@@ -5,7 +5,7 @@
 namespace smoothly{
     class mods{
         public:
-            struct item{
+            struct itemBase{
                 
             };
             
