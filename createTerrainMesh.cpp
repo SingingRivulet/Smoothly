@@ -2,7 +2,7 @@
 namespace smoothly{
 using namespace irr;
 using namespace irr::scene;
-scene::IMesh * createTerrainMesh(
+scene::IMesh * terrain::createTerrainMesh(
     video::IImage* texture,
     float ** heightmap, 
     u32 hx,u32 hy,
@@ -10,7 +10,7 @@ scene::IMesh * createTerrainMesh(
     video::IVideoDriver* driver,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
     bool debugBorders
-){
+)const{
     if (!texture || !heightmap)
 		return 0;
 

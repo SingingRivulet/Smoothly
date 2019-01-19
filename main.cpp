@@ -15,30 +15,38 @@ int main(){
     t.m=&m;
     t.device=device;
     t.scene=scenemgr;
-    t.generator.seed=123456;
-    t.pointNum=128;
-    t.altitudeK=80;
-    t.hillK=20;
-    t.temperatureK=30;
-    t.humidityK=30;
-    t.altitudeArg=2000;
+    t.generator.seed=1234506;
+    t.pointNum=129;
+    t.altitudeK=0.8;
+    t.hillK=0.2;
+    t.temperatureK=0.3;
+    t.humidityK=0.3;
+    t.altitudeArg=20000;
     t.hillArg=200;
     t.temperatureArg=2000;
     t.humidityArg=2000;
-    t.texture=;
 
     //node->setMaterialFlag(video::EMF_LIGHTING, false);
 
     // add a first person shooter style user controlled camera
-    scenemgr->addCameraSceneNodeFPS();
+    auto camera=scenemgr->addCameraSceneNodeFPS();
+    camera->setPosition(core::vector3df(0,0,1500));
+    
+    //auto sph=scenemgr->addSphereSceneNode();
+    //sph->setPosition(core::vector3df(0,10,2000));
+    //sph->setMaterialFlag(video::EMF_LIGHTING, false );
 
     // draw everything
+    t.genTexture();
+    
     t.visualChunkUpdate(0,0,true);
     while(device->run() && driver){
-        driver->beginScene(true, true, video::SColor(255,0,0,255));
+        driver->beginScene(true, true, video::SColor(255,0,0,0));
         scenemgr->drawAll();
         driver->endScene();
     }
+    //t.destroyTexture();
+    t.destroy();
 
     // delete device
     device->drop();

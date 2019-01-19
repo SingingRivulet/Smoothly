@@ -13,11 +13,11 @@ perlin3d::~perlin3d(){
 
 float perlin3d::rand(int x , int y , int z){
     return 
-        (((
-           (x&(48271*seed))+
+        (float)(((
+           (x&(48271-seed))+
            (y&(23456+seed))+
            (z^(98704^seed))
-        )&0x7ffffff))/10000.0d;
+        )&0x7ffffff)%128000)/10000.0f;
 }
 
 float perlin3d::smooth(int x,int y,int z){

@@ -2,6 +2,7 @@
 #define SMOOTHLY_TERRAIN
 #include "utils.h"
 #include "mods.h"
+#include <map>
 namespace smoothly{
     
     class perlin3d{
@@ -28,7 +29,47 @@ namespace smoothly{
             mods * m;
             terrain();
             ~terrain();
+            void destroy();
         public:
+            class ipair{
+                public:
+                    int x,y;
+                    inline bool operator==(const ipair & i)const{
+                        return (x==i.x) && (y==i.y);
+                    }
+                    inline bool operator<(const ipair & i)const{
+                        if(x<i.x)
+                            return true;
+                        else
+                        if(x==i.x){
+                            if(y<i.y)
+                                return true;
+                        }
+                            return false;
+                    }
+                    //inline bool operator<(const ipar & i)const{
+                    //    if((x==i.x) && (y==i.y))
+                    //        return false;
+                    //    return
+                    //}
+                    inline ipair & operator=(const ipair & i){
+                        x=i.x;
+                        y=i.y;
+                        return *this;
+                    }
+                    inline ipair(const ipair & i){
+                        x=i.x;
+                        y=i.y;
+                    }
+                    inline ipair(int & ix , int & iy){
+                        x=ix;
+                        y=iy;
+                    }
+                    inline ipair(){
+                        x=0;
+                        y=0;
+                    }
+            };
             class item:public mods::itemBase{
                 public:
                     int id;
@@ -71,6 +112,7 @@ namespace smoothly{
                     );
             };
             
+            std::map<ipair,chunk*> chunks;
             //chunksize:128*128
             int pointNum;//每条边顶点数量
             float altitudeK;
@@ -84,6 +126,8 @@ namespace smoothly{
             float humidityArg;
             irr::video::IImage* texture;
             
+            void genTexture();
+            void destroyTexture();
         public:
         
             irr::scene::IMesh * createTerrainMesh(
@@ -98,40 +142,40 @@ namespace smoothly{
             
         public:
             //地形生成器
-            inline irr::u32 getHightf(float x , float y){
+            inline float getHightf(float x , float y){
                 return generator.get(x/altitudeArg , y/altitudeArg , 1024)*altitudeK;
             }
-            inline irr::u32 getHillHight(float x , float y){//山高
+            inline float getHillHight(float x , float y){//山高
                 return generator.get(x/hillArg , y/hillArg , 2048)*hillK;
             }
-            inline irr::u32 getAltitude(float x , float y){//海拔
+            inline float getAltitude(float x , float y){//海拔
                 return getHightf(x/128 , y/128);
             }
             
             //真实高度=海拔+山高
             
-            inline irr::u32 getTemperatureF(float x , float y){
+            inline float getTemperatureF(float x , float y){
                 return generator.get(x/temperatureArg , y/temperatureArg , 4096)*temperatureK;
             }
             
-            inline irr::u32 getHumidityF(float x , float y){
+            inline float getHumidityF(float x , float y){
                 return generator.get(x/humidityArg , y/humidityArg , 8192)*humidityK;
             }
             
-            void genTerrain(
+            float genTerrain(
                 float ** ,  //高度图边长=chunk边长+1
                 irr::u32 x , irr::u32 y //chunk坐标，真实坐标/128
-            );
+            );//返回最大值
             
         public:
             
-            inline irr::u32 getHight(irr::u32 x , irr::u32 y){//chunk高度(近似海拔)
+            inline float getHight(irr::u32 x , irr::u32 y){//chunk高度(近似海拔)
                 return getHightf(x , y);
             }
-            inline irr::u32 getTemperature(irr::u32 x , irr::u32 y){//温度
+            inline float getTemperature(irr::u32 x , irr::u32 y){//温度
                 return getTemperatureF(x , y);
             }
-            inline irr::u32 getHumidity(irr::u32 x , irr::u32 y){//湿度
+            inline float getHumidity(irr::u32 x , irr::u32 y){//湿度
                 return getHumidityF(x , y);
             }
             void getItems(irr::u32 x , irr::u32 y , chunk * ch);//获取chunk中所有物体
