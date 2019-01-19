@@ -113,7 +113,7 @@ namespace smoothly{
             };
             
             std::map<ipair,chunk*> chunks;
-            //chunksize:128*128
+            //chunksize:32*32
             int pointNum;//每条边顶点数量
             float altitudeK;
             float hillK;
@@ -149,7 +149,7 @@ namespace smoothly{
                 return generator.get(x/hillArg , y/hillArg , 2048)*hillK;
             }
             inline float getAltitude(float x , float y){//海拔
-                return getHightf(x/128 , y/128);
+                return getHightf(x/32 , y/32);
             }
             
             //真实高度=海拔+山高
@@ -164,7 +164,7 @@ namespace smoothly{
             
             float genTerrain(
                 float ** ,  //高度图边长=chunk边长+1
-                irr::u32 x , irr::u32 y //chunk坐标，真实坐标/128
+                irr::u32 x , irr::u32 y //chunk坐标，真实坐标/32
             );//返回最大值
             
         public:

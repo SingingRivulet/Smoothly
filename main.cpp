@@ -30,7 +30,7 @@ int main(){
 
     // add a first person shooter style user controlled camera
     auto camera=scenemgr->addCameraSceneNodeFPS();
-    camera->setPosition(core::vector3df(0,0,1500));
+    camera->setPosition(core::vector3df(0,1190,0));
     
     //auto sph=scenemgr->addSphereSceneNode();
     //sph->setPosition(core::vector3df(0,10,2000));

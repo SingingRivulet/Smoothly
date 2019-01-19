@@ -86,15 +86,15 @@ void terrain::visualChunkUpdate(irr::u32 x , irr::u32 y , bool force){
 
 float terrain::genTerrain(
     float ** img,  //高度图边长=chunk边长+1
-    irr::u32 x , irr::u32 y //chunk坐标，真实坐标/128
+    irr::u32 x , irr::u32 y //chunk坐标，真实坐标/32
 ){
     float h;
     float ix,iy;
     float max=0;
     float mx=0,my=0;
-    int begX=x*128;
-    int begY=y*128;
-    float len=129.0f/((float)pointNum);
+    int begX=x*32;
+    int begY=y*32;
+    float len=39.0f/((float)pointNum);
     
     for(int i=0;i<pointNum;i++){
         for(int j=0;j<pointNum;j++){
@@ -109,7 +109,7 @@ float terrain::genTerrain(
             img[i][j]=h;
         }
     }
-    printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
+    //printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
     return max;
 }
 void terrain::chunk::add(
@@ -131,9 +131,9 @@ void terrain::getItems(irr::u32 x , irr::u32 y , terrain::chunk * ch){
 void terrain::updateChunk(terrain::chunk * ch, irr::u32 x , irr::u32 y){
     auto driver=this->scene->getVideoDriver();
     auto max=genTerrain(ch->T , x ,y);
-    printf("update chunk x=%d , y=%d , max=%f\n",x,y,max);
+    printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
     
-    float len=129.0f/(float)pointNum;
+    float len=33.0f/(float)pointNum;
     ch->mesh=this->createTerrainMesh(
         this->texture ,
         ch->T , pointNum , pointNum ,
@@ -145,7 +145,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::u32 x , irr::u32 y){
     ch->node=scene->addMeshSceneNode(
         ch->mesh,
         0,-1,
-        irr::core::vector3df(x*128 , 0 , y*128)
+        irr::core::vector3df(x*32 , 0 , y*32)
     );
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
 }
@@ -154,15 +154,15 @@ void terrain::genTexture(){
     if(this->texture)
         return;
     printf("generate texture\n");
-    auto img=this->scene->getVideoDriver()->createImage(irr::video::ECF_R8G8B8 , irr::core::dimension2d<irr::u32>(128,128));
+    auto img=this->scene->getVideoDriver()->createImage(irr::video::ECF_R8G8B8 , irr::core::dimension2d<irr::u32>(64,64));
     perlin3d r;
     r.seed=1234;
     
     auto pitch=img->getPitch();
     auto data=(irr::u8*)(img->lock());
     
-    for(int i=0;i<128;i++){
-        for(int j=0;j<128;j++){
+    for(int i=0;i<64;i++){
+        for(int j=0;j<64;j++){
             irr::u8* dest = data + ( j * pitch ) + ( i * 3 );
             int v=r.get(i/10.0f , j/10.0f , 16);
             v%=256;
