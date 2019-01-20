@@ -48,7 +48,7 @@ void terrain::removecChunk(terrain::chunk * ptr){
     ((chunkpool*)this->pool)->del(ptr);
 }
 
-void terrain::visualChunkUpdate(irr::u32 x , irr::u32 y , bool force){
+void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     if(x==px && y==py && !force)
         return;
     int i,j;
@@ -86,21 +86,23 @@ void terrain::visualChunkUpdate(irr::u32 x , irr::u32 y , bool force){
 
 float terrain::genTerrain(
     float ** img,  //高度图边长=chunk边长+1
-    irr::u32 x , irr::u32 y //chunk坐标，真实坐标/32
+    irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
 ){
     float h;
     float ix,iy;
     float max=0;
     float mx=0,my=0;
-    int begX=x*32;
-    int begY=y*32;
-    float len=39.0f/((float)pointNum);
+    float begX=x*32;
+    float begY=y*32;
+    float len=33.0f/((float)pointNum);
     
     for(int i=0;i<pointNum;i++){
         for(int j=0;j<pointNum;j++){
+            //ix=len*(pointNum-i+1)+begX;
             ix=len*i+begX;
+            //iy=len*(pointNum-j+1)+begY;
             iy=len*j+begY;
-            h=getHillHight(ix,iy)+getAltitude(ix,iy);
+            h=getRealHight(ix,iy);
             if(h>max){
                 max=h;
                 mx=ix;
@@ -121,14 +123,14 @@ void terrain::chunk::add(
 
 }
 
-void terrain::getItems(irr::u32 x , irr::u32 y , terrain::chunk * ch){
+void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
     for(auto it:m->mapGenFuncs){
         if(it)
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
 }
 
-void terrain::updateChunk(terrain::chunk * ch, irr::u32 x , irr::u32 y){
+void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     auto driver=this->scene->getVideoDriver();
     auto max=genTerrain(ch->T , x ,y);
     printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
@@ -144,9 +146,10 @@ void terrain::updateChunk(terrain::chunk * ch, irr::u32 x , irr::u32 y){
     );
     ch->node=scene->addMeshSceneNode(
         ch->mesh,
-        0,-1,
-        irr::core::vector3df(x*32 , 0 , y*32)
+        0,-1
     );
+    ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
+    printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
 }
 

@@ -153,6 +153,10 @@ namespace smoothly{
             }
             
             //真实高度=海拔+山高
+            inline float getRealHight(int x , int y){
+                return getHillHight(x,y)+getAltitude(x,y);
+                //return x+y;
+            }
             
             inline float getTemperatureF(float x , float y){
                 return generator.get(x/temperatureArg , y/temperatureArg , 4096)*temperatureK;
@@ -162,36 +166,40 @@ namespace smoothly{
                 return generator.get(x/humidityArg , y/humidityArg , 8192)*humidityK;
             }
             
+            inline float getDefaultCameraHight(float x , float y){
+                return getRealHight(x,y)+1;
+            }
+            
             float genTerrain(
                 float ** ,  //高度图边长=chunk边长+1
-                irr::u32 x , irr::u32 y //chunk坐标，真实坐标/32
+                irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
             );//返回最大值
             
         public:
             
-            inline float getHight(irr::u32 x , irr::u32 y){//chunk高度(近似海拔)
+            inline float getHight(irr::s32 x , irr::s32 y){//chunk高度(近似海拔)
                 return getHightf(x , y);
             }
-            inline float getTemperature(irr::u32 x , irr::u32 y){//温度
+            inline float getTemperature(irr::s32 x , irr::s32 y){//温度
                 return getTemperatureF(x , y);
             }
-            inline float getHumidity(irr::u32 x , irr::u32 y){//湿度
+            inline float getHumidity(irr::s32 x , irr::s32 y){//湿度
                 return getHumidityF(x , y);
             }
-            void getItems(irr::u32 x , irr::u32 y , chunk * ch);//获取chunk中所有物体
+            void getItems(irr::s32 x , irr::s32 y , chunk * ch);//获取chunk中所有物体
         
         public:
         
             //地图更新
-            irr::u32 px;
-            irr::u32 py;//之前角色位置
+            irr::s32 px;
+            irr::s32 py;//之前角色位置
             chunk * visualChunk[7][7];//可见的chunk（脚下一个，前3个后3个）
             
             void * pool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
             void removecChunk(chunk *);//回收chunk
-            void updateChunk(chunk * , irr::u32 x , irr::u32 y);
-            void visualChunkUpdate(irr::u32 x , irr::u32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
+            void updateChunk(chunk * , irr::s32 x , irr::s32 y);
+            void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             
         public:
         

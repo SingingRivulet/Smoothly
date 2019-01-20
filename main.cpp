@@ -16,8 +16,8 @@ int main(){
     t.device=device;
     t.scene=scenemgr;
     t.generator.seed=1234506;
-    t.pointNum=129;
-    t.altitudeK=0.8;
+    t.pointNum=34;
+    t.altitudeK=0.08;
     t.hillK=0.2;
     t.temperatureK=0.3;
     t.humidityK=0.3;
@@ -30,7 +30,7 @@ int main(){
 
     // add a first person shooter style user controlled camera
     auto camera=scenemgr->addCameraSceneNodeFPS();
-    camera->setPosition(core::vector3df(0,1190,0));
+    camera->setPosition(core::vector3df(0,t.getDefaultCameraHight(0,0)+2,0));
     
     //auto sph=scenemgr->addSphereSceneNode();
     //sph->setPosition(core::vector3df(0,10,2000));
