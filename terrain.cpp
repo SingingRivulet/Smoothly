@@ -5,8 +5,10 @@
 namespace smoothly{
 
 typedef mempool<terrain::chunk> chunkpool;
+typedef mempool<terrain::item> itempool;
 terrain::terrain(){
-    this->pool=new chunkpool;
+    this->cpool=new chunkpool;
+    this->ipool=new itempool;
     this->texture=NULL;
     for(int i=0;i<7;i++){
         for(int j=0;j<7;j++){
@@ -16,7 +18,8 @@ terrain::terrain(){
 }
 
 terrain::~terrain(){
-    delete (chunkpool*)this->pool;
+    delete (chunkpool*)this->cpool;
+    delete (itempool*)this->ipool;
 }
 void terrain::destroy(){
     for(int i=0;i<7;i++){
@@ -29,14 +32,25 @@ void terrain::destroy(){
     }
 }
 
+terrain::item * terrain::createItem(){
+    auto ptr=((itempool*)this->ipool)->get();
+    
+    return ptr;
+}
+
+void terrain::destroyItem(terrain::item * ptr){
+    ((itempool*)this->ipool)->del(ptr);
+}
+
 terrain::chunk * terrain::createChunk(){
-    auto ptr=((chunkpool*)this->pool)->get();
+    auto ptr=((chunkpool*)this->cpool)->get();
     ptr->scene=this->scene;
     ptr->device=this->device;
     ptr->T=new float*[pointNum];
     for(int i=0;i<pointNum;i++){
         ptr->T[i]=new float[pointNum];
     }
+    ptr->parent=this;
     return ptr;
 }
 
@@ -45,7 +59,7 @@ void terrain::removecChunk(terrain::chunk * ptr){
         delete [] ptr->T[i];
     }
     delete [] ptr->T;
-    ((chunkpool*)this->pool)->del(ptr);
+    ((chunkpool*)this->cpool)->del(ptr);
 }
 
 void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
@@ -120,7 +134,20 @@ void terrain::chunk::add(
     const irr::core::vector3df & r,
     const irr::core::vector3df & s
 ){
-
+    auto mit=parent->m->items.find(id);
+    if(mit==parent->m->items.end()){
+        return;
+    }
+    auto ptr=parent->createItem();
+    ptr->parent=mit->second;
+    ptr->mesh=mit->second->mesh;
+    ptr->inChunk=this;
+    ptr->id=id;
+    ptr->node=parent->scene->addMeshSceneNode(
+        ptr->mesh,
+        0,-1,p,r,s
+    );
+    this->items.insert(ptr);
 }
 
 void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
@@ -149,7 +176,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
         0,-1
     );
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
-    printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
+    //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
 }
 

@@ -1,14 +1,22 @@
 #ifndef SMOOTHLY_MODS
 #define SMOOTHLY_MODS
 #include <list>
+#include <map>
 #include "utils.h"
 namespace smoothly{
     class mods{
         public:
+            class mapGenerator;
+            struct itemBase;
+            //预先声明，防止报错
+            
+            typedef void(*mapGeneratorFunc)(int x,int y,int temp,int humi,float alti,mapGenerator * gen);
+            
             struct itemBase{
+                irr::scene::IMesh * mesh;
                 
             };
-            
+            std::map<long,itemBase*> items;
             class mapGenerator{
                 public:
                     irr::IrrlichtDevice * device;
@@ -21,7 +29,6 @@ namespace smoothly{
                         const irr::core::vector3df & s
                     )=0;
             };
-            typedef void(*mapGeneratorFunc)(int x,int y,int temp,int humi,float alti,mapGenerator * gen);
             std::list<mapGeneratorFunc> mapGenFuncs;
     };
 }

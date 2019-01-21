@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "mods.h"
 #include <map>
+#include <set>
 namespace smoothly{
     
     class perlin3d{
@@ -31,6 +32,7 @@ namespace smoothly{
             ~terrain();
             void destroy();
         public:
+            class chunk;
             class ipair{
                 public:
                     int x,y;
@@ -74,7 +76,9 @@ namespace smoothly{
                 public:
                     int id;
                     mods::itemBase * parent;
+                    chunk * inChunk;
                     irr::scene::IMeshSceneNode * node;
+                    item * next;
                     inline void remove(){
                         node->remove();
                     }
@@ -92,13 +96,15 @@ namespace smoothly{
             class chunk:public mods::mapGenerator{
                 public:
                     chunk * next;
-                    std::list<item> items;
+                    std::set<item*> items;
                     float ** T;
                     irr::scene::IMesh * mesh;
+                    terrain * parent;
                     int x,y;
                     inline void remove(){
                         for(auto it:items){
-                            it.remove();
+                            it->remove();
+                            parent->destroyItem(it);
                         }
                         node->remove();
                         mesh->drop();
@@ -187,6 +193,11 @@ namespace smoothly{
                 return getHumidityF(x , y);
             }
             void getItems(irr::s32 x , irr::s32 y , chunk * ch);//获取chunk中所有物体
+            
+            void * ipool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
+            
+            item * createItem();
+            void destroyItem(item *);
         
         public:
         
@@ -195,7 +206,7 @@ namespace smoothly{
             irr::s32 py;//之前角色位置
             chunk * visualChunk[7][7];//可见的chunk（脚下一个，前3个后3个）
             
-            void * pool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
+            void * cpool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
             void removecChunk(chunk *);//回收chunk
             void updateChunk(chunk * , irr::s32 x , irr::s32 y);
