@@ -139,6 +139,7 @@ namespace smoothly{
                     terrain * parent;
                     int x,y;
                     std::map<long,int> itemNum;
+                    irr::scene::ITriangleSelector * selector;
                     inline void remove(){
                         for(auto it:items){
                             parent->allItems.erase(mapid(this->x,this->y,it->id,it->mapId));
@@ -146,9 +147,25 @@ namespace smoothly{
                             parent->destroyItem(it);
                         }
                         node->remove();
+                        selector->drop();
                         mesh->drop();
                         items.clear();
                         itemNum.clear();
+                        //printf("remove chunk:(%d,%d)\n",x,y);
+                    }
+                    inline bool getCollisionPoint(
+                        const irr::core::line3d<irr::f32>& ray,
+                        irr::core::vector3df& outCollisionPoint,
+                        irr::core::triangle3df& outTriangle,
+                        irr::scene::ISceneNode*& outNode
+                    ){
+                        return scene->getSceneCollisionManager()->getCollisionPoint(
+                            ray,
+                            selector,
+                            outCollisionPoint,
+                            outTriangle,
+                            outNode
+                        );
                     }
                     inline int getId(const long & iid){
                         auto it=itemNum.find(iid);

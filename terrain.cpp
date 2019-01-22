@@ -163,7 +163,7 @@ int terrain::chunk::add(
         return -1;
     }
     int mapId=this->getId(id);
-    printf("add id=%d (%f,%f,%f) mapId=%d\n" , id , p.X , p.Y , p.Z , mapId);
+    //printf("add id=%d (%f,%f,%f) mapId=%d\n" , id , p.X , p.Y , p.Z , mapId);
     //set ptr
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
@@ -209,6 +209,8 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
         ch->mesh,
         0,-1
     );
+    ch->selector=scene->createOctreeTriangleSelector(ch->mesh,ch->node);
+    ch->node->setTriangleSelector(ch->selector);
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
