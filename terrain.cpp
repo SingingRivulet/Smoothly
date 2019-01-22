@@ -249,5 +249,27 @@ void terrain::destroyTexture(){
     this->texture->drop();
     this->texture=NULL;
 }
+void terrain::getNearChunk(bool(*callback)(chunk*,void*),void * arg){
+    for(int i=2;i<5;i++){
+        for(int j=2;j<5;j++){
+            if(visualChunk[i][j])
+                if(!callback(visualChunk[i][j],arg))
+                    return;
+        }
+    }
+}
+bool terrain::selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vector3df& outCollisionPoint){
+    irr::core::triangle3df  outTriangle;
+    irr::scene::ISceneNode* outNode;
+    for(int i=2;i<5;i++){
+        for(int j=2;j<5;j++){
+            if(visualChunk[i][j]){
+                if(visualChunk[i][j]->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode))
+                    return true;
+            }
+        }
+    }
+    return false;
+}
 }//namespace smoothly
 

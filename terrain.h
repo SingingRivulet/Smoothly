@@ -283,6 +283,9 @@ namespace smoothly{
             void updateChunk(chunk * , irr::s32 x , irr::s32 y);
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             
+            void getNearChunk(bool(*callback)(chunk*,void*)/*return false:stop loop*/,void * arg);
+            bool selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vector3df& outCollisionPoint);
+            
         public:
         
             perlin3d generator;//噪声发生器
