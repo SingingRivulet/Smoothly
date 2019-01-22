@@ -47,12 +47,21 @@ int main(){
                 irr::core::vector3df(0,0,0),
                 irr::core::vector3df(1,1,1)
             );
+            gen->add(
+                1,
+                irr::core::vector3df(x*32,gen->getRealHight(x+16,y+16)+10,y*32),
+                irr::core::vector3df(0,0,0),
+                irr::core::vector3df(1,1,1)
+            );
         }
     );
     
     t.genTexture();
     
     t.visualChunkUpdate(0,0,true);
+    
+    t.remove(smoothly::terrain::mapid(0,0,1,1));
+    
     while(device->run() && driver){
         driver->beginScene(true, true, video::SColor(255,0,0,0));
         scenemgr->drawAll();

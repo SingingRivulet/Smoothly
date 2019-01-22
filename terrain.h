@@ -16,6 +16,59 @@ namespace smoothly{
             void destroy();
         public:
             class chunk;
+            class mapid{
+                public:
+                    int x,y,mapId;
+                    long itemId;
+                    inline bool operator==(const mapid & i)const{
+                        return (x==i.x) && (y==i.y) && (itemId==i.itemId) && (mapId==i.mapId);
+                    }
+                    inline bool operator<(const mapid & i)const{
+                        if(x<i.x)
+                            return true;
+                        else
+                        if(x==i.x){
+                            if(y<i.y)
+                                return true;
+                            else
+                            if(y==i.y){
+                                if(itemId<i.itemId)
+                                    return true;
+                                else
+                                if(itemId==i.itemId){
+                                    if(mapId<i.mapId)
+                                        return true;
+                                }
+                            }
+                        }
+                            return false;
+                    }
+                    mapid(){
+                        x=0;
+                        y=0;
+                        itemId=0;
+                        mapId=0;
+                    }
+                    mapid(const mapid & i){
+                        x=i.x;
+                        y=i.y;
+                        itemId=i.itemId;
+                        mapId=i.mapId;
+                    }
+                    mapid(int ix,int iy,long iitemId,int imapId){
+                        x=ix;
+                        y=iy;
+                        itemId=iitemId;
+                        mapId=imapId;
+                    }
+                    mapid & operator=(const mapid & i){
+                        x=i.x;
+                        y=i.y;
+                        itemId=i.itemId;
+                        mapId=i.mapId;
+                        return *this;
+                    }
+            };
             class ipair{
                 public:
                     int x,y;
@@ -57,11 +110,12 @@ namespace smoothly{
             };
             class item:public mods::itemBase{
                 public:
-                    int id;
+                    long id;
                     mods::itemBase * parent;
                     chunk * inChunk;
                     irr::scene::IMeshSceneNode * node;
                     item * next;
+                    int mapId;
                     inline void remove(){
                         node->remove();
                     }
@@ -84,17 +138,29 @@ namespace smoothly{
                     irr::scene::IMesh * mesh;
                     terrain * parent;
                     int x,y;
+                    std::map<long,int> itemNum;
                     inline void remove(){
                         for(auto it:items){
+                            parent->allItems.erase(mapid(this->x,this->y,it->id,it->mapId));
                             it->remove();
                             parent->destroyItem(it);
                         }
                         node->remove();
                         mesh->drop();
                         items.clear();
+                        itemNum.clear();
                     }
-                    virtual void add(
-                        int id,
+                    inline int getId(const long & iid){
+                        auto it=itemNum.find(iid);
+                        if(it==itemNum.end()){
+                            itemNum[iid]=1;
+                            return 0;
+                        }else{
+                            return (it->second)++;
+                        }
+                    }
+                    virtual int add(
+                        long id,
                         const irr::core::vector3df & p,
                         const irr::core::vector3df & r,
                         const irr::core::vector3df & s
@@ -180,8 +246,12 @@ namespace smoothly{
             
             void * ipool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             
+            std::map<mapid,item*> allItems;
             item * createItem();
             void destroyItem(item *);
+            
+            virtual bool itemExist(int ix,int iy,long iitemId,int imapId);
+            bool remove(const mapid & mid);
         
         public:
         

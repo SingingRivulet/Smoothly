@@ -24,8 +24,8 @@ namespace smoothly{
                     irr::scene::ISceneManager * scene;//场景
                     irr::scene::IMeshSceneNode * node;
                     perlin3d * generator;
-                    virtual void add(
-                        int id,
+                    virtual int add(
+                        long id,
                         const irr::core::vector3df & p,
                         const irr::core::vector3df & r,
                         const irr::core::vector3df & s

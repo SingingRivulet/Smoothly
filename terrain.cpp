@@ -129,31 +129,59 @@ float terrain::genTerrain(
     //printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
     return max;
 }
+
 float terrain::chunk::getRealHight(float x,float y){
     return parent->getRealHight(x,y);
 }
-void terrain::chunk::add(
-    int id,
+
+bool terrain::itemExist(int ix,int iy,long iitemId,int imapId){
+    
+}
+
+bool terrain::remove(const mapid & mid){
+    auto it=allItems.find(mid);
+    if(it==allItems.end()){
+        return false;
+    }
+    
+    it->second->inChunk->items.erase(it->second);
+    it->second->remove();
+    destroyItem(it->second);
+    
+    allItems.erase(it);
+    return true;
+}
+
+int terrain::chunk::add(
+    long id,
     const irr::core::vector3df & p,
     const irr::core::vector3df & r,
     const irr::core::vector3df & s
 ){
     auto mit=parent->m->items.find(id);
     if(mit==parent->m->items.end()){
-        return;
+        return -1;
     }
-    printf("add id=%d (%f,%f,%f)\n" , id , p.X , p.Y , p.Z);
+    int mapId=this->getId(id);
+    printf("add id=%d (%f,%f,%f) mapId=%d\n" , id , p.X , p.Y , p.Z , mapId);
+    //set ptr
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
     ptr->mesh=mit->second->mesh;
     ptr->inChunk=this;
     ptr->id=id;
+    ptr->mapId=mapId;
+    //set node
     ptr->node=parent->scene->addMeshSceneNode(
         ptr->mesh,
         0,-1,p,r,s
     );
     ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    //set index
     this->items.insert(ptr);
+    parent->allItems[mapid(x,y,id,mapId)]=ptr;
+    ///////
+    return ptr->mapId;
 }
 
 void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
@@ -184,6 +212,9 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    ch->x=x;
+    ch->y=y;
+    ch->itemNum.clear();
     getItems(x,y,ch);
 }
 
