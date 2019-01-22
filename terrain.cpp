@@ -51,6 +51,7 @@ terrain::chunk * terrain::createChunk(){
         ptr->T[i]=new float[pointNum];
     }
     ptr->parent=this;
+    ptr->generator=&(this->generator);
     return ptr;
 }
 
@@ -128,6 +129,9 @@ float terrain::genTerrain(
     //printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
     return max;
 }
+float terrain::chunk::getRealHight(float x,float y){
+    return parent->getRealHight(x,y);
+}
 void terrain::chunk::add(
     int id,
     const irr::core::vector3df & p,
@@ -138,6 +142,7 @@ void terrain::chunk::add(
     if(mit==parent->m->items.end()){
         return;
     }
+    printf("add id=%d (%f,%f,%f)\n" , id , p.X , p.Y , p.Z);
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
     ptr->mesh=mit->second->mesh;
@@ -147,6 +152,7 @@ void terrain::chunk::add(
         ptr->mesh,
         0,-1,p,r,s
     );
+    ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     this->items.insert(ptr);
 }
 
@@ -178,6 +184,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    getItems(x,y,ch);
 }
 
 void terrain::genTexture(){

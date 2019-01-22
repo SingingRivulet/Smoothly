@@ -6,23 +6,6 @@
 #include <set>
 namespace smoothly{
     
-    class perlin3d{
-        public:
-            int seed;
-            int num;
-            float step;
-            float height;
-            
-            perlin3d();
-            ~perlin3d();
-            
-            float rand(int x , int y , int z);
-            float smooth(int x,int y,int z);
-            float interpolate(float a,float b,float x);
-            float inoise(float x,float y,float z);
-            float get(float x , float y , float z);
-    };
-    
     class terrain{
         public:
             irr::IrrlichtDevice * device;
@@ -116,6 +99,7 @@ namespace smoothly{
                         const irr::core::vector3df & r,
                         const irr::core::vector3df & s
                     );
+                    virtual float getRealHight(float x,float y);
             };
             
             std::map<ipair,chunk*> chunks;

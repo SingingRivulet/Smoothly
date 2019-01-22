@@ -3,12 +3,12 @@ using namespace irr;
 int main(){
     // start up the engine
     IrrlichtDevice * device = createDevice(video::EDT_OPENGL,
-        core::dimension2d<u32>(640,480));
+        core::dimension2d<u32>(800,600));
 
     video::IVideoDriver * driver = device->getVideoDriver();
     scene::ISceneManager * scenemgr = device->getSceneManager();
 
-    device->setWindowCaption(L"Hello World!");
+    device->setWindowCaption(L"Smoothly");
 
     smoothly::terrain t;
     smoothly::mods m;
@@ -36,7 +36,20 @@ int main(){
     //sph->setPosition(core::vector3df(0,10,2000));
     //sph->setMaterialFlag(video::EMF_LIGHTING, false );
 
-    // draw everything
+    auto md=new smoothly::mods::itemBase;
+    md->mesh=scenemgr->getGeometryCreator()->createSphereMesh();
+    t.m->items[1]=md;
+    t.m->mapGenFuncs.push_back(
+        [](int x,int y,float temp,float humi,float alti,smoothly::mods::mapGenerator * gen){
+            gen->add(
+                1,
+                irr::core::vector3df(x*32+16.0f,gen->getRealHight(x+16,y+16)+10,y*32+16.0f),
+                irr::core::vector3df(0,0,0),
+                irr::core::vector3df(1,1,1)
+            );
+        }
+    );
+    
     t.genTexture();
     
     t.visualChunkUpdate(0,0,true);
