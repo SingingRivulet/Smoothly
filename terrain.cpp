@@ -22,14 +22,26 @@ terrain::~terrain(){
     delete (itempool*)this->ipool;
 }
 void terrain::destroy(){
-    for(int i=0;i<7;i++){
-        for(int j=0;j<7;j++){
-            if(visualChunk[i][j]){
-                visualChunk[i][j]->remove();
-                removecChunk(visualChunk[i][j]);
-            }
+    //for(int i=0;i<7;i++){
+    //    for(int j=0;j<7;j++){
+    //        if(visualChunk[i][j]){
+    //            visualChunk[i][j]->remove();
+    //            removecChunk(visualChunk[i][j]);
+    //        }
+    //    }
+    //}
+    for(auto it:chunks){
+        if(it.second){
+            it.second->remove();
+            removecChunk(it.second);
         }
     }
+    for(int i=0;i<7;i++){
+        for(int j=0;j<7;j++){
+            visualChunk[i][j]=NULL;
+        }
+    }
+     chunks.clear();   
 }
 
 terrain::item * terrain::createItem(){
@@ -135,7 +147,7 @@ float terrain::chunk::getRealHight(float x,float y){
 }
 
 bool terrain::itemExist(int ix,int iy,long iitemId,int imapId){
-    
+    return true;
 }
 
 bool terrain::remove(const mapid & mid){
@@ -165,6 +177,8 @@ int terrain::chunk::add(
     int mapId=this->getId(id);
     //printf("add id=%d (%f,%f,%f) mapId=%d\n" , id , p.X , p.Y , p.Z , mapId);
     //set ptr
+    if(!parent->itemExist(x,y,id,mapId))
+        return -1;
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
     ptr->mesh=mit->second->mesh;
@@ -249,6 +263,7 @@ void terrain::destroyTexture(){
     this->texture->drop();
     this->texture=NULL;
 }
+
 void terrain::getNearChunk(bool(*callback)(chunk*,void*),void * arg){
     for(int i=2;i<5;i++){
         for(int j=2;j<5;j++){
@@ -258,6 +273,7 @@ void terrain::getNearChunk(bool(*callback)(chunk*,void*),void * arg){
         }
     }
 }
+
 bool terrain::selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vector3df& outCollisionPoint){
     irr::core::triangle3df  outTriangle;
     irr::scene::ISceneNode* outNode;
@@ -271,5 +287,98 @@ bool terrain::selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vect
     }
     return false;
 }
+
+bool terrain::selectPointM(
+    float x,float y,
+    const irr::core::line3d<irr::f32>& ray,
+    irr::core::vector3df& outCollisionPoint,
+    irr::core::triangle3df& outTriangle,
+    irr::scene::ISceneNode*& outNode
+){
+    int cx=(int)(x/32);
+    int cy=(int)(y/32);
+    float ipx=x-cx*32;
+    float ipy=y-cy*32;
+    if(selectPointInChunk(cx,cy,ray,outCollisionPoint,outTriangle,outNode))
+        return true;
+    if(ipx>16){
+        if(ipy>16){
+            //(cx+1,cy+1)
+            if(selectPointInChunk(cx+1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx+1,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }else{
+            //(cx+1,cy-1)
+            if(selectPointInChunk(cx+1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx+1,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }
+    }else{
+        if(ipy>16){
+            //(cx-1,cy+1)
+            if(selectPointInChunk(cx-1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx-1,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }else{
+            //(cx-1,cy-1)
+            if(selectPointInChunk(cx-1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx-1,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }
+    }
+}
+
+
+terrain::chunk * terrain::getChunkFromStr(const char * str){
+    int x,y;
+    if(sscanf(str,"tc %d %d",&x,&y)==2){
+        auto it=chunks.find(ipair(x,y));
+        if(it!=chunks.end()){
+            return it->second;
+        }
+    }
+    return NULL;
+}
+
+terrain::item *  terrain::getItemFromStr(const char * str){
+    int x,y,itemid;
+    long id;
+    if(sscanf(str,"ti %d %d %ld %d",&x,&y,&id,&itemid)==4){
+        auto it=allItems.find(mapid(x,y,id,itemid));
+        if(it!=allItems.end()){
+            return it->second;
+        }
+    }
+    return NULL;
+}
+
 }//namespace smoothly
 

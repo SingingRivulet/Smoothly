@@ -62,10 +62,20 @@ int main(){
     
     t.remove(smoothly::terrain::mapid(0,0,1,1));
     
+    irr::core::line3d<irr::f32> line;
+    irr::core::vector3df outCollisionPoint;
+    irr::core::triangle3df outTriangle;
+    irr::scene::ISceneNode* outNode;
+    
     while(device->run() && driver){
         driver->beginScene(true, true, video::SColor(255,0,0,0));
         scenemgr->drawAll();
         driver->endScene();
+        line.start=camera->getPosition();
+        line.end=line.start+(camera->getTarget()-line.start).normalize()*32.0f;
+        if(t.selectPointM(line,outCollisionPoint,outTriangle,outNode)){
+            printf("select:(%f,%f,%f)\n",outCollisionPoint.X,outCollisionPoint.Y,outCollisionPoint.Z);
+        }
     }
     //t.destroyTexture();
     t.destroy();

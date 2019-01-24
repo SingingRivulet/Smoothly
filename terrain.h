@@ -284,8 +284,82 @@ namespace smoothly{
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             
             void getNearChunk(bool(*callback)(chunk*,void*)/*return false:stop loop*/,void * arg);
-            bool selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vector3df& outCollisionPoint);
             
+            bool selectPoint(//准心拾取(查询周围9格)，建议用selectPointM代替
+                const irr::core::line3d<irr::f32>& ray,
+                irr::core::vector3df& outCollisionPoint
+            );
+            
+            bool selectPointM(//准心拾取(查询周围4格)
+                float x,
+                float y,
+                const irr::core::line3d<irr::f32>& ray,
+                irr::core::vector3df& outCollisionPoint,
+                irr::core::triangle3df& outTriangle,
+                irr::scene::ISceneNode*& outNode
+            );
+            
+            inline bool selectPointM(//准心拾取(自动定位chunk)
+                const irr::core::line3d<irr::f32>& ray,
+                irr::core::vector3df& outCollisionPoint,
+                irr::core::triangle3df& outTriangle,
+                irr::scene::ISceneNode*& outNode
+            ){
+                return selectPointM(
+                    ray.start.X,
+                    ray.start.Z,
+                    ray,
+                    outCollisionPoint,
+                    outTriangle,
+                    outNode
+                );
+            }
+            
+            inline bool selectPointInChunk(
+                int x,int y,
+                const irr::core::line3d<irr::f32>& ray,
+                irr::core::vector3df& outCollisionPoint,
+                irr::core::triangle3df& outTriangle,
+                irr::scene::ISceneNode*& outNode
+            ){
+                auto it=chunks.find(ipair(x,y));
+                if(it==chunks.end()){
+                    return false;
+                }else{
+                    return it->second->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode);
+                }
+            }
+            
+            inline void getCameraChunkPosition(float x,float y,int & ox,int & oy){
+                ox=(int)(x/32);
+                oy=(int)(y/32);
+            }
+        public:
+            //生成节点名字，便于识别
+            inline void getChunkName(char * buf,int len,int x,int y){
+                snprintf(buf,len,"tc %d %d",x,y);
+            }
+            inline void getItemName(char * buf,int len,int x,int y,long id,int itemid){
+                snprintf(buf,len,"ti %d %d %ld %d",x,y,id,itemid);
+            }
+            inline bool isChunk(const char * buf){
+                if(buf[0]!='t')
+                    return false;
+                if(buf[1]=='c')
+                    return true;
+                else
+                    return false;
+            }
+            inline bool isItem(const char * buf){
+                if(buf[0]!='t')
+                    return false;
+                if(buf[1]=='i')
+                    return true;
+                else
+                    return false;
+            }
+            chunk * getChunkFromStr(const char * buf);
+            item *  getItemFromStr(const char * buf);
         public:
         
             perlin3d generator;//噪声发生器
