@@ -10,6 +10,7 @@ namespace smoothly{
         public:
             irr::IrrlichtDevice * device;
             irr::scene::ISceneManager * scene;//场景
+            btDiscreteDynamicsWorld * dynamicsWorld;
             mods * m;
             terrain();
             ~terrain();
@@ -114,10 +115,12 @@ namespace smoothly{
                     mods::itemBase * parent;
                     chunk * inChunk;
                     irr::scene::IMeshSceneNode * node;
+                    btRigidBody * rigidBody;
                     item * next;
                     int mapId;
                     inline void remove(){
                         node->remove();
+                        inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
                     }
                     inline void setPosition(const irr::core::vector3df & r){
                         node->setPosition(r);
@@ -136,6 +139,7 @@ namespace smoothly{
                     std::set<item*> items;
                     float ** T;
                     irr::scene::IMesh * mesh;
+                    btRigidBody * rigidBody;
                     terrain * parent;
                     int x,y;
                     std::map<long,int> itemNum;
@@ -146,6 +150,8 @@ namespace smoothly{
                             it->remove();
                             parent->destroyItem(it);
                         }
+                        parent->dynamicsWorld->removeRigidBody(rigidBody);
+                        delete rigidBody;
                         node->remove();
                         selector->drop();
                         mesh->drop();
@@ -279,7 +285,7 @@ namespace smoothly{
             
             void * cpool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
-            void removecChunk(chunk *);//回收chunk
+            void removeChunk(chunk *);//回收chunk
             void updateChunk(chunk * , irr::s32 x , irr::s32 y);
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             

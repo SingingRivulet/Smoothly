@@ -140,7 +140,6 @@ btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * nod
 	using irr::scene::IMesh;
 	using irr::scene::IMeshBuffer;
 	using irr::scene::IMeshSceneNode;
-	using irr::scene::IAnimatedMeshSceneNode;
 
 	// Handy lambda for converting from irr::vector to btVector
 	auto toBtVector = [ &]( const vector3df & vec ) -> btVector3
@@ -152,14 +151,14 @@ btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * nod
 
 	irr::scene::ESCENE_NODE_TYPE type = node->getType();
 
-	IAnimatedMeshSceneNode * meshnode = nullptr;
+	IMeshSceneNode * meshnode = nullptr;
 	btRigidBody	* body = nullptr;
 
 	switch ( type )
 	{
-		case irr::scene::ESNT_ANIMATED_MESH:
+		case irr::scene::ESNT_MESH:
 			{
-				meshnode = (IAnimatedMeshSceneNode *)node;
+				meshnode = (IMeshSceneNode *)node;
 			}
 			break;
 	}
@@ -310,6 +309,7 @@ btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * nod
 
 			// Create the rigid body object
 			btScalar mass = 0.0f;
+			//printf("create btRigidBody\n" );
 			body = new btRigidBody( mass, motionState, btShape );
 
 		}

@@ -26,14 +26,14 @@ void terrain::destroy(){
     //    for(int j=0;j<7;j++){
     //        if(visualChunk[i][j]){
     //            visualChunk[i][j]->remove();
-    //            removecChunk(visualChunk[i][j]);
+    //            removeChunk(visualChunk[i][j]);
     //        }
     //    }
     //}
     for(auto it:chunks){
         if(it.second){
             it.second->remove();
-            removecChunk(it.second);
+            removeChunk(it.second);
         }
     }
     for(int i=0;i<7;i++){
@@ -67,7 +67,7 @@ terrain::chunk * terrain::createChunk(){
     return ptr;
 }
 
-void terrain::removecChunk(terrain::chunk * ptr){
+void terrain::removeChunk(terrain::chunk * ptr){
     for(int i=0;i<pointNum;i++){
         delete [] ptr->T[i];
     }
@@ -107,7 +107,7 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     
     for(auto it3:rm){
         it3.second->remove();
-        removecChunk(it3.second);
+        removeChunk(it3.second);
     }
 }
 
@@ -194,6 +194,11 @@ int terrain::chunk::add(
     ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
     ptr->node->setName(buf);
+    
+    ptr->rigidBody=makeBulletMeshFromIrrlichtNode(ptr->node);
+    ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    parent->dynamicsWorld->addRigidBody(ptr->rigidBody);
+    
     //set index
     this->items.insert(ptr);
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
@@ -229,11 +234,17 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     );
     getChunkName(buf,sizeof(buf),x,y);
     ch->node->setName(buf);
+    
     ch->selector=scene->createOctreeTriangleSelector(ch->mesh,ch->node);
     ch->node->setTriangleSelector(ch->selector);
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    
+    ch->rigidBody=makeBulletMeshFromIrrlichtNode(ch->node);
+    ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    dynamicsWorld->addRigidBody(ch->rigidBody);
+    
     ch->x=x;
     ch->y=y;
     ch->itemNum.clear();

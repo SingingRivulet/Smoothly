@@ -23,6 +23,8 @@ int main(){
     t.m=&m;
     t.device=device;
     t.scene=scenemgr;
+    t.dynamicsWorld=dynamicsWorld;
+    
     t.generator.seed=1234506;
     t.pointNum=34;
     t.altitudeK=0.08;
