@@ -5,7 +5,7 @@
 #include <map>
 #include <set>
 namespace smoothly{
-    
+    btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * node );
     class terrain{
         public:
             irr::IrrlichtDevice * device;

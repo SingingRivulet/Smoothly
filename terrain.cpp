@@ -179,6 +179,7 @@ int terrain::chunk::add(
     //set ptr
     if(!parent->itemExist(x,y,id,mapId))
         return -1;
+    char buf[256];
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
     ptr->mesh=mit->second->mesh;
@@ -191,6 +192,8 @@ int terrain::chunk::add(
         0,-1,p,r,s
     );
     ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
+    ptr->node->setName(buf);
     //set index
     this->items.insert(ptr);
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
@@ -206,6 +209,7 @@ void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
 }
 
 void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
+    char buf[128];
     auto driver=this->scene->getVideoDriver();
     auto max=genTerrain(ch->T , x ,y);
     printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
@@ -223,6 +227,8 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
         ch->mesh,
         0,-1
     );
+    getChunkName(buf,sizeof(buf),x,y);
+    ch->node->setName(buf);
     ch->selector=scene->createOctreeTriangleSelector(ch->mesh,ch->node);
     ch->node->setTriangleSelector(ch->selector);
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
@@ -239,8 +245,6 @@ void terrain::genTexture(){
         return;
     printf("generate texture\n");
     auto img=this->scene->getVideoDriver()->createImage(irr::video::ECF_R8G8B8 , irr::core::dimension2d<irr::u32>(64,64));
-    perlin3d r;
-    r.seed=1234;
     
     auto pitch=img->getPitch();
     auto data=(irr::u8*)(img->lock());
@@ -248,8 +252,7 @@ void terrain::genTexture(){
     for(int i=0;i<64;i++){
         for(int j=0;j<64;j++){
             irr::u8* dest = data + ( j * pitch ) + ( i * 3 );
-            int v=r.get(i/10.0f , j/10.0f , 16);
-            v%=256;
+            int v=rand()%128+128;
             dest[0]=v;
             dest[1]=v;
             dest[2]=v;

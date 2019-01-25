@@ -1,6 +1,14 @@
 #include "terrain.h"
 using namespace irr;
 int main(){
+    // start up physical
+    btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+    btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    btBroadphaseInterface* overlappingPairCache = new btDbvtBroadphase();
+    btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+    btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+    dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    
     // start up the engine
     IrrlichtDevice * device = createDevice(video::EDT_OPENGL,
         core::dimension2d<u32>(800,600));
@@ -82,6 +90,12 @@ int main(){
 
     // delete device
     device->drop();
+    delete dynamicsWorld;
+	delete solver;
+	delete overlappingPairCache;
+	delete dispatcher;
+	delete collisionConfiguration;
+
     return 0;
 }
 
