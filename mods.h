@@ -12,12 +12,13 @@ namespace smoothly{
             //预先声明，防止报错
             
             typedef void(*mapGeneratorFunc)(int x,int y,float temp,float humi,float alti,mapGenerator * gen);
-            
+            /////////////////////////////////////////////////////////////////////////////
             struct itemBase{
                 irr::scene::IMesh * mesh;
                 
             };
             std::map<long,itemBase*> items;
+            /////////////////////////////////////////////////////////////////////////////
             class mapGenerator{
                 public:
                     irr::IrrlichtDevice * device;
@@ -33,6 +34,18 @@ namespace smoothly{
                     virtual float getRealHight(float x,float y)=0;
             };
             std::list<mapGeneratorFunc> mapGenFuncs;
+            /////////////////////////////////////////////////////////////////////////////
+            class buildingBase{
+                public:
+                    long type;
+                    int linkNum;
+            };
+            class building:public buildingBase{
+                
+                    
+                
+            };
+            std::map<long,building*> buildings;
     };
 }
 #endif

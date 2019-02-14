@@ -97,6 +97,7 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
                 visualChunk[i][j]=it2->second;
             }else{
                 auto ptr=createChunk();
+                this->onGenChunk(ptr);
                 //2号是中心
                 updateChunk(ptr , ix , iy);
                 visualChunk[i][j]=ptr;
@@ -106,6 +107,7 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     }
     
     for(auto it3:rm){
+        this->onFreeChunk(it3.second);
         it3.second->remove();
         removeChunk(it3.second);
     }

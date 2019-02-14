@@ -1,4 +1,4 @@
-#include "terrain.h"
+#include "building.h"
 using namespace irr;
 int main(){
     // start up physical
@@ -8,7 +8,7 @@ int main(){
     btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
     btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
     dynamicsWorld->setGravity(btVector3(0, -10, 0));
-    
+
     // start up the engine
     IrrlichtDevice * device = createDevice(video::EDT_OPENGL,
         core::dimension2d<u32>(800,600));
@@ -18,13 +18,13 @@ int main(){
 
     device->setWindowCaption(L"Smoothly");
 
-    smoothly::terrain t;
+    smoothly::buildings t;
     smoothly::mods m;
     t.m=&m;
     t.device=device;
     t.scene=scenemgr;
     t.dynamicsWorld=dynamicsWorld;
-    
+
     t.generator.seed=1234506;
     t.pointNum=34;
     t.altitudeK=0.08;
@@ -41,7 +41,7 @@ int main(){
     // add a first person shooter style user controlled camera
     auto camera=scenemgr->addCameraSceneNodeFPS();
     camera->setPosition(core::vector3df(0,t.getDefaultCameraHight(0,0)+2,0));
-    
+
     //auto sph=scenemgr->addSphereSceneNode();
     //sph->setPosition(core::vector3df(0,10,2000));
     //sph->setMaterialFlag(video::EMF_LIGHTING, false );
@@ -65,18 +65,18 @@ int main(){
             );
         }
     );
-    
+
     t.genTexture();
-    
+
     t.visualChunkUpdate(0,0,true);
-    
+
     t.remove(smoothly::terrain::mapid(0,0,1,1));
-    
+
     irr::core::line3d<irr::f32> line;
     irr::core::vector3df outCollisionPoint;
     irr::core::triangle3df outTriangle;
     irr::scene::ISceneNode* outNode;
-    
+
     while(device->run() && driver){
         driver->beginScene(true, true, video::SColor(255,0,0,0));
         scenemgr->drawAll();
@@ -84,7 +84,7 @@ int main(){
         line.start=camera->getPosition();
         line.end=line.start+(camera->getTarget()-line.start).normalize()*32.0f;
         if(t.selectPointM(line,outCollisionPoint,outTriangle,outNode)){
-            printf("select:(%f,%f,%f)\n",outCollisionPoint.X,outCollisionPoint.Y,outCollisionPoint.Z);
+            //printf("select:(%f,%f,%f)\n",outCollisionPoint.X,outCollisionPoint.Y,outCollisionPoint.Z);
         }
     }
     //t.destroyTexture();

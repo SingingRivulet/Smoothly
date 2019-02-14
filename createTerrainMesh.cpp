@@ -172,6 +172,8 @@ btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * nod
 
 		// Save position
 		btVector3 position = toBtVector( meshnode->getPosition() );
+        btQuaternion rotation;
+        euler2quaternion(meshnode->getRotation() , rotation);
 
 		// Save data here
 		std::vector<irr::video::S3DVertex>	verticesList;
@@ -300,7 +302,11 @@ btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * nod
 			// Give it a default MotionState
 			btTransform transform;
 			transform.setIdentity();
+            //set position
 			transform.setOrigin( position );
+            //set rotation
+            transform.setRotation( rotation );
+            
 			btDefaultMotionState *motionState = new btDefaultMotionState( transform );
 
 			// Create the shape
