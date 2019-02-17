@@ -37,7 +37,7 @@ namespace smoothly{
                 x=i.x;
                 y=i.y;
             }
-            inline ipair(int & ix , int & iy){
+            inline ipair(const int & ix , const int & iy){
                 x=ix;
                 y=iy;
             }

@@ -12,6 +12,9 @@ namespace smoothly{
         //碰撞，显示等等交给子类
         public:
             
+            remoteGraph();
+            ~remoteGraph();
+            
             enum uploadMode {
                 ADD_ITEM,REMOVE_ITEM
             };
@@ -37,8 +40,13 @@ namespace smoothly{
                     remoteGraph * parent;
                     std::string uuid;
                     irr::core::vector3df position;
+                    irr::core::vector3df rotation;//此变量给子类用的
                     std::set<std::string> link,linkTo;
                     bool isRoot;
+                    
+                    int hp;
+                    long type;
+                    
                     item * next;
                     inline void construct(){
                         uuid.clear();
@@ -76,20 +84,31 @@ namespace smoothly{
             
             item * addNode(//添加节点
                 const irr::core::vector3df & position,//位置
-                const std::set<std::string> & link//表示修建在什么节点上
+                const irr::core::vector3df & rotation,//无用，给子类
+                const std::set<std::string> & link,//表示修建在什么节点上
+                int hp,
+                long type
             );
             
             item * genNode(
                 const irr::core::vector3df & position,//位置
+                const irr::core::vector3df & rotation,
                 const std::set<std::string> & link,//表示修建在什么节点上
                 const std::set<std::string> & linkTo,
                 const std::string & uuid,
+                int hp,
+                long type,
                 bool createmode
             );
             
             void removeNode(
                 const std::string & uuid,
                 bool updatemode=false//更新模式，不会引发变动，否则将会上传变动
+            );
+            
+            void attackNode(
+                const std::string & uuid,
+                int hurt
             );
             
             void clearNodes();
@@ -111,6 +130,8 @@ namespace smoothly{
             void removeApplay();
             void createListFilter();
             
+            void destroy();
+            
             inline void buildingApplay(){
                 removeApplay();
                 createListFilter();
@@ -123,21 +144,29 @@ namespace smoothly{
             virtual void onDestroyBuilding(item *)=0;
             virtual void onCreateBuilding(item *)=0;
             
-            virtual void uploadBuilding(const std::string & uuid , uploadMode m)=0;
+            virtual void uploadBuilding(item * , uploadMode m)=0;
+            virtual void uploadAttack(const std::string & uuid , int hurt)=0;
             virtual void downloadBuilding(int x,int y)=0;
             virtual item * downloadBuilding(const std::string & uuid)=0;
             
             void onMessageGen(
                 const std::string & uuid,
                 const irr::core::vector3df & position,
+                const irr::core::vector3df & rotation,
                 const std::set<std::string> & link,
-                const std::set<std::string> & linkTo
+                const std::set<std::string> & linkTo,
+                int hp,
+                long type
             );
             void onMessageCreate(
                 const std::string & uuid,
                 const irr::core::vector3df & position,
-                const std::set<std::string> & link
+                const irr::core::vector3df & rotation,
+                const std::set<std::string> & link,
+                int hp,
+                long pw
             );
+            void onMessageAttack(const std::string & uuid,int hurt);
             void onMessageDestroy(const std::string & uuid);
             
         private:

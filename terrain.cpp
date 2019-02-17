@@ -10,11 +10,6 @@ terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
     this->texture=NULL;
-    for(int i=0;i<7;i++){
-        for(int j=0;j<7;j++){
-            visualChunk[i][j]=NULL;
-        }
-    }
 }
 
 terrain::~terrain(){
@@ -22,26 +17,13 @@ terrain::~terrain(){
     delete (itempool*)this->ipool;
 }
 void terrain::destroy(){
-    //for(int i=0;i<7;i++){
-    //    for(int j=0;j<7;j++){
-    //        if(visualChunk[i][j]){
-    //            visualChunk[i][j]->remove();
-    //            removeChunk(visualChunk[i][j]);
-    //        }
-    //    }
-    //}
     for(auto it:chunks){
         if(it.second){
             it.second->remove();
             removeChunk(it.second);
         }
     }
-    for(int i=0;i<7;i++){
-        for(int j=0;j<7;j++){
-            visualChunk[i][j]=NULL;
-        }
-    }
-     chunks.clear();   
+    chunks.clear();   
 }
 
 terrain::item * terrain::createItem(){
@@ -64,6 +46,8 @@ terrain::chunk * terrain::createChunk(){
     }
     ptr->parent=this;
     ptr->generator=&(this->generator);
+    ptr->items.clear();
+    ptr->removeTable.clear();
     return ptr;
 }
 
@@ -72,6 +56,8 @@ void terrain::removeChunk(terrain::chunk * ptr){
         delete [] ptr->T[i];
     }
     delete [] ptr->T;
+    ptr->items.clear();
+    ptr->removeTable.clear();
     ((chunkpool*)this->cpool)->del(ptr);
 }
 
@@ -94,14 +80,13 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
             auto it2=chunks.find(posi);
             if(it2!=chunks.end()){
                 rm.erase(posi);
-                visualChunk[i][j]=it2->second;
             }else{
                 auto ptr=createChunk();
                 this->onGenChunk(ptr);
-                //2号是中心
                 updateChunk(ptr , ix , iy);
-                visualChunk[i][j]=ptr;
                 chunks[posi]=ptr;
+                //chunks[posi]=NULL;
+                //requestUpdateChunk(ix,iy);
             }
         }
     }
@@ -110,6 +95,7 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         this->onFreeChunk(it3.second);
         it3.second->remove();
         removeChunk(it3.second);
+        chunks.erase(it3.first);
     }
 }
 
@@ -148,10 +134,6 @@ float terrain::chunk::getRealHight(float x,float y){
     return parent->getRealHight(x,y);
 }
 
-bool terrain::itemExist(int ix,int iy,long iitemId,int imapId){
-    return true;
-}
-
 bool terrain::remove(const mapid & mid){
     auto it=allItems.find(mid);
     if(it==allItems.end()){
@@ -160,6 +142,10 @@ bool terrain::remove(const mapid & mid){
     
     it->second->inChunk->items.erase(it->second);
     it->second->remove();
+    
+    requestRemoveItem(mid);
+    addIntoRemoveTable(mid);
+    
     destroyItem(it->second);
     
     allItems.erase(it);
@@ -179,8 +165,18 @@ int terrain::chunk::add(
     int mapId=this->getId(id);
     //printf("add id=%d (%f,%f,%f) mapId=%d\n" , id , p.X , p.Y , p.Z , mapId);
     //set ptr
-    if(!parent->itemExist(x,y,id,mapId))
-        return -1;
+    //if(!parent->itemExist(x,y,id,mapId))
+    //    return -1;
+    
+    auto rit=removeTable.find(id);
+    if(rit!=removeTable.end()){
+        if(rit->second.find(mapId)!=rit->second.end())
+            return -1;
+    }
+    
+    if(parent->allItems.find(mapid(x,y,id,mapId))!=parent->allItems.end())
+        return -2;
+    
     char buf[256];
     auto ptr=parent->createItem();
     ptr->parent=mit->second;
@@ -206,6 +202,26 @@ int terrain::chunk::add(
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
     ///////
     return ptr->mapId;
+}
+
+void terrain::setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t){
+    auto it=chunks.find(ipair(x,y));
+    if(it==chunks.end())
+        return;
+    
+    auto ch=it->second;
+    
+    if(ch==NULL)
+        return;
+    
+    for(auto it:t){
+        ch->removeTable[it.first].insert(it.second);
+    }
+    ch->itemNum.clear();
+    for(auto it:m->mapGenFuncs){
+        if(it)
+            it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
+    }
 }
 
 void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
@@ -280,29 +296,6 @@ void terrain::destroyTexture(){
     this->texture=NULL;
 }
 
-void terrain::getNearChunk(bool(*callback)(chunk*,void*),void * arg){
-    for(int i=2;i<5;i++){
-        for(int j=2;j<5;j++){
-            if(visualChunk[i][j])
-                if(!callback(visualChunk[i][j],arg))
-                    return;
-        }
-    }
-}
-
-bool terrain::selectPoint(const irr::core::line3d<irr::f32>& ray,irr::core::vector3df& outCollisionPoint){
-    irr::core::triangle3df  outTriangle;
-    irr::scene::ISceneNode* outNode;
-    for(int i=2;i<5;i++){
-        for(int j=2;j<5;j++){
-            if(visualChunk[i][j]){
-                if(visualChunk[i][j]->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode))
-                    return true;
-            }
-        }
-    }
-    return false;
-}
 
 bool terrain::selectPointM(
     float x,float y,

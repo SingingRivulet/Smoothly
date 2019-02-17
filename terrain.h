@@ -106,6 +106,7 @@ namespace smoothly{
                     int x,y;
                     std::map<long,int> itemNum;
                     irr::scene::ITriangleSelector * selector;
+                    std::map<long,std::set<int> > removeTable;
                     inline void remove(){
                         for(auto it:items){
                             parent->allItems.erase(mapid(this->x,this->y,it->id,it->mapId));
@@ -119,6 +120,7 @@ namespace smoothly{
                         mesh->drop();
                         items.clear();
                         itemNum.clear();
+                        removeTable.clear();
                         //printf("remove chunk:(%d,%d)\n",x,y);
                     }
                     inline bool getCollisionPoint(
@@ -127,6 +129,7 @@ namespace smoothly{
                         irr::core::triangle3df& outTriangle,
                         irr::scene::ISceneNode*& outNode
                     ){
+                        
                         return scene->getSceneCollisionManager()->getCollisionPoint(
                             ray,
                             selector,
@@ -235,7 +238,6 @@ namespace smoothly{
             item * createItem();
             void destroyItem(item *);
             
-            virtual bool itemExist(int ix,int iy,long iitemId,int imapId);
             bool remove(const mapid & mid);
         
         public:
@@ -243,20 +245,12 @@ namespace smoothly{
             //地图更新
             irr::s32 px;
             irr::s32 py;//之前角色位置
-            chunk * visualChunk[7][7];//可见的chunk（脚下一个，前3个后3个）
             
             void * cpool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
             void removeChunk(chunk *);//回收chunk
             void updateChunk(chunk * , irr::s32 x , irr::s32 y);
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
-            
-            void getNearChunk(bool(*callback)(chunk*,void*)/*return false:stop loop*/,void * arg);
-            
-            bool selectPoint(//准心拾取(查询周围9格)，建议用selectPointM代替
-                const irr::core::line3d<irr::f32>& ray,
-                irr::core::vector3df& outCollisionPoint
-            );
             
             bool selectPointM(//准心拾取(查询周围4格)
                 float x,
@@ -326,11 +320,23 @@ namespace smoothly{
                 else
                     return false;
             }
+            inline void addIntoRemoveTable(const mapid & mid){
+                auto it=chunks.find(ipair(mid.x , mid.y));
+                if(it!=chunks.end()){
+                    if(it->second)
+                        it->second->removeTable[mid.itemId].insert(mid.mapId);
+                }
+            }
+            
             chunk * getChunkFromStr(const char * buf);
             item *  getItemFromStr(const char * buf);
             
+            void setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t);
+            
             virtual void onGenChunk(chunk *)=0;
             virtual void onFreeChunk(chunk *)=0;
+            virtual void requestRemoveItem(const mapid & mid)=0;
+            virtual void requestUpdateTerrain(int x,int y)=0;
         public:
         
             perlin3d generator;//噪声发生器

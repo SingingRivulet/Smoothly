@@ -1,6 +1,7 @@
 #ifndef SMOOTHLY_BUILDING
 #define SMOOTHLY_BUILDING
 #include "terrain.h"
+#include "hbb.h"
 #include "remoteGraph.h"
 namespace smoothly{
     class buildings:public terrain,public remoteGraph{

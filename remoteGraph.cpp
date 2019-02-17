@@ -52,9 +52,12 @@ void remoteGraph::item::remove(remoteGraph::item * p){
 
 remoteGraph::item * remoteGraph::genNode(
     const irr::core::vector3df & position,//位置
+    const irr::core::vector3df & rotation,
     const std::set<std::string> & link,//表示修建在什么节点上
     const std::set<std::string> & linkTo,
     const std::string & uuid,
+    int hp,
+    long type,
     bool createmode
 ){
     auto p=seekNode(uuid,false);
@@ -63,6 +66,12 @@ remoteGraph::item * remoteGraph::genNode(
         p->uuid=uuid;
         setChunk(p , position);
     }
+    
+    p->position=position;
+    p->rotation=rotation;
+    p->hp=hp;
+    p->type=type;
+    
     if(link.empty()){
         p->isRoot=true;
     }else{
@@ -85,11 +94,20 @@ remoteGraph::item * remoteGraph::genNode(
 
 remoteGraph::item * remoteGraph::addNode(//添加节点
     const irr::core::vector3df & position,//位置
-    const std::set<std::string> & link//表示修建在什么节点上
+    const irr::core::vector3df & rotation,
+    const std::set<std::string> & link,//表示修建在什么节点上
+    int hp,
+    long type
 ){
     auto p=createNode();
     getUUID(p->uuid);
     setChunk(p , position);
+    
+    p->position=position;
+    p->rotation=rotation;
+    p->hp=hp;
+    p->type=type;
+    
     if(link.empty()){
         p->isRoot=true;
     }else{
@@ -102,7 +120,7 @@ remoteGraph::item * remoteGraph::addNode(//添加节点
             }
         }
     }
-    uploadBuilding(p->uuid,remoteGraph::ADD_ITEM);
+    uploadBuilding(p,remoteGraph::ADD_ITEM);
     createlist.insert(p);
     return p;
 }
@@ -111,11 +129,13 @@ void remoteGraph::removeNode(
     const std::string & uuid,
     bool updatemode
 ){
-    if(!updatemode)
-        uploadBuilding(uuid,remoteGraph::REMOVE_ITEM);
     auto p=seekNode(uuid,false);
-    if(p)
+    if(p){
+        if(!updatemode)
+            uploadBuilding(p,remoteGraph::REMOVE_ITEM);
         p->destroy();
+        
+    }
 }
 
 bool remoteGraph::inRange(remoteGraph::item * p){
@@ -145,7 +165,7 @@ void remoteGraph::createListFilter(){
             removeFromChunk(it);
             delNode(it);
         }else{
-            onCreateBuilding(it);
+            this->onCreateBuilding(it);
         }
     }
     createlist.clear();
@@ -155,23 +175,51 @@ void remoteGraph::createListFilter(){
 void remoteGraph::onMessageGen(
     const std::string & uuid,
     const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation,
     const std::set<std::string> & link,
-    const std::set<std::string> & linkTo
+    const std::set<std::string> & linkTo,
+    int hp,
+    long type
 ){
-    genNode(position,link,linkTo,uuid,false);
+    genNode(position,rotation,link,linkTo,uuid,hp,type,false);
 }
 
 void remoteGraph::onMessageCreate(
     const std::string & uuid,
     const irr::core::vector3df & position,
-    const std::set<std::string> & link
+    const irr::core::vector3df & rotation,
+    const std::set<std::string> & link,
+    int hp,
+    long type
 ){
     std::set<std::string> tmp;
-    genNode(position,link,tmp,uuid,true);
+    genNode(position,rotation,link,tmp,uuid,hp,type,true);
 }
 
 void remoteGraph::onMessageDestroy(const std::string & uuid){
     removeNode(uuid,true);
+}
+
+void remoteGraph::attackNode(
+    const std::string & uuid,
+    int hurt
+){
+    auto p=seekNode(uuid,false);
+    if(p){
+        uploadAttack(uuid,hurt);
+        p->hp-=hurt;
+        if((p->hp)<=0)
+            p->destroy();
+    }
+}
+
+void remoteGraph::onMessageAttack(const std::string & uuid , int hurt){
+    auto p=seekNode(uuid,false);
+    if(p){
+        p->hp-=hurt;
+        if((p->hp)<=0)
+            p->destroy();
+    }
 }
 
 void remoteGraph::setChunk(remoteGraph::item * p,const irr::core::vector3df & position){
@@ -301,6 +349,25 @@ remoteGraph::item * remoteGraph::seekNode(const std::string & uuid,bool download
             return NULL;
     }else
         return it->second;
+}
+
+remoteGraph::remoteGraph(){
+    removelist.clear();
+    createlist.clear();
+    genlist.clear();
+    maxdeep=64;
+    items.clear();
+    chunks.clear();
+    poolInit();
+}
+
+void remoteGraph::destroy(){
+    buildingApplay();
+    clearNodes();
+    poolFree();
+}
+
+remoteGraph::~remoteGraph(){
 }
 
 }//namespace smoothly
