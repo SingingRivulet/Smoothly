@@ -56,6 +56,10 @@ void terrain::removeChunk(terrain::chunk * ptr){
         delete [] ptr->T[i];
     }
     delete [] ptr->T;
+    //for(auto it:ptr->items){
+    //    if(it)
+    //        remove(it);
+    //}
     ptr->items.clear();
     ptr->removeTable.clear();
     ((chunkpool*)this->cpool)->del(ptr);
@@ -134,12 +138,24 @@ float terrain::chunk::getRealHight(float x,float y){
     return parent->getRealHight(x,y);
 }
 
+void terrain::remove(item * i){
+    onFreeTerrainItem(i);
+    if(i->inChunk)
+        allItems.erase(mapid(i->inChunk->x , i->inChunk->y , i->id , i->mapId));
+    //i->inChunk->items.erase(i);
+    i->remove();
+    destroyItem(i);
+}
+
 bool terrain::remove(const mapid & mid){
     auto it=allItems.find(mid);
     if(it==allItems.end()){
         return false;
     }
+    if(it->second==NULL)
+        return false;
     
+    onFreeTerrainItem(it->second);
     it->second->inChunk->items.erase(it->second);
     it->second->remove();
     
@@ -189,7 +205,7 @@ int terrain::chunk::add(
         ptr->mesh,
         0,-1,p,r,s
     );
-    ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
     ptr->node->setName(buf);
     
@@ -200,6 +216,7 @@ int terrain::chunk::add(
     //set index
     this->items.insert(ptr);
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
+    parent->onGenTerrainItem(ptr);
     ///////
     return ptr->mapId;
 }
@@ -257,7 +274,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     ch->node->setTriangleSelector(ch->selector);
     ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
-    ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     
     ch->rigidBody=makeBulletMeshFromIrrlichtNode(ch->node);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);

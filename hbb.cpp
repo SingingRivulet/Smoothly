@@ -14,8 +14,8 @@ void HBB::AABB::autoclean(){
                 parent->right=NULL;
             }
             parent->autoclean();
+            hbb->delAABB(this);
         }
-        hbb->delAABB(this);
     }else
     if(parent && parent->parent){
         if(parent->left && parent->right==NULL)
@@ -82,6 +82,12 @@ void HBB::AABB::add(AABB * in){
         nnode->setRight(in);
         this->setRight(nnode);
     }
+    //debug
+    //printf(
+    //    "create:(%f,%f,%f)->(%f,%f,%f)\n",
+    //    nnode->from.X,nnode->from.Y,nnode->from.Z,
+    //    nnode->to.X,nnode->to.Y,nnode->to.Z
+    //);
 }
 
 

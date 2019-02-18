@@ -17,7 +17,11 @@ namespace smoothly{
                 irr::scene::IMesh * mesh;
                 
             };
-            std::map<long,itemBase*> items;
+            struct itemConfig:itemBase{
+                bool haveBB;
+                irr::core::aabbox3d<float> BB;
+            };
+            std::map<long,itemConfig*> items;
             /////////////////////////////////////////////////////////////////////////////
             class mapGenerator{
                 public:
@@ -41,9 +45,10 @@ namespace smoothly{
                     int linkNum;
             };
             class building:public buildingBase{
-                
-                    
-                
+                public:
+                    irr::scene::IMesh * mesh;
+                    irr::core::aabbox3d<float> BB;
+                    irr::scene::ITriangleSelector * selector;
             };
             std::map<long,building*> buildings;
     };

@@ -46,7 +46,7 @@ int main(){
     //sph->setPosition(core::vector3df(0,10,2000));
     //sph->setMaterialFlag(video::EMF_LIGHTING, false );
 
-    auto md=new smoothly::mods::itemBase;
+    auto md=new smoothly::mods::itemConfig;
     md->mesh=scenemgr->getGeometryCreator()->createSphereMesh();
     t.m->items[1]=md;
     t.m->mapGenFuncs.push_back(

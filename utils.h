@@ -12,6 +12,10 @@ namespace smoothly{
         irr::core::quaternion irrq(e);
         q.setValue(irrq.X , irrq.Y , irrq.Z , irrq.W);
     }
+    inline float getLenSq(const irr::core::vector3df & f,const irr::core::vector3df & t){
+        auto l=t-f;
+        return (l.X*l.X + l.Y*l.Y + l.Z*l.Z);
+    }
     class ipair{
         public:
             int x,y;

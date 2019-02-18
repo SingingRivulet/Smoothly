@@ -2,6 +2,7 @@
 #define SMOOTHLY_HBB
 #include "utils.h"
 #include <stdlib.h>
+#include <stdio.h>
 namespace smoothly{
     class HBB{
         public:

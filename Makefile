@@ -1,6 +1,6 @@
 
 CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ 
-LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid
+LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthread
 
 ./a,out:main.cpp perlin.o building.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o $(LIBS)
@@ -23,5 +23,8 @@ remoteGraph_test.out:remoteGraph.o remoteGraph_test.cpp
 hbb.o:hbb.h hbb.cpp
 	$(CC) -c hbb.cpp
 
-building.o:terrain.o building.h remoteGraph.o hbb.o
+hbb_test.out:hbb_test.cpp hbb.o
+	$(CC) hbb_test.cpp hbb.o -o hbb_test.out $(LIBS)
+
+building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp

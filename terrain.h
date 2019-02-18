@@ -82,6 +82,7 @@ namespace smoothly{
                     inline void remove(){
                         node->remove();
                         inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
+                        delete rigidBody;
                     }
                     inline void setPosition(const irr::core::vector3df & r){
                         node->setPosition(r);
@@ -109,6 +110,7 @@ namespace smoothly{
                     std::map<long,std::set<int> > removeTable;
                     inline void remove(){
                         for(auto it:items){
+                            parent->onFreeTerrainItem(it);
                             parent->allItems.erase(mapid(this->x,this->y,it->id,it->mapId));
                             it->remove();
                             parent->destroyItem(it);
@@ -239,6 +241,7 @@ namespace smoothly{
             void destroyItem(item *);
             
             bool remove(const mapid & mid);
+            void remove(item * i);
         
         public:
         
@@ -337,6 +340,9 @@ namespace smoothly{
             virtual void onFreeChunk(chunk *)=0;
             virtual void requestRemoveItem(const mapid & mid)=0;
             virtual void requestUpdateTerrain(int x,int y)=0;
+            
+            virtual void onFreeTerrainItem(item *)=0;
+            virtual void onGenTerrainItem(item *)=0;
         public:
         
             perlin3d generator;//噪声发生器

@@ -42,6 +42,8 @@ namespace smoothly{
                     irr::core::vector3df position;
                     irr::core::vector3df rotation;//此变量给子类用的
                     std::set<std::string> link,linkTo;
+                    irr::scene::IMeshSceneNode * node;
+                    btRigidBody * rigidBody;
                     bool isRoot;
                     
                     int hp;
