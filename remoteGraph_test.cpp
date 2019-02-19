@@ -41,13 +41,15 @@ int main(){
     buildIn.clear();
     printf("add1\n");
     auto p=R.addNode(irr::core::vector3df(0,0,0),irr::core::vector3df(0,0,0),buildIn,1,1);
+    R.buildingApplay();
     buildIn.insert(p->uuid);
     printf("add2\n");
     R.addNode(irr::core::vector3df(0,0,1),irr::core::vector3df(0,0,0),buildIn,1,1);
     R.buildingApplay();
     printf("attack1\n");
-    R.attackNode(p->uuid,10);
+    //R.attackNode(p->uuid,10);
     R.buildingApplay();
+    printf("size:%lu\n",R.items.size());
     printf("free\n");
     R.destroy();
 }

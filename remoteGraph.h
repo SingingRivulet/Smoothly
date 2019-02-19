@@ -113,6 +113,11 @@ namespace smoothly{
                 int hurt
             );
             
+            void setHP(
+                const std::string & uuid,
+                int hp
+            );
+            
             void clearNodes();
             
             void setChunk(item *,const irr::core::vector3df & position);//将节点插入到区块和全局表里面

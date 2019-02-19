@@ -200,17 +200,24 @@ void remoteGraph::onMessageDestroy(const std::string & uuid){
     removeNode(uuid,true);
 }
 
+void remoteGraph::setHP(
+    const std::string & uuid,
+    int hp
+){
+    auto p=seekNode(uuid,false);
+    if(p){
+        //uploadAttack(uuid,hurt);
+        p->hp=hp;
+        if(hp<=0)
+            p->destroy();
+    }
+}
+
 void remoteGraph::attackNode(
     const std::string & uuid,
     int hurt
 ){
-    auto p=seekNode(uuid,false);
-    if(p){
-        uploadAttack(uuid,hurt);
-        p->hp-=hurt;
-        if((p->hp)<=0)
-            p->destroy();
-    }
+    uploadAttack(uuid,hurt);
 }
 
 void remoteGraph::onMessageAttack(const std::string & uuid , int hurt){
@@ -262,8 +269,12 @@ void remoteGraph::removeFromChunk(remoteGraph::item * p){
 
 void remoteGraph::clearNodes(){
     for(auto it:items){
+        //printf("free:%s\n",it.second->uuid.c_str());
         onFreeBuilding(it.second);
-        removeFromChunk(it.second);
+        //removeFromChunk(it.second);
+        //bug:removeFromChunk导致迭代器失效无法遍历所有item，导致内存泄漏
+        if(it.second->inChunk)
+            it.second->inChunk->items.erase(it.second);
         delNode(it.second);
     }
     for(auto it:chunks){
