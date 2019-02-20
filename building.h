@@ -46,6 +46,9 @@ namespace smoothly{
             void doBuildUpdate(const irr::core::line3d<irr::f32> & ray);
             void doBuildApplay();
             
+            building * selectByRay(const irr::core::line3d<irr::f32> & ray);
+            void attackByRay(const irr::core::line3d<irr::f32> & ray);
+            
             virtual bool collisionWithObject(irr::scene::IMeshSceneNode * n)=0; 
             
             inline static bool intersectionTriangle(

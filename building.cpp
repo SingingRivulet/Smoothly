@@ -334,4 +334,12 @@ void buildings::doBuildApplay(){
     }
 }
 
+void buildings::attackByRay(const irr::core::line3d<irr::f32> & ray){
+    buildingHBB.rayTest(ray,[](HBB::AABB * box , void * argp){
+}
+
+buildings::building * buildings::selectByRay(const irr::core::line3d<irr::f32> & ray){
+    
+}
+
 }//namespace smoothly

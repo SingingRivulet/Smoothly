@@ -20,6 +20,7 @@ namespace smoothly{
             }
             
             void removeApplay();
+            bool nodeExist(const std::string & uuid);
             
             void attack(const std::string & uuid,int hurt);
             int hurt(const std::string & uuid,int hurt);

@@ -25,6 +25,11 @@ void graphServer::remove(const std::string & uuid,int deep){
         db->Delete(leveldb::WriteOptions(),knode);
     }
 }
+bool graphServer::nodeExist(const std::string & uuid){
+    std::string knode=std::string("node_")+uuid;
+    return (db->Get(leveldb::ReadOptions(),knode,&buf1).ok() && !buf1.empty());
+}
+
 void graphServer::removeAllLinkTo(const std::string & uuid,int deep){
     if(deep<=0)
         return;
@@ -166,6 +171,8 @@ void graphServer::createNode(
     
     std::string bufs="";
     for(auto it:link){
+        if(!nodeExist(it))
+            continue;
         addLinkTo(it,uuid);
         bufs+=it+" ";
     }

@@ -92,47 +92,11 @@ remoteGraph::item * remoteGraph::genNode(
     return p;
 }
 
-remoteGraph::item * remoteGraph::addNode(//添加节点
-    const irr::core::vector3df & position,//位置
-    const irr::core::vector3df & rotation,
-    const std::set<std::string> & link,//表示修建在什么节点上
-    int hp,
-    long type
-){
-    auto p=createNode();
-    getUUID(p->uuid);
-    setChunk(p , position);
-    
-    p->position=position;
-    p->rotation=rotation;
-    p->hp=hp;
-    p->type=type;
-    
-    if(link.empty()){
-        p->isRoot=true;
-    }else{
-        p->isRoot=false;
-        for(auto it:link){
-            p->link.insert(it);
-            auto par=seekNode(it,false);
-            if(par){
-                par->linkTo.insert(p->uuid);
-            }
-        }
-    }
-    uploadBuilding(p,remoteGraph::ADD_ITEM);
-    createlist.insert(p);
-    return p;
-}
-
 void remoteGraph::removeNode(
-    const std::string & uuid,
-    bool updatemode
+    const std::string & uuid
 ){
     auto p=seekNode(uuid,false);
     if(p){
-        if(!updatemode)
-            uploadBuilding(p,remoteGraph::REMOVE_ITEM);
         p->destroy();
         
     }
@@ -197,10 +161,10 @@ void remoteGraph::onMessageCreate(
 }
 
 void remoteGraph::onMessageDestroy(const std::string & uuid){
-    removeNode(uuid,true);
+    removeNode(uuid);
 }
 
-void remoteGraph::setHP(
+void remoteGraph::setBuildingHP(
     const std::string & uuid,
     int hp
 ){

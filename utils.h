@@ -2,8 +2,34 @@
 #define SMOOTHLY_UTILS
 #include <irrlicht/irrlicht.h>
 #include <bullet/btBulletDynamicsCommon.h>
+#include <raknet/RakPeerInterface.h>
+#include <raknet/MessageIdentifiers.h>
+#include <raknet/BitStream.h>
+#include <raknet/RakNetTypes.h>
 #include <list>
 namespace smoothly{
+    
+    enum GameMessage{
+        MESSAGE_GAME=ID_USER_PACKET_ENUM+1
+    };
+    
+    enum MessageMethodFlag{
+        M_UPDATE_BUILDING = 'b',
+        M_UPDATE_TERRAIN  = 't',
+        M_UPDATE_OBJECT   = 'o'
+    };
+    
+    enum BuildingMethod{
+        B_ATTACK            ='a',
+        B_ATTACK_UPLOAD     ='u',
+        B_CREATE            ='c',
+        B_CREATE_UPLOAD     ='p',
+        B_DESTROY           ='d',
+        B_GENER             ='g',
+        B_DOWNLOAD_CHUNK    ='l',
+        B_DOWNLOAD_UUID     ='i'
+    };
+    
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){
         irr::core::quaternion irrq(q.x(),q.y(),q.z(),q.w());
         irrq.toEuler(e);
@@ -18,7 +44,7 @@ namespace smoothly{
     }
     class ipair{
         public:
-            int x,y;
+            int32_t x,y;
             inline bool operator==(const ipair & i)const{
                 return (x==i.x) && (y==i.y);
             }

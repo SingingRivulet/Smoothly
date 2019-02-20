@@ -159,7 +159,7 @@ bool terrain::remove(const mapid & mid){
     it->second->inChunk->items.erase(it->second);
     it->second->remove();
     
-    requestRemoveItem(mid);
+    //requestRemoveItem(mid);
     addIntoRemoveTable(mid);
     
     destroyItem(it->second);
@@ -283,7 +283,8 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     ch->x=x;
     ch->y=y;
     ch->itemNum.clear();
-    getItems(x,y,ch);
+    //getItems(x,y,ch);
+    requestUpdateTerrain(x,y);
 }
 
 void terrain::genTexture(){
