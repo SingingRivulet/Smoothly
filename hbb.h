@@ -64,6 +64,14 @@ namespace smoothly{
                         return from.X > to.X || from.Y > to.Y || from.Z > to.Z;
                     }
                     
+                    inline bool inBox(const vec3 & point)const{
+                        return (
+                            (point.X>=from.X && point.X<=to.X) &&
+                            (point.Y>=from.Y && point.Y<=to.Y) &&
+                            (point.Z>=from.Z && point.Z<=to.Z)
+                        );
+                    }
+                    
                     inline bool intersects(const AABB * in)const{
                         return (
                             (from.X >= in->from.X && from.X <= in->to.X) || 
@@ -156,6 +164,12 @@ namespace smoothly{
                         void * arg=NULL
                     );
                     
+                    void fetchByPoint(
+                        const vec3 & point,
+                        void(*callback)(AABB *,void *),
+                        void * arg=NULL
+                    );
+                    
                     void autoclean();
                     void autodrop();
                     void add(AABB * in);
@@ -187,7 +201,13 @@ namespace smoothly{
             ){
                 root->collisionTest(in,callback,arg);
             }
-            
+            inline void fetchByPoint(
+                const vec3 & point,
+                void(*callback)(AABB *,void *),
+                void * arg=NULL
+            ){
+                root->fetchByPoint(point,callback,arg);
+            }
             HBB();
             ~HBB();
             

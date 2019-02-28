@@ -1,7 +1,85 @@
 #include "clientNetwork.h"
 #include <string.h>
 namespace smoothly{
-
+void clientNetwork::init(const char * addr,short port){
+    connection=RakNet::RakPeerInterface::GetInstance();
+    RakNet::SocketDescriptor sd;
+    connection->Startup(1,&sd,1);
+    this->addr=addr;
+    this->port=port;
+}
+void clientNetwork::connect(){
+    connection->Connect(addr.c_str(),port,0,0);
+}
+void clientNetwork::sendMessage(RakNet::BitStream * data){
+    connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );  
+}
+void clientNetwork::sendMessageU(RakNet::BitStream * data){
+    connection->Send( data, HIGH_PRIORITY, RELIABLE, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );  
+}
+void clientNetwork::shutdown(){
+    connection->Shutdown(300);
+    RakNet::RakPeerInterface::DestroyInstance(connection);
+    terrain::destroy();
+    remoteGraph::destroy();
+}
+void clientNetwork::recv(){
+    if(!connection)
+        return;
+    auto pk=connection->Receive();
+    if(pk)
+        onRecvMessage(pk);
+}
+void clientNetwork::onRecvMessage(RakNet::Packet * data){
+    switch(data->data[0]){
+        case MESSAGE_GAME:
+            switch(data->data[1]){
+                case M_UPDATE_BUILDING:
+                    onMessageUpdateBuilding(data);
+                break;
+                case M_UPDATE_TERRAIN:
+                    onMessageUpdateTerrain(data);
+                break;
+                case M_UPDATE_OBJECT:
+                
+                break;
+            }
+        break;
+    }
+}
+void clientNetwork::onMessageUpdateBuilding(RakNet::Packet * data){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case B_ATTACK:
+            onMessageUpdateBuildingAttack(&bs);
+        break;
+        case B_CREATE:
+            onMessageUpdateBuildingCreate(&bs);
+        break;
+        case B_DESTROY:
+            onMessageUpdateBuildingDestroy(&bs);
+        break;
+        case B_GENER:
+            onMessageUpdateBuildingGen(&bs);
+        break;
+    }
+}
+void clientNetwork::onMessageUpdateTerrain(RakNet::Packet * data){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case T_SEND_ONE:
+            onMessageUpdateTerrainRemove(&bs);
+        break;
+        case T_SEND_TABLE:
+            onMessageUpdateTerrainGetRMTable(&bs);
+        break;
+        case T_APPLAY:
+            onMessageUpdateTerrainRMTApply(&bs);
+        break;
+    }
+}
 void clientNetwork::onMessageUpdateBuildingGen(RakNet::BitStream * data){
     irr::core::vector3df position;
     irr::core::vector3df rotation;
@@ -101,6 +179,12 @@ void clientNetwork::onMessageUpdateTerrainGetRMTable(RakNet::BitStream * data){
     }
     setRemoveTable(x,y,t);
 }
+void clientNetwork::onMessageUpdateTerrainRMTApply(RakNet::BitStream * data){
+    int32_t x,y;
+    if(!data->Read(x))return;
+    if(!data->Read(y))return;
+    removeTableApplay(x,y);
+}
 void clientNetwork::onMessageUpdateTerrainRemove(RakNet::BitStream * data){
     mapid mid;
     int32_t x,y,mapId;
@@ -120,7 +204,8 @@ void clientNetwork::onMessageUpdateTerrainRemove(RakNet::BitStream * data){
 void clientNetwork::uploadAttack(const std::string & uuid , int hurt){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_ATTACK_UPLOAD);
+    bs.Write((RakNet::MessageID)M_UPDATE_BUILDING);
+    bs.Write((RakNet::MessageID)B_ATTACK_UPLOAD);
     bs.Write(uuid.c_str());
     bs.Write((int32_t)hurt);
     sendMessage(&bs);
@@ -128,17 +213,14 @@ void clientNetwork::uploadAttack(const std::string & uuid , int hurt){
 void clientNetwork::downloadBuilding(int x,int y){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_DOWNLOAD_CHUNK);
+    bs.Write((RakNet::MessageID)M_UPDATE_BUILDING);
+    bs.Write((RakNet::MessageID)B_DOWNLOAD_CHUNK);
     bs.Write((int32_t)x);
     bs.Write((int32_t)y);
-    sendMessage(&bs);
+    sendMessageU(&bs);
 }
 remoteGraph::item * clientNetwork::downloadBuilding(const std::string & uuid){
-    RakNet::BitStream bs;
-    bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_DOWNLOAD_UUID);
-    bs.Write(uuid.c_str());
-    sendMessage(&bs);
+    
 }
 void clientNetwork::addNode(//添加节点
     const irr::core::vector3df & position,//位置
@@ -149,7 +231,8 @@ void clientNetwork::addNode(//添加节点
 ){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_CREATE_UPLOAD);
+    bs.Write((RakNet::MessageID)M_UPDATE_BUILDING);
+    bs.Write((RakNet::MessageID)B_CREATE_UPLOAD);
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
     bs.Write((int64_t)type);
@@ -167,7 +250,8 @@ void clientNetwork::buildOnFloor(
 ){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_CREATE_UPLOAD);
+    bs.Write((RakNet::MessageID)M_UPDATE_BUILDING);
+    bs.Write((RakNet::MessageID)B_CREATE_UPLOAD);
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
     bs.Write((int64_t)type);
@@ -182,7 +266,8 @@ void clientNetwork::buildOn(
 ){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((char)B_CREATE_UPLOAD);
+    bs.Write((RakNet::MessageID)M_UPDATE_BUILDING);
+    bs.Write((RakNet::MessageID)B_CREATE_UPLOAD);
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
     bs.Write((int64_t)type);
@@ -195,10 +280,39 @@ void clientNetwork::buildOn(
 }
 
 void clientNetwork::requestRemoveItem(const mapid & mid){
-    
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_TERRAIN);
+    bs.Write((RakNet::MessageID)T_REMOVE);
+    bs.Write((int32_t)mid.x);
+    bs.Write((int32_t)mid.y);
+    bs.Write((int64_t)mid.itemId);
+    bs.Write((int32_t)mid.mapId);
+    sendMessageU(&bs);
 }
 void clientNetwork::requestUpdateTerrain(int x,int y){
-    
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_TERRAIN);
+    bs.Write((RakNet::MessageID)T_DOWNLOAD);
+    bs.Write((int32_t)x);
+    bs.Write((int32_t)y);
+    sendMessageU(&bs);
+}
+void clientNetwork::setUserPosition(const irr::core::vector3df & p){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_USER);
+    bs.Write((RakNet::MessageID)U_SET_POSITION);
+    bs.WriteVector(p.X , p.Y , p.Z);
+    sendMessage(&bs);
+}
+void clientNetwork::setUserRotation(const irr::core::vector3df & r){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)U_SET_ROTATION);
+    bs.WriteVector(r.X , r.Y , r.Z);
+    sendMessage(&bs);
 }
 
 }

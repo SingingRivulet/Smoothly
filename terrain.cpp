@@ -234,6 +234,12 @@ void terrain::setRemoveTable(int x,int y,const std::list<std::pair<long,int> > &
     for(auto it:t){
         ch->removeTable[it.first].insert(it.second);
     }
+}
+void terrain::removeTableApplay(int x,int y){
+    auto it=chunks.find(ipair(x,y));
+    if(it==chunks.end())
+        return;
+    auto ch=it->second;
     ch->itemNum.clear();
     for(auto it:m->mapGenFuncs){
         if(it)

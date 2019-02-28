@@ -8,6 +8,7 @@ namespace smoothly{
         public:
             
             HBB buildingHBB;
+            int buildingDamage;
             
             class building{
                 public:
@@ -49,7 +50,7 @@ namespace smoothly{
             building * selectByRay(const irr::core::line3d<irr::f32> & ray);
             void attackByRay(const irr::core::line3d<irr::f32> & ray);
             
-            virtual bool collisionWithObject(irr::scene::IMeshSceneNode * n)=0; 
+            virtual bool collisionWithObject(irr::scene::IMeshSceneNode * n);
             
             inline static bool intersectionTriangle(
                 const irr::core::line3d<irr::f32> & ray,
@@ -91,7 +92,7 @@ namespace smoothly{
             
         private:
             
-            bool collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,irr::core::line3d<irr::f32> &normal);
+            building * collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,irr::core::line3d<irr::f32> &normal);
             bool collisionWithBuildings(irr::scene::IMeshSceneNode * n,long type,std::list<building*> & b);
             bool collisionWithTerrain(irr::scene::IMeshSceneNode * n,long type);
             

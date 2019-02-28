@@ -7,6 +7,10 @@
 #include <raknet/BitStream.h>
 #include <raknet/RakNetTypes.h>
 #include <list>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <lua.hpp>
 namespace smoothly{
     
     enum GameMessage{
@@ -16,7 +20,15 @@ namespace smoothly{
     enum MessageMethodFlag{
         M_UPDATE_BUILDING = 'b',
         M_UPDATE_TERRAIN  = 't',
-        M_UPDATE_OBJECT   = 'o'
+        M_UPDATE_OBJECT   = 'o',
+        M_UPDATE_USER     = 'u'
+    };
+    
+    enum UserMethod{
+        U_SET_POSITION  ='p',
+        U_SET_ROTATION  ='r',
+        U_MOVE          ='m',
+        U_LOGIN         ='l'
     };
     
     enum BuildingMethod{
@@ -28,6 +40,14 @@ namespace smoothly{
         B_GENER             ='g',
         B_DOWNLOAD_CHUNK    ='l',
         B_DOWNLOAD_UUID     ='i'
+    };
+    
+    enum TerrainMethod{
+        T_REMOVE    ='r',
+        T_DOWNLOAD  ='d',
+        T_SEND_ONE  ='o',
+        T_SEND_TABLE='t',
+        T_APPLAY    ='a'
     };
     
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){
@@ -75,6 +95,59 @@ namespace smoothly{
                 x=0;
                 y=0;
             }
+    };
+    class mapid{
+        public:
+            int x,y,mapId;
+            long itemId;
+            inline bool operator==(const mapid & i)const{
+                return (x==i.x) && (y==i.y) && (itemId==i.itemId) && (mapId==i.mapId);
+            }
+            inline bool operator<(const mapid & i)const{
+                if(x<i.x)
+                    return true;
+                else
+                if(x==i.x){
+                    if(y<i.y)
+                        return true;
+                    else
+                    if(y==i.y){
+                        if(itemId<i.itemId)
+                            return true;
+                        else
+                        if(itemId==i.itemId){
+                            if(mapId<i.mapId)
+                                return true;
+                        }
+                    }
+                }
+                    return false;
+            }
+            mapid(){
+                x=0;
+                y=0;
+                itemId=0;
+                mapId=0;
+            }
+            mapid(const mapid & i){
+                x=i.x;
+                y=i.y;
+                itemId=i.itemId;
+                mapId=i.mapId;
+            }
+            mapid(int ix,int iy,long iitemId,int imapId){
+                x=ix;
+                y=iy;
+                itemId=iitemId;
+                mapId=imapId;
+            }
+            mapid & operator=(const mapid & i){
+                x=i.x;
+                y=i.y;
+                itemId=i.itemId;
+                mapId=i.mapId;
+                return *this;
+        }
     };
 }
 #endif

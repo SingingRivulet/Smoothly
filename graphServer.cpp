@@ -1,6 +1,13 @@
 #include "graphServer.h"
 namespace smoothly{
-
+void graphServer::init(const char * path){
+    leveldb::Options opt;
+    opt.create_if_missing=true;
+    leveldb::DB::Open(opt,path,&this->db);
+}
+void graphServer::destroy(){
+    delete this->db;
+}
 void graphServer::remove(const std::string & uuid){
     removeAllLink(uuid);
     remove(uuid,maxdeep);
@@ -27,6 +34,7 @@ void graphServer::remove(const std::string & uuid,int deep){
 }
 bool graphServer::nodeExist(const std::string & uuid){
     std::string knode=std::string("node_")+uuid;
+    std::string buf1;
     return (db->Get(leveldb::ReadOptions(),knode,&buf1).ok() && !buf1.empty());
 }
 
@@ -121,8 +129,14 @@ void graphServer::addLinkTo(const std::string & uuid,const std::string & a){
     addSet("linkTo_",uuid,a);
 }
 void graphServer::attack(const std::string & uuid,int h){
-    if(hurt(uuid,h)<=0)
+    int lhp=hurt(uuid,h);
+    if(lhp<=0)
         remove(uuid);
+    
+    int x,y;
+    getChunk(uuid,x,y);
+    onAttackNode(uuid,lhp,x,y);
+    
 }
 int graphServer::hurt(const std::string & uuid,int hurt){
     std::string key=std::string("hp_")+uuid;
@@ -146,6 +160,8 @@ void graphServer::createNode(
 ){
     std::string uuid;
     int hp=getHPByType(type);
+    if(hp<=0)
+        return;
     getUUID(uuid);
     char buf[512];
     
@@ -178,7 +194,7 @@ void graphServer::createNode(
     }
     db->Put(leveldb::WriteOptions(),std::string("link_")+uuid,bufs);
     
-    onCreateNode(uuid,position,rotation,link,x,y);
+    onCreateNode(uuid,position,rotation,link,type,hp,x,y);
 }
 
 void graphServer::getChunk(const std::string & uuid,int & x,int & y){
@@ -224,6 +240,73 @@ void graphServer::removeApplay(){
         }
     }
     removeList.clear();
+}
+void graphServer::getAllNode(int x,int y,const RakNet::SystemAddress & to){
+    char key[256];
+    snprintf(key,256,"map_chunkdata_%d_%d_",x,y);
+    std::string buf1,buf2,buf3;
+    if(db->Get(leveldb::ReadOptions(),key,&buf1).ok() && !buf1.empty()){
+        buf3.clear();
+        std::istringstream iss(buf1);
+        while(!iss.eof()){
+            buf2.clear();
+            
+            iss>>buf2;
+            if(buf2.empty())
+                break;
+            
+            sendNode(x,y,buf2,to);
+        }
+    }
+}
+void graphServer::sendNode(int x,int y,const std::string & uuid,const RakNet::SystemAddress & to){
+    std::string node,buf1,buf2;
+    long type;
+    int hp=0;
+    irr::core::vector3df position(0,0,0);
+    irr::core::vector3df rotation(0,0,0);
+    std::set<std::string> link;
+    std::set<std::string> linkTo;
+    
+    if(db->Get(leveldb::ReadOptions(),std::string("node_")+uuid,&node).ok() && !node.empty()){
+        type=atol(node.c_str());
+        buf1.clear();
+        if(db->Get(leveldb::ReadOptions(),std::string("hp_")+uuid,&buf1).ok() && !buf1.empty()){
+            hp=atoi(buf1.c_str());
+        }
+        buf1.clear();
+        if(db->Get(leveldb::ReadOptions(),std::string("position_")+uuid,&buf1).ok() && !buf1.empty()){
+            sscanf(buf1.c_str(),"%f %f %f",&(position.X),&(position.Y),&(position.Z));
+        }
+        buf1.clear();
+        if(db->Get(leveldb::ReadOptions(),std::string("rotation_")+uuid,&buf1).ok() && !buf1.empty()){
+            sscanf(buf1.c_str(),"%f %f %f",&(rotation.X),&(rotation.Y),&(rotation.Z));
+        }
+        buf1.clear();
+        if(db->Get(leveldb::ReadOptions(),std::string("link_")+uuid,&buf1).ok() && !buf1.empty()){
+            std::istringstream iss(buf1);
+            while(!iss.eof()){
+                buf2.clear();
+                iss>>buf2;
+                if(buf2.empty())
+                    break;
+                link.insert(buf2);
+            }
+        }
+        buf1.clear();
+        if(db->Get(leveldb::ReadOptions(),std::string("linkTo_")+uuid,&buf1).ok() && !buf1.empty()){
+            std::istringstream iss(buf1);
+            while(!iss.eof()){
+                buf2.clear();
+                iss>>buf2;
+                if(buf2.empty())
+                    break;
+                linkTo.insert(buf2);
+            }
+        }
+        onSendNode(uuid,position,rotation,link,linkTo,type,hp,x,y,to);
+    }else
+        return;
 }
 
 }

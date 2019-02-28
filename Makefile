@@ -1,6 +1,6 @@
 
 CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ 
-LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthread -lRakNetDLL
+LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthread -lRakNetDLL -llua
 
 ./a,out:main.cpp perlin.o clientNetwork.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o clientNetwork.o $(LIBS)
@@ -31,3 +31,21 @@ clientNetwork.o:clientNetwork.cpp clientNetwork.h building.o
 
 building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp
+
+server:server.cpp serverNetwork.o
+	$(CC) server.cpp serverNetwork.o watch.o serverMod.o removeTable.o graphServer.o hbb.o -lleveldb -o server $(LIBS)
+
+serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
+	$(CC) -c serverNetwork.cpp
+
+watch.o:serverMod.o watch.cpp watch.h
+	$(CC) -c watch.cpp
+
+serverMod.o:removeTable.o graphServer.o serverMod.cpp serverMod.h
+	$(CC) -c serverMod.cpp
+
+removeTable.o:removeTable.cpp removeTable.h
+	$(CC) -c removeTable.cpp
+
+graphServer.o:graphServer.cpp graphServer.h
+	$(CC) -c graphServer.cpp

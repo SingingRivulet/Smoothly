@@ -19,6 +19,9 @@ namespace smoothly{
                 oy=iy/32;
             }
             
+            void init(const char * path);
+            void destroy();
+            
             void removeApplay();
             bool nodeExist(const std::string & uuid);
             
@@ -50,14 +53,31 @@ namespace smoothly{
             //void destroyNode(const std::string & uuid);
             //请使用attack
             
+            void getAllNode(int x,int y,const RakNet::SystemAddress & to);
+            void sendNode(int x,int y,const std::string & uuid,const RakNet::SystemAddress & to);
+            virtual void onSendNode(
+                const std::string & uuid,
+                const irr::core::vector3df & position,
+                const irr::core::vector3df & rotation,
+                const std::set<std::string> & link,
+                const std::set<std::string> & linkTo,
+                long type,
+                int hp,
+                int x,int y,
+                const RakNet::SystemAddress & to
+            )=0;
+            
             virtual void onCreateNode(
                 const std::string & uuid,
                 const irr::core::vector3df & position,
                 const irr::core::vector3df & rotation,
                 const std::set<std::string> & link,
+                long type,
+                int hp,
                 int x,int y
             )=0;
             virtual void onDestroyNode(const std::string & uuid,int x,int y)=0;
+            virtual void onAttackNode(const std::string & uuid,int hp,int x,int y)=0;
             virtual int getHPByType(long hp)=0;
     };
 }

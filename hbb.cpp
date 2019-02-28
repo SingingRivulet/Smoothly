@@ -210,7 +210,24 @@ void HBB::AABB::collisionTest(
             right->collisionTest(in,callback,arg);
     }
 }
-
+void HBB::AABB::fetchByPoint(
+    const vec3 & point,
+    void(*callback)(AABB *,void *),
+    void * arg
+){
+    if(left && left->inBox(point)){
+        if(left->isDataNode())
+            callback(left,arg);
+        else
+            left->fetchByPoint(point,callback,arg);
+    }
+    if(right && right->inBox(point)){
+        if(right->isDataNode())
+            callback(right,arg);
+        else
+            right->fetchByPoint(point,callback,arg);
+    }
+}
 HBB::HBB(){
     poolInit();
     root=createAABB();

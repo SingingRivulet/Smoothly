@@ -7,12 +7,14 @@ namespace smoothly{
             void init(const char * addr,short port);
             void shutdown();
             void recv();
+            void connect();
             
-            void onRecvMessage(RakNet::BitStream * data);
+            void onRecvMessage(RakNet::Packet * data);
             void sendMessage(RakNet::BitStream * data);
+            void sendMessageU(RakNet::BitStream * data);
             
-            void onMessageUpdateBuilding(RakNet::BitStream * data);
-            void onMessageUpdateTerrain(RakNet::BitStream * data);
+            void onMessageUpdateBuilding(RakNet::Packet * data);
+            void onMessageUpdateTerrain(RakNet::Packet * data);
             
             void onMessageUpdateBuildingGen(RakNet::BitStream * data);
             void onMessageUpdateBuildingAttack(RakNet::BitStream * data);
@@ -20,6 +22,7 @@ namespace smoothly{
             void onMessageUpdateBuildingDestroy(RakNet::BitStream * data);
             
             void onMessageUpdateTerrainGetRMTable(RakNet::BitStream * data);
+            void onMessageUpdateTerrainRMTApply(RakNet::BitStream * data);
             void onMessageUpdateTerrainRemove(RakNet::BitStream * data);
             
             virtual void uploadAttack(const std::string & uuid , int hurt);
@@ -27,7 +30,7 @@ namespace smoothly{
             virtual remoteGraph::item * downloadBuilding(const std::string & uuid);
             virtual void addNode(//添加节点
                 const irr::core::vector3df & position,//位置
-                const irr::core::vector3df & rotation,//无用，给子类
+                const irr::core::vector3df & rotation,
                 const std::set<std::string> & link,//表示修建在什么节点上
                 int hp,
                 long type
@@ -36,7 +39,6 @@ namespace smoothly{
             
             virtual void requestRemoveItem(const mapid & mid);
             virtual void requestUpdateTerrain(int x,int y);
-            virtual bool collisionWithObject(irr::scene::IMeshSceneNode * n);
             virtual void buildOnFloor(
                 long type,
                 const irr::core::vector3df &,
@@ -48,9 +50,13 @@ namespace smoothly{
                 const irr::core::vector3df &,
                 const std::list<std::string> &
             );
-            
+            void setUserPosition(const irr::core::vector3df & p);
+            void setUserRotation(const irr::core::vector3df & r);
+            void move(const irr::core::vector3df & delta);
         private:
             RakNet::RakPeerInterface * connection;
+            std::string addr;
+            short port;
     };
 }
 #endif

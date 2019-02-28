@@ -3,3 +3,5 @@
 *.gch
 *.out
 *~
+/server
+/data*

@@ -17,59 +17,6 @@ namespace smoothly{
             void destroy();
         public:
             class chunk;
-            class mapid{
-                public:
-                    int x,y,mapId;
-                    long itemId;
-                    inline bool operator==(const mapid & i)const{
-                        return (x==i.x) && (y==i.y) && (itemId==i.itemId) && (mapId==i.mapId);
-                    }
-                    inline bool operator<(const mapid & i)const{
-                        if(x<i.x)
-                            return true;
-                        else
-                        if(x==i.x){
-                            if(y<i.y)
-                                return true;
-                            else
-                            if(y==i.y){
-                                if(itemId<i.itemId)
-                                    return true;
-                                else
-                                if(itemId==i.itemId){
-                                    if(mapId<i.mapId)
-                                        return true;
-                                }
-                            }
-                        }
-                            return false;
-                    }
-                    mapid(){
-                        x=0;
-                        y=0;
-                        itemId=0;
-                        mapId=0;
-                    }
-                    mapid(const mapid & i){
-                        x=i.x;
-                        y=i.y;
-                        itemId=i.itemId;
-                        mapId=i.mapId;
-                    }
-                    mapid(int ix,int iy,long iitemId,int imapId){
-                        x=ix;
-                        y=iy;
-                        itemId=iitemId;
-                        mapId=imapId;
-                    }
-                    mapid & operator=(const mapid & i){
-                        x=i.x;
-                        y=i.y;
-                        itemId=i.itemId;
-                        mapId=i.mapId;
-                        return *this;
-                    }
-            };
             class item:public mods::itemBase{
                 public:
                     long id;
@@ -335,6 +282,7 @@ namespace smoothly{
             item *  getItemFromStr(const char * buf);
             
             void setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t);
+            void removeTableApplay(int x,int y);
             
             virtual void onGenChunk(chunk *)=0;
             virtual void onFreeChunk(chunk *)=0;

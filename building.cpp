@@ -36,7 +36,7 @@ void buildings::onGenTerrainItem(terrain::item * i){
     p->node=buildingHBB.add(mit->second->BB.MinEdge+posi , mit->second->BB.MaxEdge+posi , p);
 }
 
-bool buildings::collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,irr::core::line3d<irr::f32> &normal){
+buildings::building * buildings::collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,irr::core::line3d<irr::f32> &normal){
     struct cwbtmp{
         float lenSq;
         irr::core::vector3df position;
@@ -44,10 +44,12 @@ bool buildings::collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,i
         bool havevalue;
         buildings * self;
         irr::core::line3d<irr::f32> ray;
+        building * node;
     }arg;
     arg.havevalue=false;
     arg.self=this;
     arg.ray=ray;
+    arg.node=NULL;
     
     buildingHBB.rayTest(ray,[](HBB::AABB * box , void * argp){
         
@@ -87,17 +89,18 @@ bool buildings::collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,i
             arg->lenSq=sq;
             arg->triangle=t;
             arg->position=position;
+            arg->node=bd;
         }
         
     },&arg);
     if(arg.havevalue==false)
-        return false;
+        return NULL;
     //get normal
     irr::core::vector3df n;
     getTriangleNormal(arg.triangle , ray.start , n);
     normal.start=arg.position;
     normal.end=arg.position+n;
-    return true;
+    return arg.node;
 }
 
 void buildings::onGenBuilding(remoteGraph::item * i){
@@ -333,13 +336,21 @@ void buildings::doBuildApplay(){
         );
     }
 }
+bool buildings::collisionWithObject(irr::scene::IMeshSceneNode * n){
+    return false;
+}
 
 void buildings::attackByRay(const irr::core::line3d<irr::f32> & ray){
-    buildingHBB.rayTest(ray,[](HBB::AABB * box , void * argp){
+    auto p=selectByRay(ray);
+    if(p){
+        auto pitem=(remoteGraph::item*)p->data;
+        attackNode(pitem->uuid,buildingDamage);
+    }
 }
 
 buildings::building * buildings::selectByRay(const irr::core::line3d<irr::f32> & ray){
-    
+    irr::core::line3d<irr::f32> l;
+    return collisionWithBuildings(ray,l);
 }
 
 }//namespace smoothly
