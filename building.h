@@ -90,13 +90,17 @@ namespace smoothly{
                 const std::list<std::string> &
             )=0;
             
+            buildings();
+            ~buildings();
+            
+            float meshSize;
         private:
             
             building * collisionWithBuildings(const irr::core::line3d<irr::f32> & ray,irr::core::line3d<irr::f32> &normal);
             bool collisionWithBuildings(irr::scene::IMeshSceneNode * n,long type,std::list<building*> & b);
             bool collisionWithTerrain(irr::scene::IMeshSceneNode * n,long type);
             
-            void * pool;
+            void * cBuildPool;
             building * createCBuild();
             void delCBuilding(building*);
             

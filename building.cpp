@@ -1,7 +1,58 @@
 #include "building.h"
+#include "mempool.h"
 namespace smoothly{
 
+typedef mempool<buildings::building> cbpool;
 
+buildings::building * buildings::createCBuild(){
+    if(!cBuildPool)
+        return NULL;
+    auto p=((cbpool*)cBuildPool)->get();
+    p->node=NULL;
+    p->data=NULL;
+    return p;
+}
+
+void buildings::delCBuilding(buildings::building * p){
+    if(!cBuildPool)
+        return;
+    ((cbpool*)cBuildPool)->del(p);
+}
+
+buildings::buildings(){
+    cBuildPool=new cbpool;
+    meshSize=2.0f;
+}
+buildings::~buildings(){
+    delete (cbpool*)cBuildPool;
+}
+bool buildings::collisionWithTerrain(irr::scene::IMeshSceneNode * n,long type){
+    auto it=m->buildings.find(type);
+    if(it==m->buildings.end())
+        return false;
+    irr::core::aabbox3d<irr::f32> box=it->second->BB;
+    n->getAbsoluteTransformation().transformBoxEx(box);
+    
+    float b=box.MinEdge.Y;
+    
+    float fx=box.MinEdge.X;
+    float fy=box.MinEdge.Z;
+    float tx=box.MaxEdge.X;
+    float ty=box.MaxEdge.Z;
+    
+    if(tx-fx<=meshSize && ty-fy<=meshSize){
+        if(getRealHight(fx,fy)>=b)
+            return true;
+    }else{
+        for(float i=fx;i<=tx;i+=meshSize){
+            for(float j=fy;j<=ty;j+=meshSize){
+                if(getRealHight(i,j)>=b)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
 void buildings::onGenChunk(terrain::chunk *){
     
 }
@@ -63,25 +114,22 @@ buildings::building * buildings::collisionWithBuildings(const irr::core::line3d<
         //use selector to get collision point
         auto pitem=(remoteGraph::item*)bd->data;
         
-        auto it=self->m->buildings.find(pitem->type);
-        if(it==self->m->buildings.end())
-            return;
-        
-        auto selector=it->second->selector;
+        auto selector=pitem->node->getTriangleSelector();
         
         if(pitem->node==NULL)
             return;
         
         irr::core::triangle3df t;
-        int num=0;
-        auto mat=pitem->node->getAbsoluteTransformation();
-        selector->getTriangles(&t,1,num,arg->ray,&mat);
-        
-        if(num<=0)
-            return;
-        
         irr::core::vector3df position;
-        intersectionTriangle(arg->ray,t,position);
+        irr::scene::ISceneNode * outNode;
+        
+        if(!self->scene->getSceneCollisionManager()->getCollisionPoint(
+            arg->ray,
+            selector,
+            position,
+            t,
+            outNode
+        ))return;
         
         auto sq=getLenSq(arg->ray.start , position);
         if(arg->havevalue==false || sq < arg->lenSq){
@@ -125,6 +173,10 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
     i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     dynamicsWorld->addRigidBody(i->rigidBody);
+    
+    auto sel=scene->createOctreeTriangleSelector(it->second->mesh,i->node);
+    i->node->setTriangleSelector(sel);
+    sel->drop();
     
     auto p=createCBuild();
     p->type=building::BUILDING_ITEM;

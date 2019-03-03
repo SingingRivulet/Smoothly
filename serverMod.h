@@ -8,9 +8,12 @@ namespace smoothly{
             virtual int getHPByType(long type);
             virtual int itemidNum(long id);
             void scriptInit(const char * path);
+            void scriptDestroy();
             float viewRange;
             std::map<long,int> buildingHPMap;
             std::map<long,int> terrainNumMap;
+            
+            lua_State * L;
     };
 }
 #endif

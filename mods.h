@@ -48,9 +48,16 @@ namespace smoothly{
                 public:
                     irr::scene::IMesh * mesh;
                     irr::core::aabbox3d<float> BB;
-                    irr::scene::ITriangleSelector * selector;
             };
             std::map<long,building*> buildings;
+            
+            irr::scene::ISceneManager * scene;
+            
+            long defaultBuildingList[7];
+            
+            void init(const char * path);
+            void loadMesh();
+            void destroy();
     };
 }
 #endif

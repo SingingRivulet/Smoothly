@@ -5,13 +5,31 @@ LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthrea
 ./a,out:main.cpp perlin.o clientNetwork.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o clientNetwork.o $(LIBS)
 
+client:client.cpp game.o
+	$(CC) client.cpp \
+	perlin.o \
+	terrain.o \
+	createTerrainMesh.o \
+	remoteGraph.o \
+	building.o \
+	hbb.o \
+	clientNetwork.o \
+	view.o \
+	control.o \
+	mods.o \
+	-o client \
+	$(LIBS)
+
+mods.o:mods.h mods.cpp utils.h
+	$(CC) -c mods.cpp
+
 perlin.o:perlin.cpp terrain.h perlin.h
 	$(CC) -c perlin.cpp
 
 createTerrainMesh.o:createTerrainMesh.cpp terrain.h
 	$(CC) -c createTerrainMesh.cpp
 
-terrain.o:terrain.cpp terrain.h mods.h utils.h
+terrain.o:terrain.cpp terrain.h mods.h utils.h mods.o
 	$(CC) -c terrain.cpp
 
 remoteGraph.o:remoteGraph.h remoteGraph.cpp
@@ -28,6 +46,15 @@ hbb_test.out:hbb_test.cpp hbb.o
 
 clientNetwork.o:clientNetwork.cpp clientNetwork.h building.o
 	$(CC) -c clientNetwork.cpp
+
+view.o:view.h view.cpp clientNetwork.o
+	$(CC) -c view.cpp
+
+control.o:control.h control.cpp view.o
+	$(CC) -c control.cpp
+
+game.o:game.h game.cpp control.o
+	$(CC) -c game.cpp
 
 building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp

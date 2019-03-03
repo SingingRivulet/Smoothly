@@ -95,6 +95,7 @@ serverNetwork::~serverNetwork(){
     }
     removeTable::destroy();
     graphServer::destroy();
+    scriptDestroy();
     lstPoolFree();
 }
 void serverNetwork::recv(){

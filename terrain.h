@@ -62,10 +62,10 @@ namespace smoothly{
                             it->remove();
                             parent->destroyItem(it);
                         }
-                        parent->dynamicsWorld->removeRigidBody(rigidBody);
+                        //parent->dynamicsWorld->removeRigidBody(this->rigidBody);
                         delete rigidBody;
-                        node->remove();
                         selector->drop();
+                        node->remove();
                         mesh->drop();
                         items.clear();
                         itemNum.clear();

@@ -45,7 +45,7 @@ static int mod_addBuildingTypeHP(lua_State * L){
     return 1;
 }
 void serverMod::scriptInit(const char * path){
-    auto L=luaL_newstate();
+    L=luaL_newstate();
     struct luaL_Reg funcs[]={
         {"addTerrainItemID" ,mod_addTerrainItemID},
         {"addBuildingTypeHP",mod_addBuildingTypeHP},
@@ -66,6 +66,8 @@ void serverMod::scriptInit(const char * path){
         return;
     }
     
+}
+void serverMod::scriptDestroy(){
     lua_close(L);
 }
 

@@ -10,6 +10,18 @@ terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
     this->texture=NULL;
+    generator.seed=1234506;
+    pointNum=34;
+    altitudeK=0.08;
+    hillK=0.2;
+    temperatureK=0.3;
+    humidityK=0.3;
+    altitudeArg=20000;
+    hillArg=200;
+    temperatureArg=2000;
+    humidityArg=2000;
+    dynamicsWorld=NULL;
+    scene =NULL;
 }
 
 terrain::~terrain(){
@@ -69,6 +81,8 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     if(x==px && y==py && !force)
         return;
     int i,j;
+    px=x;
+    py=y;
     std::map<ipair,chunk*> rm;
     
     for(auto it : chunks){
@@ -284,7 +298,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     
     ch->rigidBody=makeBulletMeshFromIrrlichtNode(ch->node);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    dynamicsWorld->addRigidBody(ch->rigidBody);
+    //this->dynamicsWorld->addRigidBody(ch->rigidBody);
     
     ch->x=x;
     ch->y=y;

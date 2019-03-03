@@ -7,6 +7,7 @@ void clientNetwork::init(const char * addr,short port){
     connection->Startup(1,&sd,1);
     this->addr=addr;
     this->port=port;
+    connect();
 }
 void clientNetwork::connect(){
     connection->Connect(addr.c_str(),port,0,0);
