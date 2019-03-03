@@ -65,7 +65,8 @@ remoteGraph::item * remoteGraph::genNode(
         p=createNode();
         p->uuid=uuid;
         setChunk(p , position);
-    }
+    }else
+        return NULL;//bug:重复调用onGenBuilding导致内存泄露
     
     p->position=position;
     p->rotation=rotation;

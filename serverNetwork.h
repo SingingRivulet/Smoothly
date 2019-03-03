@@ -26,11 +26,11 @@ namespace smoothly{
             
             inline void sendMessage(RakNet::BitStream * data,const RakNet::SystemAddress & address){
                 if(connection)
-                    connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, address, true );
+                    connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, address, false );
             }
             inline void sendMessageU(RakNet::BitStream * data,const RakNet::SystemAddress & address){
                 if(connection)
-                    connection->Send( data, HIGH_PRIORITY, RELIABLE, 0, address, true );
+                    connection->Send( data, HIGH_PRIORITY, RELIABLE, 0, address, false );
             }
             
             inline void kick(const RakNet::SystemAddress & address){

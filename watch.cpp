@@ -20,7 +20,8 @@ void watch::setListener(
     }
     p->address=addr;
     p->box=eventHBB.add(from,to,p);
-    
+    //printf("setListener:(%f,%f,%f)\n",from.X,from.Y,from.Z);
+    //printf("to:(%f,%f,%f)\n",to.X,to.Y,to.Z);
 }
 void watch::delListener(const RakNet::SystemAddress & addr){
     auto it=listeners.find(addr);
@@ -103,10 +104,12 @@ void watch::onRemoveTerrain(int x,int y,long itemid,int mapid){
 }
 
 void watch::boardcastByPoint(const HBB::vec3 & point,RakNet::BitStream * bs){
+    //printf("boardcast:(%f,%f,%f)\n",point.X,point.Y,point.Z);
     eventHBB.fetchByPoint(point,[](HBB::AABB * box , void * argp){
         auto bs=(RakNet::BitStream*)argp;
         auto lst=(listener*)box->data;
         lst->parent->sendMessage(bs,lst->address);
+        //printf("boardcast\n");
     },bs);
 }
 

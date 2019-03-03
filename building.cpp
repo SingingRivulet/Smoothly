@@ -158,21 +158,18 @@ void buildings::onGenBuilding(remoteGraph::item * i){
         i->rigidBody=NULL;
         return;
     }
-    i->node=scene->addMeshSceneNode(
-        it->second->mesh,
-        0,-1,
-        i->position,
-        i->rotation
-    );
-    
+    i->node=scene->addMeshSceneNode(it->second->mesh);
+    i->node->setPosition(i->position);
+    i->node->setRotation(i->rotation);
     i->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     
     irr::core::aabbox3d<irr::f32> box=it->second->BB;
     i->node->getAbsoluteTransformation().transformBoxEx(box);
     
-    i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
-    i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    dynamicsWorld->addRigidBody(i->rigidBody);
+    i->rigidBody=NULL;
+    //i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
+    //i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    //dynamicsWorld->addRigidBody(i->rigidBody);
     
     auto sel=scene->createOctreeTriangleSelector(it->second->mesh,i->node);
     i->node->setTriangleSelector(sel);
@@ -185,11 +182,14 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     allBuildings[i]=p;
     
     p->node=buildingHBB.add(box.MinEdge , box.MaxEdge , p);
+    
+    //i->node->remove();
 }
 
 void buildings::onFreeBuilding(remoteGraph::item * i){
     if(i->node)
         i->node->remove();
+        
     if(i->rigidBody){
         dynamicsWorld->removeRigidBody(i->rigidBody);
         delete i->rigidBody;
@@ -206,6 +206,7 @@ void buildings::onDestroyBuilding(remoteGraph::item * i){
     onFreeBuilding(i);
 }
 void buildings::onCreateBuilding(remoteGraph::item * i){
+    printf("createBuilding:%ld\n",i->type);
     onGenBuilding(i);
 }
 bool buildings::collisionWithBuildings(irr::scene::IMeshSceneNode * n,long type,std::list<building*> & b){
@@ -344,11 +345,14 @@ void buildings::doBuildUpdate(const irr::core::line3d<irr::f32> & ray){
     if(getNormalByRay(cameraRay,buildingNormal)){
         transformByNormal(buildingNode,buildingNormal);
         buildingNode->setVisible(true);
-    }else
+        allowBuild=true;
+    }else{
         buildingNode->setVisible(false);
+        allowBuild=false;
+    }
 }
 void buildings::doBuildApplay(){
-    if(!buildingMode)
+    if(!buildingMode || !allowBuild)
         return;
     std::list<building*> l;
     std::list<std::string> sislist;

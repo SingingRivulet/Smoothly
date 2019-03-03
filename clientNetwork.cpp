@@ -34,6 +34,7 @@ void clientNetwork::recv(){
 void clientNetwork::onRecvMessage(RakNet::Packet * data){
     switch(data->data[0]){
         case MESSAGE_GAME:
+            //printf("recv message\n");
             switch(data->data[1]){
                 case M_UPDATE_BUILDING:
                     onMessageUpdateBuilding(data);
@@ -143,6 +144,7 @@ void clientNetwork::onMessageUpdateBuildingCreate(RakNet::BitStream * data){
     data->ReadVector(position.X , position.Y , position.Z);
     data->ReadVector(rotation.X , rotation.Y , rotation.Z);
     data->Read(type);
+    printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     if(!data->Read(hp))
         return;
     if(data->Read(linkNum)){
@@ -257,6 +259,7 @@ void clientNetwork::buildOnFloor(
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
     bs.Write((int64_t)type);
     bs.Write((int32_t)0);
+    //printf("buildOnFloor:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     sendMessage(&bs);
 }
 void clientNetwork::buildOn(
@@ -277,6 +280,7 @@ void clientNetwork::buildOn(
     for(auto it:link){
         bs.Write(it.c_str());
     }
+    //printf("buildOn:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     sendMessage(&bs);
 }
 

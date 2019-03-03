@@ -1,13 +1,13 @@
 #include "control.h"
 namespace smoothly{
 void clientNetwork::move(const irr::core::vector3df & mto){
-    printf("camrea:(%f,%f,%f)\n",mto.X,mto.Y,mto.Z);
+    //printf("camrea:(%f,%f,%f)\n",mto.X,mto.Y,mto.Z);
     int cx=mto.X/32;
     int cy=mto.Z/32;
 
     visualChunkUpdate(cx,cy,false);
     updateBuildingChunks(cx,cy,3);
-    
+    setUserPosition(mto);
 }
 control::control(){
     walkSpeed=0.1;
@@ -172,6 +172,7 @@ void control::loop(){
     if(!ok())
         return;
     recv();
+    buildingApplay();
     deltaTimeUpdate();
     irr::core::line3d<irr::f32> line;
     cameraPosition           = camera->getPosition();

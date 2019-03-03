@@ -14,7 +14,7 @@ void view::loadScene(){
     //m=new mods;
     genTexture();
     visualChunkUpdate(0,0,true);
-    updateBuildingChunks(0,0,3);
+    //updateBuildingChunks(0,0,3);
     
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
     

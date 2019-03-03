@@ -22,8 +22,8 @@ namespace smoothly{
                 return listeners.find(addr)!=listeners.end();
             }
             inline void setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr){
-                HBB::vec3 from  (position.X-viewRange , position.Y-viewRange , position.Z-viewRange);
-                HBB::vec3 to    (position.X+viewRange , position.Y+viewRange , position.Z+viewRange);
+                HBB::vec3 from  (position.X-viewRange , -2000 , position.Z-viewRange);
+                HBB::vec3 to    (position.X+viewRange ,  2000 , position.Z+viewRange);
                 setListener(from,to,addr);
             }
             void setListener(

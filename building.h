@@ -109,6 +109,7 @@ namespace smoothly{
             long buildingType;
             irr::scene::IMeshSceneNode * buildingNode;
             mods::building * buildingConfig;
+            bool allowBuild;
     };
 }
 #endif

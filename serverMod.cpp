@@ -44,11 +44,24 @@ static int mod_addBuildingTypeHP(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
+static int mod_setViewRange(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(serverMod*)ptr;
+    self->viewRange=luaL_checknumber(L,2);
+    lua_pushboolean(L,1);
+    return 1;
+}
 void serverMod::scriptInit(const char * path){
     L=luaL_newstate();
+    luaL_openlibs(L);
     struct luaL_Reg funcs[]={
         {"addTerrainItemID" ,mod_addTerrainItemID},
         {"addBuildingTypeHP",mod_addBuildingTypeHP},
+        {"setViewRange"     ,mod_setViewRange},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);

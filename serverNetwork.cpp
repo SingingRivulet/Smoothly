@@ -133,9 +133,11 @@ void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddr
         case ID_NEW_INCOMING_CONNECTION:
             //下一版本修改
             setUserPosition(irr::core::vector3df(0,0,0),address);
+            printf("connect\n");
         break;
         case ID_DISCONNECTION_NOTIFICATION:
             delListener(address);
+            printf("disconnect\n");
         break;
     }
 }
@@ -183,6 +185,7 @@ void serverNetwork::onMessageUpdateUserPosition(RakNet::BitStream * data,const R
     //暂定
     irr::core::vector3df position;
     data->ReadVector(position.X,position.Y,position.Z);
+    //printf("setPosition:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     setUserPosition(position,address);
 }
 void serverNetwork::onMessageUpdateUserRotation(RakNet::BitStream * data,const RakNet::SystemAddress & address){
@@ -211,6 +214,7 @@ void serverNetwork::onMessageUpdateBuildingCreate(RakNet::BitStream * data,const
     irr::core::vector3df position,rotation;
     data->ReadVector(position.X,position.Y,position.Z);
     data->ReadVector(rotation.X,rotation.Y,rotation.Z);
+    printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     if(!data->Read(type))
         return;
     link.clear();
