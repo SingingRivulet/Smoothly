@@ -258,8 +258,10 @@ void remoteGraph::updateBuildingChunks(int x,int y,int range){
     std::map<ipair,chunk*> rm=chunks;
     for(int i=fx;i<=tx;i++){
         for(int j=fy;j<=ty;j++){
-            createChunk(i,j);
-            downloadBuilding(i,j);
+            if(chunks.find(ipair(i,j))==chunks.end()){
+                createChunk(i,j);
+                downloadBuilding(i,j);
+            }
             rm.erase(ipair(i,j));
         }
     }

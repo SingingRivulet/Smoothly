@@ -10,7 +10,7 @@ void clientNetwork::move(const irr::core::vector3df & mto){
     setUserPosition(mto);
 }
 control::control(){
-    walkSpeed=0.1;
+    walkSpeed=0.01;
 }
 control::~control(){
     

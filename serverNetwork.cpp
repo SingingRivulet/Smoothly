@@ -214,7 +214,7 @@ void serverNetwork::onMessageUpdateBuildingCreate(RakNet::BitStream * data,const
     irr::core::vector3df position,rotation;
     data->ReadVector(position.X,position.Y,position.Z);
     data->ReadVector(rotation.X,rotation.Y,rotation.Z);
-    printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
+    //printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     if(!data->Read(type))
         return;
     link.clear();

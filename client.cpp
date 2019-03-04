@@ -7,7 +7,7 @@ int main(){
     running=true;
     game.addEventRecv();
     game.canFly=true;
-    game.setCameraPosition(irr::core::vector3df(0,400,0));
+    game.setCameraPosition(irr::core::vector3df(0,game.getRealHight(0,0)+2,0));
     while(running && game.ok()){
         game.loop();
     }

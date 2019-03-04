@@ -54,16 +54,23 @@ void clientNetwork::onMessageUpdateBuilding(RakNet::Packet * data){
     bs.IgnoreBytes(3);
     switch(data->data[2]){
         case B_ATTACK:
-            onMessageUpdateBuildingAttack(&bs);
+             //printf("updateBuilding:attack\n");
+             onMessageUpdateBuildingAttack(&bs);
         break;
         case B_CREATE:
-            onMessageUpdateBuildingCreate(&bs);
+             //printf("updateBuilding:create\n");
+             onMessageUpdateBuildingCreate(&bs);
         break;
         case B_DESTROY:
-            onMessageUpdateBuildingDestroy(&bs);
+             //printf("updateBuilding:destroy\n");
+             onMessageUpdateBuildingDestroy(&bs);
         break;
         case B_GENER:
-            onMessageUpdateBuildingGen(&bs);
+             //printf("updateBuilding:gen\n");
+             onMessageUpdateBuildingGen(&bs);
+        break;
+        default:
+             //printf("updateBuilding\n");
         break;
     }
 }
@@ -95,6 +102,7 @@ void clientNetwork::onMessageUpdateBuildingGen(RakNet::BitStream * data){
     data->Read(uuid);
     data->ReadVector(position.X , position.Y , position.Z);
     data->ReadVector(rotation.X , rotation.Y , rotation.Z);
+    //printf("genBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     data->Read(type);
     if(!data->Read(hp))
         return;
@@ -144,7 +152,7 @@ void clientNetwork::onMessageUpdateBuildingCreate(RakNet::BitStream * data){
     data->ReadVector(position.X , position.Y , position.Z);
     data->ReadVector(rotation.X , rotation.Y , rotation.Z);
     data->Read(type);
-    printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
+    //printf("createBuilding:(%f,%f,%f)\n",position.X,position.Y,position.Z);
     if(!data->Read(hp))
         return;
     if(data->Read(linkNum)){

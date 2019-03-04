@@ -206,7 +206,7 @@ void buildings::onDestroyBuilding(remoteGraph::item * i){
     onFreeBuilding(i);
 }
 void buildings::onCreateBuilding(remoteGraph::item * i){
-    printf("createBuilding:%ld\n",i->type);
+    //printf("createBuilding:%ld\n",i->type);
     onGenBuilding(i);
 }
 bool buildings::collisionWithBuildings(irr::scene::IMeshSceneNode * n,long type,std::list<building*> & b){
