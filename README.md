@@ -6,6 +6,7 @@ Smoothly，中文名 平静之地，这是一款可以建造房子的开源游�
 ## 操作：  
 wasd控制移动，ctrl下降，空格上升，zxcv切换建筑类型，鼠标右键建造  
 ## 效果图：  
+![img](./screenshot/2019-03-05-15-41-39.png)  
 ![img](./screenshot/2019-03-03-14-46-54.png)  
 ![img](./screenshot/2019-03-03-14-47-02.png)  
 ![img](./screenshot/2019-03-03-14-47-14.png)  

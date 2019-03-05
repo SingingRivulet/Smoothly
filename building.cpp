@@ -101,9 +101,7 @@ buildings::building * buildings::collisionWithBuildings(const irr::core::line3d<
     arg.self=this;
     arg.ray=ray;
     arg.node=NULL;
-    
     buildingHBB.rayTest(ray,[](HBB::AABB * box , void * argp){
-        
         auto bd=(building*)(box->data);
         if(bd->type==building::BUILDING_TERRAIN)
             return;
@@ -164,6 +162,7 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     
     irr::core::aabbox3d<irr::f32> box=it->second->BB;
+    i->node->updateAbsolutePosition();
     i->node->getAbsoluteTransformation().transformBoxEx(box);
     
     i->rigidBody=NULL;
@@ -182,7 +181,6 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     allBuildings[i]=p;
     
     p->node=buildingHBB.add(box.MinEdge , box.MaxEdge , p);
-    
     //i->node->remove();
 }
 
@@ -290,6 +288,7 @@ void buildings::transformByNormal(irr::scene::IMeshSceneNode * n,const irr::core
     
     n->setPosition(normal.start);
     n->setRotation(eu);
+    n->updateAbsolutePosition();
 }
 
 bool buildings::canBuild(irr::scene::IMeshSceneNode * n,long type){
