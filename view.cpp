@@ -1,6 +1,17 @@
 #include "view.h"
 namespace smoothly{
 
+static void addSkyBox(irr::scene::ISceneManager * scene,irr::video::IVideoDriver * driver){
+    scene->addSkyBoxSceneNode(
+        driver->getTexture("./res/skybox/top.jpg"),
+        driver->getTexture("./res/skybox/bottom.jpg"),
+        driver->getTexture("./res/skybox/left.jpg"),
+        driver->getTexture("./res/skybox/right.jpg"),
+        driver->getTexture("./res/skybox/front.jpg"),
+        driver->getTexture("./res/skybox/back.jpg")
+    );
+}
+
 void view::loadScene(){
     device = irr::createDevice(
         irr::video::EDT_OPENGL,
@@ -24,6 +35,7 @@ void view::loadScene(){
     liconf.SpecularColor=irr::video::SColor(255,230,230,230);
     light->setLightData(liconf);
     light->setPosition(irr::core::vector3df(0,2000,0));
+    addSkyBox(scene,driver);
 }
 void view::destroyScene(){
     device->drop();

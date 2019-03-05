@@ -6,7 +6,7 @@ void clientNetwork::move(const irr::core::vector3df & mto){
     int cy=mto.Z/32;
 
     visualChunkUpdate(cx,cy,false);
-    updateBuildingChunks(cx,cy,3);
+    updateBuildingChunks(cx,cy,7);
     setUserPosition(mto);
 }
 control::control(){

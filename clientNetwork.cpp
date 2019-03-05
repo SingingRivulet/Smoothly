@@ -22,6 +22,7 @@ void clientNetwork::shutdown(){
     connection->Shutdown(300);
     RakNet::RakPeerInterface::DestroyInstance(connection);
     terrain::destroy();
+    terrain::destroyTexture();
     remoteGraph::destroy();
 }
 void clientNetwork::recv(){

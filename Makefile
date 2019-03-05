@@ -2,12 +2,16 @@
 CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ 
 LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthread -lRakNetDLL -llua -ldl
 
+all:client server
+	
+
 ./a,out:main.cpp perlin.o clientNetwork.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o clientNetwork.o $(LIBS)
 
 client:client.cpp game.o
 	$(CC) client.cpp \
 	perlin.o \
+	SimplexNoise.o \
 	terrain.o \
 	createTerrainMesh.o \
 	remoteGraph.o \
@@ -23,13 +27,16 @@ client:client.cpp game.o
 mods.o:mods.h mods.cpp utils.h
 	$(CC) -c mods.cpp
 
-perlin.o:perlin.cpp terrain.h perlin.h
+SimplexNoise.o:SimplexNoise.cpp SimplexNoise.h
+	$(CC) -c SimplexNoise.cpp
+
+perlin.o:perlin.cpp terrain.h perlin.h SimplexNoise.o
 	$(CC) -c perlin.cpp
 
 createTerrainMesh.o:createTerrainMesh.cpp terrain.h
 	$(CC) -c createTerrainMesh.cpp
 
-terrain.o:terrain.cpp terrain.h mods.h utils.h mods.o
+terrain.o:terrain.cpp terrain.h mods.h utils.h mods.o createTerrainMesh.o perlin.o
 	$(CC) -c terrain.cpp
 
 remoteGraph.o:remoteGraph.h remoteGraph.cpp
@@ -76,3 +83,6 @@ removeTable.o:removeTable.cpp removeTable.h
 
 graphServer.o:graphServer.cpp graphServer.h
 	$(CC) -c graphServer.cpp
+
+clean:
+	rm *.o

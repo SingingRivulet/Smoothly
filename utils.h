@@ -6,6 +6,7 @@
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/BitStream.h>
 #include <raknet/RakNetTypes.h>
+#include <raknet/RakSleep.h>
 #include <list>
 #include <stdio.h>
 #include <stdlib.h>

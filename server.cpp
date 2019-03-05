@@ -46,5 +46,6 @@ int main(int argc,char * argv[]){
     running=true;
     while(running){
         server.recv();
+        RakSleep(30);
     }
 }

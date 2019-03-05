@@ -10,14 +10,13 @@ terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
     this->texture=NULL;
-    generator.seed=1234506;
     pointNum=34;
     altitudeK=0.08;
-    hillK=0.2;
+    hillK=100;
     temperatureK=0.3;
     humidityK=0.3;
     altitudeArg=20000;
-    hillArg=200;
+    hillArg=500;
     temperatureArg=2000;
     humidityArg=2000;
     dynamicsWorld=NULL;
@@ -89,11 +88,11 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         rm[it.first]=it.second;
     }
     
-    for(i=0;i<7;i++){
-        for(j=0;j<7;j++){
+    for(i=0;i<15;i++){
+        for(j=0;j<15;j++){
         
-            int ix=x+i-3;
-            int iy=y+j-3;
+            int ix=x+i-7;
+            int iy=y+j-7;
             ipair posi(ix , iy);
             auto it2=chunks.find(posi);
             if(it2!=chunks.end()){
@@ -272,7 +271,7 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     char buf[128];
     auto driver=this->scene->getVideoDriver();
     auto max=genTerrain(ch->T , x ,y);
-    printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
+    //printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
     
     float len=33.0f/(float)pointNum;
     ch->mesh=this->createTerrainMesh(
