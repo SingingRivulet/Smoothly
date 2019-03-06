@@ -15,10 +15,13 @@ control::control(){
 control::~control(){
     
 }
-void control::setRelativePosition(const irr::core::vector3df & delta){
-    irr::core::vector3df dt=(delta * this->deltaTime)*walkSpeed + cameraPosition;
+void control::relativePositionApply(){
+    irr::core::vector3df dt= relativePosition + cameraPosition;
     clientNetwork::move(dt);
     camera->setPosition(dt);
+}
+void control::setRelativePosition(const irr::core::vector3df & delta){
+    relativePosition+=(delta * this->deltaTime)*walkSpeed;
 }
 void control::setCameraPosition(const irr::core::vector3df & p){
     clientNetwork::move(p);
@@ -182,6 +185,8 @@ void control::loop(){
     setCameraDirect(dir);
     doBuildUpdate(line);
     
+    relativePosition.set(0,0,0);
+    
     if(status.moveFront && !status.moveBack){
         moveFront();
     }else
@@ -202,6 +207,8 @@ void control::loop(){
     if(!status.moveUp && status.moveDown){
         moveDown();
     }
+    
+    relativePositionApply();
     
     while(!eventQueue.empty()){
         auto ele=eventQueue.front();

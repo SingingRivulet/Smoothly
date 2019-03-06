@@ -22,6 +22,14 @@ void view::loadScene(){
     timer = device->getTimer();
     device->setWindowCaption(L"Smoothly");
     
+    driver->setFog(
+        irr::video::SColor(0,255,255,255),
+        irr::video::EFT_FOG_LINEAR,
+        100,500,
+        true,
+        false
+    );
+    
     //m=new mods;
     genTexture();
     visualChunkUpdate(0,0,true);

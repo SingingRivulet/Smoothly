@@ -41,11 +41,13 @@ namespace smoothly{
                     moveDown=false;
                 }
             }status;
+            irr::core::vector3df relativePosition;
             
             void moveFront();
             void moveBack();
             void moveLeft();
             void moveRight();
+            void relativePositionApply();
             
             bool canFly;
             void moveUp();//飞行模式是升，普通模式是跳
