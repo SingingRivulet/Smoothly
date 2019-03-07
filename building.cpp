@@ -165,10 +165,9 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->node->updateAbsolutePosition();
     i->node->getAbsoluteTransformation().transformBoxEx(box);
     
-    i->rigidBody=NULL;
-    //i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
-    //i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    //dynamicsWorld->addRigidBody(i->rigidBody);
+    i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
+    i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    dynamicsWorld->addRigidBody(i->rigidBody);
     
     auto sel=scene->createOctreeTriangleSelector(it->second->mesh,i->node);
     i->node->setTriangleSelector(sel);
@@ -284,6 +283,17 @@ void buildings::transformByNormal(irr::scene::IMeshSceneNode * n,const irr::core
     
     irr::core::vector3df eu;
     irr::core::quaternion qu(ct , st*u.X , st*u.Y , st*u.Z);
+    
+    auto cm=cameraRay.end-cameraRay.start;
+    cm.Y=0;
+    cm.normalize();
+    theta=acos(cm.dotProduct(irr::core::vector3df(1,0,0)));
+    theta=theta/2;
+    ct=cos(theta);
+    st=sin(theta);
+    irr::core::quaternion qc(ct , 0 , st*1 , 0);
+    
+    qu=qc*qu;
     qu.toEuler(eu);
     
     n->setPosition(normal.start);

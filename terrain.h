@@ -50,7 +50,6 @@ namespace smoothly{
                     chunk * next;
                     std::set<item*> items;
                     std::set<void*> buildings;//预留给子类
-                    float ** T;
                     irr::scene::IMesh * mesh;
                     btRigidBody * rigidBody;
                     terrain * parent;
@@ -58,16 +57,16 @@ namespace smoothly{
                     std::map<long,int> itemNum;
                     irr::scene::ITriangleSelector * selector;
                     std::map<long,std::set<int> > removeTable;
-                    bool requestRemove;
                     bool nodeInited;
                     inline void remove(){
+                        //printf("remove (%d,%d)\n",x,y);
                         for(auto it:items){
                             parent->onFreeTerrainItem(it);
                             parent->allItems.erase(mapid(this->x,this->y,it->id,it->mapId));
                             it->remove();
                             parent->destroyItem(it);
                         }
-                        //parent->dynamicsWorld->removeRigidBody(this->rigidBody);
+                        parent->dynamicsWorld->removeRigidBody(this->rigidBody);
                         if(nodeInited){
                             delete rigidBody;
                             selector->drop();
@@ -204,9 +203,12 @@ namespace smoothly{
             short getTemperatureLevel(float x,float y);
             
             void terrainLoop();
+            void terrainParseOne();
             void updateTerrainThread();
             
-            std::queue<chunk*> sendTChunkQ,recvTChunkQ;
+            enum tuMethod {TU_CREATE,TU_DELETE};
+            
+            std::queue<std::pair<chunk*,tuMethod> > sendTChunkQ,recvTChunkQ;
             std::mutex sendTChunkQL,recvTChunkQL;
             std::mutex sqmtx;
             std::condition_variable sqcv;

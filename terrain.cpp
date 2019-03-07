@@ -20,7 +20,6 @@ terrain::terrain(){
     hillArg=500;
     temperatureArg=2000;
     humidityArg=2000;
-    dynamicsWorld=NULL;
     scene =NULL;
 }
 
@@ -52,10 +51,8 @@ terrain::chunk * terrain::createChunk(){
     auto ptr=((chunkpool*)this->cpool)->get();
     ptr->scene=this->scene;
     ptr->device=this->device;
-    ptr->T=new float*[pointNum];
-    for(int i=0;i<pointNum;i++){
-        ptr->T[i]=new float[pointNum];
-    }
+    ptr->mesh=NULL;
+    ptr->node=NULL;
     ptr->parent=this;
     ptr->generator=&(this->generator);
     ptr->items.clear();
@@ -64,10 +61,6 @@ terrain::chunk * terrain::createChunk(){
 }
 
 void terrain::removeChunk(terrain::chunk * ptr){
-    for(int i=0;i<pointNum;i++){
-        delete [] ptr->T[i];
-    }
-    delete [] ptr->T;
     //for(auto it:ptr->items){
     //    if(it)
     //        remove(it);
@@ -89,11 +82,11 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         rm[it.first]=it.second;
     }
     
-    for(i=0;i<15;i++){
-        for(j=0;j<15;j++){
+    for(i=0;i<33;i++){
+        for(j=0;j<33;j++){
         
-            int ix=x+i-7;
-            int iy=y+j-7;
+            int ix=x+i-16;
+            int iy=y+j-16;
             ipair posi(ix , iy);
             auto it2=chunks.find(posi);
             if(it2!=chunks.end()){
@@ -102,12 +95,11 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
                 auto ptr=createChunk();
                 ptr->x=ix;
                 ptr->y=iy;
-                ptr->requestRemove=false;
                 //updateChunk(ptr , ix , iy);
                 ptr->nodeInited=false;
                 ptr->mesh=NULL;
                 sendTChunkQL.lock();
-                sendTChunkQ.push(ptr);
+                sendTChunkQ.push(std::pair<chunk*,tuMethod>(ptr,TU_CREATE));
                 sendTChunkQL.unlock();
                 chunks[posi]=ptr;
                 terrainWake();
@@ -121,9 +113,8 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         //this->onFreeChunk(it3.second);
         //it3.second->remove();
         //removeChunk(it3.second);
-        it3.second->requestRemove=true;
         sendTChunkQL.lock();
-        sendTChunkQ.push(it3.second);
+        sendTChunkQ.push(std::pair<chunk*,tuMethod>(it3.second,TU_DELETE));
         sendTChunkQL.unlock();
         chunks.erase(it3.first);
     }
@@ -278,18 +269,34 @@ void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
 }
+void terrain::terrainParseOne(){
+    recvTChunkQL.lock();
+    if(recvTChunkQ.empty()){
+        recvTChunkQL.unlock();
+        return;
+    }
+    auto p=recvTChunkQ.front();
+    recvTChunkQ.pop();
+    recvTChunkQL.unlock();
+    if(p.second==TU_DELETE){
+        this->onFreeChunk(p.first);
+        p.first->remove();
+        removeChunk(p.first);
+    }else
+        updateChunk(p.first);
+}
 void terrain::terrainLoop(){
     recvTChunkQL.lock();
     while(!recvTChunkQ.empty()){
-        auto ptr=recvTChunkQ.front();
+        auto p=recvTChunkQ.front();
         recvTChunkQ.pop();
         recvTChunkQL.unlock();
-        if(ptr->requestRemove){
-            this->onFreeChunk(ptr);
-            ptr->remove();
-            removeChunk(ptr);
+        if(p.second==TU_DELETE){
+            this->onFreeChunk(p.first);
+            p.first->remove();
+            removeChunk(p.first);
         }else
-            updateChunk(ptr);
+            updateChunk(p.first);
         recvTChunkQL.lock();
     }
     recvTChunkQL.unlock();
@@ -297,16 +304,15 @@ void terrain::terrainLoop(){
 void terrain::updateTerrainThread(){
     sendTChunkQL.lock();
     while(!sendTChunkQ.empty()){
-        auto ptr=sendTChunkQ.front();
+        auto p=sendTChunkQ.front();
         sendTChunkQ.pop();
         sendTChunkQL.unlock();
-        if(ptr->requestRemove){
-            ptr->requestRemove=true;
+        if(p.second==TU_DELETE){
             recvTChunkQL.lock();
-            recvTChunkQ.push(ptr);
+            recvTChunkQ.push(std::pair<chunk*,tuMethod>(p.first,TU_DELETE));
             recvTChunkQL.unlock();
         }else
-            updateChunkThread(ptr);
+            updateChunkThread(p.first);
         sendTChunkQL.lock();
     }
     sendTChunkQL.unlock();
@@ -314,17 +320,24 @@ void terrain::updateTerrainThread(){
     sqcv.wait(lck);
 }
 void terrain::updateChunkThread(terrain::chunk * ch){
-    genTerrain(ch->T , ch->x ,ch->y);
+    float ** T=new float*[pointNum];
+    for(auto i=0;i<pointNum;i++)
+        T[i]=new float[pointNum];
+    
+    genTerrain(T , ch->x ,ch->y);
     float len=33.0f/(float)pointNum;
     ch->mesh=this->createTerrainMesh(
         this->texture ,
-        ch->T , pointNum , pointNum ,
+        T , pointNum , pointNum ,
         irr::core::dimension2d<irr::f32>(len , len),
         irr::core::dimension2d<irr::u32>(pointNum , pointNum),
         true
     );
+    for(auto i=0;i<pointNum;i++)
+        delete [] T[i];
+    delete [] T;
     recvTChunkQL.lock();
-    recvTChunkQ.push(ch);
+    recvTChunkQ.push(std::pair<chunk*,tuMethod>(ch,TU_CREATE));
     recvTChunkQL.unlock();
 }
 void terrain::updateChunk(terrain::chunk * ch){
@@ -346,7 +359,7 @@ void terrain::updateChunk(terrain::chunk * ch){
     
     ch->rigidBody=makeBulletMeshFromIrrlichtNode(ch->node);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    //this->dynamicsWorld->addRigidBody(ch->rigidBody);
+    this->dynamicsWorld->addRigidBody(ch->rigidBody);
     
     ch->itemNum.clear();
     //getItems(x,y,ch);
