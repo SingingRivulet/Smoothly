@@ -53,6 +53,7 @@ namespace smoothly{
             void setUserPosition(const irr::core::vector3df & p);
             void setUserRotation(const irr::core::vector3df & r);
             void move(const irr::core::vector3df & delta);
+            bool canConnect;
         private:
             RakNet::RakPeerInterface * connection;
             std::string addr;

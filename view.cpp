@@ -15,7 +15,7 @@ static void addSkyBox(irr::scene::ISceneManager * scene,irr::video::IVideoDriver
 void view::loadScene(){
     device = irr::createDevice(
         irr::video::EDT_OPENGL,
-        irr::core::dimension2d<irr::u32>(800,600)
+        irr::core::dimension2d<irr::u32>(1024,768)
     );
     driver = device->getVideoDriver();
     scene = device->getSceneManager();

@@ -8,6 +8,7 @@ void clientNetwork::init(const char * addr,short port){
     this->addr=addr;
     this->port=port;
     connect();
+    canConnect=true;
 }
 void clientNetwork::connect(){
     connection->Connect(addr.c_str(),port,0,0);
@@ -305,6 +306,8 @@ void clientNetwork::requestRemoveItem(const mapid & mid){
     sendMessageU(&bs);
 }
 void clientNetwork::requestUpdateTerrain(int x,int y){
+    if(!canConnect)
+        return;
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_TERRAIN);

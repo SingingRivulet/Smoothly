@@ -11,6 +11,7 @@ void clientNetwork::move(const irr::core::vector3df & mto){
 }
 control::control(){
     walkSpeed=0.01;
+    flyDir=true;
 }
 control::~control(){
     
@@ -79,6 +80,7 @@ void control::moveDown(){
 }
 void control::setCameraDirect(const irr::core::vector3df & delta){
     moveTo.set(delta.X,delta.Z);
+    moveTo.normalize();
 }
 void control::addCamera(){
     camera=scene->addCameraSceneNodeFPS();
@@ -184,14 +186,20 @@ void control::loop(){
     line.end                 = line.start+dir.normalize()*32.0f;
     setCameraDirect(dir);
     doBuildUpdate(line);
-    
+    dir.normalize();
     relativePosition.set(0,0,0);
     
     if(status.moveFront && !status.moveBack){
-        moveFront();
+        if(flyDir){
+            setRelativePosition(dir);
+        }else
+            moveFront();
     }else
     if(!status.moveFront && status.moveBack){
-        moveBack();
+        if(flyDir){
+            setRelativePosition(-dir);
+        }else
+            moveBack();
     }
     
     if(status.moveLeft && !status.moveRight){
@@ -229,6 +237,7 @@ void control::loop(){
     
     worldLoop();
     sceneLoop();
+    terrainLoop();
 }
 
 }

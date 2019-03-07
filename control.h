@@ -21,6 +21,7 @@ namespace smoothly{
             typedef std::pair<gameEvent,long> gemeEPair;
             std::queue<gemeEPair> eventQueue;
             float walkSpeed;
+            bool flyDir;
             
             control();
             ~control();

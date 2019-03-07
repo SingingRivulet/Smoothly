@@ -4,6 +4,9 @@
 #include "mods.h"
 #include <map>
 #include <set>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 namespace smoothly{
     btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * node );
     class terrain{
@@ -55,6 +58,8 @@ namespace smoothly{
                     std::map<long,int> itemNum;
                     irr::scene::ITriangleSelector * selector;
                     std::map<long,std::set<int> > removeTable;
+                    bool requestRemove;
+                    bool nodeInited;
                     inline void remove(){
                         for(auto it:items){
                             parent->onFreeTerrainItem(it);
@@ -63,10 +68,13 @@ namespace smoothly{
                             parent->destroyItem(it);
                         }
                         //parent->dynamicsWorld->removeRigidBody(this->rigidBody);
-                        delete rigidBody;
-                        selector->drop();
-                        node->remove();
-                        mesh->drop();
+                        if(nodeInited){
+                            delete rigidBody;
+                            selector->drop();
+                            node->remove();
+                        }
+                        if(mesh)
+                            mesh->drop();
                         items.clear();
                         itemNum.clear();
                         removeTable.clear();
@@ -117,23 +125,47 @@ namespace smoothly{
             float hillArg;
             float temperatureArg;
             float humidityArg;
-            irr::video::IImage* texture;
+            irr::video::ITexture* texture;
             
             void genTexture();
             void destroyTexture();
         public:
         
             irr::scene::IMesh * createTerrainMesh(
-                irr::video::IImage* texture,
+                irr::video::ITexture* texture,
                 float ** heightmap, 
                 irr::u32 hx,irr::u32 hy,
                 const irr::core::dimension2d<irr::f32>& stretchSize,
-                irr::video::IVideoDriver* driver,
                 const irr::core::dimension2d<irr::u32>& maxVtxBlockSize, //网眼大小。官方文档没写
                 bool debugBorders) const;
             //irrlicht自带的太差，所以自己实现一个
             
         public:
+            /*
+             * 
+             * 0-------------------------------------->湿度
+             * |戈壁                              雪地
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |                泥地
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |
+             * |沙漠                              沼泽
+             * V
+             * 温度
+             * 
+             */
             //地形生成器
             inline float getHightf(float x , float y){
                 return generator.get(x/altitudeArg , y/altitudeArg , 1024)*altitudeK;
@@ -168,6 +200,20 @@ namespace smoothly{
                 irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
             );//返回最大值
             
+            short getHumidityLevel(float x,float y);
+            short getTemperatureLevel(float x,float y);
+            
+            void terrainLoop();
+            void updateTerrainThread();
+            
+            std::queue<chunk*> sendTChunkQ,recvTChunkQ;
+            std::mutex sendTChunkQL,recvTChunkQL;
+            std::mutex sqmtx;
+            std::condition_variable sqcv;
+            inline void terrainWake(){
+                std::unique_lock <std::mutex> lck(sqmtx);
+                sqcv.notify_all();
+            }
         public:
             
             inline float getHight(irr::s32 x , irr::s32 y){//chunk高度(近似海拔)
@@ -199,7 +245,8 @@ namespace smoothly{
             void * cpool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
             void removeChunk(chunk *);//回收chunk
-            void updateChunk(chunk * , irr::s32 x , irr::s32 y);
+            void updateChunk(chunk *);
+            void updateChunkThread(chunk *);
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             
             bool selectPointM(//准心拾取(查询周围4格)

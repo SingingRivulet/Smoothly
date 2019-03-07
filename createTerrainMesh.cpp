@@ -4,11 +4,10 @@ namespace smoothly{
 using namespace irr;
 using namespace irr::scene;
 scene::IMesh * terrain::createTerrainMesh(
-    video::IImage* texture,
+    video::ITexture* texture,
     float ** heightmap, 
     u32 hx,u32 hy,
     const core::dimension2d<f32>& stretchSize,
-    video::IVideoDriver* driver,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
     bool debugBorders
 )const{
@@ -23,8 +22,6 @@ scene::IMesh * terrain::createTerrainMesh(
 
 	SMesh* mesh = new SMesh();
 
-	const core::dimension2d<u32> tMapSize= texture->getDimension();
-	const core::position2d<f32> thRel(static_cast<f32>(tMapSize.Width) / hx, static_cast<f32>(tMapSize.Height) / hy);
 	
 	core::position2d<u32> processed(0,0);
 	while (processed.Y<hy)
@@ -98,22 +95,9 @@ scene::IMesh * terrain::createTerrainMesh(
 
 			if (buffer->Vertices.size())
 			{
-				c8 textureName[64];
-				// create texture for this block
-				video::IImage* img = driver->createImage(texture->getColorFormat(), core::dimension2d<u32>(core::floor32(blockSize.Width*thRel.X), core::floor32(blockSize.Height*thRel.Y)));
-				texture->copyTo(img, core::position2di(0,0), core::recti(
-					core::position2d<s32>(core::floor32(processed.X*thRel.X), core::floor32(processed.Y*thRel.Y)),
-					core::dimension2d<u32>(core::floor32(blockSize.Width*thRel.X), core::floor32(blockSize.Height*thRel.Y))), 0);
+				
+				buffer->Material.setTexture(0, texture);
 
-
-				buffer->Material.setTexture(0, driver->addTexture(textureName, img));
-
-				if (buffer->Material.getTexture(0))
-				{
-					
-				}
-
-				img->drop();
 			}
 
 			buffer->recalculateBoundingBox();

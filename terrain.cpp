@@ -2,6 +2,7 @@
 #include "mempool.h"
 #include <stdio.h>
 #include <set>
+#include <mutex>
 namespace smoothly{
 
 typedef mempool<terrain::chunk> chunkpool;
@@ -99,9 +100,17 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
                 rm.erase(posi);
             }else{
                 auto ptr=createChunk();
-                this->onGenChunk(ptr);
-                updateChunk(ptr , ix , iy);
+                ptr->x=ix;
+                ptr->y=iy;
+                ptr->requestRemove=false;
+                //updateChunk(ptr , ix , iy);
+                ptr->nodeInited=false;
+                ptr->mesh=NULL;
+                sendTChunkQL.lock();
+                sendTChunkQ.push(ptr);
+                sendTChunkQL.unlock();
                 chunks[posi]=ptr;
+                terrainWake();
                 //chunks[posi]=NULL;
                 //requestUpdateChunk(ix,iy);
             }
@@ -109,9 +118,13 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     }
     
     for(auto it3:rm){
-        this->onFreeChunk(it3.second);
-        it3.second->remove();
-        removeChunk(it3.second);
+        //this->onFreeChunk(it3.second);
+        //it3.second->remove();
+        //removeChunk(it3.second);
+        it3.second->requestRemove=true;
+        sendTChunkQL.lock();
+        sendTChunkQ.push(it3.second);
+        sendTChunkQL.unlock();
         chunks.erase(it3.first);
     }
 }
@@ -225,7 +238,6 @@ int terrain::chunk::add(
     ptr->rigidBody=makeBulletMeshFromIrrlichtNode(ptr->node);
     ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     parent->dynamicsWorld->addRigidBody(ptr->rigidBody);
-    
     //set index
     this->items.insert(ptr);
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
@@ -266,32 +278,69 @@ void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
 }
-
-void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
-    char buf[128];
-    auto driver=this->scene->getVideoDriver();
-    auto max=genTerrain(ch->T , x ,y);
-    //printf("update chunk \tx=%d \t y=%d \t max=%f\n",x,y,max);
-    
+void terrain::terrainLoop(){
+    recvTChunkQL.lock();
+    while(!recvTChunkQ.empty()){
+        auto ptr=recvTChunkQ.front();
+        recvTChunkQ.pop();
+        recvTChunkQL.unlock();
+        if(ptr->requestRemove){
+            this->onFreeChunk(ptr);
+            ptr->remove();
+            removeChunk(ptr);
+        }else
+            updateChunk(ptr);
+        recvTChunkQL.lock();
+    }
+    recvTChunkQL.unlock();
+}
+void terrain::updateTerrainThread(){
+    sendTChunkQL.lock();
+    while(!sendTChunkQ.empty()){
+        auto ptr=sendTChunkQ.front();
+        sendTChunkQ.pop();
+        sendTChunkQL.unlock();
+        if(ptr->requestRemove){
+            ptr->requestRemove=true;
+            recvTChunkQL.lock();
+            recvTChunkQ.push(ptr);
+            recvTChunkQL.unlock();
+        }else
+            updateChunkThread(ptr);
+        sendTChunkQL.lock();
+    }
+    sendTChunkQL.unlock();
+    std::unique_lock <std::mutex> lck(sqmtx);
+    sqcv.wait(lck);
+}
+void terrain::updateChunkThread(terrain::chunk * ch){
+    genTerrain(ch->T , ch->x ,ch->y);
     float len=33.0f/(float)pointNum;
     ch->mesh=this->createTerrainMesh(
         this->texture ,
         ch->T , pointNum , pointNum ,
         irr::core::dimension2d<irr::f32>(len , len),
-        driver,
         irr::core::dimension2d<irr::u32>(pointNum , pointNum),
         true
     );
+    recvTChunkQL.lock();
+    recvTChunkQ.push(ch);
+    recvTChunkQL.unlock();
+}
+void terrain::updateChunk(terrain::chunk * ch){
+    char buf[128];
+    auto driver=this->scene->getVideoDriver();
+    
     ch->node=scene->addMeshSceneNode(
         ch->mesh,
         0,-1
     );
-    getChunkName(buf,sizeof(buf),x,y);
+    getChunkName(buf,sizeof(buf),ch->x,ch->y);
     ch->node->setName(buf);
     
     ch->selector=scene->createOctreeTriangleSelector(ch->mesh,ch->node);
     ch->node->setTriangleSelector(ch->selector);
-    ch->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
+    ch->node->setPosition(irr::core::vector3df(ch->x*32.0f , 0 , ch->y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     
@@ -299,33 +348,22 @@ void terrain::updateChunk(terrain::chunk * ch, irr::s32 x , irr::s32 y){
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     //this->dynamicsWorld->addRigidBody(ch->rigidBody);
     
-    ch->x=x;
-    ch->y=y;
     ch->itemNum.clear();
     //getItems(x,y,ch);
-    requestUpdateTerrain(x,y);
+    requestUpdateTerrain(ch->x,ch->y);
+    this->onGenChunk(ch);
+    ch->nodeInited=true;
+    
 }
 
 void terrain::genTexture(){
     if(this->texture)
         return;
     printf("generate texture\n");
-    auto img=this->scene->getVideoDriver()->createImage(irr::video::ECF_R8G8B8 , irr::core::dimension2d<irr::u32>(64,64));
-    
-    auto pitch=img->getPitch();
-    auto data=(irr::u8*)(img->lock());
-    
-    for(int i=0;i<64;i++){
-        for(int j=0;j<64;j++){
-            irr::u8* dest = data + ( j * pitch ) + ( i * 3 );
-            int v=rand()%128+128;
-            dest[0]=v;
-            dest[1]=v;
-            dest[2]=v;
-        }
-    }
-    img->unlock();
-    this->texture=img;
+    auto driver=this->scene->getVideoDriver();
+    this->texture=driver->getTexture("./res/terrain/grass.jpg");
+    //this->texture=driver->addTexture("terrain-grass", img);
+    //img->drop();
 }
 
 void terrain::destroyTexture(){
