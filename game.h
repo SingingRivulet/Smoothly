@@ -9,6 +9,7 @@ namespace smoothly{
                 clientNetwork::init(addr,port);
                 m=new mods;
                 m->init(modpath);
+                m->scriptInit("./script/smoothly.lua");
                 
                 loadScene();
                 
@@ -21,7 +22,7 @@ namespace smoothly{
                 //addEventRecv();
             }
             void gameDestroy(){
-                
+                m->scriptDestroy();
                 m->destroy();
                 delete m;
                 

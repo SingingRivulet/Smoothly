@@ -67,6 +67,13 @@ terrain::terrain(){
     hillArg=500;
     temperatureArg=2000;
     humidityArg=2000;
+    
+    temperatureMax=2000;
+    humidityMax=2000;
+    
+    temperatureMin=0;
+    humidityMin=0;
+    
     scene =NULL;
     createUpdatePath(16);
 }
@@ -306,6 +313,7 @@ void terrain::removeTableApplay(int x,int y){
         return;
     auto ch=it->second;
     ch->itemNum.clear();
+    ch->autoGen(x,y,getTemperatureLevel(x,y),getHumidityLevel(x,y),getHight(x,y),m);
     for(auto it:m->mapGenFuncs){
         if(it)
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);

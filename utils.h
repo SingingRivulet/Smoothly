@@ -150,5 +150,20 @@ namespace smoothly{
                 return *this;
         }
     };
+    class predictableRand{
+        public:
+            inline int rand(){
+                next = next * 1103515245 + 12345;
+                return((unsigned)((next/65536)&0x7fffffff) % 32768);
+            }
+            inline float frand(){
+                return ((float)rand())/32768.0f;
+            }
+            inline void setSeed(unsigned long seed){
+                next=seed;
+            }
+        private:
+            unsigned long next=1;
+    };
 }
 #endif

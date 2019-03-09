@@ -8,6 +8,10 @@
 namespace smoothly{
     class mods:public physical{
         public:
+            lua_State * L;
+            void scriptInit(const char * path);
+            void scriptDestroy();
+            /////////////////////////////////////////////////////////////////////////////
             class mapGenerator;
             struct itemBase;
             //预先声明，防止报错
@@ -42,8 +46,18 @@ namespace smoothly{
                         const irr::core::vector3df & s
                     )=0;
                     virtual float getRealHight(float x,float y)=0;
+                    void autoGen(int x,int y,int tem,int hu,float h,mods * mod);
             };
             std::list<mapGeneratorFunc> mapGenFuncs;
+            
+            std::map<long,int> terrainItemNum;
+            
+            void getGenList(int x,int y,int tem,int hu,float h,std::map<long,float> & pl);
+            struct autoMapGen{
+                int luaFunc;
+                void getGenList(lua_State * L,int x,int y,int tem,int hu,float h,std::map<long,float> & pl);
+            };
+            std::list<autoMapGen> autoMapGenList;
             /////////////////////////////////////////////////////////////////////////////
             class buildingBase{
                 public:

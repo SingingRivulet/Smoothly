@@ -144,6 +144,13 @@ namespace smoothly{
             float hillArg;
             float temperatureArg;
             float humidityArg;
+            
+            float temperatureMax;
+            float humidityMax;
+            
+            float temperatureMin;
+            float humidityMin;
+            
             irr::video::ITexture* texture;
             
             void genTexture();
@@ -219,23 +226,39 @@ namespace smoothly{
                 irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
             );//返回最大值
             
-            short getHumidityLevel(float x,float y);
-            short getTemperatureLevel(float x,float y);
+            inline static short getLevel(float min,float max,float v){
+                if(v<=min)
+                    return 0;
+                if(v>=max)
+                    return 16;
+                float l=max-min;
+                float r=v-min;
+                return (r/l)*16;
+            }
+            inline short getHumidityLevel(float x,float y){
+                return getLevel(humidityMin,humidityMax,getHumidityF(x,y));
+            }
+            inline short getTemperatureLevel(float x,float y){
+                return getLevel(temperatureMin,temperatureMax,getTemperatureF(x,y));
+            }
             
             void terrainLoop();
             void terrainParseOne();
             void updateTerrainThread();
             
+        private:
             enum tuMethod {TU_CREATE,TU_DELETE};
-            
             std::queue<std::pair<chunk*,tuMethod> > sendTChunkQ,recvTChunkQ;
             std::mutex sendTChunkQL,recvTChunkQL;
             std::mutex sqmtx;
             std::condition_variable sqcv;
+            
+        public:
             inline void terrainWake(){
                 std::unique_lock <std::mutex> lck(sqmtx);
                 sqcv.notify_all();
             }
+            
         public:
             
             inline float getHight(irr::s32 x , irr::s32 y){//chunk高度(近似海拔)
