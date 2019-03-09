@@ -4,13 +4,18 @@
 #include <map>
 #include "utils.h"
 #include "perlin.h"
+#include "physical.h"
 namespace smoothly{
-    class mods{
+    class mods:public physical{
         public:
             class mapGenerator;
             struct itemBase;
             //预先声明，防止报错
-            
+            enum phyObjMethod{
+                USE_IRRMOD,
+                USE_BULLET,
+                NONE
+            };
             typedef void(*mapGeneratorFunc)(int x,int y,float temp,float humi,float alti,mapGenerator * gen);
             /////////////////////////////////////////////////////////////////////////////
             struct itemBase{
@@ -20,6 +25,7 @@ namespace smoothly{
             struct itemConfig:itemBase{
                 bool haveBB;
                 irr::core::aabbox3d<float> BB;
+                btCollisionShape * bodyShape;
             };
             std::map<long,itemConfig*> items;
             /////////////////////////////////////////////////////////////////////////////
@@ -47,6 +53,8 @@ namespace smoothly{
             class building:public buildingBase{
                 public:
                     irr::scene::IMesh * mesh;
+                    btCollisionShape  * bodyShape;
+                    btTriangleMesh    * bodyMesh;
                     irr::core::aabbox3d<float> BB;
             };
             std::map<long,building*> buildings;

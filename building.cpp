@@ -165,9 +165,13 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->node->updateAbsolutePosition();
     i->node->getAbsoluteTransformation().transformBoxEx(box);
     
-    i->rigidBody=makeBulletMeshFromIrrlichtNode(i->node);
-    i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    dynamicsWorld->addRigidBody(i->rigidBody);
+    if(it->second->bodyShape){
+        i->bodyState=setMotionState(i->node->getAbsoluteTransformation().pointer());
+        i->rigidBody=createBody(it->second->bodyShape,i->bodyState);
+        i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+        dynamicsWorld->addRigidBody(i->rigidBody);
+    }else
+        i->rigidBody=NULL;
     
     auto sel=scene->createOctreeTriangleSelector(it->second->mesh,i->node);
     i->node->setTriangleSelector(sel);
@@ -190,6 +194,7 @@ void buildings::onFreeBuilding(remoteGraph::item * i){
     if(i->rigidBody){
         dynamicsWorld->removeRigidBody(i->rigidBody);
         delete i->rigidBody;
+        delete i->bodyState;
     }
     auto it=allBuildings.find(i);
     if(it==allBuildings.end())

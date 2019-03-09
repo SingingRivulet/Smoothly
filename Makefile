@@ -21,10 +21,14 @@ client:client.cpp game.o
 	view.o \
 	control.o \
 	mods.o \
+	physical.o \
 	-o client \
 	$(LIBS)
 
-mods.o:mods.h mods.cpp utils.h
+physical.o:physical.h physical.cpp utils.h
+	$(CC) -c physical.cpp
+
+mods.o:mods.h mods.cpp utils.h physical.o
 	$(CC) -c mods.cpp
 
 SimplexNoise.o:SimplexNoise.cpp SimplexNoise.h

@@ -7,6 +7,53 @@ namespace smoothly{
 
 typedef mempool<terrain::chunk> chunkpool;
 typedef mempool<terrain::item> itempool;
+void terrain::createUpdatePath(int range){
+    updatePath.clear();
+    updatePath.push_back(ipair(0,0));
+    /*
+     * Ab------------------B
+     * |                   c
+     * |                   |
+     * |                   |
+     * |                   |
+     * |         0         |
+     * |                   |
+     * |                   |
+     * |                   |
+     * a                   |
+     * D------------------dC
+    */ 
+    for(int i=1;i<range;++i){
+        {//a
+            int a=-i+1;
+            int A=i;
+            int ax=-i;
+            for(int j=a;j<=A;j++)
+                updatePath.push_back(ipair(ax,j));
+        }
+        {//b
+            int b=-i+1;
+            int B=i;
+            int by=i;
+            for(int j=b;j<=B;j++)
+                updatePath.push_back(ipair(j,by));
+        }
+        {//c
+            int c=i-1;
+            int C=-i;
+            int cx=i;
+            for(int j=c;j>=C;j--)
+                updatePath.push_back(ipair(cx,j));
+        }
+        {//d
+            int d=i-1;
+            int D=-i;
+            int dy=-i;
+            for(int j=d;j>=D;j--)
+                updatePath.push_back(ipair(j,dy));
+        }
+    }
+}
 terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
@@ -21,6 +68,7 @@ terrain::terrain(){
     temperatureArg=2000;
     humidityArg=2000;
     scene =NULL;
+    createUpdatePath(16);
 }
 
 terrain::~terrain(){
@@ -82,30 +130,27 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         rm[it.first]=it.second;
     }
     
-    for(i=0;i<33;i++){
-        for(j=0;j<33;j++){
-        
-            int ix=x+i-16;
-            int iy=y+j-16;
-            ipair posi(ix , iy);
-            auto it2=chunks.find(posi);
-            if(it2!=chunks.end()){
-                rm.erase(posi);
-            }else{
-                auto ptr=createChunk();
-                ptr->x=ix;
-                ptr->y=iy;
-                //updateChunk(ptr , ix , iy);
-                ptr->nodeInited=false;
-                ptr->mesh=NULL;
-                sendTChunkQL.lock();
-                sendTChunkQ.push(std::pair<chunk*,tuMethod>(ptr,TU_CREATE));
-                sendTChunkQL.unlock();
-                chunks[posi]=ptr;
-                terrainWake();
-                //chunks[posi]=NULL;
-                //requestUpdateChunk(ix,iy);
-            }
+    for(auto it:updatePath){
+        int ix=x+it.x;
+        int iy=y+it.y;
+        ipair posi(ix , iy);
+        auto it2=chunks.find(posi);
+        if(it2!=chunks.end()){
+            rm.erase(posi);
+        }else{
+            auto ptr=createChunk();
+            ptr->x=ix;
+            ptr->y=iy;
+            //updateChunk(ptr , ix , iy);
+            ptr->nodeInited=false;
+            ptr->mesh=NULL;
+            sendTChunkQL.lock();
+            sendTChunkQ.push(std::pair<chunk*,tuMethod>(ptr,TU_CREATE));
+            sendTChunkQL.unlock();
+            chunks[posi]=ptr;
+            terrainWake();
+            //chunks[posi]=NULL;
+            //requestUpdateChunk(ix,iy);
         }
     }
     
@@ -226,9 +271,13 @@ int terrain::chunk::add(
     parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
     ptr->node->setName(buf);
     
-    ptr->rigidBody=makeBulletMeshFromIrrlichtNode(ptr->node);
-    ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-    parent->dynamicsWorld->addRigidBody(ptr->rigidBody);
+    if(mit->second->bodyShape){
+        ptr->bodyState=setMotionState(ptr->node->getAbsoluteTransformation().pointer());
+        ptr->rigidBody=createBody(mit->second->bodyShape,ptr->bodyState);
+        ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+        parent->dynamicsWorld->addRigidBody(ptr->rigidBody);
+    }else
+        ptr->rigidBody=NULL;
     //set index
     this->items.insert(ptr);
     parent->allItems[mapid(x,y,id,mapId)]=ptr;
@@ -357,7 +406,10 @@ void terrain::updateChunk(terrain::chunk * ch){
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     
-    ch->rigidBody=makeBulletMeshFromIrrlichtNode(ch->node);
+    ch->bodyMesh  =createBtMesh(ch->mesh);
+    ch->bodyShape =createShape(ch->bodyMesh);
+    ch->bodyState =setMotionState(ch->node->getAbsoluteTransformation().pointer());
+    ch->rigidBody =createBody(ch->bodyShape,ch->bodyState);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     this->dynamicsWorld->addRigidBody(ch->rigidBody);
     

@@ -25,6 +25,11 @@ namespace smoothly{
             std::unordered_map<std::string,item*> items;
             std::map<ipair,chunk*> chunks;
             
+        private:
+            std::list<ipair> updatePath;
+            void createUpdatePath(int range);
+            
+        public:
             static inline void getChunkPosition(double ix,double iy,int & ox,int & oy){
                 ox=ix/32;
                 oy=iy/32;
@@ -40,6 +45,7 @@ namespace smoothly{
                     std::set<std::string> link,linkTo;
                     irr::scene::IMeshSceneNode * node;
                     btRigidBody * rigidBody;
+                    btMotionState * bodyState;
                     bool isRoot;
                     
                     int hp;

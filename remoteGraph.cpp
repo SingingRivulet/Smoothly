@@ -5,6 +5,54 @@ namespace smoothly{
 typedef mempool<remoteGraph::item> bpool;
 typedef mempool<remoteGraph::chunk> chpool;
 
+void remoteGraph::createUpdatePath(int range){
+    updatePath.clear();
+    updatePath.push_back(ipair(0,0));
+    /*
+     * Ab------------------B
+     * |                   c
+     * |                   |
+     * |                   |
+     * |                   |
+     * |         0         |
+     * |                   |
+     * |                   |
+     * |                   |
+     * a                   |
+     * D------------------dC
+    */ 
+    for(int i=1;i<range;++i){
+        {//a
+            int a=-i+1;
+            int A=i;
+            int ax=-i;
+            for(int j=a;j<=A;j++)
+                updatePath.push_back(ipair(ax,j));
+        }
+        {//b
+            int b=-i+1;
+            int B=i;
+            int by=i;
+            for(int j=b;j<=B;j++)
+                updatePath.push_back(ipair(j,by));
+        }
+        {//c
+            int c=i-1;
+            int C=-i;
+            int cx=i;
+            for(int j=c;j>=C;j--)
+                updatePath.push_back(ipair(cx,j));
+        }
+        {//d
+            int d=i-1;
+            int D=-i;
+            int dy=-i;
+            for(int j=d;j>=D;j--)
+                updatePath.push_back(ipair(j,dy));
+        }
+    }
+}
+
 void remoteGraph::item::destroy(){
     destroy(parent->maxdeep);
 }
@@ -251,20 +299,24 @@ void remoteGraph::clearNodes(){
 }
 
 void remoteGraph::updateBuildingChunks(int x,int y,int range){
-    int fx=x-range;
-    int tx=x+range;
-    int fy=y-range;
-    int ty=y+range;
+    //int fx=x-range;
+    //int tx=x+range;
+    //int fy=y-range;
+    //int ty=y+range;
     std::map<ipair,chunk*> rm=chunks;
-    for(int i=fx;i<=tx;i++){
-        for(int j=fy;j<=ty;j++){
+    //for(int i=fx;i<=tx;i++){
+    //    for(int j=fy;j<=ty;j++){
+    for(auto it:updatePath){
+            int i=x+it.x;
+            int j=y+it.y;
             if(chunks.find(ipair(i,j))==chunks.end()){
                 createChunk(i,j);
                 downloadBuilding(i,j);
             }
             rm.erase(ipair(i,j));
-        }
     }
+    //    }
+    //}
     for(auto it:rm){
         delChunk(it.second);
         chunks.erase(it.first);
@@ -337,6 +389,7 @@ remoteGraph::remoteGraph(){
     items.clear();
     chunks.clear();
     poolInit();
+    createUpdatePath(13);
 }
 
 void remoteGraph::destroy(){

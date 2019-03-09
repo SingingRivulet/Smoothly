@@ -2,14 +2,15 @@
 #define SMOOTHLY_TERRAIN
 #include "utils.h"
 #include "mods.h"
+#include "physical.h"
 #include <map>
 #include <set>
+#include <list>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 namespace smoothly{
-    btRigidBody * makeBulletMeshFromIrrlichtNode( const irr::scene::ISceneNode * node );
-    class terrain{
+    class terrain:public physical{
         public:
             irr::IrrlichtDevice * device;
             irr::scene::ISceneManager * scene;//场景
@@ -26,13 +27,19 @@ namespace smoothly{
                     mods::itemBase * parent;
                     chunk * inChunk;
                     irr::scene::IMeshSceneNode * node;
-                    btRigidBody * rigidBody;
+                    
+                    btRigidBody   * rigidBody;
+                    btMotionState * bodyState;
+                    
                     item * next;
                     int mapId;
                     inline void remove(){
                         node->remove();
                         inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
-                        delete rigidBody;
+                        if(rigidBody){
+                            delete rigidBody;
+                            delete bodyState;
+                        }
                     }
                     inline void setPosition(const irr::core::vector3df & r){
                         node->setPosition(r);
@@ -51,7 +58,13 @@ namespace smoothly{
                     std::set<item*> items;
                     std::set<void*> buildings;//预留给子类
                     irr::scene::IMesh * mesh;
-                    btRigidBody * rigidBody;
+                    
+                    
+                    btRigidBody      * rigidBody;
+                    btMotionState    * bodyState;
+                    btCollisionShape * bodyShape;
+                    btTriangleMesh   * bodyMesh;
+                    
                     terrain * parent;
                     int x,y;
                     std::map<long,int> itemNum;
@@ -69,6 +82,9 @@ namespace smoothly{
                         parent->dynamicsWorld->removeRigidBody(this->rigidBody);
                         if(nodeInited){
                             delete rigidBody;
+                            delete bodyState;
+                            delete bodyShape;
+                            delete bodyMesh;
                             selector->drop();
                             node->remove();
                         }
@@ -114,6 +130,10 @@ namespace smoothly{
             
             std::map<ipair,chunk*> chunks;
             //chunksize:32*32
+        private:
+            std::list<ipair> updatePath;
+            void createUpdatePath(int range);
+        public:
             int pointNum;//每条边顶点数量
             float altitudeK;
             float hillK;
