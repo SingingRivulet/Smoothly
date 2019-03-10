@@ -9,6 +9,150 @@ void mods::init(const char * path){
     defaultBuildingList[5]=-1;
     defaultBuildingList[6]=-1;
 }
+static int mod_addBuildingMesh(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    if(self->scene==NULL){
+        lua_pushstring(L,"Irrlicht scene has not been initializated!");
+        return 1;
+    }
+    
+    int id=luaL_checkinteger(L,2);
+    
+    if(self->buildings.find(id)!=self->buildings.end()){
+        lua_pushstring(L,"ID has been existed!");
+        return 1;
+    }
+    
+    std::string scmpath;
+    bool havebody=false;
+    
+    if(!lua_istable(L,-1)){
+        lua_pushstring(L,"smoothly.addBuildingMesh(handler,itemId,{mesh=path,havebody=havebody})");
+        return 1;
+    }
+    
+    lua_pushstring(L,"mesh");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        scmpath=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Mesh doesn't exist!");
+        return 1;
+    }
+    
+    lua_pushstring(L,"havebody");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        havebody=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    auto mesh=self->scene->getMesh(scmpath.c_str());
+    if(mesh==NULL){
+        lua_pushstring(L,"Load mesh fail!");
+        return 1;
+    }
+    
+    auto b  = new mods::building;
+    b->mesh = mesh;
+    b->BB   = b->mesh->getBoundingBox();
+    b->bodyMesh = physical::createBtMesh(b->mesh);
+    b->bodyShape= physical::createShape(b->bodyMesh);
+    self->buildings[id]=b;
+    
+    lua_pushstring(L,"OK");
+    return 1;
+}
+static int mod_addTerrainMesh(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    if(self->scene==NULL){
+        lua_pushstring(L,"Irrlicht scene has not been initializated!");
+        return 1;
+    }
+    
+    int id=luaL_checkinteger(L,2);
+    
+    if(self->items.find(id)!=self->items.end() || self->terrainItemNum.find(id)!=self->terrainItemNum.end()){
+        lua_pushstring(L,"ID has been existed!");
+        return 1;
+    }
+    
+    std::string scmpath;
+    bool havebody=false;
+    
+    if(!lua_istable(L,-1)){
+        lua_pushstring(L,"smoothly.addTerrainMesh(handler,itemId,{mesh=path,havebody=havebody,maxnum=maxnum})");
+        return 1;
+    }
+    
+    lua_pushstring(L,"mesh");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        scmpath=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Mesh doesn't exist!");
+        return 1;
+    }
+    
+    lua_pushstring(L,"havebody");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        havebody=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    
+    auto mesh=self->scene->getMesh(scmpath.c_str());
+    if(mesh==NULL){
+        lua_pushstring(L,"Load mesh fail!");
+        return 1;
+    }
+    
+    auto b=new mods::itemConfig;
+    b->mesh=mesh;
+    
+    if(havebody){
+        b->bodyMesh=physical::createBtMesh(mesh);
+        if(b->bodyMesh)
+            b->bodyShape=physical::createShape(b->bodyMesh);
+    }else{
+        b->bodyMesh =NULL;
+        b->bodyShape=NULL;
+    }
+    
+    b->BB=mesh->getBoundingBox();
+    
+    int maxnum=5;
+    
+    lua_pushstring(L,"maxnum");
+    lua_gettable(L,-2);
+    if(lua_isinteger(L,-1)){
+        maxnum=lua_tointeger(L,-1);
+    }
+    lua_pop(L,1);
+    
+    self->items[id]=b;
+    self->terrainItemNum[id]=maxnum;
+    
+    lua_pushstring(L,"OK");
+    return 1;
+}
 static int mod_addAutoGen(lua_State * L){
     if(!lua_isfunction(L,-1))
         return 0;
@@ -31,7 +175,9 @@ void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
     struct luaL_Reg funcs[]={
-        {"addAutoGen" ,mod_addAutoGen},
+        {"addAutoGen"           ,mod_addAutoGen},
+        {"addTerrainMesh"       ,mod_addTerrainMesh},
+        {"addBuildingMesh"      ,mod_addBuildingMesh},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);
@@ -104,6 +250,14 @@ void mods::autoMapGen::getGenList(
         }
     }
 }
+void mods::loadConfig(){
+    lua_getglobal(L,"sceneInit");
+    lua_pushlightuserdata(L,this);
+    if(lua_pcall(L, 1, 0, 0) != 0){
+        printf("script error %s\n", lua_tostring(L,-1));
+        return;
+    }
+}
 void mods::loadMesh(){
     building * b;
     auto creator=scene->getGeometryCreator();
@@ -131,7 +285,7 @@ void mods::loadMesh(){
 }
 void mods::destroy(){
     for(auto it:items){
-        it.second->mesh->drop();
+        it.second->destroy();
         delete it.second;
     }
     items.clear();

@@ -11,6 +11,7 @@ namespace smoothly{
             lua_State * L;
             void scriptInit(const char * path);
             void scriptDestroy();
+            void loadConfig();
             /////////////////////////////////////////////////////////////////////////////
             class mapGenerator;
             struct itemBase;
@@ -30,6 +31,12 @@ namespace smoothly{
                 bool haveBB;
                 irr::core::aabbox3d<float> BB;
                 btCollisionShape * bodyShape;
+                btTriangleMesh   * bodyMesh;
+                inline void destroy(){
+                    if(mesh)     mesh->drop();
+                    if(bodyMesh) delete bodyMesh;
+                    if(bodyShape)delete bodyShape;
+                }
             };
             std::map<long,itemConfig*> items;
             /////////////////////////////////////////////////////////////////////////////

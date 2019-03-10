@@ -15,7 +15,7 @@ namespace smoothly{
                 
                 m->scene=scene;
                 m->loadMesh();
-                
+                m->loadConfig();
                 buildingSelectionInit();
                 
                 addCamera();
