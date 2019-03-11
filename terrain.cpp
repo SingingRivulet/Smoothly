@@ -83,13 +83,15 @@ terrain::~terrain(){
     delete (itempool*)this->ipool;
 }
 void terrain::destroy(){
+    chunkmtx.lock();
     for(auto it:chunks){
         if(it.second){
             it.second->remove();
             removeChunk(it.second);
         }
     }
-    chunks.clear();   
+    chunks.clear();
+    chunkmtx.unlock();
 }
 
 terrain::item * terrain::createItem(){
@@ -181,14 +183,17 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
     py=y;
     std::map<ipair,chunk*> rm;
     
+    chunkmtx.lock();
     for(auto it : chunks){
         rm[it.first]=it.second;
     }
+    chunkmtx.unlock();
     
     for(auto it:updatePath){
         int ix=x+it.x;
         int iy=y+it.y;
         ipair posi(ix , iy);
+        chunkmtx.lock();
         auto it2=chunks.find(posi);
         if(it2!=chunks.end()){
             rm.erase(posi);
@@ -198,7 +203,11 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
             ptr->y=iy;
             //updateChunk(ptr , ix , iy);
             ptr->nodeInited=false;
-            ptr->mesh=NULL;
+            ptr->rigidBody  =NULL;
+            ptr->bodyShape  =NULL;
+            ptr->bodyState  =NULL;
+            ptr->bodyMesh   =NULL;
+            ptr->mesh       =NULL;
             sendTChunkQL.lock();
             sendTChunkQ.push(std::pair<chunk*,tuMethod>(ptr,TU_CREATE));
             sendTChunkQL.unlock();
@@ -207,6 +216,7 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
             //chunks[posi]=NULL;
             //requestUpdateChunk(ix,iy);
         }
+        chunkmtx.unlock();
     }
     
     for(auto it3:rm){
@@ -216,7 +226,9 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         sendTChunkQL.lock();
         sendTChunkQ.push(std::pair<chunk*,tuMethod>(it3.second,TU_DELETE));
         sendTChunkQL.unlock();
+        chunkmtx.lock();
         chunks.erase(it3.first);
+        chunkmtx.unlock();
     }
 }
 
@@ -342,23 +354,32 @@ int terrain::chunk::add(
 }
 
 void terrain::setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t){
+    chunkmtx.lock();
     auto it=chunks.find(ipair(x,y));
-    if(it==chunks.end())
+    if(it==chunks.end()){
+        chunkmtx.unlock();
         return;
+    }
     
     auto ch=it->second;
     
-    if(ch==NULL)
+    if(ch==NULL){
+        chunkmtx.unlock();
         return;
+    }
     
     for(auto it:t){
         ch->removeTable[it.first].insert(it.second);
     }
+    chunkmtx.unlock();
 }
 void terrain::removeTableApplay(int x,int y){
+    chunkmtx.lock();
     auto it=chunks.find(ipair(x,y));
-    if(it==chunks.end())
+    if(it==chunks.end()){
+        chunkmtx.unlock();
         return;
+    }
     auto ch=it->second;
     ch->itemNum.clear();
     ch->autoGen(x,y,getTemperatureLevel(x,y),getHumidityLevel(x,y),getHight(x,y),m);
@@ -366,6 +387,7 @@ void terrain::removeTableApplay(int x,int y){
         if(it)
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
+    chunkmtx.unlock();
 }
 
 void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
@@ -375,6 +397,10 @@ void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
     }
 }
 void terrain::terrainParseOne(){
+    long t=timer->getRealTime();
+    begin:
+    if(fabs(timer->getRealTime()-t)>20)
+        return;
     recvTChunkQL.lock();
     if(recvTChunkQ.empty()){
         recvTChunkQL.unlock();
@@ -389,6 +415,7 @@ void terrain::terrainParseOne(){
         removeChunk(p.first);
     }else
         updateChunk(p.first);
+    goto begin;
 }
 void terrain::terrainLoop(){
     recvTChunkQL.lock();
@@ -425,6 +452,8 @@ void terrain::updateTerrainThread(){
     sqcv.wait(lck);
 }
 void terrain::updateChunkThread(terrain::chunk * ch){
+    if(!chunkExist(ch->x ,ch->y))
+        return;
     float ** T=new float*[pointNum];
     for(auto i=0;i<pointNum;i++)
         T[i]=new float[pointNum];
@@ -565,10 +594,13 @@ bool terrain::selectPointM(
 terrain::chunk * terrain::getChunkFromStr(const char * str){
     int x,y;
     if(sscanf(str,"tc %d %d",&x,&y)==2){
+        chunkmtx.lock();
         auto it=chunks.find(ipair(x,y));
         if(it!=chunks.end()){
+            chunkmtx.unlock();
             return it->second;
         }
+        chunkmtx.unlock();
     }
     return NULL;
 }

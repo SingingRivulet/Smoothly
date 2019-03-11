@@ -14,6 +14,7 @@ namespace smoothly{
         public:
             irr::IrrlichtDevice * device;
             irr::scene::ISceneManager * scene;//场景
+            irr::ITimer * timer;
             btDiscreteDynamicsWorld * dynamicsWorld;
             mods * m;
             terrain();
@@ -79,8 +80,8 @@ namespace smoothly{
                             it->remove();
                             parent->destroyItem(it);
                         }
-                        parent->dynamicsWorld->removeRigidBody(this->rigidBody);
                         if(nodeInited){
+                            parent->dynamicsWorld->removeRigidBody(this->rigidBody);
                             delete rigidBody;
                             delete bodyState;
                             delete bodyShape;
@@ -270,6 +271,7 @@ namespace smoothly{
             std::queue<std::pair<chunk*,tuMethod> > sendTChunkQ,recvTChunkQ;
             std::mutex sendTChunkQL,recvTChunkQL;
             std::mutex sqmtx;
+            std::mutex chunkmtx;
             std::condition_variable sqcv;
             
         public:
@@ -322,6 +324,14 @@ namespace smoothly{
                 irr::scene::ISceneNode*& outNode
             );
             
+            inline bool chunkExist(int x,int y){
+                chunkmtx.lock();
+                auto it=chunks.find(ipair(x,y));
+                bool res=(it!=chunks.end());
+                chunkmtx.unlock();
+                return res;
+            }
+            
             inline bool selectPointM(//准心拾取(自动定位chunk)
                 const irr::core::line3d<irr::f32>& ray,
                 irr::core::vector3df& outCollisionPoint,
@@ -345,11 +355,15 @@ namespace smoothly{
                 irr::core::triangle3df& outTriangle,
                 irr::scene::ISceneNode*& outNode
             ){
+                chunkmtx.lock();
                 auto it=chunks.find(ipair(x,y));
                 if(it==chunks.end()){
+                    chunkmtx.unlock();
                     return false;
                 }else{
-                    return it->second->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode);
+                    auto res=it->second->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode);
+                    chunkmtx.unlock();
+                    return res;
                 }
             }
             
@@ -382,11 +396,13 @@ namespace smoothly{
                     return false;
             }
             inline void addIntoRemoveTable(const mapid & mid){
+                chunkmtx.lock();
                 auto it=chunks.find(ipair(mid.x , mid.y));
                 if(it!=chunks.end()){
                     if(it->second)
                         it->second->removeTable[mid.itemId].insert(mid.mapId);
                 }
+                chunkmtx.unlock();
             }
             
             chunk * getChunkFromStr(const char * buf);
