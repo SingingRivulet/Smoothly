@@ -101,7 +101,55 @@ terrain::item * terrain::createItem(){
 void terrain::destroyItem(terrain::item * ptr){
     ((itempool*)this->ipool)->del(ptr);
 }
-
+void terrain::genRiver(int seed){
+    predictableRand randg;
+    randg.setSeed(seed);
+    for(int i=0;i<3;i++){
+        rivers[i].a=(randg.rand())%1024-512;
+        rivers[i].b=(randg.rand())%1024-512;
+        rivers[i].c=(randg.rand())%1024-512;
+        rivers[i].d=(randg.rand())%1024-512;
+        rivers[i].e=(randg.rand())%1024-512;
+        rivers[i].f=(randg.rand())%1024-512;
+        rivers[i].g=(randg.rand())%1024-512;
+        rivers[i].h=(randg.rand())%1024-512;
+        rivers[i].i=(randg.rand())%1024-512;
+        rivers[i].j=(randg.rand())%1024-512;
+        rivers[i].w=(randg.rand())%8+2;
+    }
+}
+float terrain::getRiver(float x , float y){
+    float K=1;
+    for(int i=0;i<3;i++){
+        K*=rivers[i].getK(x,y);
+    }
+    return K;
+}
+float terrain::river::sigmoid(float x){
+    return (1/(1+exp(-x)));
+}
+float terrain::river::getK(float x,float y){
+    float de=fabs(getD(x,y));
+    float s=sigmoid(de/w-4);
+    return s;
+}
+float terrain::river::getD(float x,float y){
+    float x2=x *x;
+    float x4=x2*x2;
+    float x8=x4*x4;
+    
+    float y2=y *y;
+    float y4=y2*y2;
+    float y8=y4*y4;
+    
+    return (
+        x8*a + y8*b + 
+        x4*c + y4*d + 
+        x2*e + y2*f +
+        x *g + y *h +
+           i +    j
+    );
+}
 terrain::chunk * terrain::createChunk(){
     auto ptr=((chunkpool*)this->cpool)->get();
     ptr->scene=this->scene;

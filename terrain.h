@@ -193,6 +193,25 @@ namespace smoothly{
              * 
              */
             //地形生成器
+            
+            inline void setSeed(int seed){
+                genRiver(seed);
+            }
+            
+            struct river{
+                int a,b,c,d,e,f,g,h,i,j;
+                float w;
+                float getD(float x,float y);
+                float getK(float x,float y);
+                float sigmoid(float x);
+            };
+            
+            river rivers[3];
+            
+            void genRiver(int seed);
+            
+            float getRiver(float x , float y);
+            
             inline float getHightf(float x , float y){
                 return generator.get(x/altitudeArg , y/altitudeArg , 1024)*altitudeK;
             }
@@ -205,7 +224,7 @@ namespace smoothly{
             
             //真实高度=海拔+山高
             inline float getRealHight(int x , int y){
-                return getHillHight(x,y)+getAltitude(x,y);
+                return (getHillHight(x,y)+getAltitude(x,y))*getRiver(x,y);
                 //return x+y;
             }
             
