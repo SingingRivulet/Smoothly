@@ -25,6 +25,9 @@ client:client.cpp game.o
 	-o client \
 	$(LIBS)
 
+RealisticWater.o:RealisticWater.h RealisticWater.cpp
+	$(CC) -c RealisticWater.cpp
+
 physical.o:physical.h physical.cpp utils.h
 	$(CC) -c physical.cpp
 

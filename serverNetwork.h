@@ -5,7 +5,7 @@
 namespace smoothly{
     class serverNetwork:public watch{
         public:
-            virtual void removeTableApplay(const RakNet::SystemAddress & to,int x,int y);
+            virtual void removeTableApply(const RakNet::SystemAddress & to,int x,int y);
             
             virtual void sendRemoveTable(
                 const RakNet::SystemAddress & to,

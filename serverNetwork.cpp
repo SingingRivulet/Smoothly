@@ -1,11 +1,11 @@
 #include "serverNetwork.h"
 namespace smoothly{
-void serverNetwork::removeTableApplay(const RakNet::SystemAddress & to,int x,int y){
+void serverNetwork::removeTableApply(const RakNet::SystemAddress & to,int x,int y){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_TERRAIN);
     
-    bs.Write((RakNet::MessageID)T_APPLAY);
+    bs.Write((RakNet::MessageID)T_APPLY);
     
     bs.Write((int32_t)x);
     bs.Write((int32_t)y);

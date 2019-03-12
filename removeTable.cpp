@@ -71,8 +71,8 @@ void removeTable::getRemoveTable(const RakNet::SystemAddress & to,int x,int y){
         if(!l.empty()){
             sendRemoveTable(to,l,x,y);
         }
-        removeTableApplay(to,x,y);
     }
+    removeTableApply(to,x,y);
 }
 void removeTable::resetTerrain(int x,int y){
     char key[128];

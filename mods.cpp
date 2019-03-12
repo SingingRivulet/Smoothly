@@ -307,6 +307,7 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
         if(tinit==mod->terrainItemNum.end())
             continue;
         
+        
         int num=tinit->second;
         
         if(num<=0)
@@ -321,9 +322,11 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
                 float mx=(randg.frand()+x)*32;
                 float my=(randg.frand()+y)*32;
                 float mr=randg.frand()*3.14159*2;
+                float mh=getRealHight(mx,my);
+                //printf("autoGen:%f %f %f %f\n",mx,my,mh,mr);
                 this->add(
                     it.first,
-                    irr::core::vector3df(mx,getRealHight(mx,my),my),
+                    irr::core::vector3df(mx,mh,my),
                     irr::core::vector3df(0,mr,0),
                     irr::core::vector3df(1,1,1)
                 );

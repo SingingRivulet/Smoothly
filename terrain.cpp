@@ -373,7 +373,7 @@ void terrain::setRemoveTable(int x,int y,const std::list<std::pair<long,int> > &
     }
     chunkmtx.unlock();
 }
-void terrain::removeTableApplay(int x,int y){
+void terrain::removeTableApply(int x,int y){
     chunkmtx.lock();
     auto it=chunks.find(ipair(x,y));
     if(it==chunks.end()){

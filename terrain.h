@@ -409,7 +409,7 @@ namespace smoothly{
             item *  getItemFromStr(const char * buf);
             
             void setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t);
-            void removeTableApplay(int x,int y);
+            void removeTableApply(int x,int y);
             
             virtual void onGenChunk(chunk *)=0;
             virtual void onFreeChunk(chunk *)=0;

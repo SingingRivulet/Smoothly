@@ -86,7 +86,7 @@ void clientNetwork::onMessageUpdateTerrain(RakNet::Packet * data){
         case T_SEND_TABLE:
             onMessageUpdateTerrainGetRMTable(&bs);
         break;
-        case T_APPLAY:
+        case T_APPLY:
             onMessageUpdateTerrainRMTApply(&bs);
         break;
     }
@@ -196,7 +196,7 @@ void clientNetwork::onMessageUpdateTerrainRMTApply(RakNet::BitStream * data){
     int32_t x,y;
     if(!data->Read(x))return;
     if(!data->Read(y))return;
-    removeTableApplay(x,y);
+    removeTableApply(x,y);
 }
 void clientNetwork::onMessageUpdateTerrainRemove(RakNet::BitStream * data){
     mapid mid;

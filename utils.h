@@ -48,7 +48,7 @@ namespace smoothly{
         T_DOWNLOAD  ='d',
         T_SEND_ONE  ='o',
         T_SEND_TABLE='t',
-        T_APPLAY    ='a'
+        T_APPLY     ='a'
     };
     
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){

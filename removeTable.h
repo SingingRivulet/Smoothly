@@ -33,7 +33,7 @@ namespace smoothly{
                 const std::list<std::pair<long,int> > & l,
                 int x,int y
             )=0;
-            virtual void removeTableApplay(const RakNet::SystemAddress & to,int x,int y)=0;
+            virtual void removeTableApply(const RakNet::SystemAddress & to,int x,int y)=0;
             virtual void onRemoveTerrain(int x,int y,long itemid,int mapid)=0;
     };
 }
