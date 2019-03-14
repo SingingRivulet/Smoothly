@@ -20,6 +20,15 @@ namespace smoothly{
             terrain();
             ~terrain();
             void destroy();
+            
+            struct terrainBuffer{
+                terrainBuffer * next;
+                float ** buf;
+            };
+        private:
+            void * tbufpool;
+            terrainBuffer * createTBuf();
+            void delTBuf(terrainBuffer * p);
         public:
             class chunk;
             class item:public mods::itemBase{
@@ -65,6 +74,8 @@ namespace smoothly{
                     btMotionState    * bodyState;
                     btCollisionShape * bodyShape;
                     btTriangleMesh   * bodyMesh;
+                    
+                    terrainBuffer * tbuf;
                     
                     terrain * parent;
                     int x,y;

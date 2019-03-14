@@ -7,6 +7,7 @@ namespace smoothly{
 
 typedef mempool<terrain::chunk> chunkpool;
 typedef mempool<terrain::item> itempool;
+typedef mempool<terrain::terrainBuffer> terrpool;
 void terrain::createUpdatePath(int range){
     updatePath.clear();
     updatePath.push_back(ipair(0,0));
@@ -57,6 +58,7 @@ void terrain::createUpdatePath(int range){
 terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
+    this->tbufpool=new terrpool;
     this->texture=NULL;
     pointNum=34;
     altitudeK=0.08;
@@ -81,6 +83,7 @@ terrain::terrain(){
 terrain::~terrain(){
     delete (chunkpool*)this->cpool;
     delete (itempool*)this->ipool;
+    delete (terrpool*)this->tbufpool;
 }
 void terrain::destroy(){
     chunkmtx.lock();
@@ -102,6 +105,16 @@ terrain::item * terrain::createItem(){
 
 void terrain::destroyItem(terrain::item * ptr){
     ((itempool*)this->ipool)->del(ptr);
+}
+
+terrain::terrainBuffer * terrain::createTBuf(){
+    auto ptr=((terrpool*)this->tbufpool)->get();
+    
+    return ptr;
+}
+
+void terrain::delTBuf(terrain::terrainBuffer * ptr){
+    ((terrpool*)this->tbufpool)->del(ptr);
 }
 void terrain::genRiver(int seed){
     predictableRand randg;
@@ -454,22 +467,13 @@ void terrain::updateTerrainThread(){
 void terrain::updateChunkThread(terrain::chunk * ch){
     if(!chunkExist(ch->x ,ch->y))
         return;
-    float ** T=new float*[pointNum];
+    ch->tbuf=createTBuf();
+    ch->tbuf->buf=new float*[pointNum];
     for(auto i=0;i<pointNum;i++)
-        T[i]=new float[pointNum];
+        ch->tbuf->buf[i]=new float[pointNum];
     
-    genTerrain(T , ch->x ,ch->y);
-    float len=33.0f/(float)pointNum;
-    ch->mesh=this->createTerrainMesh(
-        this->texture ,
-        T , pointNum , pointNum ,
-        irr::core::dimension2d<irr::f32>(len , len),
-        irr::core::dimension2d<irr::u32>(pointNum , pointNum),
-        true
-    );
-    for(auto i=0;i<pointNum;i++)
-        delete [] T[i];
-    delete [] T;
+    genTerrain(ch->tbuf->buf , ch->x ,ch->y);
+    
     recvTChunkQL.lock();
     recvTChunkQ.push(std::pair<chunk*,tuMethod>(ch,TU_CREATE));
     recvTChunkQL.unlock();
@@ -477,7 +481,18 @@ void terrain::updateChunkThread(terrain::chunk * ch){
 void terrain::updateChunk(terrain::chunk * ch){
     char buf[128];
     auto driver=this->scene->getVideoDriver();
-    
+    float len=33.0f/(float)pointNum;
+    ch->mesh=this->createTerrainMesh(
+        this->texture ,
+        ch->tbuf->buf , pointNum , pointNum ,
+        irr::core::dimension2d<irr::f32>(len , len),
+        irr::core::dimension2d<irr::u32>(pointNum , pointNum),
+        true
+    );
+    for(auto i=0;i<pointNum;i++)
+        delete [] ch->tbuf->buf[i];
+    delete [] ch->tbuf->buf;
+    delTBuf(ch->tbuf);
     ch->node=scene->addMeshSceneNode(
         ch->mesh,
         0,-1

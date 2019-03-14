@@ -27,8 +27,8 @@ namespace smoothly{
                 delete m;
                 
                 clientNetwork::shutdown();
-                destroyScene();
                 destroyWorld();
+                destroyScene();
             }
         
     };
