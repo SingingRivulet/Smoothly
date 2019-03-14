@@ -32,8 +32,22 @@ namespace smoothly{
                 irr::core::aabbox3d<float> BB;
                 btCollisionShape * bodyShape;
                 btTriangleMesh   * bodyMesh;
+                irr::scene::IMesh * meshv2;
+                irr::scene::IMesh * meshv3;
+                irr::scene::IMesh * meshv4;
+                itemConfig(){
+                    mesh=NULL;
+                    meshv2=NULL;
+                    meshv3=NULL;
+                    meshv4=NULL;
+                    bodyMesh=NULL;
+                    bodyShape=NULL;
+                }
                 inline void destroy(){
                     if(mesh)     mesh->drop();
+                    if(meshv2)   meshv2->drop();
+                    if(meshv3)   meshv3->drop();
+                    if(meshv4)   meshv4->drop();
                     if(bodyMesh) delete bodyMesh;
                     if(bodyShape)delete bodyShape;
                 }

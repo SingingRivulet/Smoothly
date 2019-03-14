@@ -274,18 +274,22 @@ bool buildings::getNormalByRay(const irr::core::line3d<irr::f32> & ray,irr::core
 void buildings::transformByNormal(irr::scene::IMeshSceneNode * n,const irr::core::line3d<irr::f32> & normal){
     //normal:某一平面的法向量
     //将物体n变换后贴到该平面表面
-    auto v1=irr::core::vector3df(0,1,0);//朝上的坐标
-    auto vn=normal.end-normal.start;//求法线向量
+    //auto v1=irr::core::vector3df(0,1,0);//朝上的坐标
+    //auto vn=normal.end-normal.start;//求法线向量
+    auto vc=cameraRay.end-cameraRay.start;
+    vc.normalize();
+    auto ang=vc.getHorizontalAngle();
+    ang.X=0;
     
-    irr::core::vector3df eu;
-    irr::core::quaternion qu;//用于保存旋转的四元数
+    //irr::core::vector3df eu;
+    //irr::core::quaternion qu;//用于保存旋转的四元数
     
-    qu.rotationFromTo(v1,vn);//求从(0,1,0)旋转到法线的四元数
+    //qu.rotationFromTo(v1,vn);//求从(0,1,0)旋转到法线的四元数
     
-    qu.toEuler(eu);//转换四元数为欧拉角
+    //qu.toEuler(eu);//转换四元数为欧拉角
     
     n->setPosition(normal.start);//更新n的坐标
-    n->setRotation(eu);//更新n的旋转欧拉角
+    n->setRotation(ang);//更新n的旋转欧拉角
     n->updateAbsolutePosition();//更新
 }
 

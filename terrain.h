@@ -36,7 +36,8 @@ namespace smoothly{
                     long id;
                     mods::itemBase * parent;
                     chunk * inChunk;
-                    irr::scene::IMeshSceneNode * node;
+                    irr::scene::ISceneNode * node;
+                    irr::scene::IMeshSceneNode * nodeLOD[4];
                     
                     btRigidBody   * rigidBody;
                     btMotionState * bodyState;
@@ -44,6 +45,12 @@ namespace smoothly{
                     item * next;
                     int mapId;
                     inline void remove(){
+                        for(int i=0;i<4;i++){
+                            if(nodeLOD[i]){
+                                nodeLOD[i]->remove();
+                                nodeLOD[i]=NULL;
+                            }
+                        }
                         node->remove();
                         inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
                         if(rigidBody){
@@ -60,6 +67,7 @@ namespace smoothly{
                     inline void setScale(const irr::core::vector3df & r){
                         node->setScale(r);
                     }
+                    void useLOD(int i);
             };
             
             class chunk:public mods::mapGenerator{
@@ -138,6 +146,9 @@ namespace smoothly{
                         const irr::core::vector3df & s
                     );
                     virtual float getRealHight(float x,float y);
+                    void itemsLODUpdate();
+                    void terrLODUpdate();
+                    void useLOD(int i);
             };
             
             std::map<ipair,chunk*> chunks;

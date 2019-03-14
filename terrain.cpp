@@ -97,9 +97,46 @@ void terrain::destroy(){
     chunkmtx.unlock();
 }
 
+void terrain::item::useLOD(int i){
+    for(int j=0;j<4;j++){
+        if(nodeLOD[j]==NULL)
+            continue;
+        if(i==j)
+            nodeLOD[j]->setVisible(true);
+        else
+            nodeLOD[j]->setVisible(false);
+    }
+}
+void terrain::chunk::useLOD(int i){
+    for(auto it:items){
+        it->useLOD(i);
+    }
+}
+void terrain::chunk::terrLODUpdate(){
+    
+}
+void terrain::chunk::itemsLODUpdate(){
+    if(!nodeInited)
+        return;
+    float dtx=(float)parent->px - (float)x - 0.5f;
+    float dty=(float)parent->py - (float)y - 0.5f;
+    float sqlen=dtx * dtx + dty * dty;
+    if(sqlen<8)
+        useLOD(0);
+    else
+    if(sqlen<64)
+        useLOD(1);
+    else
+    if(sqlen<128)
+        useLOD(2);
+    else
+        useLOD(3);
+}
 terrain::item * terrain::createItem(){
     auto ptr=((itempool*)this->ipool)->get();
-    
+    ptr->node=NULL;
+    for(int i=0;i<4;i++)
+        ptr->nodeLOD[i]=NULL;
     return ptr;
 }
 
@@ -189,7 +226,7 @@ void terrain::removeChunk(terrain::chunk * ptr){
 }
 
 void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
-    if(x==px && y==py && !force)
+    if(fabs(x-px)<2 && fabs(y-py)<2 && !force)
         return;
     int i,j;
     px=x;
@@ -209,6 +246,8 @@ void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
         chunkmtx.lock();
         auto it2=chunks.find(posi);
         if(it2!=chunks.end()){
+            it2->second->terrLODUpdate();
+            it2->second->itemsLODUpdate();
             rm.erase(posi);
         }else{
             auto ptr=createChunk();
@@ -343,10 +382,28 @@ int terrain::chunk::add(
     ptr->id=id;
     ptr->mapId=mapId;
     //set node
-    ptr->node=parent->scene->addMeshSceneNode(
-        ptr->mesh,
-        0,-1,p,r,s
-    );
+    ptr->node=parent->scene->addEmptySceneNode();
+    
+    ptr->nodeLOD[0]=parent->scene->addMeshSceneNode(ptr->mesh,ptr->node,-1,p,r,s);
+    ptr->nodeLOD[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    
+    
+    if(mit->second->meshv2){
+        ptr->nodeLOD[1]=parent->scene->addMeshSceneNode(mit->second->meshv2,ptr->node,-1,p,r,s);
+        ptr->nodeLOD[1]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    }
+    
+    if(mit->second->meshv3){
+        ptr->nodeLOD[2]=parent->scene->addMeshSceneNode(mit->second->meshv3,ptr->node,-1,p,r,s);
+        ptr->nodeLOD[2]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    }
+    
+    if(mit->second->meshv4){
+        ptr->nodeLOD[3]=parent->scene->addMeshSceneNode(mit->second->meshv4,ptr->node,-1,p,r,s);
+        ptr->nodeLOD[3]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    }
+        
+    
     ptr->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
     ptr->node->setName(buf);
@@ -401,6 +458,7 @@ void terrain::removeTableApply(int x,int y){
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
     chunkmtx.unlock();
+    ch->itemsLODUpdate();
 }
 
 void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
@@ -518,7 +576,7 @@ void terrain::updateChunk(terrain::chunk * ch){
     requestUpdateTerrain(ch->x,ch->y);
     this->onGenChunk(ch);
     ch->nodeInited=true;
-    
+    ch->terrLODUpdate();
 }
 
 void terrain::genTexture(){

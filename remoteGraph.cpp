@@ -299,6 +299,13 @@ void remoteGraph::clearNodes(){
 }
 
 void remoteGraph::updateBuildingChunks(int x,int y,int range){
+    if(inited){
+        if(fabs(x-lastX)<2 && fabs(y-lastY)<2)
+            return;
+    }else
+        inited=true;
+    lastX=x;
+    lastY=y;
     //int fx=x-range;
     //int tx=x+range;
     //int fy=y-range;
@@ -390,6 +397,7 @@ remoteGraph::remoteGraph(){
     chunks.clear();
     poolInit();
     createUpdatePath(13);
+    inited=false;
 }
 
 void remoteGraph::destroy(){

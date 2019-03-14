@@ -117,7 +117,6 @@ static int mod_addTerrainMesh(lua_State * L){
     }
     lua_pop(L,1);
     
-    
     auto mesh=self->scene->getMesh(scmpath.c_str());
     if(mesh==NULL){
         lua_pushstring(L,"Load mesh fail!");
@@ -144,6 +143,33 @@ static int mod_addTerrainMesh(lua_State * L){
     lua_gettable(L,-2);
     if(lua_isinteger(L,-1)){
         maxnum=lua_tointeger(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"lodMeshV2");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto lmsh=self->scene->getMesh(lua_tostring(L,-1));
+        if(lmsh)
+            b->meshv2=lmsh;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"lodMeshV3");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto lmsh=self->scene->getMesh(lua_tostring(L,-1));
+        if(lmsh)
+            b->meshv3=lmsh;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"lodMeshV4");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto lmsh=self->scene->getMesh(lua_tostring(L,-1));
+        if(lmsh)
+            b->meshv4=lmsh;
     }
     lua_pop(L,1);
     

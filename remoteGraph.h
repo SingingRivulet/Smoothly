@@ -145,6 +145,8 @@ namespace smoothly{
                 createListFilter();
             }
             
+            bool inited;
+            int lastX,lastY;
             void updateBuildingChunks(int x,int y,int range);
             
             virtual void onGenBuilding(item *)=0;

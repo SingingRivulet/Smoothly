@@ -39,8 +39,8 @@ int main(int argc,char * argv[]){
         maxconn=atoi(argv[3]);
     
     snprintf(path1,sizeof(path1),"%s/gra",pre);
-    snprintf(path2,sizeof(path1),"%s/rmt",pre);
-    snprintf(path3,sizeof(path1),"%s/mod.lua",pre);
+    snprintf(path2,sizeof(path2),"%s/rmt",pre);
+    snprintf(path3,sizeof(path3),"./script/server.lua");
     
     smoothly::serverNetwork server(path1,path2,path3,port,maxconn);
     running=true;
