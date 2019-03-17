@@ -21,14 +21,10 @@ namespace smoothly{
             ~terrain();
             void destroy();
             
-            struct terrainBuffer{
-                terrainBuffer * next;
-                float ** buf;
-            };
         private:
-            void * tbufpool;
-            terrainBuffer * createTBuf();
-            void delTBuf(terrainBuffer * p);
+            
+            float ** bufv1;
+            
         public:
             class chunk;
             class item:public mods::itemBase{
@@ -83,8 +79,6 @@ namespace smoothly{
                     btCollisionShape * bodyShape;
                     btTriangleMesh   * bodyMesh;
                     
-                    terrainBuffer * tbuf;
-                    
                     terrain * parent;
                     int x,y;
                     std::map<long,int> itemNum;
@@ -108,8 +102,7 @@ namespace smoothly{
                             selector->drop();
                             node->remove();
                         }
-                        if(mesh)
-                            mesh->drop();
+                        if(mesh)mesh->drop();
                         items.clear();
                         itemNum.clear();
                         removeTable.clear();
@@ -154,10 +147,11 @@ namespace smoothly{
             std::map<ipair,chunk*> chunks;
             //chunksize:32*32
         private:
-            std::list<ipair> updatePath;
+            std::vector<ipair> updatePath;
+            int upIndex;
+            std::map<ipair,chunk*> rmIndex;
             void createUpdatePath(int range);
         public:
-            int pointNum;//每条边顶点数量
             float altitudeK;
             float hillK;
             float temperatureK;
@@ -265,7 +259,8 @@ namespace smoothly{
             
             float genTerrain(
                 float ** ,  //高度图边长=chunk边长+1
-                irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
+                irr::s32 x , irr::s32 y , //chunk坐标，真实坐标/32
+                int pointNum
             );//返回最大值
             
             inline static short getLevel(float min,float max,float v){
@@ -285,22 +280,7 @@ namespace smoothly{
             }
             
             void terrainLoop();
-            void terrainParseOne();
-            void updateTerrainThread();
             
-        private:
-            enum tuMethod {TU_CREATE,TU_DELETE};
-            std::queue<std::pair<chunk*,tuMethod> > sendTChunkQ,recvTChunkQ;
-            std::mutex sendTChunkQL,recvTChunkQL;
-            std::mutex sqmtx;
-            std::mutex chunkmtx;
-            std::condition_variable sqcv;
-            
-        public:
-            inline void terrainWake(){
-                std::unique_lock <std::mutex> lck(sqmtx);
-                sqcv.notify_all();
-            }
             
         public:
             
@@ -333,8 +313,8 @@ namespace smoothly{
             void * cpool;//内存池（因为直接定义mempool会导致重复定义问题，所以用void指针）
             chunk * createChunk();//使用内存池创建一个chunk
             void removeChunk(chunk *);//回收chunk
-            void updateChunk(chunk *);
-            void updateChunkThread(chunk *);
+            void removeChunk(int x,int y);
+            void updateChunk(int x,int y);
             void visualChunkUpdate(irr::s32 x , irr::s32 y , bool force=false);//参数为chunk坐标，表示新的角色所在位置
             
             bool selectPointM(//准心拾取(查询周围4格)
@@ -347,10 +327,8 @@ namespace smoothly{
             );
             
             inline bool chunkExist(int x,int y){
-                chunkmtx.lock();
                 auto it=chunks.find(ipair(x,y));
                 bool res=(it!=chunks.end());
-                chunkmtx.unlock();
                 return res;
             }
             
@@ -377,14 +355,11 @@ namespace smoothly{
                 irr::core::triangle3df& outTriangle,
                 irr::scene::ISceneNode*& outNode
             ){
-                chunkmtx.lock();
                 auto it=chunks.find(ipair(x,y));
                 if(it==chunks.end()){
-                    chunkmtx.unlock();
                     return false;
                 }else{
                     auto res=it->second->getCollisionPoint(ray,outCollisionPoint,outTriangle,outNode);
-                    chunkmtx.unlock();
                     return res;
                 }
             }
@@ -418,13 +393,11 @@ namespace smoothly{
                     return false;
             }
             inline void addIntoRemoveTable(const mapid & mid){
-                chunkmtx.lock();
                 auto it=chunks.find(ipair(mid.x , mid.y));
                 if(it!=chunks.end()){
                     if(it->second)
                         it->second->removeTable[mid.itemId].insert(mid.mapId);
                 }
-                chunkmtx.unlock();
             }
             
             chunk * getChunkFromStr(const char * buf);

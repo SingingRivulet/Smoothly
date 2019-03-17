@@ -1,6 +1,6 @@
 # Blender v2.79 (sub 0) OBJ File: 'untitled.blend'
 # www.blender.org
-mtllib untitled.mtl
+mtllib test1-lodv1.mtl
 o Cone
 v -0.097717 6.269061 -0.925734
 v 0.097374 6.269061 -0.906520

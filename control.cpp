@@ -237,8 +237,7 @@ void control::loop(){
     
     worldLoop();
     sceneLoop();
-    //terrainLoop();
-    terrainParseOne();
+    terrainLoop();
 }
 
 }

@@ -173,6 +173,16 @@ static int mod_addTerrainMesh(lua_State * L){
     }
     lua_pop(L,1);
     
+    
+    lua_pushstring(L,"texture");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto texture=self->scene->getVideoDriver()->getTexture(lua_tostring(L,-1));
+        if(texture)
+            b->texture=texture;
+    }
+    lua_pop(L,1);
+    
     self->items[id]=b;
     self->terrainItemNum[id]=maxnum;
     
@@ -327,6 +337,7 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
     std::map<long,float> pl;
     predictableRand randg;
     mod->getGenList(x,y,tem,hu,h,pl);
+    randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
     for(auto it:pl){
         
         auto tinit=mod->terrainItemNum.find(it.first);
@@ -338,8 +349,6 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
         
         if(num<=0)
             continue;
-        
-        randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
         
         int delta=it.second*1000;
         for(int i=0;i<num;i++){

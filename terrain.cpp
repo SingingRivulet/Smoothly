@@ -7,7 +7,6 @@ namespace smoothly{
 
 typedef mempool<terrain::chunk> chunkpool;
 typedef mempool<terrain::item> itempool;
-typedef mempool<terrain::terrainBuffer> terrpool;
 void terrain::createUpdatePath(int range){
     updatePath.clear();
     updatePath.push_back(ipair(0,0));
@@ -58,9 +57,7 @@ void terrain::createUpdatePath(int range){
 terrain::terrain(){
     this->cpool=new chunkpool;
     this->ipool=new itempool;
-    this->tbufpool=new terrpool;
     this->texture=NULL;
-    pointNum=34;
     altitudeK=0.08;
     hillK=100;
     temperatureK=0.3;
@@ -78,15 +75,22 @@ terrain::terrain(){
     
     scene =NULL;
     createUpdatePath(16);
+    
+    bufv1=new float*[33];
+    for(auto i=0;i<33;i++)
+        bufv1[i]=new float[33];
+    
 }
 
 terrain::~terrain(){
     delete (chunkpool*)this->cpool;
     delete (itempool*)this->ipool;
-    delete (terrpool*)this->tbufpool;
+    
+    for(auto i=0;i<33;i++)
+        delete [] bufv1[i];
+    delete [] bufv1;
 }
 void terrain::destroy(){
-    chunkmtx.lock();
     for(auto it:chunks){
         if(it.second){
             it.second->remove();
@@ -94,7 +98,6 @@ void terrain::destroy(){
         }
     }
     chunks.clear();
-    chunkmtx.unlock();
 }
 
 void terrain::item::useLOD(int i){
@@ -118,8 +121,8 @@ void terrain::chunk::terrLODUpdate(){
 void terrain::chunk::itemsLODUpdate(){
     if(!nodeInited)
         return;
-    float dtx=(float)parent->px - (float)x - 0.5f;
-    float dty=(float)parent->py - (float)y - 0.5f;
+    float dtx=(float)parent->px - (float)x - 1;
+    float dty=(float)parent->py - (float)y - 1;
     float sqlen=dtx * dtx + dty * dty;
     if(sqlen<8)
         useLOD(0);
@@ -144,15 +147,6 @@ void terrain::destroyItem(terrain::item * ptr){
     ((itempool*)this->ipool)->del(ptr);
 }
 
-terrain::terrainBuffer * terrain::createTBuf(){
-    auto ptr=((terrpool*)this->tbufpool)->get();
-    
-    return ptr;
-}
-
-void terrain::delTBuf(terrain::terrainBuffer * ptr){
-    ((terrpool*)this->tbufpool)->del(ptr);
-}
 void terrain::genRiver(int seed){
     predictableRand randg;
     randg.setSeed(seed);
@@ -226,67 +220,26 @@ void terrain::removeChunk(terrain::chunk * ptr){
 }
 
 void terrain::visualChunkUpdate(irr::s32 x , irr::s32 y , bool force){
-    if(fabs(x-px)<2 && fabs(y-py)<2 && !force)
+    if(fabs(x-px)<2 && fabs(y-py)<2 && !force){
         return;
-    int i,j;
+    }
+    
+    
     px=x;
     py=y;
-    std::map<ipair,chunk*> rm;
     
-    chunkmtx.lock();
+    rmIndex.clear();
     for(auto it : chunks){
-        rm[it.first]=it.second;
-    }
-    chunkmtx.unlock();
-    
-    for(auto it:updatePath){
-        int ix=x+it.x;
-        int iy=y+it.y;
-        ipair posi(ix , iy);
-        chunkmtx.lock();
-        auto it2=chunks.find(posi);
-        if(it2!=chunks.end()){
-            it2->second->terrLODUpdate();
-            it2->second->itemsLODUpdate();
-            rm.erase(posi);
-        }else{
-            auto ptr=createChunk();
-            ptr->x=ix;
-            ptr->y=iy;
-            //updateChunk(ptr , ix , iy);
-            ptr->nodeInited=false;
-            ptr->rigidBody  =NULL;
-            ptr->bodyShape  =NULL;
-            ptr->bodyState  =NULL;
-            ptr->bodyMesh   =NULL;
-            ptr->mesh       =NULL;
-            sendTChunkQL.lock();
-            sendTChunkQ.push(std::pair<chunk*,tuMethod>(ptr,TU_CREATE));
-            sendTChunkQL.unlock();
-            chunks[posi]=ptr;
-            terrainWake();
-            //chunks[posi]=NULL;
-            //requestUpdateChunk(ix,iy);
-        }
-        chunkmtx.unlock();
+        rmIndex[it.first]=it.second;
     }
     
-    for(auto it3:rm){
-        //this->onFreeChunk(it3.second);
-        //it3.second->remove();
-        //removeChunk(it3.second);
-        sendTChunkQL.lock();
-        sendTChunkQ.push(std::pair<chunk*,tuMethod>(it3.second,TU_DELETE));
-        sendTChunkQL.unlock();
-        chunkmtx.lock();
-        chunks.erase(it3.first);
-        chunkmtx.unlock();
-    }
+    upIndex=0;
 }
 
 float terrain::genTerrain(
     float ** img,  //高度图边长=chunk边长+1
-    irr::s32 x , irr::s32 y //chunk坐标，真实坐标/32
+    irr::s32 x , irr::s32 y , //chunk坐标，真实坐标/32
+    int pointNum
 ){
     float h;
     float ix,iy;
@@ -386,21 +339,24 @@ int terrain::chunk::add(
     
     ptr->nodeLOD[0]=parent->scene->addMeshSceneNode(ptr->mesh,ptr->node,-1,p,r,s);
     ptr->nodeLOD[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    
+    if(mit->second->texture)ptr->nodeLOD[0]->setMaterialTexture( 0 , mit->second->texture);
     
     if(mit->second->meshv2){
         ptr->nodeLOD[1]=parent->scene->addMeshSceneNode(mit->second->meshv2,ptr->node,-1,p,r,s);
         ptr->nodeLOD[1]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        if(mit->second->texture)ptr->nodeLOD[1]->setMaterialTexture( 0 , mit->second->texture);
     }
     
     if(mit->second->meshv3){
         ptr->nodeLOD[2]=parent->scene->addMeshSceneNode(mit->second->meshv3,ptr->node,-1,p,r,s);
         ptr->nodeLOD[2]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        if(mit->second->texture)ptr->nodeLOD[2]->setMaterialTexture( 0 , mit->second->texture);
     }
     
     if(mit->second->meshv4){
         ptr->nodeLOD[3]=parent->scene->addMeshSceneNode(mit->second->meshv4,ptr->node,-1,p,r,s);
         ptr->nodeLOD[3]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        if(mit->second->texture)ptr->nodeLOD[3]->setMaterialTexture( 0 , mit->second->texture);
     }
         
     
@@ -424,30 +380,24 @@ int terrain::chunk::add(
 }
 
 void terrain::setRemoveTable(int x,int y,const std::list<std::pair<long,int> > & t){
-    chunkmtx.lock();
     auto it=chunks.find(ipair(x,y));
     if(it==chunks.end()){
-        chunkmtx.unlock();
         return;
     }
     
     auto ch=it->second;
     
     if(ch==NULL){
-        chunkmtx.unlock();
         return;
     }
     
     for(auto it:t){
         ch->removeTable[it.first].insert(it.second);
     }
-    chunkmtx.unlock();
 }
 void terrain::removeTableApply(int x,int y){
-    chunkmtx.lock();
     auto it=chunks.find(ipair(x,y));
     if(it==chunks.end()){
-        chunkmtx.unlock();
         return;
     }
     auto ch=it->second;
@@ -457,7 +407,6 @@ void terrain::removeTableApply(int x,int y){
         if(it)
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
-    chunkmtx.unlock();
     ch->itemsLODUpdate();
 }
 
@@ -467,90 +416,67 @@ void terrain::getItems(irr::s32 x , irr::s32 y , terrain::chunk * ch){
             it(x,y,getTemperature(x,y),getHumidity(x,y),getHight(x,y),ch);
     }
 }
-void terrain::terrainParseOne(){
+void terrain::terrainLoop(){
     long t=timer->getRealTime();
     begin:
     if(fabs(timer->getRealTime()-t)>20)
         return;
-    recvTChunkQL.lock();
-    if(recvTChunkQ.empty()){
-        recvTChunkQL.unlock();
-        return;
-    }
-    auto p=recvTChunkQ.front();
-    recvTChunkQ.pop();
-    recvTChunkQL.unlock();
-    if(p.second==TU_DELETE){
-        this->onFreeChunk(p.first);
-        p.first->remove();
-        removeChunk(p.first);
+    if(upIndex<updatePath.size()){
+        auto posi=updatePath[upIndex];
+        posi.x+=px;
+        posi.y+=py;
+        updateChunk(posi.x,posi.y);
+        rmIndex.erase(posi);
+        ++upIndex;
     }else
-        updateChunk(p.first);
+    if(!rmIndex.empty()){
+        for(auto it:rmIndex){
+            this->onFreeChunk(it.second);
+            it.second->remove();
+            removeChunk(it.second);
+            chunks.erase(it.first);
+        }
+        rmIndex.clear();
+    }
     goto begin;
 }
-void terrain::terrainLoop(){
-    recvTChunkQL.lock();
-    while(!recvTChunkQ.empty()){
-        auto p=recvTChunkQ.front();
-        recvTChunkQ.pop();
-        recvTChunkQL.unlock();
-        if(p.second==TU_DELETE){
-            this->onFreeChunk(p.first);
-            p.first->remove();
-            removeChunk(p.first);
-        }else
-            updateChunk(p.first);
-        recvTChunkQL.lock();
+void terrain::removeChunk(int x,int y){
+    auto it=chunks.find(ipair(x,y));
+    if(it!=chunks.end()){
+        this->onFreeChunk(it->second);
+        it->second->remove();
+        removeChunk(it->second);
+        chunks.erase(it);
     }
-    recvTChunkQL.unlock();
 }
-void terrain::updateTerrainThread(){
-    sendTChunkQL.lock();
-    while(!sendTChunkQ.empty()){
-        auto p=sendTChunkQ.front();
-        sendTChunkQ.pop();
-        sendTChunkQL.unlock();
-        if(p.second==TU_DELETE){
-            recvTChunkQL.lock();
-            recvTChunkQ.push(std::pair<chunk*,tuMethod>(p.first,TU_DELETE));
-            recvTChunkQL.unlock();
-        }else
-            updateChunkThread(p.first);
-        sendTChunkQL.lock();
-    }
-    sendTChunkQL.unlock();
-    std::unique_lock <std::mutex> lck(sqmtx);
-    sqcv.wait(lck);
-}
-void terrain::updateChunkThread(terrain::chunk * ch){
-    if(!chunkExist(ch->x ,ch->y))
+void terrain::updateChunk(int x,int y){
+    auto posi=ipair(x,y);
+    auto it=chunks.find(posi);
+    if(it!=chunks.end()){
+        it->second->terrLODUpdate();
+        it->second->itemsLODUpdate();
+        //update LOD
         return;
-    ch->tbuf=createTBuf();
-    ch->tbuf->buf=new float*[pointNum];
-    for(auto i=0;i<pointNum;i++)
-        ch->tbuf->buf[i]=new float[pointNum];
+    }
+    terrain::chunk * ch=createChunk();
+    ch->x=x;
+    ch->y=y;
     
-    genTerrain(ch->tbuf->buf , ch->x ,ch->y);
-    
-    recvTChunkQL.lock();
-    recvTChunkQ.push(std::pair<chunk*,tuMethod>(ch,TU_CREATE));
-    recvTChunkQL.unlock();
-}
-void terrain::updateChunk(terrain::chunk * ch){
     char buf[128];
-    auto driver=this->scene->getVideoDriver();
-    float len=33.0f/(float)pointNum;
+    
+    
+    genTerrain(bufv1 , ch->x ,ch->y , 33);
+    
+    float len=33.0f/(float)33;
     ch->mesh=this->createTerrainMesh(
         this->texture ,
-        ch->tbuf->buf , pointNum , pointNum ,
+        bufv1 , 33 , 33 ,
         irr::core::dimension2d<irr::f32>(len , len),
-        irr::core::dimension2d<irr::u32>(pointNum , pointNum),
+        irr::core::dimension2d<irr::u32>(33 , 33),
         true
     );
-    for(auto i=0;i<pointNum;i++)
-        delete [] ch->tbuf->buf[i];
-    delete [] ch->tbuf->buf;
-    delTBuf(ch->tbuf);
+    
+    
     ch->node=scene->addMeshSceneNode(
         ch->mesh,
         0,-1
@@ -577,6 +503,7 @@ void terrain::updateChunk(terrain::chunk * ch){
     this->onGenChunk(ch);
     ch->nodeInited=true;
     ch->terrLODUpdate();
+    chunks[posi]=ch;
 }
 
 void terrain::genTexture(){
@@ -667,13 +594,10 @@ bool terrain::selectPointM(
 terrain::chunk * terrain::getChunkFromStr(const char * str){
     int x,y;
     if(sscanf(str,"tc %d %d",&x,&y)==2){
-        chunkmtx.lock();
         auto it=chunks.find(ipair(x,y));
         if(it!=chunks.end()){
-            chunkmtx.unlock();
             return it->second;
         }
-        chunkmtx.unlock();
     }
     return NULL;
 }
