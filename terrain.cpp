@@ -339,24 +339,44 @@ int terrain::chunk::add(
     
     ptr->nodeLOD[0]=parent->scene->addMeshSceneNode(ptr->mesh,ptr->node,-1,p,r,s);
     ptr->nodeLOD[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    if(mit->second->texture)ptr->nodeLOD[0]->setMaterialTexture( 0 , mit->second->texture);
+    if(mit->second->texture){
+        ptr->nodeLOD[0]->setMaterialTexture( 0 , mit->second->texture);
+        if(mit->second->useAlpha){
+            ptr->nodeLOD[0]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
     
     if(mit->second->meshv2){
         ptr->nodeLOD[1]=parent->scene->addMeshSceneNode(mit->second->meshv2,ptr->node,-1,p,r,s);
         ptr->nodeLOD[1]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-        if(mit->second->texture)ptr->nodeLOD[1]->setMaterialTexture( 0 , mit->second->texture);
+        if(mit->second->texture){
+            ptr->nodeLOD[1]->setMaterialTexture( 0 , mit->second->texture);
+            if(mit->second->useAlpha){
+                ptr->nodeLOD[1]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+            }
+        }
     }
     
     if(mit->second->meshv3){
         ptr->nodeLOD[2]=parent->scene->addMeshSceneNode(mit->second->meshv3,ptr->node,-1,p,r,s);
         ptr->nodeLOD[2]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-        if(mit->second->texture)ptr->nodeLOD[2]->setMaterialTexture( 0 , mit->second->texture);
+        if(mit->second->texture){
+            ptr->nodeLOD[2]->setMaterialTexture( 0 , mit->second->texture);
+            if(mit->second->useAlpha){
+                ptr->nodeLOD[2]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+            }
+        }
     }
     
     if(mit->second->meshv4){
         ptr->nodeLOD[3]=parent->scene->addMeshSceneNode(mit->second->meshv4,ptr->node,-1,p,r,s);
         ptr->nodeLOD[3]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-        if(mit->second->texture)ptr->nodeLOD[3]->setMaterialTexture( 0 , mit->second->texture);
+        if(mit->second->texture){
+            ptr->nodeLOD[3]->setMaterialTexture( 0 , mit->second->texture);
+            if(mit->second->useAlpha){
+                ptr->nodeLOD[3]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+            }
+        }
     }
         
     

@@ -25,6 +25,7 @@ function sceneInit(m)
         --["lodMeshV4"]="./res/model/tree1/tree_foliage_lod2.obj",
         ["texture"]  ="./res/model/tree1/tree_foliage.tga",
         ["havebody"]=true,
+        ["useAlpha"]=true,
         ["maxnum"]  =2
     })
 end

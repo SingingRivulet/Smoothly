@@ -31,6 +31,7 @@ static int mod_addBuildingMesh(lua_State * L){
     
     std::string scmpath;
     bool havebody=false;
+    bool useAlpha=false;
     
     if(!lua_istable(L,-1)){
         lua_pushstring(L,"smoothly.addBuildingMesh(handler,itemId,{mesh=path,havebody=havebody})");
@@ -61,11 +62,19 @@ static int mod_addBuildingMesh(lua_State * L){
         return 1;
     }
     
+    lua_pushstring(L,"useAlpha");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        useAlpha=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
     auto b  = new mods::building;
     b->mesh = mesh;
     b->BB   = b->mesh->getBoundingBox();
     b->bodyMesh = physical::createBtMesh(b->mesh);
     b->bodyShape= physical::createShape(b->bodyMesh);
+    b->useAlpha = useAlpha;
     self->buildings[id]=b;
     
     lua_pushstring(L,"OK");
@@ -180,6 +189,13 @@ static int mod_addTerrainMesh(lua_State * L){
         auto texture=self->scene->getVideoDriver()->getTexture(lua_tostring(L,-1));
         if(texture)
             b->texture=texture;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"useAlpha");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->useAlpha=lua_toboolean(L,-1);
     }
     lua_pop(L,1);
     

@@ -36,6 +36,7 @@ namespace smoothly{
                 irr::scene::IMesh * meshv3;
                 irr::scene::IMesh * meshv4;
                 irr::video::ITexture* texture;
+                bool                useAlpha;
                 itemConfig(){
                     mesh=NULL;
                     meshv2=NULL;
@@ -44,6 +45,7 @@ namespace smoothly{
                     texture=NULL;
                     bodyMesh=NULL;
                     bodyShape=NULL;
+                    useAlpha=false;
                 }
                 inline void destroy(){
                     //if(mesh)     mesh->drop();
@@ -93,6 +95,7 @@ namespace smoothly{
                     irr::scene::IMesh * mesh;
                     btCollisionShape  * bodyShape;
                     btTriangleMesh    * bodyMesh;
+                    bool                useAlpha;
                     irr::core::aabbox3d<float> BB;
             };
             std::map<long,building*> buildings;
