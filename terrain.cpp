@@ -388,6 +388,11 @@ int terrain::chunk::add(
         ptr->bodyState=setMotionState(ptr->node->getAbsoluteTransformation().pointer());
         ptr->rigidBody=createBody(mit->second->bodyShape,ptr->bodyState);
         ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+        
+        ptr->info.type=BODY_TERRAIN_ITEM;
+        ptr->info.ptr=ptr;
+        ptr->rigidBody->setUserPointer(&(ptr->info));
+        
         parent->dynamicsWorld->addRigidBody(ptr->rigidBody);
     }else
         ptr->rigidBody=NULL;
@@ -515,6 +520,11 @@ void terrain::updateChunk(int x,int y){
     ch->bodyState =setMotionState(ch->node->getAbsoluteTransformation().pointer());
     ch->rigidBody =createBody(ch->bodyShape,ch->bodyState);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    
+    ch->info.type=BODY_TERRAIN;
+    ch->info.ptr=ch;
+    ch->rigidBody->setUserPointer(&(ch->info));
+    
     this->dynamicsWorld->addRigidBody(ch->rigidBody);
     
     ch->itemNum.clear();

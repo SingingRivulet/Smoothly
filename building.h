@@ -23,6 +23,7 @@ namespace smoothly{
                     
                     void * data;
                     HBB::AABB * node;
+                    
             };
             
             std::map<void*,building*> allBuildings;
@@ -45,7 +46,7 @@ namespace smoothly{
             void doBuildBegin(long type);
             void doBuildEnd();
             void doBuildUpdate(const irr::core::line3d<irr::f32> & ray);
-            void doBuildApplay();
+            void doBuildApply();
             
             building * selectByRay(const irr::core::line3d<irr::f32> & ray);
             void attackByRay(const irr::core::line3d<irr::f32> & ray);

@@ -2,6 +2,29 @@
 #include <vector>
 namespace smoothly{
 
+float physical::getKEnergy(btRigidBody * r){
+    float l=r->getLinearVelocity().length2();
+    auto a=r->getAngularVelocity();
+    auto im=r->getInvMass();
+    auto ia=r->getInvInertiaDiagLocal();
+    //0.5*lv2*m
+    float le=0;
+    float ae=0;
+    if(im!=0)
+        le=l*(1.0f/im);
+    
+    if(ia.getX())
+        ae+=a.getX()*a.getX()*(1.0f/ia.getX());
+    
+    if(ia.getY())
+        ae+=a.getY()*a.getY()*(1.0f/ia.getY());
+    
+    if(ia.getZ())
+        ae+=a.getZ()*a.getZ()*(1.0f/ia.getZ());
+    
+    return (le+ae)*0.5f;
+}
+
 static btVector3 toBtVector( const irr::core::vector3df & vec ){
     btVector3 bt( vec.X, vec.Y, vec.Z );
     return bt;
@@ -132,8 +155,13 @@ void physical::setMotionState(btMotionState * motionState,const float * mtx){
 btCollisionShape * physical::createShape(btTriangleMesh * mesh){
     return new btBvhTriangleMeshShape( mesh, true );
 }
-btRigidBody * physical::createBody(btCollisionShape * shape , btMotionState * motionState){
-    return new btRigidBody( 0.0f , motionState, shape );
+btRigidBody * physical::createBody(
+    btCollisionShape * shape , 
+    btMotionState * motionState , 
+    btScalar mass , 
+    const btVector3 & localInertia
+){
+    return new btRigidBody( mass , motionState, shape );
 }
 void physical::getMotionState(btMotionState * motionState,float * mtx){
     btTransform transform;

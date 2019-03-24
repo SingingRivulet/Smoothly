@@ -177,7 +177,7 @@ void control::loop(){
     if(!ok())
         return;
     recv();
-    buildingApplay();
+    buildingApply();
     deltaTimeUpdate();
     irr::core::line3d<irr::f32> line;
     cameraPosition           = camera->getPosition();
@@ -228,7 +228,7 @@ void control::loop(){
                 buildingModeBegin();
             break;
             case BUILDING_APPLY:
-                doBuildApplay();
+                doBuildApply();
                 doBuildEnd();
             break;
         }

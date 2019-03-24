@@ -79,8 +79,34 @@ void view::sceneLoop(){
     driver->endScene();
 }
 void view::worldLoop(){
-    if(dynamicsWorld && deltaTime!=0.0f)
+    if(dynamicsWorld && deltaTime!=0.0f){
         dynamicsWorld->stepSimulation(deltaTime,10);
+        //collision
+        auto disp=dynamicsWorld->getDispatcher();
+        int numManifolds = disp->getNumManifolds();
+        for(int i=0;i<numManifolds;i++){
+            btPersistentManifold * contactManifold = disp->getManifoldByIndexInternal(i);
+            int numContacts= contactManifold->getNumContacts();
+            if(numContacts>0){
+                const btCollisionObject * obA = contactManifold->getBody0();
+                const btCollisionObject * obB = contactManifold->getBody1();
+                
+                void * pA=obA->getUserPointer();
+                void * pB=obB->getUserPointer();
+                
+                int numContacts=contactManifold->getNumContacts();
+                for(int j=0;j<numContacts;j++){
+                    
+                    auto point=contactManifold->getContactPoint(j);
+                    
+                    float impulse=point.getAppliedImpulse();
+                    
+                    
+                    
+                }
+            }
+        }
+    }
 }
 void view::deltaTimeUpdate(){
     if(deltaTimeUpdateFirst){

@@ -160,6 +160,9 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->node->setPosition(i->position);
     i->node->setRotation(i->rotation);
     i->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    if(it->second->useAlpha){
+        i->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    }
     
     irr::core::aabbox3d<irr::f32> box=it->second->BB;
     i->node->updateAbsolutePosition();
@@ -169,6 +172,11 @@ void buildings::onGenBuilding(remoteGraph::item * i){
         i->bodyState=setMotionState(i->node->getAbsoluteTransformation().pointer());
         i->rigidBody=createBody(it->second->bodyShape,i->bodyState);
         i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+        
+        i->info.type=BODY_BUILDING;
+        i->info.ptr=i;
+        i->rigidBody->setUserPointer(&(i->info));
+        
         dynamicsWorld->addRigidBody(i->rigidBody);
     }else
         i->rigidBody=NULL;
@@ -352,7 +360,7 @@ void buildings::doBuildUpdate(const irr::core::line3d<irr::f32> & ray){
         allowBuild=false;
     }
 }
-void buildings::doBuildApplay(){
+void buildings::doBuildApply(){
     if(!buildingMode || !allowBuild)
         return;
     std::list<building*> l;

@@ -155,7 +155,7 @@ bool remoteGraph::inRange(remoteGraph::item * p){
     return p->inChunk!=NULL;
 }
 
-void remoteGraph::removeApplay(){
+void remoteGraph::removeApply(){
     for(auto it:removelist){
         onDestroyBuilding(it);
         removeFromChunk(it);
@@ -401,7 +401,7 @@ remoteGraph::remoteGraph(){
 }
 
 void remoteGraph::destroy(){
-    buildingApplay();
+    buildingApply();
     clearNodes();
     poolFree();
 }

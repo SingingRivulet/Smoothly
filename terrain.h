@@ -38,6 +38,8 @@ namespace smoothly{
                     btRigidBody   * rigidBody;
                     btMotionState * bodyState;
                     
+                    bodyInfo info;
+                    
                     item * next;
                     int mapId;
                     inline void remove(){
@@ -78,6 +80,8 @@ namespace smoothly{
                     btMotionState    * bodyState;
                     btCollisionShape * bodyShape;
                     btTriangleMesh   * bodyMesh;
+                    
+                    bodyInfo info;
                     
                     terrain * parent;
                     int x,y;

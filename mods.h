@@ -103,7 +103,25 @@ namespace smoothly{
             irr::scene::ISceneManager * scene;
             
             long defaultBuildingList[7];
-            
+            //////////////////////////////////////////////////////////////////////////////
+            enum subsType{
+                SUBS_LASTING,
+                SUBS_BRIEF
+            };
+            class subsConf{
+                public:
+                    long id;
+                    float mass;
+                    btVector3 localInertia;
+                    int life;
+                    subsType type;
+                    irr::scene::IMesh * mesh;
+                    btCollisionShape  * bodyShape;
+                    btTriangleMesh    * bodyMesh;
+                    bool                useAlpha;
+            };
+            std::map<long,subsConf *> subsConfs;
+            //////////////////////////////////////////////////////////////////////////////
             void init(const char * path);
             void loadMesh();
             void destroy();

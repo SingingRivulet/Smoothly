@@ -2,6 +2,7 @@
 #define SMOOTHLY_REMOTEGRAPH
 #include "utils.h"
 #include "uuid.h"
+#include "physical.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
@@ -46,6 +47,7 @@ namespace smoothly{
                     irr::scene::IMeshSceneNode * node;
                     btRigidBody * rigidBody;
                     btMotionState * bodyState;
+                    physical::bodyInfo info;
                     bool isRoot;
                     
                     int hp;
@@ -135,13 +137,13 @@ namespace smoothly{
             void createChunk(int x,int y);
             
             bool inRange(item *);
-            void removeApplay();
+            void removeApply();
             void createListFilter();
             
             void destroy();
             
-            inline void buildingApplay(){
-                removeApplay();
+            inline void buildingApply(){
+                removeApply();
                 createListFilter();
             }
             
