@@ -1,6 +1,8 @@
 #include "substance.h"
 namespace smoothly{
 
+typedef mempool<substance::subs> subsPool;
+
 void substance::subs::setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r){
     btTransform transform;
     
@@ -64,7 +66,7 @@ void substance::removeSubs(substance::subs * p){
 void substance::subs::update(){
     if(parent){
         updateByWorld();
-        if(type==mods::SUBS_LASTING && !rigidBody->wantsSleeping()){
+        if(type==mods::SUBS_LASTING && (!rigidBody->wantsSleeping() || wake)){
             //upload to server
             parent->uploadBodyStatus(
                 uuid,
@@ -74,6 +76,7 @@ void substance::subs::update(){
                 getAngularVelocity()
             );
         }
+        wake=(!rigidBody->wantsSleeping());
     }
 }
 void substance::removeApply(){
@@ -112,7 +115,10 @@ substance::subs * substance::addBriefSubs(//添加非持久物体
         auto sp=createSubs();
         sp->setRandUUID();
         sp->init(p,posi,rota);
+        sp->type=mods::SUBS_BRIEF;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
+        
+        sp->setAsBrief(p->life);
         
         requestCreateBriefSubs(id,posi,rota,impulse,rel_pos);
     }
@@ -128,10 +134,11 @@ void substance::genSubs(//添加物体（持久），由服务器调用
     if(seekSubs(uuid))
         return;
     auto p=seekSubsConf(id);
-    if(p && p->type==mods::SUBS_BRIEF){
+    if(p && p->type==mods::SUBS_LASTING){
         auto sp=createSubs();
         sp->uuid=uuid;
         sp->init(p,posi,rota);
+        sp->type=mods::SUBS_LASTING;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
     }
 }
@@ -148,7 +155,9 @@ void substance::genSubs(//添加物体（非持久）
         auto sp=createSubs();
         sp->setRandUUID();
         sp->init(p,posi,rota);
+        sp->type=mods::SUBS_BRIEF;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
+        sp->setAsBrief(p->life);
     }
 }
 
@@ -211,10 +220,42 @@ void substance::subs::release(){
 }
 
 void substance::subs::setAsBrief(int life){
+    if(uuid.empty() || parent==NULL)
+        return;
     
+    parent->briefSubs.push_back(briefTime(this->uuid , parent->timer->getTime(),life));
+    type==mods::SUBS_BRIEF;
 }
+struct isSubsExpire{
+    substance * self;
+    bool operator() (const substance::briefTime & value){
+        if(fabs(self->timer->getTime()-value.createTime)>value.life){
+            //expire
+            self->removeLocalSubs(value.uuid);
+            return true;
+        }else
+            return false;
+    }
+};
 void substance::clearDiedSubs(){
-    
+    isSubsExpire s;
+    s.self=this;
+    briefSubs.remove_if(s);
+}
+substance::subs * substance::createSubs(){
+    auto p=((subsPool*)sPool)->get();
+    p->parent=this;
+    p->wake=true;
+    return p;
+}
+void substance::delSubs(substance::subs * p){
+    ((subsPool*)sPool)->del(p);
+}
+void substance::subsPoolInit(){
+    sPool = new subsPool;
+}
+void substance::subsPoolDestroy(){
+    delete (subsPool*)sPool;
 }
 
 }//namespace smoothly

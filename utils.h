@@ -7,6 +7,7 @@
 #include <raknet/BitStream.h>
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakSleep.h>
+#include <leveldb/db.h>
 #include <list>
 #include <stdio.h>
 #include <stdlib.h>

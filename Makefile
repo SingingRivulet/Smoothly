@@ -25,6 +25,9 @@ client:client.cpp game.o
 	-o client \
 	$(LIBS)
 
+dblist.o:dblist.h dblist.cpp utils.h
+	$(CC) -c dblist.cpp
+
 RealisticWater.o:RealisticWater.h RealisticWater.cpp
 	$(CC) -c RealisticWater.cpp
 

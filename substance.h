@@ -21,6 +21,8 @@ namespace smoothly{
                 subs * next;
                 substance * parent;
                 
+                bool wake;
+                
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
@@ -58,11 +60,27 @@ namespace smoothly{
                 std::string uuid;
                 int createTime;
                 int life;
+                inline briefTime(const std::string & u,int t,int l){
+                    uuid=u;
+                    createTime=t;
+                    life=l;
+                }
+                inline briefTime(const briefTime & b){
+                    uuid=b.uuid;
+                    createTime=b.createTime;
+                    life=b.life;
+                }
             };
             std::list<briefTime> briefSubs;//非持久物体表
             void clearDiedSubs();//清除到期的物体
             
-            subs * seekSubs(const std::string & );
+            inline subs * seekSubs(const std::string & uuid){
+                auto it=subses.find(uuid);
+                if(it==subses.end())
+                    return NULL;
+                else
+                    return it->second;
+            }
             
             //本地直接调用的删除函数
             void removeSubs(subs * );//删除物体（调用removeLocalSubs）
@@ -149,8 +167,17 @@ namespace smoothly{
                 const btVector3& rel_pos
             )=0;
             
+        public:
+            
+            inline substance():briefSubs(),subses(),subsRMT(){
+                subsPoolInit();
+            }
+            inline ~substance(){
+                subsPoolDestroy();
+            }
+            
         private:
-            void * subsPool;
+            void * sPool;
             subs * createSubs();
             void delSubs(subs *);
             void subsPoolInit();

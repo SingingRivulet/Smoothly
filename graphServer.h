@@ -1,6 +1,5 @@
 #ifndef SMOOTHLY_SERVER_GRAPH
 #define SMOOTHLY_SERVER_GRAPH
-#include <leveldb/db.h>
 #include <string>
 #include <list>
 #include <map>
