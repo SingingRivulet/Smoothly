@@ -179,6 +179,15 @@ void subsServer::attackSubs(const std::string & uuid,int dmg){
     }
     pthread_rwlock_unlock(&rwlock);
 }
+void subsServer::sendSubs(const RakNet::SystemAddress & addr,const std::string & uuid){
+    pthread_rwlock_rdlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        p->send(addr);
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
 void subsServer::sendSubs(
     const RakNet::SystemAddress & addr,int x,int y
 ){

@@ -112,7 +112,7 @@ namespace smoothly{
                 auto it=nodes.find(name);
                 if(it!=nodes.end())
                     it->second->drop();
-                
+                n->parent=this;
                 n->grab();
                 n->expire=getTime()+life;
                 

@@ -78,10 +78,9 @@ namespace smoothly{
             void removeSubs(const std::string & uuid);
             void attackSubs(const std::string & uuid,int dmg);
             void sendSubs(const RakNet::SystemAddress & addr,int x,int y);
+            void sendSubs(const RakNet::SystemAddress & addr,const std::string & uuid);
             
             virtual bool getSubsConf(long id , bool & isLasting , int & hp)=0;
-            virtual bool getUUIDByAddr(std::string & uuid , const RakNet::SystemAddress & addr)=0;
-            virtual bool getAddrByUUID(RakNet::SystemAddress & addr , const std::string & uuid)=0;
             virtual void setOwner(const std::string & subsuuid,const std::string & useruuid)=0;
             virtual void removeFromOwner(const std::string & subsuuid,const std::string & useruuid)=0;
             virtual bool userCanPutSubs(const std::string & useruuid)=0;
