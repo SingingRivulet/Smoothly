@@ -1,0 +1,358 @@
+#include "subsServer.h"
+namespace smoothly{
+
+subsServer::subsServer(const char * path){
+    pthread_rwlock_init(&rwlock, NULL);
+    leveldb::Options opt;
+    opt.create_if_missing=true;
+    leveldb::DB::Open(opt,path,&this->db);
+}
+
+subsServer::~subsServer(){
+    subsCache.clear();
+    delete this->db;
+    pthread_rwlock_destroy(&rwlock);
+}
+void subsServer::teleport(
+    const std::string & uuid,
+    const irr::core::vector3df & posi
+){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        //set memory
+        p->position=posi;
+        p->updateChunkPosition();
+        //set database
+        p->save(false,true);
+        moveUserPosition(uuid,p->userUUID,posi);
+        p->drop();
+    }
+    
+    pthread_rwlock_unlock(&rwlock);
+}
+void subsServer::setSubs(
+    const std::string & uuid,
+    const irr::core::vector3df & posi,
+    const irr::core::vector3df & rota, 
+    const btVector3& lin_vel ,
+    const btVector3& ang_vel ,
+    int status,
+    const std::string & muuid
+){//move a lasting substance
+    pthread_rwlock_wrlock(&rwlock);
+    
+    bool resetMan=false;
+    
+    auto p=seekSubs(uuid);
+    if(p){
+        if(p->manager=="NULL" || p->manager.empty()){
+            p->manager=muuid;
+            p->lastChMan=cache::getTime();
+            resetMan=true;
+        }
+        if(resetMan || p->manager==muuid){
+            //set memory
+            p->position=posi;
+            p->rotation=rota;
+            p->lin_vel=lin_vel;
+            p->ang_vel=ang_vel;
+            p->status=status;
+            p->updateChunkPosition();
+            //set database
+            p->save();
+            moveUserPosition(uuid,p->userUUID,posi);
+        }else{
+            if(p->userUUID==muuid){
+                p->manager=muuid;
+                p->lastChMan=cache::getTime();
+                p->save();
+            }else
+            if(fabs(p->lastChMan-cache::getTime())>60){
+                if(((int)(posi.X+posi.Y+posi.Z)+cache::getTime())%8 == 1){
+                    p->manager=muuid;
+                    p->lastChMan=cache::getTime();
+                    p->save();
+                }
+            }
+        }
+        p->drop();
+    }
+    
+    pthread_rwlock_unlock(&rwlock);
+}
+
+void subsServer::createSubs(//添加物体
+    long id , 
+    const irr::core::vector3df & posi,
+    const irr::core::vector3df & rota, 
+    const btVector3& impulse,
+    const btVector3& rel_pos,
+    const std::string & muuid,
+    const RakNet::SystemAddress & from
+){
+    pthread_rwlock_wrlock(&rwlock);
+    
+    bool lasting;
+    int hp;
+    
+    if(getSubsConf(id,lasting,hp)){
+        if(lasting){
+            if(userCanPutSubs(muuid)){
+                auto p=new subs();
+                p->id       =id;
+                p->parent   =this;
+                p->userUUID =muuid;
+                p->manager  =muuid;
+                p->status   =0;
+                p->position =posi;
+                p->rotation =rota;
+                p->lin_vel.setValue(0,0,0);
+                p->ang_vel.setValue(0,0,0);
+                p->hp       =hp;
+                p->updateChunkPosition();
+                genuuid:
+                p->genUUID();
+                if(uuidExist(p->uuid))
+                    goto genuuid;
+            
+                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos);
+                setOwner(p->uuid,muuid);
+                p->save(true);
+                p->drop();
+            }else
+                sendPutSubsFail(from);
+        }else{
+            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,from);
+        }
+    }
+    
+    pthread_rwlock_unlock(&rwlock);
+}
+
+void subsServer::giveUpControl(const std::string & uuid,const std::string & muuid){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        if(p->manager==muuid){
+            p->manager="NULL";
+            p->lastChMan=0;
+        }
+        p->save();
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+void subsServer::changeManager(const std::string & uuid,const std::string & muuid){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        if(p->manager==p->userUUID){
+            
+        }else{
+            p->manager=muuid;
+            p->lastChMan=cache::getTime();
+            p->save();
+        }
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+
+void subsServer::removeSubs(const std::string & uuid){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        p->remove();
+        p->drop();
+    }
+    subsCache.del(uuid);
+    pthread_rwlock_unlock(&rwlock);
+}
+void subsServer::attackSubs(const std::string & uuid,int dmg){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        p->hp-=dmg;
+        p->save();
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+void subsServer::sendSubs(
+    const RakNet::SystemAddress & addr,int x,int y
+){
+    pthread_rwlock_rdlock(&rwlock);
+    char kbuf[256];
+    snprintf(kbuf,256,"subsChunkList_%d_%d_",x,y);
+    dblist l;
+    l.db=db;
+    l.prefix=kbuf;
+    l.seekBegin();
+    while(1){
+        auto p=seekSubs(l.key_now);
+        if(p){
+            p->send(addr);
+            p->drop();
+        }
+        if(!l.next())
+            break;
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+subsServer::subs * subsServer::seekSubs(const std::string & uuid){
+    auto p=(subs*)subsCache.get(uuid);
+    if(p==NULL)
+        p=createSubs(uuid);
+    return p;
+}
+
+subsServer::subs * subsServer::createSubs(const std::string & uuid){
+    std::string sbuf;
+    char kbuf[256];
+    snprintf(kbuf,256,"subsNode %s",uuid.c_str());
+    
+    if(db->Get(leveldb::ReadOptions(),kbuf,&sbuf).ok() && !sbuf.empty()){
+        auto p=new subs();
+        p->uuid=uuid;
+        p->parent=this;
+        p->decode(sbuf.c_str());
+        p->updateChunkPosition();
+        subsCache.put(uuid,p);
+        return p;
+    }else
+        return NULL;
+}
+
+bool subsServer::uuidExist(const std::string & uuid){
+    std::string sbuf;
+    char kbuf[256];
+    snprintf(kbuf,256,"subsNode %s",uuid.c_str());
+    
+    return (db->Get(leveldb::ReadOptions(),kbuf,&sbuf).ok() && !sbuf.empty());
+}
+
+void subsServer::subs::updateChunkPosition(){
+    x=(int)(position.X/32);
+    y=(int)(position.Z/32);
+}
+void subsServer::subs::genUUID(){
+    getUUID(uuid);
+}
+void subsServer::subs::encode(char * vbuf,int len){
+    snprintf(vbuf,len,
+        "%ld %d %d "
+        "%f %f %f "
+        "%f %f %f "
+        "%f %f %f "
+        "%f %f %f "
+        "%s %s ",
+        id,hp,status,
+        position.X,position.Y,position.Z ,
+        rotation.X,rotation.Y,rotation.Z ,
+        lin_vel.getX(),lin_vel.getY(),lin_vel.getZ() ,
+        ang_vel.getX(),ang_vel.getY(),ang_vel.getZ() ,
+        userUUID.c_str() , manager.c_str() 
+    );
+}
+void subsServer::subs::decode(const char * vbuf){
+    float fbuf;
+    std::istringstream iss(vbuf);
+    iss>>id;
+    iss>>hp;
+    iss>>status;
+    
+    iss>>position.X;
+    iss>>position.Y;
+    iss>>position.Z;
+    
+    iss>>rotation.X;
+    iss>>rotation.Y;
+    iss>>rotation.Z;
+    
+    fbuf=0;iss>>fbuf;lin_vel.setX(fbuf);
+    fbuf=0;iss>>fbuf;lin_vel.setY(fbuf);
+    fbuf=0;iss>>fbuf;lin_vel.setZ(fbuf);
+    
+    fbuf=0;iss>>fbuf;ang_vel.setX(fbuf);
+    fbuf=0;iss>>fbuf;ang_vel.setY(fbuf);
+    fbuf=0;iss>>fbuf;ang_vel.setZ(fbuf);
+    
+    userUUID.clear();
+    iss>>userUUID;
+    
+    manager.clear();
+    iss>>manager;
+}
+
+void subsServer::subs::save(bool updateChunk,bool tp){
+    int tx,ty;
+    tx=x;
+    ty=y;
+    updateChunkPosition();
+    if(updateChunk){
+        addIntoChunk(x,y);
+    }else
+    if(tx!=x || ty!=y){
+        removeFromChunk(tx,ty);
+        addIntoChunk(x,y);
+    }
+    if(tp){
+        parent->sendTeleport(uuid,position);
+    }else
+        send();
+}
+
+void subsServer::subs::saveDo(){
+    save();
+    char kbuf[256];
+    char vbuf[2048];
+    encode(vbuf,sizeof(vbuf));
+    snprintf(kbuf,256,"subsNode %s",uuid.c_str());
+    parent->db->Put(leveldb::WriteOptions(),kbuf,vbuf);
+}
+void subsServer::subs::load(){
+    std::string sbuf;
+    char kbuf[256];
+    snprintf(kbuf,256,"subsNode %s",uuid.c_str());
+    
+    if(parent->db->Get(leveldb::ReadOptions(),kbuf,&sbuf).ok() && !sbuf.empty()){
+        decode(sbuf.c_str());
+    }
+    
+}
+void subsServer::subs::remove(){
+    parent->boardcastSubsRemove(uuid,position);
+    removeFromChunk(x,y);
+    parent->removeFromOwner(uuid,userUUID);
+    char kbuf[256];
+    snprintf(kbuf,256,"subsNode %s",uuid.c_str());
+    parent->db->Delete(leveldb::WriteOptions(),kbuf);
+}
+void subsServer::subs::send(){
+    parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status);
+}
+void subsServer::subs::send(const RakNet::SystemAddress & addr){
+    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,addr);
+}
+void subsServer::subs::onFree(){
+    saveDo();
+}
+void subsServer::subs::removeFromChunk(int x,int y){
+    char kbuf[256];
+    snprintf(kbuf,256,"subsChunkList_%d_%d_",x,y);
+    dblist l;
+    l.db=parent->db;
+    l.prefix=kbuf;
+    l.del(uuid);
+}
+void subsServer::subs::addIntoChunk(int x,int y){
+    char kbuf[256];
+    snprintf(kbuf,256,"subsChunkList_%d_%d_",x,y);
+    dblist l;
+    l.db=parent->db;
+    l.prefix=kbuf;
+    l.pushBegin(uuid);
+}
+
+}

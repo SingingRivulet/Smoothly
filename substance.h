@@ -26,6 +26,7 @@ namespace smoothly{
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
+                void teleport(const irr::core::vector3df & p);
                 
                 inline const btVector3 & getAngularVelocity(){
                     return rigidBody->getAngularVelocity();
@@ -112,7 +113,14 @@ namespace smoothly{
             
             
         public:
-            
+            void setSubs(//设置物体（持久），由服务器调用
+                const std::string & uuid ,
+                long id , 
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r,  
+                const btVector3& lin_vel ,
+                const btVector3& ang_vel
+            );
             void genSubs(//添加物体（持久），由服务器调用
                 const std::string & uuid ,
                 long id , 

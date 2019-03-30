@@ -14,7 +14,11 @@ void substance::subs::setMotion(const irr::core::vector3df & p,const irr::core::
     
     bodyState->setWorldTransform(transform);//apply
 }
-
+void substance::subs::teleport(const irr::core::vector3df & p){
+    btTransform transform=rigidBody->getWorldTransform();
+    transform.setOrigin(btVector3(p.X, p.Y, p.Z));
+    rigidBody->setWorldTransform(transform);
+}
 void substance::subs::setPosition(const irr::core::vector3df & p){
     node->setPosition(p);
     
@@ -160,7 +164,31 @@ void substance::genSubs(//添加物体（非持久）
         sp->setAsBrief(p->life);
     }
 }
-
+void substance::setSubs(//设置物体（持久），由服务器调用
+    const std::string & uuid ,
+    long id , 
+    const irr::core::vector3df & posi,
+    const irr::core::vector3df & rota,
+    const btVector3& lin_vel ,
+    const btVector3& ang_vel
+){
+    auto ptr=seekSubs(uuid);
+    if(ptr){
+        ptr->setMotion(posi,rota);
+        ptr->rigidBody->setLinearVelocity(lin_vel);
+        ptr->rigidBody->setAngularVelocity(ang_vel);
+    }else{
+        auto p=seekSubsConf(id);
+        if(p && p->type==mods::SUBS_LASTING){
+            auto sp=createSubs();
+            sp->uuid=uuid;
+            sp->init(p,posi,rota);
+            sp->type=mods::SUBS_LASTING;
+            sp->rigidBody->setLinearVelocity(lin_vel);
+            sp->rigidBody->setAngularVelocity(ang_vel);
+        }
+    }
+}
 void substance::updateSubs(//更新物体状态，由服务器调用
     const std::string & uuid , 
     const irr::core::vector3df & posi,

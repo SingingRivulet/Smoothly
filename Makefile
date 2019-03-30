@@ -28,6 +28,12 @@ client:client.cpp game.o
 dblist.o:dblist.h dblist.cpp utils.h
 	$(CC) -c dblist.cpp
 
+subsServer.o:subsServer.h subsServer.cpp utils.h
+	$(CC) -c subsServer.cpp
+
+user.o:user.h user.cpp subsServer.o
+	$(CC) -c user.cpp
+
 RealisticWater.o:RealisticWater.h RealisticWater.cpp
 	$(CC) -c RealisticWater.cpp
 

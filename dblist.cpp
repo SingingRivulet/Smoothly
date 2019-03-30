@@ -79,7 +79,8 @@ void dblistBase::clear(){
     while(1){
         if(!key_now.empty()){
             delNode_unsafe(key_now);
-            next();
+            if(!next())
+                break;
         }else
             break;
     }
@@ -127,6 +128,38 @@ void dblistBase::setBegin(const std::string & nkey){
     std::string nk;
     getBeginKey(nk);
     writeDb(nk,nkey);
+}
+void dblist::readDb (const std::string & key,std::string & value){
+    db->Get(leveldb::ReadOptions(),key,&value);
+}
+void dblist::delDb  (const std::string & key){
+    db->Delete(leveldb::WriteOptions(),key);
+}
+void dblist::writeDb(const std::string & key,const std::string & value){
+    db->Put(leveldb::WriteOptions(),key,value);
+}
+
+void dblist::clear(){
+    leveldb::WriteBatch batch;
+    seekBegin();
+    std::string lk,nk;
+    getBeginKey(nk);
+    batch.Delete(nk);
+    
+    while(1){
+        if(!key_now.empty()){
+            
+            getLastKey(lk , key_now);
+            getNextKey(nk , key_now);
+            batch.Delete(lk);
+            batch.Delete(nk);
+            
+            if(!next())
+                break;
+        }else
+            break;
+    }
+    db->Write(leveldb::WriteOptions(), &batch);
 }
 
 }
