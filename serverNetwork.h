@@ -23,6 +23,23 @@ namespace smoothly{
                 int x,int y,
                 const RakNet::SystemAddress & to
             );
+            virtual void sendSubsStatus(
+                const std::string & subsuuid,
+                long id , 
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r, 
+                const btVector3& lin_vel,
+                const btVector3& ang_vel,
+                int status,
+                int hp,
+                const std::string & useruuid,
+                const RakNet::SystemAddress & to
+            );
+            virtual void sendPutSubsFail(const RakNet::SystemAddress & to);
+            virtual void sendSetUserSubs(const RakNet::SystemAddress & address,const std::string & uuid);
+            virtual void sendUserSubsUUID(const std::string & uuid,const RakNet::SystemAddress & address);
+            virtual void sendUserSubsUUIDs(const std::list<std::string> & uuid,const RakNet::SystemAddress & address);
+            virtual void sendChunkRun(int x,int y,const RakNet::SystemAddress & to);
             
             inline void sendMessage(RakNet::BitStream * data,const RakNet::SystemAddress & address){
                 if(connection)
@@ -41,22 +58,42 @@ namespace smoothly{
             
             bool loged(const RakNet::SystemAddress & address);
             
+        public:
             void recv();
+            //events
             void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
             
             void onMessageUpdateBuilding(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateTerrain(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateUser(RakNet::Packet * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubs(RakNet::Packet * data,const RakNet::SystemAddress & address);
             
-            void onMessageUpdateUserPosition(RakNet::BitStream * data,const RakNet::SystemAddress & address);
-            void onMessageUpdateUserRotation(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            //user
+            void onMessageUpdateUserLogin(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateUserChangePwd(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateUserLogout(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
+            
+            //building
             void onMessageUpdateBuildingDownload(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageUpdateBuildingAttack(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageUpdateBuildingCreate(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
+            
+            //terrain
             void onMessageUpdateTerrainGetRMT(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageUpdateTerrainRemove(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            
+            
+            //substances
+            void onMessageUpdateSubsCreate(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsRemove(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsAttack(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsRequestChunk(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsRequestUUID(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsSetSubs(RakNet::BitStream * data,const RakNet::SystemAddress & address);//所有用户不断调用，至于采纳谁的，由服务器决定
+            void onMessageUpdateSubsTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateSubsGiveUp(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
             serverNetwork(const char * pathGra,const char * pathRMT,const char * modpath,short port,int maxcl);
             serverNetwork(const serverNetwork &)=delete;

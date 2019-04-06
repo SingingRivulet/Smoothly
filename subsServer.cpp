@@ -1,16 +1,18 @@
 #include "subsServer.h"
 namespace smoothly{
-
-subsServer::subsServer(const char * path){
-    pthread_rwlock_init(&rwlock, NULL);
+void subsServer::subsInit(const char * path){
     leveldb::Options opt;
     opt.create_if_missing=true;
     leveldb::DB::Open(opt,path,&this->db);
 }
+void subsServer::subsDestroy(){
+    delete this->db;
+}
+subsServer::subsServer(){
+    pthread_rwlock_init(&rwlock, NULL);
+}
 
 subsServer::~subsServer(){
-    subsCache.clear();
-    delete this->db;
     pthread_rwlock_destroy(&rwlock);
 }
 void subsServer::teleport(
@@ -46,7 +48,7 @@ void subsServer::setSubs(
     
     auto p=seekSubs(uuid);
     if(p){
-        if(p->manager=="NULL" || p->manager.empty()){
+        if(p->manager=="NULL" || p->manager.empty() || !userOnline(p->manager)){
             p->manager=muuid;
             p->lastChMan=cache::getTime();
             resetMan=true;
@@ -116,14 +118,14 @@ void subsServer::createSubs(//添加物体
                 if(uuidExist(p->uuid))
                     goto genuuid;
             
-                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos);
+                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos,muuid);
                 setOwner(p->uuid,muuid);
                 p->save(true);
                 p->drop();
             }else
                 sendPutSubsFail(from);
         }else{
-            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,from);
+            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,muuid,from);
         }
     }
     
@@ -169,16 +171,32 @@ void subsServer::removeSubs(const std::string & uuid){
     subsCache.del(uuid);
     pthread_rwlock_unlock(&rwlock);
 }
+
+void subsServer::getSubsPosition(irr::core::vector3df & posi,const std::string & uuid){
+    pthread_rwlock_rdlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        posi=p->position;
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+
 void subsServer::attackSubs(const std::string & uuid,int dmg){
     pthread_rwlock_wrlock(&rwlock);
     auto p=seekSubs(uuid);
     if(p){
         p->hp-=dmg;
-        p->save();
+        if(p->hp <= 0){
+            p->remove();
+            subsCache.del(uuid);
+        }else
+            boardcastSubsAttack(uuid,p->position,p->hp,dmg);
         p->drop();
     }
     pthread_rwlock_unlock(&rwlock);
 }
+
 void subsServer::sendSubs(const RakNet::SystemAddress & addr,const std::string & uuid){
     pthread_rwlock_rdlock(&rwlock);
     auto p=seekSubs(uuid);
@@ -188,9 +206,8 @@ void subsServer::sendSubs(const RakNet::SystemAddress & addr,const std::string &
     }
     pthread_rwlock_unlock(&rwlock);
 }
-void subsServer::sendSubs(
-    const RakNet::SystemAddress & addr,int x,int y
-){
+
+void subsServer::sendSubs(const RakNet::SystemAddress & addr,int x,int y){
     pthread_rwlock_rdlock(&rwlock);
     char kbuf[256];
     snprintf(kbuf,256,"subsChunkList_%d_%d_",x,y);
@@ -199,15 +216,18 @@ void subsServer::sendSubs(
     l.prefix=kbuf;
     l.seekBegin();
     while(1){
-        auto p=seekSubs(l.key_now);
-        if(p){
-            p->send(addr);
-            p->drop();
+        if(!l.key_now.empty()){
+            auto p=seekSubs(l.key_now);
+            if(p){
+                p->send(addr);
+                p->drop();
+            }
         }
         if(!l.next())
             break;
     }
     pthread_rwlock_unlock(&rwlock);
+    sendChunkRun(x,y,addr);
 }
 subsServer::subs * subsServer::seekSubs(const std::string & uuid){
     auto p=(subs*)subsCache.get(uuid);
@@ -307,7 +327,7 @@ void subsServer::subs::save(bool updateChunk,bool tp){
         addIntoChunk(x,y);
     }
     if(tp){
-        parent->sendTeleport(uuid,position);
+        parent->boardcastTeleport(uuid,position);
     }else
         send();
 }
@@ -339,10 +359,10 @@ void subsServer::subs::remove(){
     parent->db->Delete(leveldb::WriteOptions(),kbuf);
 }
 void subsServer::subs::send(){
-    parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status);
+    parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID);
 }
 void subsServer::subs::send(const RakNet::SystemAddress & addr){
-    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,addr);
+    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,addr);
 }
 void subsServer::subs::onFree(){
     saveDo();

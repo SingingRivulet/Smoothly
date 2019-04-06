@@ -317,19 +317,10 @@ void clientNetwork::requestUpdateTerrain(int x,int y){
     sendMessageU(&bs);
 }
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){
-    RakNet::BitStream bs;
-    bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((RakNet::MessageID)M_UPDATE_USER);
-    bs.Write((RakNet::MessageID)U_SET_POSITION);
-    bs.WriteVector(p.X , p.Y , p.Z);
-    sendMessage(&bs);
+    
 }
 void clientNetwork::setUserRotation(const irr::core::vector3df & r){
-    RakNet::BitStream bs;
-    bs.Write((RakNet::MessageID)MESSAGE_GAME);
-    bs.Write((RakNet::MessageID)U_SET_ROTATION);
-    bs.WriteVector(r.X , r.Y , r.Z);
-    sendMessage(&bs);
+    
 }
 
 }

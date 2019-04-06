@@ -23,14 +23,33 @@ namespace smoothly{
         M_UPDATE_BUILDING = 'b',
         M_UPDATE_TERRAIN  = 't',
         M_UPDATE_OBJECT   = 'o',
+        M_UPDATE_SUBS     = 's',
         M_UPDATE_USER     = 'u'
     };
-    
+    enum SubsMethod{
+        S_UL_TELEPORT   ='p',
+        S_DL_TELEPORT   ='P',
+        S_DL_STATUS     ='S',
+        S_UL_CREATE     ='c',
+        S_DL_CREATE     ='C',
+        S_DL_CREATE_B   ='B',
+        S_UL_ATTACK     ='t',
+        S_DL_ATTACK     ='T',
+        S_UL_REMOVE     ='r',
+        S_DL_REMOVE     ='R',
+        S_RQ_CHUNK      ='k',
+        S_RQ_UUID       ='i',
+        S_FAIL          ='f',
+        S_SET_USER_SUBS ='e',
+        S_SUBS_UUID     ='d',
+        S_SUBS_UUIDS    ='o',
+        S_RUN_CHUNK     ='N'
+    };
     enum UserMethod{
-        U_SET_POSITION  ='p',
-        U_SET_ROTATION  ='r',
         U_MOVE          ='m',
-        U_LOGIN         ='l'
+        U_LOGIN         ='l',
+        U_LOGOUT        ='o',
+        U_CHANGE_PWD    ='c'
     };
     
     enum BuildingMethod{

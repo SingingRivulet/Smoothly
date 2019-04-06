@@ -30,6 +30,11 @@ void watch::delListener(const RakNet::SystemAddress & addr){
     it->second->box->autodrop();
     delListener(it->second);
 }
+void watch::setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr){
+    HBB::vec3 from  (position.X-viewRange , -2000 , position.Z-viewRange);
+    HBB::vec3 to    (position.X+viewRange ,  2000 , position.Z+viewRange);
+    setListener(from,to,addr);
+}
 void watch::onCreateNode(
     const std::string & uuid,
     const irr::core::vector3df & position,
@@ -112,7 +117,166 @@ void watch::boardcastByPoint(const HBB::vec3 & point,RakNet::BitStream * bs){
         //printf("boardcast\n");
     },bs);
 }
+void watch::boardcastSubsCreate(
+    const std::string & subsuuid,
+    long id , 
+    const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation, 
+    const btVector3& impulse,
+    const btVector3& rel_pos,
+    const std::string & useruuid
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_CREATE);
+    
+    RakNet::RakString u;
+    
+    bs.Write((int64_t)id);
+    
+    u=subsuuid.c_str();
+    bs.Write(u);
+    
+    u=useruuid.c_str();
+    bs.Write(u);
+    
+    bs.WriteVector(position.X , position.Y , position.Z);
+    bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
+    bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
+void watch::boardcastSubsCreate(
+    long id , 
+    const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation, 
+    const btVector3& impulse,
+    const btVector3& rel_pos,
+    const std::string & useruuid,
+    const RakNet::SystemAddress & ext
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_CREATE_B);
+    
+    RakNet::RakString u;
+    
+    bs.Write((int64_t)id);
+    
+    u=useruuid.c_str();
+    bs.Write(u);
+    
+    bs.WriteVector(position.X , position.Y , position.Z);
+    bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
+    bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
+    
+    struct tmpc{
+        RakNet::SystemAddress ext;
+        RakNet::BitStream * bs;
+    }arg;
+    
+    arg.ext=ext;
+    arg.bs=&bs;
+    
+    eventHBB.fetchByPoint(HBB::vec3(position.X,0,position.Z),[](HBB::AABB * box , void * argp){
+        auto arg=(tmpc*)argp;
+        auto lst=(listener*)box->data;
+        
+        if(arg->ext!=lst->address)
+            lst->parent->sendMessage(arg->bs,lst->address);
+    },&arg);
+}
+void watch::boardcastSubsStatus(
+    const std::string & subsuuid,
+    long id , 
+    const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation, 
+    const btVector3& lin_vel,
+    const btVector3& ang_vel,
+    int status,
+    int hp,
+    const std::string & useruuid
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_STATUS);
+    
+    RakNet::RakString u;
+    
+    bs.Write((int64_t)id);
+    
+    u=subsuuid.c_str();
+    bs.Write(u);
+    
+    u=useruuid.c_str();
+    bs.Write(u);
+    
+    bs.WriteVector(position.X , position.Y , position.Z);
+    bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(lin_vel.getX(),lin_vel.getY(),lin_vel.getZ());
+    bs.WriteVector(ang_vel.getX(),ang_vel.getY(),ang_vel.getZ());
+    
+    bs.Write((int32_t)status);
+    bs.Write((int32_t)hp);
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
 
+void watch::boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & position){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_REMOVE);
+    
+    RakNet::RakString u;
+    u=subsuuid.c_str();
+    bs.Write(u);
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
+void watch::boardcastSubsAttack(const std::string & subsuuid,const irr::core::vector3df & position,int hp,int delta){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_ATTACK);
+    
+    RakNet::RakString u;
+    u=subsuuid.c_str();
+    bs.Write(u);
+    
+    bs.Write((int32_t)hp);
+    bs.Write((int32_t)delta);
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
+void watch::boardcastTeleport(
+    const std::string & subsuuid,
+    const irr::core::vector3df & position
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_DL_TELEPORT);
+    
+    RakNet::RakString u;
+    u=subsuuid.c_str();
+    bs.Write(u);
+    
+    bs.WriteVector(position.X , position.Y , position.Z);
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
 watch::listener * watch::createListener(){
     auto pool=(lpool*)listenerPool;
     auto p=pool->get();

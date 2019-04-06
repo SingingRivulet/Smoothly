@@ -21,11 +21,7 @@ namespace smoothly{
             inline bool addrExist(const RakNet::SystemAddress & addr){
                 return listeners.find(addr)!=listeners.end();
             }
-            inline void setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr){
-                HBB::vec3 from  (position.X-viewRange , -2000 , position.Z-viewRange);
-                HBB::vec3 to    (position.X+viewRange ,  2000 , position.Z+viewRange);
-                setListener(from,to,addr);
-            }
+            virtual void setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr);
             void setListener(
                 const HBB::vec3 & from,
                 const HBB::vec3 & to,
@@ -34,7 +30,7 @@ namespace smoothly{
             void delListener(listener *);
             void lstPoolInit();
             void lstPoolFree();
-            void delListener(const RakNet::SystemAddress & addr);
+            virtual void delListener(const RakNet::SystemAddress & addr);
             void boardcastByPoint(const HBB::vec3 & point,RakNet::BitStream * bs);
             
             virtual void sendMessage(RakNet::BitStream * data,const RakNet::SystemAddress & address)=0;
@@ -50,6 +46,41 @@ namespace smoothly{
             virtual void onDestroyNode(const std::string & uuid,int x,int y);
             virtual void onAttackNode(const std::string & uuid,int hp,int x,int y);
             virtual void onRemoveTerrain(int x,int y,long itemid,int mapid);
+            virtual void boardcastSubsCreate(
+                const std::string & subsuuid,
+                long id , 
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r, 
+                const btVector3& impulse,
+                const btVector3& rel_pos,
+                const std::string & useruuid
+            );
+            virtual void boardcastSubsCreate(
+                long id , 
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r, 
+                const btVector3& impulse,
+                const btVector3& rel_pos,
+                const std::string & useruuid,
+                const RakNet::SystemAddress & ext
+            );
+            virtual void boardcastSubsStatus(
+                const std::string & subsuuid,
+                long id , 
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r, 
+                const btVector3& lin_vel,
+                const btVector3& ang_vel,
+                int status,
+                int hp,
+                const std::string & useruuid
+            );
+            virtual void boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & p);
+            virtual void boardcastSubsAttack(const std::string & subsuuid,const irr::core::vector3df & p,int hp,int delta);
+            virtual void boardcastTeleport(
+                const std::string & subsuuid,
+                const irr::core::vector3df & p
+            );
     };
 }
 #endif

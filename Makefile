@@ -86,7 +86,17 @@ building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp
 
 server:server.cpp serverNetwork.o
-	$(CC) server.cpp serverNetwork.o watch.o serverMod.o removeTable.o graphServer.o hbb.o -lleveldb -o server $(LIBS)
+	$(CC) server.cpp \
+	serverNetwork.o \
+	watch.o \
+	serverMod.o \
+	removeTable.o \
+	graphServer.o \
+	hbb.o \
+	user.o \
+	dblist.o \
+	subsServer.o \
+	-lleveldb -o server $(LIBS)
 
 serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
 	$(CC) -c serverNetwork.cpp
@@ -94,7 +104,7 @@ serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
 watch.o:serverMod.o watch.cpp watch.h
 	$(CC) -c watch.cpp
 
-serverMod.o:removeTable.o graphServer.o serverMod.cpp serverMod.h
+serverMod.o:removeTable.o graphServer.o user.o serverMod.cpp serverMod.h
 	$(CC) -c serverMod.cpp
 
 removeTable.o:removeTable.cpp removeTable.h

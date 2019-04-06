@@ -1,11 +1,24 @@
 #include "serverMod.h"
 namespace smoothly{
+int serverMod::getUserMaxSubs(){
+    return userMaxSubs;
+}
 int serverMod::getHPByType(long type){
     auto it=buildingHPMap.find(type);
     if(it==buildingHPMap.end())
         return -1;
     else
         return it->second;
+}
+bool serverMod::getSubsConf(long id , bool & isLasting , int & hp){
+    auto it=subsMap.find(id);
+    if(it==subsMap.end())
+        return false;
+    else{
+        isLasting=it->second.lasting;
+        hp=it->second.hp;
+        return true;
+    }
 }
 int serverMod::itemidNum(long id){
     auto it=buildingHPMap.find(id);
@@ -25,6 +38,30 @@ static int mod_addTerrainItemID(lua_State * L){
     int num=luaL_checkinteger(L,3);
     
     self->terrainNumMap[id]=num;
+    
+    lua_pushboolean(L,1);
+    return 1;
+}
+static int mod_addSubsConf(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(serverMod*)ptr;
+    int id=luaL_checkinteger(L,2);
+    
+    bool lasting=true;
+    if(lua_isboolean(L,3))
+        lasting=lua_toboolean(L,3);
+    else
+        return 0;
+    
+    int hp=luaL_checkinteger(L,4);
+    
+    serverMod::subsConf & s=self->subsMap[id];
+    s.lasting=lasting;
+    s.hp=hp;
     
     lua_pushboolean(L,1);
     return 1;
@@ -55,6 +92,17 @@ static int mod_setViewRange(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
+static int mod_setUserMaxSubs(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(serverMod*)ptr;
+    self->userMaxSubs=luaL_checknumber(L,2);
+    lua_pushboolean(L,1);
+    return 1;
+}
 void serverMod::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -62,6 +110,8 @@ void serverMod::scriptInit(const char * path){
         {"addTerrainItemID" ,mod_addTerrainItemID},
         {"addBuildingTypeHP",mod_addBuildingTypeHP},
         {"setViewRange"     ,mod_setViewRange},
+        {"setUserMaxSubs"   ,mod_setUserMaxSubs},
+        {"addSubsConf"      ,mod_addSubsConf},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);

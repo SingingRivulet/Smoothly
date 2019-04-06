@@ -79,6 +79,11 @@ namespace smoothly{
             void attackSubs(const std::string & uuid,int dmg);
             void sendSubs(const RakNet::SystemAddress & addr,int x,int y);
             void sendSubs(const RakNet::SystemAddress & addr,const std::string & uuid);
+            void getSubsPosition(irr::core::vector3df & posi,const std::string & uuid);
+            
+            inline void clearCache(){
+                subsCache.clear();
+            }
             
             virtual bool getSubsConf(long id , bool & isLasting , int & hp)=0;
             virtual void setOwner(const std::string & subsuuid,const std::string & useruuid)=0;
@@ -92,7 +97,8 @@ namespace smoothly{
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
-                const btVector3& rel_pos
+                const btVector3& rel_pos,
+                const std::string & useruuid
             )=0;
             virtual void boardcastSubsCreate(
                 long id , 
@@ -100,6 +106,7 @@ namespace smoothly{
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
+                const std::string & useruuid,
                 const RakNet::SystemAddress & ext
             )=0;
             virtual void boardcastSubsStatus(
@@ -109,7 +116,9 @@ namespace smoothly{
                 const irr::core::vector3df & r, 
                 const btVector3& lin_vel,
                 const btVector3& ang_vel,
-                int status
+                int status,
+                int hp,
+                const std::string & useruuid
             )=0;
             virtual void sendSubsStatus(
                 const std::string & subsuuid,
@@ -119,14 +128,19 @@ namespace smoothly{
                 const btVector3& lin_vel,
                 const btVector3& ang_vel,
                 int status,
+                int hp,
+                const std::string & useruuid,
                 const RakNet::SystemAddress & to
             )=0;
             virtual void boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & p)=0;
+            virtual void boardcastSubsAttack(const std::string & subsuuid,const irr::core::vector3df & p,int hp,int delta)=0;
             virtual void sendPutSubsFail(const RakNet::SystemAddress & to)=0;
-            virtual void sendTeleport(
+            virtual void boardcastTeleport(
                 const std::string & subsuuid,
                 const irr::core::vector3df & p
             )=0;
+            virtual void sendChunkRun(int x,int y,const RakNet::SystemAddress & to)=0;
+            virtual bool userOnline(const std::string & uuid)=0;
         
         public:
             subs * seekSubs(const std::string & uuid);
@@ -136,8 +150,10 @@ namespace smoothly{
             bool uuidExist(const std::string & uuid);
             
         public:
-            subsServer(const char * path);
+            subsServer();
             ~subsServer();
+            void subsInit(const char * path);
+            void subsDestroy();
     };
 }
 #endif
