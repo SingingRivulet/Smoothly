@@ -10,6 +10,7 @@ namespace smoothly{
             virtual int itemidNum(long id);
             virtual int getUserMaxSubs();
             virtual bool getSubsConf(long id , bool & isLasting , int & hp);
+            bool checkAdminPwd(const std::string & name,const std::string & pwd);
         public:
             void scriptInit(const char * path);
             void scriptDestroy();
@@ -36,7 +37,7 @@ namespace smoothly{
             std::map<long,int> buildingHPMap;
             std::map<long,int> terrainNumMap;
             std::map<long,subsConf> subsMap;
-            
+            std::unordered_map<std::string,std::string> adminPwd;
             lua_State * L;
     };
 }

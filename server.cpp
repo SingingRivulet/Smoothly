@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <atomic>
-#include <sys/types.h>
-#include <sys/stat.h>
 std::atomic<bool> running;
 int main(int argc,char * argv[]){
     
@@ -18,19 +16,14 @@ int main(int argc,char * argv[]){
         
     });
     
+    char pre[256];
     short port=39065;
     int maxconn=64;
-    char pre[128];
-    char path1[PATH_MAX];
-    char path2[PATH_MAX];
-    char path3[PATH_MAX];
     
     if(argc>=2)
         snprintf(pre,sizeof(pre),"%s",argv[1]);
     else
         snprintf(pre,sizeof(pre),"data");
-    
-    mkdir(pre,0777);
     
     if(argc>=3)
         port=atoi(argv[2]);
@@ -38,14 +31,15 @@ int main(int argc,char * argv[]){
     if(argc>=4)
         maxconn=atoi(argv[3]);
     
-    snprintf(path1,sizeof(path1),"%s/gra",pre);
-    snprintf(path2,sizeof(path2),"%s/rmt",pre);
-    snprintf(path3,sizeof(path3),"./script/server.lua");
+    smoothly::serverNetwork server;
     
-    smoothly::serverNetwork server(path1,path2,path3,port,maxconn);
+    server.start(pre,port,maxconn);
     running=true;
     while(running){
         server.recv();
         RakSleep(30);
     }
+    server.release();
+    
+    return 0;
 }

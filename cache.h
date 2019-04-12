@@ -110,8 +110,13 @@ namespace smoothly{
             inline void put(const std::string & name,node * n,int life=600){
                 tablemtx.lock();
                 auto it=nodes.find(name);
-                if(it!=nodes.end())
-                    it->second->drop();
+                if(it!=nodes.end()){
+                    if(it->second==n){
+                        tablemtx.unlock();
+                        return;
+                    }else
+                        it->second->drop();
+                }
                 n->parent=this;
                 n->grab();
                 n->expire=getTime()+life;

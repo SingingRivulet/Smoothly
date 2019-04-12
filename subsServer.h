@@ -33,6 +33,7 @@ namespace smoothly{
                 void genUUID();
                 void save(bool updateChunk=false,bool tp=false);
                 void saveDo();
+                void saveToDB();
                 void load();
                 void remove();
                 void send();
@@ -72,6 +73,12 @@ namespace smoothly{
                 const btVector3& rel_pos,
                 const std::string & muuid,
                 const RakNet::SystemAddress & from
+            );
+            void createSubsForUSer(
+                long id,
+                const irr::core::vector3df & posi,
+                const std::string & muuid,
+                std::string & subsuuid
             );
             void giveUpControl(const std::string & uuid,const std::string & muuid);
             void changeManager(const std::string & uuid,const std::string & muuid);

@@ -65,16 +65,20 @@ void subsServer::setSubs(
             p->save();
             moveUserPosition(uuid,p->userUUID,posi);
         }else{
-            if(p->userUUID==muuid){
-                p->manager=muuid;
-                p->lastChMan=cache::getTime();
-                p->save();
-            }else
-            if(fabs(p->lastChMan-cache::getTime())>60){
-                if(((int)(posi.X+posi.Y+posi.Z)+cache::getTime())%8 == 1){
+            if(p->userUUID==p->manager && userOnline(p->manager)){//owner is online
+                
+            }else{
+                if(p->userUUID==muuid){
                     p->manager=muuid;
                     p->lastChMan=cache::getTime();
                     p->save();
+                }else
+                if(fabs(p->lastChMan-cache::getTime())>60){
+                    if(((int)(posi.X+posi.Y+posi.Z)+cache::getTime())%8 == 1){
+                        p->manager=muuid;
+                        p->lastChMan=cache::getTime();
+                        p->save();
+                    }
                 }
             }
         }
@@ -84,6 +88,49 @@ void subsServer::setSubs(
     pthread_rwlock_unlock(&rwlock);
 }
 
+void subsServer::createSubsForUSer(
+    long id,
+    const irr::core::vector3df & posi,
+    const std::string & muuid,
+    std::string & subsuuid
+){
+    pthread_rwlock_wrlock(&rwlock);
+    
+    bool lasting;
+    int hp;
+    
+    if(getSubsConf(id,lasting,hp)){
+        if(lasting){
+            auto p=new subs();
+            p->id       =id;
+            p->parent   =this;
+            p->userUUID =muuid;
+            p->manager  =muuid;
+            p->status   =0;
+            p->position =posi;
+            p->rotation =irr::core::vector3df(0,0,0);
+            p->lin_vel.setValue(0,0,0);
+            p->ang_vel.setValue(0,0,0);
+            p->hp       =hp;
+            p->updateChunkPosition();
+            genuuid:
+            p->genUUID();
+            if(uuidExist(p->uuid))
+                goto genuuid;
+        
+            subsCache.put(p->uuid,p);
+            subsuuid=p->uuid;
+            
+            boardcastSubsCreate(p->uuid,id,posi,irr::core::vector3df(0,0,0),btVector3(0,0,0),btVector3(0,0,0),muuid);
+            setOwner(p->uuid,muuid);
+            p->save(true);
+            p->saveToDB();
+            p->drop();
+        }
+    }
+    
+    pthread_rwlock_unlock(&rwlock);
+}
 void subsServer::createSubs(//添加物体
     long id , 
     const irr::core::vector3df & posi,
@@ -118,9 +165,12 @@ void subsServer::createSubs(//添加物体
                 if(uuidExist(p->uuid))
                     goto genuuid;
             
+                subsCache.put(p->uuid,p);
+                
                 boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos,muuid);
                 setOwner(p->uuid,muuid);
                 p->save(true);
+                p->saveToDB();
                 p->drop();
             }else
                 sendPutSubsFail(from);
@@ -334,6 +384,9 @@ void subsServer::subs::save(bool updateChunk,bool tp){
 
 void subsServer::subs::saveDo(){
     save();
+    saveToDB();
+}
+void subsServer::subs::saveToDB(){
     char kbuf[256];
     char vbuf[2048];
     encode(vbuf,sizeof(vbuf));

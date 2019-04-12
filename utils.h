@@ -24,7 +24,8 @@ namespace smoothly{
         M_UPDATE_TERRAIN  = 't',
         M_UPDATE_OBJECT   = 'o',
         M_UPDATE_SUBS     = 's',
-        M_UPDATE_USER     = 'u'
+        M_UPDATE_USER     = 'u',
+        M_ADMIN           = 'a'
     };
     enum SubsMethod{
         S_UL_TELEPORT   ='p',
@@ -69,6 +70,11 @@ namespace smoothly{
         T_SEND_ONE  ='o',
         T_SEND_TABLE='t',
         T_APPLY     ='a'
+    };
+    
+    enum AdminMethod{
+        A_CREATE_USER       = 'a',
+        A_SEND_USER_UUID    = 'u'
     };
     
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){

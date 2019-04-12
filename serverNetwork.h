@@ -67,6 +67,7 @@ namespace smoothly{
             void onMessageUpdateTerrain(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateUser(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateSubs(RakNet::Packet * data,const RakNet::SystemAddress & address);
+            void onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAddress & address);
             
             //user
             void onMessageUpdateUserLogin(RakNet::BitStream * data,const RakNet::SystemAddress & address);
@@ -95,9 +96,15 @@ namespace smoothly{
             void onMessageUpdateSubsTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageUpdateSubsGiveUp(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
-            serverNetwork(const char * pathGra,const char * pathRMT,const char * modpath,short port,int maxcl);
+            //admin
+            void onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            
+            serverNetwork();
             serverNetwork(const serverNetwork &)=delete;
             ~serverNetwork();
+            
+            void start(const char * path,short port,int maxcl);
+            void release();
         private:
             RakNet::RakPeerInterface * connection;
     };

@@ -27,6 +27,14 @@ int serverMod::itemidNum(long id){
     else
         return it->second;
 }
+bool serverMod::checkAdminPwd(const std::string & name,const std::string & pwd){
+    auto it=adminPwd.find(name);
+    if(it!=adminPwd.end()){
+        if(it->second==pwd)
+            return true;
+    }
+    return false;
+}
 static int mod_addTerrainItemID(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
@@ -103,6 +111,22 @@ static int mod_setUserMaxSubs(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
+static int mod_setAdmin(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(serverMod*)ptr;
+    
+    auto u=luaL_checkstring(L,2);
+    auto p=luaL_checkstring(L,3);
+    
+    self->adminPwd[u]=p;
+    
+    lua_pushboolean(L,1);
+    return 1;
+}
 void serverMod::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -112,6 +136,7 @@ void serverMod::scriptInit(const char * path){
         {"setViewRange"     ,mod_setViewRange},
         {"setUserMaxSubs"   ,mod_setUserMaxSubs},
         {"addSubsConf"      ,mod_addSubsConf},
+        {"setAdmin"         ,mod_setAdmin},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);

@@ -1,4 +1,6 @@
 #include "serverNetwork.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 namespace smoothly{
 void serverNetwork::removeTableApply(const RakNet::SystemAddress & to,int x,int y){
     RakNet::BitStream bs;
@@ -75,11 +77,34 @@ void serverNetwork::onSendNode(
     sendMessage(&bs,to);
 }
 
-serverNetwork::serverNetwork(const char * pathGra,const char * pathRMT,const char * modpath,short port,int maxcl){
+serverNetwork::serverNetwork(){
+    
+}
+serverNetwork::~serverNetwork(){
+    
+}
+void serverNetwork::start(const char * pre,short port,int maxcl){
+    char path[PATH_MAX];
+    
     lstPoolInit();
-    scriptInit(modpath);
-    removeTable::init(pathRMT);
-    graphServer::init(pathGra);
+    
+    
+    scriptInit("./script/server.lua");
+    
+    mkdir(pre,0777);
+    
+    snprintf(path,sizeof(path),"%s/rmt",pre);
+    removeTable::init(path);
+    
+    snprintf(path,sizeof(path),"%s/gra",pre);
+    graphServer::init(path);
+    
+    snprintf(path,sizeof(path),"%s/sub",pre);
+    subsServer::subsInit(path);
+    
+    snprintf(path,sizeof(path),"%s/user",pre);
+    users::usersInit(path);
+    
     connection=RakNet::RakPeerInterface::GetInstance();
     if(connection==NULL){
         printf("RakNet::RakPeerInterface::GetInstance() Error!\n");
@@ -89,10 +114,12 @@ serverNetwork::serverNetwork(const char * pathGra,const char * pathRMT,const cha
     connection->Startup( maxcl, &desc, 1 );
     connection->SetMaximumIncomingConnections( maxcl );
 }
-serverNetwork::~serverNetwork(){
+void serverNetwork::release(){
     if(connection){
         RakNet::RakPeerInterface::DestroyInstance(connection);
     }
+    users::userDestroy();
+    subsServer::subsDestroy();
     removeTable::destroy();
     graphServer::destroy();
     scriptDestroy();
@@ -117,6 +144,10 @@ bool serverNetwork::loged(const RakNet::SystemAddress & address){
 void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
     switch(data->data[0]){
         case MESSAGE_GAME:
+            if(data->data[1]==M_ADMIN){
+                onMessageAdmin(data,address);
+                break;
+            }
             if(!loged(address)){
                 if(data->data[1]==M_UPDATE_USER && data->data[2]==U_LOGIN){
                     RakNet::BitStream bs(data->data,data->length,false);
@@ -150,6 +181,49 @@ void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddr
             printf("disconnect\n");
         break;
     }
+}
+
+void serverNetwork::onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAddress & address){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    RakNet::RakString name,pwd;
+    
+    if(!bs.Read(name))return;
+    if(!bs.Read(pwd)) return;
+    
+    if(checkAdminPwd(name.C_String() , pwd.C_String())){
+        switch(data->data[2]){
+            case A_CREATE_USER:
+                onMessageAdminCreateUser(&bs,address);
+            break;
+        }
+    }
+}
+
+void serverNetwork::onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address){
+    int64_t id;
+    irr::core::vector3df position;
+    RakNet::RakString pwd;
+    
+    if(!data->Read(id))return;
+    if(!data->ReadVector(position.X,position.Y,position.Z))return;
+    if(!data->Read(pwd))return;
+    
+    std::string uuid;
+    
+    createUser(uuid , pwd.C_String() , position , id);
+    
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_ADMIN);
+    
+    bs.Write((RakNet::MessageID)A_SEND_USER_UUID);
+    
+    RakNet::RakString u;
+    u=uuid.c_str();
+    bs.Write(u);
+    
+    sendMessage(&bs,address);
 }
 
 void serverNetwork::onMessageUpdateBuilding(RakNet::Packet * data,const RakNet::SystemAddress & address){

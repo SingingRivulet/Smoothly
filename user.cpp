@@ -107,16 +107,25 @@ void users::logout(const std::string & uuid){
     uLocker.unlock(uuid);
     --onLineNum;
 }
+
 void users::createUser(
-    const std::string & uuid ,
+    std::string & uuid ,
     const std::string & pwd , 
     irr::core::vector3df position ,
     long id
 ){
-    uLocker.lock(uuid);
+    getUUID(uuid);
     
-    uLocker.unlock(uuid);
+    std::string suuid;
+    createSubsForUSer(id,position,uuid,suuid);
+    
+    char kbuf[256];
+    snprintf(kbuf , 256 , "userSubsUUID %s" , uuid.c_str());
+    db->Put(leveldb::WriteOptions() , kbuf , suuid);
+    
+    setPwd(uuid,pwd);
 }
+
 void users::setPwd(const std::string & uuid,const std::string & pwd){
     char kbuf[256];
     snprintf(kbuf,256,"userPasswd %s",uuid.c_str());
@@ -181,7 +190,8 @@ int users::getUserNumSubs(const std::string & uuid){
     
     if(db->Get(leveldb::ReadOptions(),kbuf,&sbuf).ok() && !sbuf.empty()){
         return atoi(sbuf.c_str());
-    }
+    }else
+        return 0;
 }
 void users::setUserNumSubs(const std::string & uuid,int num){
     std::string sbuf;

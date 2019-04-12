@@ -43,7 +43,7 @@ namespace smoothly{
             void getChunkSubs(const std::string & uuid , const RakNet::SystemAddress & address,int x,int y);
             
             void createUser(
-                const std::string & uuid ,
+                std::string & uuid ,
                 const std::string & pwd , 
                 irr::core::vector3df position ,
                 long id
