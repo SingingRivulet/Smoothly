@@ -119,6 +119,7 @@ namespace smoothly{
                     btCollisionShape  * bodyShape;
                     btTriangleMesh    * bodyMesh;
                     bool                useAlpha;
+                    int                 hp;
             };
             std::map<long,subsConf *> subsConfs;
             //////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 #ifndef SMOOTHLY_CLIENT_NETWORK
 #define SMOOTHLY_CLIENT_NETWORK
-#include "building.h"
+#include "substance.h"
 namespace smoothly{
-    class clientNetwork:public buildings{
+    class clientNetwork:public substance{
         public:
             void init(const char * addr,short port);
             void shutdown();

@@ -375,6 +375,9 @@ void clientNetwork::onMessageUpdateSubsTeleport(RakNet::BitStream * data){
     if(!data->ReadVector(position.X , position.Y , position.Z))return;
     
     //call
+    auto p=seekSubs(u.C_String());
+    if(p)
+        p->teleport(position);
 }
 void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     RakNet::RakString useruuid,subsuuid;
@@ -395,6 +398,16 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     if(!data->Read(hp))return;
     
     //call
+    updateSubs(
+        id,
+        subsuuid.C_String(),
+        useruuid.C_String(),
+        position,
+        rotation,
+        btVector3(lin_vel.X  , lin_vel.Y  , lin_vel.Z),
+        btVector3(ang_vel.X  , ang_vel.Y  , ang_vel.Z),
+        hp,status
+    );
 }
 void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
     RakNet::RakString useruuid,subsuuid;
@@ -410,6 +423,15 @@ void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
     if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
     if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
     
+    genSubs(
+        subsuuid.C_String(),
+        useruuid.C_String(),
+        id,
+        position,
+        rotation,
+        btVector3(impulse.X  , impulse.Y  , impulse.Z),
+        btVector3(rel_pos.X  , rel_pos.Y  , rel_pos.Z)
+    );
 }
 void clientNetwork::onMessageUpdateSubsCreateBrief(RakNet::BitStream * data){
     RakNet::RakString useruuid;
@@ -424,7 +446,14 @@ void clientNetwork::onMessageUpdateSubsCreateBrief(RakNet::BitStream * data){
     if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
     if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
     
-    
+    genSubs(
+        id,
+        useruuid.C_String(),
+        position,
+        rotation,
+        btVector3(impulse.X  , impulse.Y  , impulse.Z),
+        btVector3(rel_pos.X  , rel_pos.Y  , rel_pos.Z)
+    );
 }
 void clientNetwork::onMessageUpdateSubsAttack(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
@@ -433,11 +462,14 @@ void clientNetwork::onMessageUpdateSubsAttack(RakNet::BitStream * data){
     if(!data->Read(subsuuid))return;
     if(!data->Read(hp))return;
     if(!data->Read(delta))return;
+    
+    attackLocalSubs(subsuuid.C_String(),hp,delta);
 }
 void clientNetwork::onMessageUpdateSubsRemove(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
     if(!data->Read(subsuuid))return;
     
+    removeLocalSubs(subsuuid.C_String());
 }
 void clientNetwork::onMessageUpdateSubsFail(RakNet::BitStream * data){
     //no data

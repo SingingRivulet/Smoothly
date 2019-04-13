@@ -10,7 +10,9 @@ namespace smoothly{
             struct subs{
                 
                 std::string uuid;
+                std::string owner;
                 long id;
+                int status,hp;
                 bodyInfo info;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -123,6 +125,7 @@ namespace smoothly{
             );
             void genSubs(//添加物体（持久），由服务器调用
                 const std::string & uuid ,
+                const std::string & owner ,
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
@@ -131,6 +134,7 @@ namespace smoothly{
             );
             void genSubs(//添加物体（非持久）
                 long id , 
+                const std::string & owner ,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
@@ -138,16 +142,28 @@ namespace smoothly{
             );
             
             void updateSubs(//更新物体状态，由服务器调用
+                long id,
                 const std::string & uuid , 
+                const std::string & owner ,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& lin_vel ,
-                const btVector3& ang_vel
+                const btVector3& ang_vel ,
+                int hp,int status
             );
             
             
             inline void removeLocalSubs(const std::string & uuid){//删除本地对象（仅添加至删除表）
                 subsRMT.insert(uuid);
+            }
+            
+            inline void attackLocalSubs(const std::string & uuid,int nhp,int delta){
+                auto p=seekSubs(uuid);
+                if(p){
+                    p->hp=nhp;
+                    if(p->hp <= 0)
+                        subsRMT.insert(uuid);
+                }
             }
             
             virtual void requestRemoveSubs(const std::string & uuid)=0;//请求删除持久物体（非持久不需要删除）

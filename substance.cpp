@@ -129,18 +129,24 @@ substance::subs * substance::addBriefSubs(//添加非持久物体
 }
 void substance::genSubs(//添加物体（持久），由服务器调用
     const std::string & uuid ,
+    const std::string & owner ,
     long id , 
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
-    const btVector3& impulse,
-    const btVector3& rel_pos
+    const btVector3 & impulse,
+    const btVector3 & rel_pos
 ){
-    if(seekSubs(uuid))
+    auto op=seekSubs(uuid);
+    if(op){
         return;
+    }
     auto p=seekSubsConf(id);
     if(p && p->type==mods::SUBS_LASTING){
         auto sp=createSubs();
         sp->uuid=uuid;
+        sp->owner=owner;
+        sp->hp=p->hp;
+        sp->status=0;
         sp->init(p,posi,rota);
         sp->type=mods::SUBS_LASTING;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
@@ -148,6 +154,7 @@ void substance::genSubs(//添加物体（持久），由服务器调用
 }
 void substance::genSubs(//添加物体（非持久）
     long id , 
+    const std::string & owner ,
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
     const btVector3& impulse,
@@ -158,6 +165,9 @@ void substance::genSubs(//添加物体（非持久）
         
         auto sp=createSubs();
         sp->setRandUUID();
+        sp->owner=owner;
+        sp->hp=p->hp;
+        sp->status=0;
         sp->init(p,posi,rota);
         sp->type=mods::SUBS_BRIEF;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
@@ -190,17 +200,36 @@ void substance::setSubs(//设置物体（持久），由服务器调用
     }
 }
 void substance::updateSubs(//更新物体状态，由服务器调用
+    long id,
     const std::string & uuid , 
+    const std::string & owner ,
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
     const btVector3& lin_vel ,
-    const btVector3& ang_vel
+    const btVector3& ang_vel ,
+    int hp,int status
 ){
     auto sp=seekSubs(uuid);
     if(sp){
         sp->setMotion(posi,rota);
+        sp->owner=owner;
+        sp->hp=hp;
+        sp->status=status;
         sp->rigidBody->setLinearVelocity(lin_vel);
         sp->rigidBody->setAngularVelocity(ang_vel);
+    }else{
+        auto p=seekSubsConf(id);
+        if(p && p->type==mods::SUBS_LASTING){
+            auto sp=createSubs();
+            sp->uuid=uuid;
+            sp->owner=owner;
+            sp->hp=hp;
+            sp->status=status;
+            sp->init(p,posi,rota);
+            sp->type=mods::SUBS_LASTING;
+            sp->rigidBody->setLinearVelocity(lin_vel);
+            sp->rigidBody->setAngularVelocity(ang_vel);
+        }
     }
 }
 void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,const irr::core::vector3df & r){
