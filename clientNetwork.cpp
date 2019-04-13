@@ -29,7 +29,12 @@ void clientNetwork::shutdown(){
 void clientNetwork::recv(){
     if(!connection)
         return;
+    
+    long t=timer->getRealTime();
+    
     while(1){
+        if(fabs(timer->getRealTime()-t)>80)
+            break;
         auto pk=connection->Receive();
         if(pk)
             onRecvMessage(pk);
@@ -88,37 +93,37 @@ void clientNetwork::onMessageUpdateSubs(RakNet::Packet * data){
     bs.IgnoreBytes(3);
     switch(data->data[2]){
         case S_DL_TELEPORT:
-        
+            onMessageUpdateSubsTeleport(&bs);
         break;
         case S_DL_STATUS:
-        
+            onMessageUpdateSubsSetStatus(&bs);
         break;
         case S_DL_CREATE:
-        
+            onMessageUpdateSubsCreate(&bs);
         break;
         case S_DL_CREATE_B:
-        
+            onMessageUpdateSubsCreateBrief(&bs);
         break;
         case S_DL_ATTACK:
-        
+            onMessageUpdateSubsAttack(&bs);
         break;
         case S_DL_REMOVE:
-        
+            onMessageUpdateSubsRemove(&bs);
         break;
         case S_FAIL:
-        
+            onMessageUpdateSubsFail(&bs);
         break;
         case S_SET_USER_SUBS:
-        
+            onMessageUpdateSubsSetUserSubs(&bs);
         break;
         case S_SUBS_UUID:
-        
+            onMessageUpdateSubsAddOneSubs(&bs);
         break;
         case S_SUBS_UUIDS:
-        
+            onMessageUpdateSubsAddSubs(&bs);
         break;
         case S_RUN_CHUNK:
-        
+            onMessageUpdateSubsRunChunk(&bs);
         break;
     }
 }
@@ -362,6 +367,112 @@ void clientNetwork::requestUpdateTerrain(int x,int y){
     bs.Write((int32_t)y);
     sendMessageU(&bs);
 }
+void clientNetwork::onMessageUpdateSubsTeleport(RakNet::BitStream * data){
+    RakNet::RakString u;
+    irr::core::vector3df position;
+    
+    if(!data->Read(u))return;
+    if(!data->ReadVector(position.X , position.Y , position.Z))return;
+    
+    //call
+}
+void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
+    RakNet::RakString useruuid,subsuuid;
+    int32_t status,hp;
+    int64_t id;
+    irr::core::vector3df position,rotation,lin_vel,ang_vel;
+    
+    if(!data->Read(id))return;
+    if(!data->Read(subsuuid))return;
+    if(!data->Read(useruuid))return;
+    
+    if(!data->ReadVector(position.X , position.Y , position.Z))return;
+    if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(lin_vel.X  , lin_vel.Y  , lin_vel.Z))return;
+    if(!data->ReadVector(ang_vel.X  , ang_vel.Y  , ang_vel.Z))return;
+    
+    if(!data->Read(status))return;
+    if(!data->Read(hp))return;
+    
+    //call
+}
+void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
+    RakNet::RakString useruuid,subsuuid;
+    int64_t id;
+    irr::core::vector3df position,rotation,impulse,rel_pos;
+    
+    if(!data->Read(id))return;
+    if(!data->Read(subsuuid))return;
+    if(!data->Read(useruuid))return;
+    
+    if(!data->ReadVector(position.X , position.Y , position.Z))return;
+    if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
+    if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
+    
+}
+void clientNetwork::onMessageUpdateSubsCreateBrief(RakNet::BitStream * data){
+    RakNet::RakString useruuid;
+    int64_t id;
+    irr::core::vector3df position,rotation,impulse,rel_pos;
+    
+    if(!data->Read(id))return;
+    if(!data->Read(useruuid))return;
+    
+    if(!data->ReadVector(position.X , position.Y , position.Z))return;
+    if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
+    if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
+    
+    
+}
+void clientNetwork::onMessageUpdateSubsAttack(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    int32_t hp,delta;
+    
+    if(!data->Read(subsuuid))return;
+    if(!data->Read(hp))return;
+    if(!data->Read(delta))return;
+}
+void clientNetwork::onMessageUpdateSubsRemove(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    if(!data->Read(subsuuid))return;
+    
+}
+void clientNetwork::onMessageUpdateSubsFail(RakNet::BitStream * data){
+    //no data
+}
+void clientNetwork::onMessageUpdateSubsSetUserSubs(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    if(!data->Read(subsuuid))return;
+    
+}
+void clientNetwork::onMessageUpdateSubsAddOneSubs(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    if(!data->Read(subsuuid))return;
+    
+}
+void clientNetwork::onMessageUpdateSubsAddSubs(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    int32_t length;
+    std::list<std::string> subs;
+    if(!data->Read(length))return;
+    for(int i=0;i<length;i++){
+        if(data->Read(subsuuid)){
+            subs.push_back(subsuuid.C_String());
+        }else
+            break;
+    }
+    
+}
+void clientNetwork::onMessageUpdateSubsRunChunk(RakNet::BitStream * data){
+    int32_t x,y;
+    if(!data->Read(x))return;
+    if(!data->Read(y))return;
+    
+}
+
+
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){
     
 }

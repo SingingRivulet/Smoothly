@@ -115,6 +115,7 @@ void serverNetwork::start(const char * pre,short port,int maxcl){
     connection->SetMaximumIncomingConnections( maxcl );
 }
 void serverNetwork::release(){
+    subsCache.clear();
     if(connection){
         RakNet::RakPeerInterface::DestroyInstance(connection);
     }

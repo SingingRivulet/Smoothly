@@ -17,14 +17,29 @@ namespace smoothly{
             void onMessageUpdateSubs(RakNet::Packet * data);
             void onMessageUpdateTerrain(RakNet::Packet * data);
             
+            //building
             void onMessageUpdateBuildingGen(RakNet::BitStream * data);
             void onMessageUpdateBuildingAttack(RakNet::BitStream * data);
             void onMessageUpdateBuildingCreate(RakNet::BitStream * data);
             void onMessageUpdateBuildingDestroy(RakNet::BitStream * data);
             
+            //terrain
             void onMessageUpdateTerrainGetRMTable(RakNet::BitStream * data);
             void onMessageUpdateTerrainRMTApply(RakNet::BitStream * data);
             void onMessageUpdateTerrainRemove(RakNet::BitStream * data);
+            
+            //substance
+            void onMessageUpdateSubsTeleport(RakNet::BitStream * data);
+            void onMessageUpdateSubsSetStatus(RakNet::BitStream * data);
+            void onMessageUpdateSubsCreate(RakNet::BitStream * data);
+            void onMessageUpdateSubsCreateBrief(RakNet::BitStream * data);
+            void onMessageUpdateSubsAttack(RakNet::BitStream * data);
+            void onMessageUpdateSubsRemove(RakNet::BitStream * data);
+            void onMessageUpdateSubsFail(RakNet::BitStream * data);
+            void onMessageUpdateSubsSetUserSubs(RakNet::BitStream * data);
+            void onMessageUpdateSubsAddOneSubs(RakNet::BitStream * data);
+            void onMessageUpdateSubsAddSubs(RakNet::BitStream * data);
+            void onMessageUpdateSubsRunChunk(RakNet::BitStream * data);
             
             virtual void uploadAttack(const std::string & uuid , int hurt);
             virtual void downloadBuilding(int x,int y);
