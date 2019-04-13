@@ -14,6 +14,7 @@ namespace smoothly{
             void sendMessageU(RakNet::BitStream * data);
             
             void onMessageUpdateBuilding(RakNet::Packet * data);
+            void onMessageUpdateSubs(RakNet::Packet * data);
             void onMessageUpdateTerrain(RakNet::Packet * data);
             
             void onMessageUpdateBuildingGen(RakNet::BitStream * data);
@@ -53,6 +54,9 @@ namespace smoothly{
             void setUserPosition(const irr::core::vector3df & p);
             void setUserRotation(const irr::core::vector3df & r);
             void move(const irr::core::vector3df & delta);
+            
+            void login(const std::string & name,const std::string & pwd);
+            
             bool canConnect;
         private:
             RakNet::RakPeerInterface * connection;

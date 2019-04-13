@@ -29,9 +29,13 @@ void clientNetwork::shutdown(){
 void clientNetwork::recv(){
     if(!connection)
         return;
-    auto pk=connection->Receive();
-    if(pk)
-        onRecvMessage(pk);
+    while(1){
+        auto pk=connection->Receive();
+        if(pk)
+            onRecvMessage(pk);
+        else
+            break;
+    }
 }
 void clientNetwork::onRecvMessage(RakNet::Packet * data){
     switch(data->data[0]){
@@ -43,6 +47,9 @@ void clientNetwork::onRecvMessage(RakNet::Packet * data){
                 break;
                 case M_UPDATE_TERRAIN:
                     onMessageUpdateTerrain(data);
+                break;
+                case M_UPDATE_SUBS:
+                    onMessageUpdateSubs(data);
                 break;
                 case M_UPDATE_OBJECT:
                 
@@ -73,6 +80,45 @@ void clientNetwork::onMessageUpdateBuilding(RakNet::Packet * data){
         break;
         default:
              //printf("updateBuilding\n");
+        break;
+    }
+}
+void clientNetwork::onMessageUpdateSubs(RakNet::Packet * data){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case S_DL_TELEPORT:
+        
+        break;
+        case S_DL_STATUS:
+        
+        break;
+        case S_DL_CREATE:
+        
+        break;
+        case S_DL_CREATE_B:
+        
+        break;
+        case S_DL_ATTACK:
+        
+        break;
+        case S_DL_REMOVE:
+        
+        break;
+        case S_FAIL:
+        
+        break;
+        case S_SET_USER_SUBS:
+        
+        break;
+        case S_SUBS_UUID:
+        
+        break;
+        case S_SUBS_UUIDS:
+        
+        break;
+        case S_RUN_CHUNK:
+        
         break;
     }
 }
