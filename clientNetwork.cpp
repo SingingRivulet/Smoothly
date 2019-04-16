@@ -478,11 +478,13 @@ void clientNetwork::onMessageUpdateSubsSetUserSubs(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
     if(!data->Read(subsuuid))return;
     
+    mainControlUUID=subsuuid.C_String();
 }
 void clientNetwork::onMessageUpdateSubsAddOneSubs(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
     if(!data->Read(subsuuid))return;
     
+    mySubs.insert(subsuuid.C_String());
 }
 void clientNetwork::onMessageUpdateSubsAddSubs(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
@@ -491,7 +493,7 @@ void clientNetwork::onMessageUpdateSubsAddSubs(RakNet::BitStream * data){
     if(!data->Read(length))return;
     for(int i=0;i<length;i++){
         if(data->Read(subsuuid)){
-            subs.push_back(subsuuid.C_String());
+            mySubs.insert(subsuuid.C_String());
         }else
             break;
     }
@@ -502,8 +504,77 @@ void clientNetwork::onMessageUpdateSubsRunChunk(RakNet::BitStream * data){
     if(!data->Read(x))return;
     if(!data->Read(y))return;
     
+    unlockChunk(x,y);
 }
 
+void clientNetwork::uploadBodyStatus(//上传持久型物体状态
+    const std::string & u , 
+    int status,
+    const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation, 
+    const btVector3& lin ,
+    const btVector3& ang
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_UL_STATUS);
+    
+    RakNet::RakString uuid=u.c_str();
+    
+    bs.Write(uuid);
+    bs.Write((int32_t)status);
+    bs.WriteVector(position.X,position.Y,position.Z);
+    bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
+    bs.WriteVector(lin.getX(),lin.getY(),lin.getZ());
+    bs.WriteVector(ang.getX(),ang.getY(),ang.getZ());
+    
+    sendMessage(&bs);
+}
+
+void clientNetwork::requestCreateSubs(//请求创建物体
+    long id,
+    const irr::core::vector3df & p,
+    const irr::core::vector3df & r, 
+    const btVector3& impulse,
+    const btVector3& rel_pos
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_UL_CREATE);
+}
+
+void clientNetwork::requestCreateBriefSubs(//请求创建物体（非持久）
+    long id,
+    const irr::core::vector3df & p,
+    const irr::core::vector3df & r, 
+    const btVector3& impulse,
+    const btVector3& rel_pos
+){
+    requestCreateSubs(id,p,r,impulse,rel_pos);
+}
+
+void clientNetwork::requestCreateLastingSubs(//请求创建物体（持久）
+    long id,
+    const irr::core::vector3df & p,
+    const irr::core::vector3df & r, 
+    const btVector3& impulse,
+    const btVector3& rel_pos
+){
+    requestCreateSubs(id,p,r,impulse,rel_pos);
+}
+
+void clientNetwork::requestDownloadSubstanceChunk(int x,int y){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_RQ_CHUNK);
+    
+}
 
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){
     

@@ -25,6 +25,9 @@ namespace smoothly{
                 
                 bool wake;
                 
+                bool inWorld;
+                int x,y;//this variable only will be use while initializate;
+                
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
@@ -44,6 +47,8 @@ namespace smoothly{
                 void setAsBrief(int life);
                 
                 void update();
+                
+                bool addIntoWorld();
 
             };
             
@@ -115,14 +120,6 @@ namespace smoothly{
             
             
         public:
-            void setSubs(//设置物体（持久），由服务器调用
-                const std::string & uuid ,
-                long id , 
-                const irr::core::vector3df & p,
-                const irr::core::vector3df & r,  
-                const btVector3& lin_vel ,
-                const btVector3& ang_vel
-            );
             void genSubs(//添加物体（持久），由服务器调用
                 const std::string & uuid ,
                 const std::string & owner ,
@@ -170,6 +167,7 @@ namespace smoothly{
             
             virtual void uploadBodyStatus(//上传持久型物体状态
                 const std::string & uuid , 
+                int status,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& lin_vel ,
@@ -190,7 +188,7 @@ namespace smoothly{
                 const btVector3& impulse,
                 const btVector3& rel_pos
             )=0;
-            
+            virtual void requestDownloadSubstanceChunk(int x,int y)=0;
         public:
             
             inline substance():briefSubs(),subses(),subsRMT(){
@@ -199,6 +197,30 @@ namespace smoothly{
             inline ~substance(){
                 subsPoolDestroy();
             }
+            
+        public:
+            std::unordered_set<std::string> mySubs;
+            std::string myUUID;
+            std::string mainControlUUID;
+            inline void setOwner(const std::string & subs,const std::string & user){
+                if(myUUID==user)
+                    mySubs.insert(subs);
+            }
+            inline void removeOwned(const std::string & subs,const std::string & user){
+                if(myUUID==user)
+                    mySubs.erase(subs);
+            }
+            irr::core::vector3df mainControlPosition;
+            int solveRange;
+            
+        private:
+            std::map<ipair,std::set<subs*> > chunkLocker;
+            virtual void onGenChunk(terrain::chunk *);
+            virtual void onFreeChunk(terrain::chunk *);
+            
+        public:
+            void lockChunk(int x,int y);
+            void unlockChunk(int x,int y);
             
         private:
             void * sPool;

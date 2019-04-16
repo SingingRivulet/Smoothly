@@ -30,6 +30,7 @@ namespace smoothly{
     enum SubsMethod{
         S_UL_TELEPORT   ='p',
         S_DL_TELEPORT   ='P',
+        S_UL_STATUS     ='^',
         S_DL_STATUS     ='S',
         S_UL_CREATE     ='c',
         S_DL_CREATE     ='C',

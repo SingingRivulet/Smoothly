@@ -29,6 +29,9 @@ void substance::subs::setPosition(const irr::core::vector3df & p){
 }
 
 void substance::subs::updateByWorld(){
+    if(!inWorld)
+        return;
+        
     btTransform transform;
     
     bodyState->getWorldTransform(transform);
@@ -49,12 +52,42 @@ void substance::subs::updateByWorld(){
     
     node->setPosition(irrPos);
     node->setRotation(irrRot);
+    
+    x=irrPos.X/32;
+    y=irrPos.Z/32;
 }
 void substance::subsUpdate(){
     clearDiedSubs();
     removeApply();
-    for(auto it:subses){
-        it.second->update();
+    
+    {//update
+        for(auto it:subses){
+            it.second->update();
+        }
+    }
+    {//set camera
+        if(!mainControlUUID.empty()){
+            auto it=subses.find(mainControlUUID);
+            if(it!=subses.end()){
+                mainControlPosition=it->second->node->getPosition();
+                
+                int cx=mainControlPosition.X/32;
+                int cy=mainControlPosition.Z/32;
+                //clear out of range
+                for(auto sit:subses){
+                    auto p=sit.second->node->getPosition();
+                    
+                    int dx=p.X/32;
+                    int dy=p.Z/32;
+                    
+                    if(fabs(cx-dx)>solveRange || fabs(cy-dy)>solveRange){
+                        removeLocalSubs(sit.second->uuid);
+                    }
+                }
+                removeApply();
+                
+            }
+        }
     }
 }
 void substance::removeSubs(substance::subs * p){
@@ -74,6 +107,7 @@ void substance::subs::update(){
             //upload to server
             parent->uploadBodyStatus(
                 uuid,
+                status,
                 node->getPosition(),
                 node->getRotation(),
                 getLinearVelocity(),
@@ -87,6 +121,7 @@ void substance::removeApply(){
     for(auto it:subsRMT){
         auto p=seekSubs(it);
         if(p){
+            removeOwned(p->uuid,p->owner);
             p->release();
             delSubs(p);
         }
@@ -101,6 +136,7 @@ substance::subs * substance::addLastingSubs(//添加持久物体
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
+    //向服务器发送创建命令，服务器再向自己发送
     auto p=seekSubsConf(id);
     if(p && p->type==mods::SUBS_LASTING)
         requestCreateLastingSubs(id,posi,rota,impulse,rel_pos);
@@ -113,11 +149,15 @@ substance::subs * substance::addBriefSubs(//添加非持久物体
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
+    //在本地创建，再发送到服务器。服务器不会再次对自己发送创建命令(smootly::watch::boardcastSubsCreate)
     auto p=seekSubsConf(id);
     if(p && p->type==mods::SUBS_BRIEF){
         
         auto sp=createSubs();
         sp->setRandUUID();
+        sp->owner=myUUID;
+        sp->hp=p->hp;
+        sp->status=0;
         sp->init(p,posi,rota);
         sp->type=mods::SUBS_BRIEF;
         sp->rigidBody->applyImpulse(impulse,rel_pos);
@@ -145,6 +185,7 @@ void substance::genSubs(//添加物体（持久），由服务器调用
         auto sp=createSubs();
         sp->uuid=uuid;
         sp->owner=owner;
+        setOwner(uuid,owner);
         sp->hp=p->hp;
         sp->status=0;
         sp->init(p,posi,rota);
@@ -174,31 +215,6 @@ void substance::genSubs(//添加物体（非持久）
         sp->setAsBrief(p->life);
     }
 }
-void substance::setSubs(//设置物体（持久），由服务器调用
-    const std::string & uuid ,
-    long id , 
-    const irr::core::vector3df & posi,
-    const irr::core::vector3df & rota,
-    const btVector3& lin_vel ,
-    const btVector3& ang_vel
-){
-    auto ptr=seekSubs(uuid);
-    if(ptr){
-        ptr->setMotion(posi,rota);
-        ptr->rigidBody->setLinearVelocity(lin_vel);
-        ptr->rigidBody->setAngularVelocity(ang_vel);
-    }else{
-        auto p=seekSubsConf(id);
-        if(p && p->type==mods::SUBS_LASTING){
-            auto sp=createSubs();
-            sp->uuid=uuid;
-            sp->init(p,posi,rota);
-            sp->type=mods::SUBS_LASTING;
-            sp->rigidBody->setLinearVelocity(lin_vel);
-            sp->rigidBody->setAngularVelocity(ang_vel);
-        }
-    }
-}
 void substance::updateSubs(//更新物体状态，由服务器调用
     long id,
     const std::string & uuid , 
@@ -213,6 +229,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
     if(sp){
         sp->setMotion(posi,rota);
         sp->owner=owner;
+        //setOwner(uuid,owner);
         sp->hp=hp;
         sp->status=status;
         sp->rigidBody->setLinearVelocity(lin_vel);
@@ -223,6 +240,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             auto sp=createSubs();
             sp->uuid=uuid;
             sp->owner=owner;
+            setOwner(uuid,owner);
             sp->hp=hp;
             sp->status=status;
             sp->init(p,posi,rota);
@@ -252,13 +270,58 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     
     rigidBody->setUserPointer(&info);
     
-    parent->dynamicsWorld->addRigidBody(rigidBody);
+    x=p.X/32;
+    y=p.Z/32;
+    this->addIntoWorld();
     
     parent->subses[uuid]=this;
+}
+
+void substance::lockChunk(int x,int y){
+    chunkLocker[ipair(x,y)];
+}
+
+void substance::unlockChunk(int x,int y){
+    auto it=chunkLocker.find(ipair(x,y));
+    
+    if(it!=chunkLocker.end()){
+        
+        for(auto s:it->second){
+            dynamicsWorld->addRigidBody(s->rigidBody);
+            s->inWorld=true;
+        }
+        chunkLocker.erase(it);
+        
+    }
+}
+
+bool substance::subs::addIntoWorld(){
+    auto it=parent->chunkLocker.find(ipair(x,y));
+    
+    if(it==parent->chunkLocker.end()){
+        //chunnk has not been locked
+        parent->dynamicsWorld->addRigidBody(rigidBody);
+        inWorld=true;
+        return true;
+    }else{
+        //chunk has been locked
+        it->second.insert(this);
+        inWorld=false;
+        return false;
+    }
+}
+void substance::onGenChunk(terrain::chunk * c){
+    buildings::onGenChunk(c);
+    lockChunk(c->x,c->y);
+    requestDownloadSubstanceChunk(c->x,c->y);
+}
+void substance::onFreeChunk(terrain::chunk * c){
+    buildings::onFreeChunk(c);
 }
 void substance::subs::setRandUUID(){
     getUUID(uuid);
 }
+
 void substance::subs::release(){
     if(uuid.empty() || parent==NULL)
         return;
@@ -267,7 +330,18 @@ void substance::subs::release(){
     
     parent->subses.erase(uuid);
     
-    parent->dynamicsWorld->removeRigidBody(rigidBody);
+    if(inWorld)
+        parent->dynamicsWorld->removeRigidBody(rigidBody);
+    else{
+        //chunk has been save in x,y
+        auto it=parent->chunkLocker.find(ipair(x,y));
+    
+        if(it!=parent->chunkLocker.end()){
+            it->second.erase(this);
+        }
+        
+    }
+    
     delete rigidBody;
     delete bodyState;
     

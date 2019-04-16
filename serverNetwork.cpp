@@ -279,7 +279,7 @@ void serverNetwork::onMessageUpdateSubs(RakNet::Packet * data,const RakNet::Syst
             onMessageUpdateSubsTeleport(&bs,address);
         break;
         
-        case S_SET_USER_SUBS:
+        case S_UL_STATUS:
             onMessageUpdateSubsSetSubs(&bs,address);
         break;
         
