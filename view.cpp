@@ -91,17 +91,20 @@ void view::worldLoop(){
                 const btCollisionObject * obA = contactManifold->getBody0();
                 const btCollisionObject * obB = contactManifold->getBody1();
                 
-                void * pA=obA->getUserPointer();
-                void * pB=obB->getUserPointer();
+                auto pA=(bodyInfo*)obA->getUserPointer();
+                auto pB=(bodyInfo*)obB->getUserPointer();
+                
+                if(pA==NULL || pB==NULL)
+                    continue;
                 
                 int numContacts=contactManifold->getNumContacts();
                 for(int j=0;j<numContacts;j++){
                     
                     auto point=contactManifold->getContactPoint(j);
                     
-                    float impulse=point.getAppliedImpulse();
+                    //float impulse=point.getAppliedImpulse();
                     
-                    
+                    onCollision(pA,pB,point);
                     
                 }
             }

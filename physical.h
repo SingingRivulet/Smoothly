@@ -1,6 +1,7 @@
 #ifndef SMOOTHLY_PHYSICAL
 #define SMOOTHLY_PHYSICAL
 #include "utils.h"
+#include <sstream>
 namespace smoothly{
     class physical{
         public:
@@ -25,6 +26,16 @@ namespace smoothly{
             struct bodyInfo{
                 void * ptr;
                 bodyType type;
+            };
+            
+            struct bodyGroup{
+                btCompoundShape * compound;
+                std::list<btCollisionShape*> children;
+                void init(const std::string & conf);
+                void release();
+                private:
+                void parseLine(const char * str);
+                void add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation);
             };
     };
 }

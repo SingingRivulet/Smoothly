@@ -99,6 +99,10 @@ namespace smoothly{
             );
             virtual void requestDownloadSubstanceChunk(int x,int y);
             
+            virtual void requestRemoveSubs(const std::string & uuid);//请求删除持久物体（非持久不需要删除）
+            virtual void requestTeleport(const std::string & uuid,const irr::core::vector3df & p);
+            virtual void requestAttackSubs(const std::string & uuid,int dmg);
+            
             void setUserPosition(const irr::core::vector3df & p);
             void setUserRotation(const irr::core::vector3df & r);
             void move(const irr::core::vector3df & delta);

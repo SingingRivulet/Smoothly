@@ -169,4 +169,102 @@ void physical::getMotionState(btMotionState * motionState,float * mtx){
     transform.getOpenGLMatrix(mtx);
 }
 
+void physical::bodyGroup::init(const std::string & conf){
+    compound = new btCompoundShape();
+    std::istringstream iss(conf);
+    char buf[1024];
+    while(!iss.eof()){
+        iss.getline(buf,1024);
+        parseLine(buf);
+    }
+}
+
+void physical::bodyGroup::release(){
+    if(compound){
+        delete compound;
+        compound=NULL;
+    }
+    for(auto it:children){
+        if(it){
+            delete it;
+        }
+    }
+    children.clear();
+}
+void physical::bodyGroup::parseLine(const char * str){
+    if(str[0]=='+'){
+        std::istringstream iss(str+2);
+        float px=0,py=0,pz=0,rx=0,ry=0,rz=0,rw=0;
+        
+        iss>>px;
+        iss>>py;
+        iss>>pz;
+        
+        iss>>rx;
+        iss>>ry;
+        iss>>rz;
+        iss>>rw;
+        
+        btCollisionShape * obj=NULL;
+        
+        float bx=0,by=0,bz=0,rad=0,radius=0,height=0,hx=0,hy=0,hz=0;
+        
+        switch(str[1]){
+            case 'b'://box
+                iss>>bx;
+                iss>>by;
+                iss>>bz;
+                obj=new btBoxShape(btVector3(bx,by,bz));
+            break;
+            case 's'://sphere
+                iss>>rad;
+                obj=new btSphereShape(rad);
+            break;
+            case 'c'://capsule
+                iss>>radius;
+                iss>>height;
+                obj=new btCapsuleShape(radius,height);
+            break;
+            case 'y'://cylinder
+                iss>>hx;
+                iss>>hy;
+                iss>>hz;
+                obj=new btCylinderShape(btVector3(hx,hy,hz));
+            break;
+            case 'o'://cone
+                iss>>radius;
+                iss>>height;
+                obj=new btConeShape(radius,height);
+            break;
+            default:
+                return;
+        }
+        if(obj){
+            add(obj,btVector3(px,py,pz),btQuaternion(rx,ry,rz,rw));
+        }
+    }else
+    if(str[0]=='M'){
+        float m=0,ix=0,iy=0,iz=0;
+        std::istringstream iss(str+1);
+        
+        iss>>m;
+        iss>>ix;
+        iss>>iy;
+        iss>>iz;
+        
+        btScalar mass(m);
+        btVector3 localInertia(ix, iy, iz);
+        compound->calculateLocalInertia(mass, localInertia);
+    }
+}
+void physical::bodyGroup::add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation){
+    btTransform t;
+    t.setIdentity();
+    t.setOrigin(position);
+    t.setRotation(rotation);
+    
+    children.push_back(obj);
+    compound->addChildShape(t, obj);
+}
+
 }

@@ -535,8 +535,8 @@ void clientNetwork::uploadBodyStatus(//上传持久型物体状态
 
 void clientNetwork::requestCreateSubs(//请求创建物体
     long id,
-    const irr::core::vector3df & p,
-    const irr::core::vector3df & r, 
+    const irr::core::vector3df & position,
+    const irr::core::vector3df & rotation, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
@@ -545,6 +545,14 @@ void clientNetwork::requestCreateSubs(//请求创建物体
     bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
     
     bs.Write((RakNet::MessageID)S_UL_CREATE);
+    
+    bs.Write((int64_t)id);
+    bs.WriteVector(position.X,position.Y,position.Z);
+    bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
+    bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
+    bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
+    
+    sendMessage(&bs);
 }
 
 void clientNetwork::requestCreateBriefSubs(//请求创建物体（非持久）
@@ -574,6 +582,49 @@ void clientNetwork::requestDownloadSubstanceChunk(int x,int y){
     
     bs.Write((RakNet::MessageID)S_RQ_CHUNK);
     
+    bs.Write((int32_t)x);
+    bs.Write((int32_t)y);
+    
+    sendMessage(&bs);
+}
+
+void clientNetwork::requestRemoveSubs(const std::string & u){//请求删除持久物体（非持久不需要删除）
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_UL_REMOVE);
+    
+    RakNet::RakString uuid=u.c_str();
+    bs.Write(uuid);
+    
+    sendMessage(&bs);
+}
+void clientNetwork::requestTeleport(const std::string & u,const irr::core::vector3df & position){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_UL_TELEPORT);
+    
+    RakNet::RakString uuid=u.c_str();
+    bs.Write(uuid);
+    bs.WriteVector(position.X,position.Y,position.Z);
+    
+    sendMessage(&bs);
+}
+void clientNetwork::requestAttackSubs(const std::string & u,int dmg){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_UL_ATTACK);
+    
+    RakNet::RakString uuid=u.c_str();
+    bs.Write(uuid);
+    bs.Write((int32_t)dmg);
+    
+    sendMessage(&bs);
 }
 
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){

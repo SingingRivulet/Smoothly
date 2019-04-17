@@ -163,7 +163,11 @@ namespace smoothly{
                 }
             }
             
+            void onCollision(bodyInfo *,bodyInfo *,const btManifoldPoint &);
+            
             virtual void requestRemoveSubs(const std::string & uuid)=0;//请求删除持久物体（非持久不需要删除）
+            virtual void requestTeleport(const std::string & uuid,const irr::core::vector3df & p)=0;
+            virtual void requestAttackSubs(const std::string & uuid,int dmg)=0;
             
             virtual void uploadBodyStatus(//上传持久型物体状态
                 const std::string & uuid , 

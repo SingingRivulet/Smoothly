@@ -520,6 +520,8 @@ void terrain::updateChunk(int x,int y){
     ch->bodyState =setMotionState(ch->node->getAbsoluteTransformation().pointer());
     ch->rigidBody =createBody(ch->bodyShape,ch->bodyState);
     ch->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+    ch->rigidBody->setFriction(0.7);
+    ch->rigidBody->setRestitution(0.1);
     
     ch->info.type=BODY_TERRAIN;
     ch->info.ptr=ch;
