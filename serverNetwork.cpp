@@ -173,12 +173,14 @@ void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddr
             }
         break;
         case ID_NEW_INCOMING_CONNECTION:
-            //下一版本修改
-            setUserPosition(irr::core::vector3df(0,0,0),address);
+            //登录后才有listener
+            //setUserPosition(irr::core::vector3df(0,0,0),address);
             printf("connect\n");
         break;
         case ID_DISCONNECTION_NOTIFICATION:
-            delListener(address);
+            logout(address);
+            //delListener(address);
+            //listener已经被删除
             printf("disconnect\n");
         break;
     }

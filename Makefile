@@ -22,6 +22,7 @@ client:client.cpp game.o
 	control.o \
 	mods.o \
 	physical.o \
+	substance.o \
 	-o client \
 	$(LIBS)
 

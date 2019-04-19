@@ -90,6 +90,7 @@ namespace smoothly{
         auto l=t-f;
         return (l.X*l.X + l.Y*l.Y + l.Z*l.Z);
     }
+    
     class ipair{
         public:
             int32_t x,y;
@@ -124,6 +125,7 @@ namespace smoothly{
                 y=0;
             }
     };
+    
     class mapid{
         public:
             int x,y,mapId;
@@ -177,6 +179,7 @@ namespace smoothly{
                 return *this;
         }
     };
+    
     class predictableRand{
         public:
             inline int rand(){
@@ -191,6 +194,58 @@ namespace smoothly{
             }
         private:
             unsigned long next=1;
+    };
+    
+    class lineReader{
+        public:
+            const char * str;
+            const char * ptr;
+            bool eof;
+            inline lineReader(const char * p){
+                this->str=p;
+                this->ptr=p;
+                this->eof=false;
+            }
+            inline int read(char * out , int len , char end='\n'){
+                if(*ptr=='\0' || this->eof){
+                    this->eof=true;
+                    return 0;
+                }
+                while(1){
+                    if(*ptr=='\0'){
+                        this->eof=true;
+                        return 0;
+                    }
+                    if(*ptr==end)
+                        ++ptr;
+                    else
+                        break;
+                }
+                int i=0;
+                while(1){
+                    if(*ptr=='\0'){
+                        this->eof=true;
+                    }
+                    if(i>=len-1){
+                        out[i]='\0';
+                        break;
+                    }else
+                    if(*ptr=='\0'){
+                        out[i]='\0';
+                        break;
+                    }else
+                    if(*ptr==end){
+                        out[i]='\0';
+                        ++ptr;
+                        break;
+                    }else{
+                        out[i]=*ptr;
+                        ++i;
+                        ++ptr;
+                    }
+                }
+                return i;
+            }
     };
 }
 #endif

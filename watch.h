@@ -21,7 +21,7 @@ namespace smoothly{
             inline bool addrExist(const RakNet::SystemAddress & addr){
                 return listeners.find(addr)!=listeners.end();
             }
-            virtual void setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr);
+            virtual void setUserPosition(const irr::core::vector3df & position,const RakNet::SystemAddress & addr)final;
             void setListener(
                 const HBB::vec3 & from,
                 const HBB::vec3 & to,

@@ -18,6 +18,8 @@ namespace smoothly{
                 btMotionState    * bodyState;
                 irr::scene::ISceneNode * node;
                 
+                mods::subsConf * subsConf;
+                
                 subsType type;
                 
                 subs * next;

@@ -173,6 +173,9 @@ void buildings::onGenBuilding(remoteGraph::item * i){
         i->rigidBody=createBody(it->second->bodyShape,i->bodyState);
         i->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
         
+        i->rigidBody->setFriction(it->second->friction);
+        i->rigidBody->setRestitution(it->second->restitution);
+        
         i->info.type=BODY_BUILDING;
         i->info.ptr=i;
         i->rigidBody->setUserPointer(&(i->info));

@@ -67,6 +67,7 @@ bool users::login(const std::string & uuid,const RakNet::SystemAddress & addr,co
     }else{
         p=new user;
     }
+    //if it have logged,log out first
     
     p->parent=this;
     p->userUUID=uuid;

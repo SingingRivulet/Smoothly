@@ -28,14 +28,44 @@ namespace smoothly{
                 bodyType type;
             };
             
-            struct bodyGroup{
-                btCompoundShape * compound;
-                std::list<btCollisionShape*> children;
-                void init(const std::string & conf);
-                void release();
+            class shapeGroup{
+                public:
+                
+                    btCompoundShape * compound;
+                    std::list<btCollisionShape*> children;
+                    btScalar mass;
+                    btVector3 localInertia;
+                    
+                    virtual void init(const std::string & conf);
+                    virtual void release();
+                
                 private:
-                void parseLine(const char * str);
-                void add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation);
+                    
+                    void parseLine(const char * str);
+                    void add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation);
+                    virtual void setFric(float f);
+                    virtual void setResti(float r);
+            };
+            class bodyGroup:public shapeGroup{
+                public:
+                    btDefaultMotionState* motion;
+                    btRigidBody * body;
+                    float f,e;
+                    virtual void init(const std::string & conf);
+                    virtual void release();
+                
+                private:
+                    virtual void setFric(float f);
+                    virtual void setResti(float r);
+                
+            };
+            
+            struct objectOperate{
+                enum operateType{
+                    REMOVE,ATTACK
+                };
+                int dmg;
+                
             };
     };
 }

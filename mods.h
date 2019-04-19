@@ -96,6 +96,8 @@ namespace smoothly{
                     btCollisionShape  * bodyShape;
                     btTriangleMesh    * bodyMesh;
                     bool                useAlpha;
+                    float               friction;
+                    float               restitution;
                     irr::core::aabbox3d<float> BB;
             };
             std::map<long,building*> buildings;
@@ -115,11 +117,43 @@ namespace smoothly{
                     btVector3 localInertia;
                     int life;
                     subsType type;
-                    irr::scene::IMesh * mesh;
-                    btCollisionShape  * bodyShape;
-                    btTriangleMesh    * bodyMesh;
-                    bool                useAlpha;
-                    int                 hp;
+                    irr::scene::IMesh  *  mesh;
+                    btCollisionShape   *  bodyShape;
+                    irr::video::ITexture* texture;
+                    shapeGroup            shape;
+                    bool                  useAlpha;
+                    int                   hp;
+                    float                 friction;
+                    float                 restitution;
+                    
+                    bool haveHitSubsCallback;
+                    int hitSubsCallback;
+                    
+                    bool haveHitBuildingCallback;
+                    int hitBuildingCallback;
+                    
+                    bool haveHitTerrainItemCallback;
+                    int hitTerrainItemCallback;
+                    
+                    bool haveHitTerrainCallback;
+                    int hitTerrainCallback;
+                    
+                    inline subsConf(){
+                        hitSubsCallback=0;
+                        hitBuildingCallback=0;
+                        hitTerrainItemCallback=0;
+                        hitTerrainCallback=0;
+                        
+                        haveHitSubsCallback=false;
+                        haveHitBuildingCallback=false;
+                        haveHitTerrainItemCallback=false;
+                        haveHitTerrainCallback=false;
+                        
+                    }
+                    
+                    inline ~subsConf(){
+                        
+                    }
             };
             std::map<long,subsConf *> subsConfs;
             //////////////////////////////////////////////////////////////////////////////

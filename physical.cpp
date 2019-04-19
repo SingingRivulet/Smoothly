@@ -169,17 +169,19 @@ void physical::getMotionState(btMotionState * motionState,float * mtx){
     transform.getOpenGLMatrix(mtx);
 }
 
-void physical::bodyGroup::init(const std::string & conf){
+void physical::shapeGroup::init(const std::string & conf){
     compound = new btCompoundShape();
-    std::istringstream iss(conf);
+    lineReader lr(conf.c_str());
     char buf[1024];
-    while(!iss.eof()){
-        iss.getline(buf,1024);
-        parseLine(buf);
+    while(!lr.eof){
+        if(lr.read(buf,1024)>0){
+            parseLine(buf);
+            buf[0]='\0';//往buf第一字节写入0，防止下一次读到相同值
+        }
     }
 }
 
-void physical::bodyGroup::release(){
+void physical::shapeGroup::release(){
     if(compound){
         delete compound;
         compound=NULL;
@@ -191,8 +193,12 @@ void physical::bodyGroup::release(){
     }
     children.clear();
 }
-void physical::bodyGroup::parseLine(const char * str){
+void physical::shapeGroup::parseLine(const char * str){
     if(str[0]=='+'){
+        
+        if(str[1]=='\0' || str[2]=='\0')
+            return;
+        
         std::istringstream iss(str+2);
         float px=0,py=0,pz=0,rx=0,ry=0,rz=0,rw=0;
         
@@ -244,6 +250,8 @@ void physical::bodyGroup::parseLine(const char * str){
         }
     }else
     if(str[0]=='M'){
+        if(str[1]=='\0')
+            return;
         float m=0,ix=0,iy=0,iz=0;
         std::istringstream iss(str+1);
         
@@ -252,12 +260,36 @@ void physical::bodyGroup::parseLine(const char * str){
         iss>>iy;
         iss>>iz;
         
-        btScalar mass(m);
-        btVector3 localInertia(ix, iy, iz);
+        mass=m;
+        localInertia=btVector3(ix, iy, iz);
         compound->calculateLocalInertia(mass, localInertia);
+    }else
+    if(str[0]=='F'){
+        
+        if(str[1]=='\0')
+            return;
+            
+        float f=0;
+        std::istringstream iss(str+1);
+        
+        iss>>f;
+        
+        setFric(f);
+    }else
+    if(str[0]=='E'){
+        
+        if(str[1]=='\0')
+            return;
+            
+        float e=0;
+        std::istringstream iss(str+1);
+        
+        iss>>e;
+        
+        setResti(e);
     }
 }
-void physical::bodyGroup::add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation){
+void physical::shapeGroup::add(btCollisionShape * obj,const btVector3& position,const btQuaternion& rotation){
     btTransform t;
     t.setIdentity();
     t.setOrigin(position);
@@ -265,6 +297,33 @@ void physical::bodyGroup::add(btCollisionShape * obj,const btVector3& position,c
     
     children.push_back(obj);
     compound->addChildShape(t, obj);
+}
+void physical::shapeGroup::setFric(float f){}
+void physical::shapeGroup::setResti(float r){}
+
+void physical::bodyGroup::init(const std::string & conf){
+    shapeGroup::init(conf);
+    
+    btTransform startTransform;
+    startTransform.setIdentity();
+    motion=new btDefaultMotionState(startTransform);
+    
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, compound, localInertia);
+    body = new btRigidBody(rbInfo);
+    body->setFriction(this->f);
+    body->setRestitution(this->e);
+}
+void physical::bodyGroup::release(){
+    delete body;
+    delete motion;
+    
+    shapeGroup::release();
+}
+void physical::bodyGroup::setFric(float fr){
+    this->f=fr;
+}
+void physical::bodyGroup::setResti(float r){
+    this->e=r;
 }
 
 }

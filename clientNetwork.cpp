@@ -627,6 +627,22 @@ void clientNetwork::requestAttackSubs(const std::string & u,int dmg){
     sendMessage(&bs);
 }
 
+void clientNetwork::login(const std::string & name,const std::string & p){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_USER);
+    
+    bs.Write((RakNet::MessageID)U_LOGIN);
+    
+    RakNet::RakString uuid=name.c_str();
+    RakNet::RakString pwd=p.c_str();
+    
+    bs.Write(uuid);
+    bs.Write(pwd);
+    
+    sendMessage(&bs);
+}
+
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){
     
 }

@@ -1,5 +1,6 @@
 #include "mods.h"
 namespace smoothly{
+
 void mods::init(const char * path){
     defaultBuildingList[0]=1;
     defaultBuildingList[1]=2;
@@ -9,6 +10,7 @@ void mods::init(const char * path){
     defaultBuildingList[5]=-1;
     defaultBuildingList[6]=-1;
 }
+
 static int mod_addBuildingMesh(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
@@ -33,10 +35,27 @@ static int mod_addBuildingMesh(lua_State * L){
     bool havebody=false;
     bool useAlpha=false;
     
+    float friction=0.5;
+    float restitution=0.1;
+    
     if(!lua_istable(L,-1)){
         lua_pushstring(L,"smoothly.addBuildingMesh(handler,itemId,{mesh=path,havebody=havebody})");
         return 1;
     }
+    
+    lua_pushstring(L,"friction");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        friction=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"restitution");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        restitution=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
     
     lua_pushstring(L,"mesh");
     lua_gettable(L,-2);
@@ -75,11 +94,14 @@ static int mod_addBuildingMesh(lua_State * L){
     b->bodyMesh = physical::createBtMesh(b->mesh);
     b->bodyShape= physical::createShape(b->bodyMesh);
     b->useAlpha = useAlpha;
+    b->friction = friction;
+    b->restitution=restitution;
     self->buildings[id]=b;
     
     lua_pushstring(L,"OK");
     return 1;
 }
+
 static int mod_addTerrainMesh(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
@@ -205,6 +227,146 @@ static int mod_addTerrainMesh(lua_State * L){
     lua_pushstring(L,"OK");
     return 1;
 }
+
+
+static int mod_addSubstance(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    if(self->scene==NULL){
+        lua_pushstring(L,"Irrlicht scene has not been initializated!");
+        return 1;
+    }
+    
+    int id=luaL_checkinteger(L,2);
+    
+    if(self->subsConfs.find(id)!=self->subsConfs.end()){
+        lua_pushstring(L,"ID has been existed!");
+        return 1;
+    }
+    
+    std::string scmpath;
+    std::string shapeConf;
+    
+    float friction=0.5;
+    float restitution=0.1;
+    
+    if(!lua_istable(L,-1)){
+        lua_pushstring(L,"Third arg must be table!");
+        return 1;
+    }
+    
+    lua_pushstring(L,"shape");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        shapeConf=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Draw shape fail!");
+        return 1;
+    }
+    
+    lua_pushstring(L,"friction");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        friction=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"restitution");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        restitution=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"mesh");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        scmpath=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Mesh doesn't exist!");
+        return 1;
+    }
+    
+    auto mesh=self->scene->getMesh(scmpath.c_str());
+    if(mesh==NULL){
+        lua_pushstring(L,"Load mesh fail!");
+        return 1;
+    }
+    
+    auto b=new mods::subsConf;
+    b->mesh=mesh;
+    
+    b->shape.init(shapeConf);
+    b->bodyShape=b->shape.compound;
+    
+    lua_pushstring(L,"texture");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto texture=self->scene->getVideoDriver()->getTexture(lua_tostring(L,-1));
+        if(texture)
+            b->texture=texture;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"useAlpha");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->useAlpha=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    //callbacks
+    lua_pushstring(L,"hitSubsCallback");
+    lua_gettable(L,-2);
+    if(lua_isfunction(L,-1)){
+        b->hitSubsCallback=luaL_ref(L,LUA_REGISTRYINDEX);
+        b->haveHitSubsCallback=true;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"hitBuildingCallback");
+    lua_gettable(L,-2);
+    if(lua_isfunction(L,-1)){
+        b->hitBuildingCallback=luaL_ref(L,LUA_REGISTRYINDEX);
+        b->haveHitBuildingCallback=true;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"hitTerrainItemCallback");
+    lua_gettable(L,-2);
+    if(lua_isfunction(L,-1)){
+        b->hitTerrainItemCallback=luaL_ref(L,LUA_REGISTRYINDEX);
+        b->haveHitTerrainItemCallback=true;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"hitTerrainCallback");
+    lua_gettable(L,-2);
+    if(lua_isfunction(L,-1)){
+        b->hitTerrainCallback=luaL_ref(L,LUA_REGISTRYINDEX);
+        b->haveHitTerrainCallback=true;
+    }
+    lua_pop(L,1);
+    
+    b->friction = friction;
+    b->restitution=restitution;
+    
+    self->subsConfs[id]=b;
+    
+    lua_pushstring(L,"OK");
+    return 1;
+}
+
+
 static int mod_addAutoGen(lua_State * L){
     if(!lua_isfunction(L,-1))
         return 0;
@@ -223,6 +385,7 @@ static int mod_addAutoGen(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
+
 void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -230,6 +393,7 @@ void mods::scriptInit(const char * path){
         {"addAutoGen"           ,mod_addAutoGen},
         {"addTerrainMesh"       ,mod_addTerrainMesh},
         {"addBuildingMesh"      ,mod_addBuildingMesh},
+        {"addSubstance"         ,mod_addSubstance},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);
@@ -341,13 +505,23 @@ void mods::destroy(){
         delete it.second;
     }
     items.clear();
+    
     for(auto it:buildings){
         it.second->mesh->drop();
-        delete it.second;
-        if(it.second->bodyMesh) delete it.second->bodyMesh;
+        //if(it.second->texture)   it.second->texture->drop();
         if(it.second->bodyShape)delete it.second->bodyShape;
+        if(it.second->bodyMesh) delete it.second->bodyMesh;
+        delete it.second;
     }
     buildings.clear();
+    
+    for(auto it:subsConfs){
+        it.second->mesh->drop();
+        if(it.second->texture)it.second->texture->drop();
+        it.second->shape.release();
+        delete it.second;
+    }
+    subsConfs.clear();
 }
 void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
     std::map<long,float> pl;

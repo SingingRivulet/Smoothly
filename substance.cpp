@@ -114,7 +114,7 @@ void substance::subs::update(){
                 getAngularVelocity()
             );
         }
-        wake=(!rigidBody->wantsSleeping());
+        wake=false;
     }
 }
 void substance::removeApply(){
@@ -254,6 +254,8 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     if(uuid.empty() || parent==NULL)
         return;
     
+    subsConf=conf;
+    
     id=conf->id;
     
     node=parent->scene->addMeshSceneNode(conf->mesh);
@@ -262,6 +264,13 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     node->updateAbsolutePosition();
     
+    if(conf->texture){
+        node->setMaterialTexture( 0 , conf->texture);
+        if(conf->useAlpha){
+            node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
+    
     info.type=BODY_SUBSTANCE;
     info.ptr=this;
     
@@ -269,6 +278,9 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     rigidBody=createBody(conf->bodyShape , bodyState , conf->mass , conf->localInertia);
     
     rigidBody->setUserPointer(&info);
+    
+    rigidBody->setFriction(conf->friction);
+    rigidBody->setRestitution(conf->restitution);
     
     x=p.X/32;
     y=p.Z/32;
