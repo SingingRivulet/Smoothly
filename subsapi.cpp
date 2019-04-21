@@ -35,7 +35,7 @@ namespace subsAPI{
     float y2=lua_tonumber(L,7); \
     float z2=lua_tonumber(L,8);
 
-static int getPosition(lua_State * L){
+static int subs_getPosition(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -46,7 +46,7 @@ static int getPosition(lua_State * L){
     lua_pushnumber(L,p.Z);
     return 3;
 }
-static int setPosition(lua_State * L){
+static int subs_setPosition(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -60,7 +60,7 @@ static int setPosition(lua_State * L){
     return 1;
 }
 
-static int getRotation(lua_State * L){
+static int subs_getRotation(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -71,7 +71,7 @@ static int getRotation(lua_State * L){
     lua_pushnumber(L,r.Z);
     return 3;
 }
-static int setRotation(lua_State * L){
+static int subs_setRotation(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -85,7 +85,7 @@ static int setRotation(lua_State * L){
     return 1;
 }
 
-static int getAngularVelocity(lua_State * L){
+static int subs_getAngularVelocity(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -96,7 +96,7 @@ static int getAngularVelocity(lua_State * L){
     lua_pushnumber(L,a.getZ());
     return 3;
 }
-static int getLinearVelocity(lua_State * L){
+static int subs_getLinearVelocity(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -108,7 +108,7 @@ static int getLinearVelocity(lua_State * L){
     return 3;
 }
 
-static int setAngularVelocity(lua_State * L){
+static int subs_setAngularVelocity(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -121,7 +121,7 @@ static int setAngularVelocity(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
-static int setLinearVelocity(lua_State * L){
+static int subs_setLinearVelocity(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -136,7 +136,7 @@ static int setLinearVelocity(lua_State * L){
     return 1;
 }
 
-static int teleport(lua_State * L){
+static int subs_teleport(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getVector1;
@@ -148,7 +148,7 @@ static int teleport(lua_State * L){
     return 1;
 }
 
-static int getOwner(lua_State * L){
+static int subs_getOwner(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -156,14 +156,14 @@ static int getOwner(lua_State * L){
     lua_pushstring(L,ptr->owner.c_str());
     return 1;
 }
-static int getMyUUID(lua_State * L){
+static int subs_getMyUUID(lua_State * L){
     getSelfPtr;
     
     lua_pushstring(L,self->myUUID.c_str());
     return 1;
 }
 
-static int attack(lua_State * L){
+static int subs_attack(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -180,7 +180,7 @@ static int attack(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
-static int remove(lua_State * L){
+static int subs_remove(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -191,7 +191,7 @@ static int remove(lua_State * L){
     return 1;
 }
 
-static int applyImpulse(lua_State * L){
+static int subs_applyImpulse(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -206,7 +206,7 @@ static int applyImpulse(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
-static int applyForce(lua_State * L){
+static int subs_applyForce(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -222,8 +222,7 @@ static int applyForce(lua_State * L){
     return 1;
 }
 
-
-static int manual(lua_State * L){
+static int subs_manual(lua_State * L){
     getSelfPtr;
     getSubsUUID;
     getSubsPtr;
@@ -238,32 +237,76 @@ static int manual(lua_State * L){
     return 1;
 }
 
+static int building_attack(lua_State * L){
+    getSelfPtr;
+    getSubsUUID;
+    
+    if(!lua_isinteger(L,3))
+        return 0;
+    int dmg=lua_tointeger(L,3);
+    
+    self->uploadAttack(suuid,dmg);
+    
+    lua_pushboolean(L,1);
+    return 1;
+}
+
+static int terrain_remove(lua_State * L){
+    getSelfPtr;
+    
+    mapid m;
+    m.x     =luaL_checkinteger(L,2);
+    m.y     =luaL_checkinteger(L,3);
+    m.itemId=luaL_checkinteger(L,4);
+    m.mapId =luaL_checkinteger(L,5);
+    
+    lua_pushboolean(L,self->remove(m));
+    return 1;
+}
+
+//register
+static void openlibs_building(lua_State * L){
+    struct luaL_Reg funcs[]={
+        {"attack" , building_attack},
+        {NULL,NULL}
+    };
+    luaL_newlib(L,funcs);
+    lua_setglobal(L,"building");
+}
+static void openlibs_terrain(lua_State * L){
+    struct luaL_Reg funcs[]={
+        {"remove" , terrain_remove},
+        {NULL,NULL}
+    };
+    luaL_newlib(L,funcs);
+    lua_setglobal(L,"terrain");
+}
 static void openlibs_subs(lua_State * L){
     struct luaL_Reg funcs[]={
-        {"setPosition"                  , setPosition},
-        {"setRotation"                  , setRotation},
+        {"setPosition"       , subs_setPosition},
+        {"setRotation"       , subs_setRotation},
         
-        {"getPosition"                  , getPosition},
-        {"getRotation"                  , getRotation},
+        {"getPosition"       , subs_getPosition},
+        {"getRotation"       , subs_getRotation},
         
-        {"getAngularVelocity"           , getAngularVelocity},
-        {"getLinearVelocity"            , getLinearVelocity},
+        {"getAngularVelocity", subs_getAngularVelocity},
+        {"getLinearVelocity" , subs_getLinearVelocity},
         
-        {"setAngularVelocity"           , setAngularVelocity},
-        {"getLinearVelocity"            , getLinearVelocity},
+        {"setAngularVelocity", subs_setAngularVelocity},
+        {"getLinearVelocity" , subs_getLinearVelocity},
         
-        {"teleport"                     , teleport},
+        {"teleport"          , subs_teleport},
         
-        {"getOwner"                     , getOwner},
-        {"getMyUUID"                    , getMyUUID},
+        {"getOwner"          , subs_getOwner},
+        {"getMyUUID"         , subs_getMyUUID},
         
-        {"attack"                       , attack},
-        {"remove"                       , remove},
+        {"attack"            , subs_attack},
+        {"remove"            , subs_remove},
         
-        {"applyImpulse"                 , applyImpulse},
-        {"applyForce"                   , applyForce},
+        {"applyImpulse"      , subs_applyImpulse},
+        {"applyForce"        , subs_applyForce},
         
-        {"manual"                       , manual},
+        {"manual"            , subs_manual},
         
         {NULL,NULL}
     };
@@ -273,6 +316,8 @@ static void openlibs_subs(lua_State * L){
 
 void openlibs(lua_State * L){
     openlibs_subs(L);
+    openlibs_building(L);
+    openlibs_terrain(L);
 }
 
 }//namespace subsAPI
