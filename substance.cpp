@@ -28,6 +28,18 @@ void substance::subs::setPosition(const irr::core::vector3df & p){
     bodyState->setWorldTransform(transform);
 }
 
+void substance::subs::setRotation(const irr::core::vector3df & r){
+    node->setRotation(r);
+    
+    btQuaternion rq;
+    euler2quaternion(r,rq);
+    
+    btTransform transform;
+    bodyState->getWorldTransform(transform);
+    transform.setRotation(rq);
+    bodyState->setWorldTransform(transform);
+}
+
 void substance::subs::updateByWorld(){
     if(!inWorld)
         return;
@@ -62,7 +74,8 @@ void substance::subsUpdate(){
     
     {//update
         for(auto it:subses){
-            it.second->update();
+            //update collision
+            it.second->update();//update scene
         }
     }
     {//set camera
@@ -80,7 +93,7 @@ void substance::subsUpdate(){
                     int dx=p.X/32;
                     int dy=p.Z/32;
                     
-                    if(fabs(cx-dx)>solveRange || fabs(cy-dy)>solveRange){
+                    if(fabs(cx-dx)>=14 || fabs(cy-dy)>=14){
                         removeLocalSubs(sit.second->uuid);
                     }
                 }
@@ -324,6 +337,13 @@ bool substance::subs::addIntoWorld(){
 }
 void substance::onGenChunk(terrain::chunk * c){
     buildings::onGenChunk(c);
+    
+    int cx=mainControlPosition.X/32;
+    int cy=mainControlPosition.Z/32;
+    
+    if(fabs(cx-(c->x))>=14 || fabs(cy-(c->y))>=14)
+        return;
+    
     lockChunk(c->x,c->y);
     requestDownloadSubstanceChunk(c->x,c->y);
 }
@@ -399,6 +419,99 @@ void substance::subsPoolInit(){
 }
 void substance::subsPoolDestroy(){
     delete (subsPool*)sPool;
+}
+
+void substance::onCollision(bodyInfo * A,bodyInfo * B,const btManifoldPoint & point){
+    //碰撞
+    float impulse=point.getAppliedImpulse();//冲量
+    {
+        if(A->type==BODY_SUBSTANCE){
+        
+            auto ptrA=(subs*)A->ptr;
+            auto scA=ptrA->subsConf;
+            
+            if(B->type==BODY_TERRAIN){
+                if(scA->haveHitTerrainCallback && (!(scA->hitTerrainCallbackOnlyForMe) || (ptrA->owner==myUUID))){
+                    scA->onHitTerrainCallback(m->L , this , ptrA->uuid , ptrA->owner , impulse);
+                }
+            }else
+            if(B->type==BODY_TERRAIN_ITEM){
+                if(scA->haveHitTerrainItemCallback && (!(scA->hitTerrainItemCallbackOnlyForMe) || (ptrA->owner==myUUID))){
+                    
+                    auto i=(terrain::item*)B->ptr;
+                    scA->onHitTerrainItemCallback(
+                        m->L , 
+                        this , 
+                        ptrA->uuid , 
+                        ptrA->owner ,
+                        mapid(i->inChunk->x , i->inChunk->y , i->id , i->mapId) , 
+                        impulse
+                    );
+                    
+                }
+            }else
+            if(B->type==BODY_BUILDING){
+                if(scA->haveHitBuildingCallback && (!(scA->hitBuildingCallbackOnlyForMe) || (ptrA->owner==myUUID))){
+                    
+                    auto b=(remoteGraph::item*)B->ptr;
+                    scA->onHitBuildingCallback(m->L , this , ptrA->uuid , ptrA->owner , b->uuid , impulse);
+                    
+                }
+            }else
+            if(B->type==BODY_SUBSTANCE){
+                if(scA->haveHitSubsCallback && (!(scA->hitSubsCallbackOnlyForMe) || (ptrA->owner==myUUID))){
+                    
+                    auto p=(subs*)B->ptr;
+                    scA->onHitSubs(m->L , this , ptrA->uuid , ptrA->owner , p->uuid , p->owner , impulse);
+                    
+                }
+            }
+        }
+    }
+    {
+        if(B->type==BODY_SUBSTANCE){
+            
+            auto ptrB=(subs*)B->ptr;
+            auto scB=ptrB->subsConf;
+            
+            if(A->type==BODY_TERRAIN){
+                if(scB->haveHitTerrainCallback && (!(scB->hitTerrainCallbackOnlyForMe) || (ptrB->owner==myUUID))){
+                    scB->onHitTerrainCallback(m->L , this , ptrB->uuid , ptrB->owner , impulse);
+                }
+            }else
+            if(A->type==BODY_TERRAIN_ITEM){
+                if(scB->haveHitTerrainItemCallback && (!(scB->hitTerrainItemCallbackOnlyForMe) || (ptrB->owner==myUUID))){
+                    
+                    auto i=(terrain::item*)A->ptr;
+                    scB->onHitTerrainItemCallback(
+                        m->L , 
+                        this , 
+                        ptrB->uuid , 
+                        ptrB->owner ,
+                        mapid(i->inChunk->x , i->inChunk->y , i->id , i->mapId) , 
+                        impulse
+                    );
+                    
+                }
+            }else
+            if(A->type==BODY_BUILDING){
+                if(scB->haveHitBuildingCallback && (!(scB->hitBuildingCallbackOnlyForMe) || (ptrB->owner==myUUID))){
+                    
+                    auto b=(remoteGraph::item*)A->ptr;
+                    scB->onHitBuildingCallback(m->L , this , ptrB->uuid , ptrB->owner , b->uuid , impulse);
+                    
+                }
+            }else
+            if(A->type==BODY_SUBSTANCE){
+                if(scB->haveHitSubsCallback && (!(scB->hitSubsCallbackOnlyForMe) || (ptrB->owner==myUUID))){
+                    
+                    auto p=(subs*)A->ptr;
+                    scB->onHitSubs(m->L , this , ptrB->uuid , ptrB->owner , p->uuid , p->owner , impulse);
+                    
+                }
+            }
+        }
+    }
 }
 
 }//namespace smoothly

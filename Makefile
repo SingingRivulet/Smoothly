@@ -8,7 +8,7 @@ all:client server
 ./a,out:main.cpp perlin.o clientNetwork.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o clientNetwork.o $(LIBS)
 
-client:client.cpp game.o
+client:client.cpp game.o subsapi.o
 	$(CC) client.cpp \
 	perlin.o \
 	SimplexNoise.o \
@@ -23,6 +23,7 @@ client:client.cpp game.o
 	mods.o \
 	physical.o \
 	substance.o \
+	subsapi.o \
 	-o client \
 	$(LIBS)
 
@@ -73,6 +74,9 @@ substance.o:substance.cpp substance.h building.o
 
 clientNetwork.o:clientNetwork.cpp clientNetwork.h substance.o
 	$(CC) -c clientNetwork.cpp
+
+subsapi.o:subsapi.cpp subsapi.h substance.o
+	$(CC) -c subsapi.cpp
 
 view.o:view.h view.cpp clientNetwork.o
 	$(CC) -c view.cpp

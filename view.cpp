@@ -110,6 +110,7 @@ void view::worldLoop(){
             }
         }
     }
+    subsUpdate();
 }
 void view::deltaTimeUpdate(){
     if(deltaTimeUpdateFirst){

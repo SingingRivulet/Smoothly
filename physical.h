@@ -60,13 +60,6 @@ namespace smoothly{
                 
             };
             
-            struct objectOperate{
-                enum operateType{
-                    REMOVE,ATTACK
-                };
-                int dmg;
-                
-            };
     };
 }
 #endif

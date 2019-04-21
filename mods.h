@@ -127,16 +127,52 @@ namespace smoothly{
                     float                 restitution;
                     
                     bool haveHitSubsCallback;
+                    bool hitSubsCallbackOnlyForMe;
                     int hitSubsCallback;
+                    void onHitSubs(
+                        lua_State * L,
+                        void * self,
+                        const std::string & uuid,
+                        const std::string & sowner,
+                        const std::string & tuuid,
+                        const std::string & tsowner,
+                        int imp
+                    );
                     
                     bool haveHitBuildingCallback;
+                    bool hitBuildingCallbackOnlyForMe;
                     int hitBuildingCallback;
+                    void onHitBuildingCallback(
+                        lua_State * L,
+                        void * self,
+                        const std::string & uuid,
+                        const std::string & sowner,
+                        const std::string & tuuid,
+                        int imp
+                    );
                     
                     bool haveHitTerrainItemCallback;
+                    bool hitTerrainItemCallbackOnlyForMe;
                     int hitTerrainItemCallback;
+                    void onHitTerrainItemCallback(
+                        lua_State * L,
+                        void * self,
+                        const std::string & uuid,
+                        const std::string & sowner,
+                        const mapid & mapid,
+                        int imp
+                    );
                     
                     bool haveHitTerrainCallback;
+                    bool hitTerrainCallbackOnlyForMe;
                     int hitTerrainCallback;
+                    void onHitTerrainCallback(
+                        lua_State * L,
+                        void * self,
+                        const std::string & uuid,
+                        const std::string & sowner,
+                        int imp
+                    );
                     
                     inline subsConf(){
                         hitSubsCallback=0;
@@ -149,6 +185,11 @@ namespace smoothly{
                         haveHitTerrainItemCallback=false;
                         haveHitTerrainCallback=false;
                         
+                        hitSubsCallbackOnlyForMe=false;
+                        hitBuildingCallbackOnlyForMe=false;
+                        hitTerrainItemCallbackOnlyForMe=false;
+                        hitTerrainCallbackOnlyForMe=false;
+                        
                     }
                     
                     inline ~subsConf(){
@@ -157,7 +198,7 @@ namespace smoothly{
             };
             std::map<long,subsConf *> subsConfs;
             //////////////////////////////////////////////////////////////////////////////
-            void init(const char * path);
+            void init();
             void loadMesh();
             void destroy();
     };

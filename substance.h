@@ -6,6 +6,8 @@ namespace smoothly{
     class substance:public buildings{
         public:
             typedef mods::subsType subsType;
+            struct subs;
+            typedef std::pair<subs*,float> subsContact;
             
             struct subs{
                 
@@ -33,6 +35,7 @@ namespace smoothly{
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
+                void setRotation(const irr::core::vector3df & r);
                 void teleport(const irr::core::vector3df & p);
                 
                 inline const btVector3 & getAngularVelocity(){
@@ -217,7 +220,6 @@ namespace smoothly{
                     mySubs.erase(subs);
             }
             irr::core::vector3df mainControlPosition;
-            int solveRange;
             
         private:
             std::map<ipair,std::set<subs*> > chunkLocker;

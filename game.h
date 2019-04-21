@@ -4,11 +4,12 @@
 namespace smoothly{
     class game:public control{
         public:
-            void gameInit(const char * addr,short port,const char * modpath){
+            void gameInit(const char * addr,short port,const std::string & name,const std::string & passwd){
                 loadWorld();
                 clientNetwork::init(addr,port);
+                clientNetwork::login(name,passwd);
                 m=new mods;
-                m->init(modpath);
+                m->init();
                 m->scriptInit("./script/smoothly.lua");
                 
                 loadScene();

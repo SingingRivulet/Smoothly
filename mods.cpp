@@ -1,7 +1,8 @@
 #include "mods.h"
+#include "subsapi.h"
 namespace smoothly{
 
-void mods::init(const char * path){
+void mods::init(){
     defaultBuildingList[0]=1;
     defaultBuildingList[1]=2;
     defaultBuildingList[2]=3;
@@ -256,7 +257,7 @@ static int mod_addSubstance(lua_State * L){
     float restitution=0.1;
     
     if(!lua_istable(L,-1)){
-        lua_pushstring(L,"Third arg must be table!");
+        lua_pushstring(L,"The third argument must be table!");
         return 1;
     }
     
@@ -325,6 +326,7 @@ static int mod_addSubstance(lua_State * L){
     lua_pop(L,1);
     
     //callbacks
+    //subs
     lua_pushstring(L,"hitSubsCallback");
     lua_gettable(L,-2);
     if(lua_isfunction(L,-1)){
@@ -333,6 +335,14 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"hitSubsCallbackOnlyForMe");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->hitSubsCallbackOnlyForMe=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    //building
     lua_pushstring(L,"hitBuildingCallback");
     lua_gettable(L,-2);
     if(lua_isfunction(L,-1)){
@@ -341,6 +351,14 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"hitBuildingCallbackOnlyForMe");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->hitBuildingCallbackOnlyForMe=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    //terrain item
     lua_pushstring(L,"hitTerrainItemCallback");
     lua_gettable(L,-2);
     if(lua_isfunction(L,-1)){
@@ -349,11 +367,26 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"hitTerrainItemCallbackOnlyForMe");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->hitTerrainItemCallbackOnlyForMe=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    //terrain
     lua_pushstring(L,"hitTerrainCallback");
     lua_gettable(L,-2);
     if(lua_isfunction(L,-1)){
         b->hitTerrainCallback=luaL_ref(L,LUA_REGISTRYINDEX);
         b->haveHitTerrainCallback=true;
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"hitTerrainCallbackOnlyForMe");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        b->hitTerrainCallbackOnlyForMe=lua_toboolean(L,-1);
     }
     lua_pop(L,1);
     
@@ -389,6 +422,7 @@ static int mod_addAutoGen(lua_State * L){
 void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
+    subsAPI::openlibs(L);
     struct luaL_Reg funcs[]={
         {"addAutoGen"           ,mod_addAutoGen},
         {"addTerrainMesh"       ,mod_addTerrainMesh},
@@ -561,4 +595,91 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
     }
 }
 
+#define pushArg(func) \
+    lua_settop(L,0); \
+    lua_rawgeti(L,LUA_REGISTRYINDEX,func); \
+    if(!lua_isfunction(L,-1)){ \
+        lua_pop(L,1); \
+        return; \
+    } \
+    lua_pushlightuserdata(L,self); \
+    lua_pushstring(L,uuid.c_str()); \
+    lua_pushstring(L,sowner.c_str());
+
+void mods::subsConf::onHitSubs(
+    lua_State * L,
+    void * self,
+    const std::string & uuid,
+    const std::string & sowner,
+    const std::string & tuuid,
+    const std::string & tsowner,
+    int imp
+){
+    pushArg(hitSubsCallback);
+    lua_pushstring(L,tuuid.c_str());
+    lua_pushstring(L,tsowner.c_str());
+    lua_pushnumber(L,imp);
+    
+    if(lua_pcall(L, 6, 0, 0) != 0){
+        //printf("error %s\n", lua_tostring(L,-1));
+        return;
+    }
 }
+
+void mods::subsConf::onHitBuildingCallback(
+    lua_State * L,
+    void * self,
+    const std::string & uuid,
+    const std::string & sowner,
+    const std::string & tuuid,
+    int imp
+){
+    pushArg(hitBuildingCallback);
+    lua_pushstring(L,tuuid.c_str());
+    lua_pushnumber(L,imp);
+    
+    if(lua_pcall(L, 5, 0, 0) != 0){
+        //printf("error %s\n", lua_tostring(L,-1));
+        return;
+    }
+}
+
+void mods::subsConf::onHitTerrainItemCallback(
+    lua_State * L,
+    void * self,
+    const std::string & uuid,
+    const std::string & sowner,
+    const mapid & mapid,
+    int imp
+){
+    pushArg(hitTerrainItemCallback);
+    lua_pushinteger(L,mapid.x);
+    lua_pushinteger(L,mapid.y);
+    lua_pushinteger(L,mapid.itemId);
+    lua_pushinteger(L,mapid.mapId);
+    lua_pushnumber(L,imp);
+    
+    if(lua_pcall(L, 8, 0, 0) != 0){
+        //printf("error %s\n", lua_tostring(L,-1));
+        return;
+    }
+}
+
+void mods::subsConf::onHitTerrainCallback(
+    lua_State * L,
+    void * self,
+    const std::string & uuid,
+    const std::string & sowner,
+    int imp
+){
+    pushArg(hitTerrainCallback);
+    lua_pushnumber(L,imp);
+    
+    if(lua_pcall(L, 4, 0, 0) != 0){
+        //printf("error %s\n", lua_tostring(L,-1));
+        return;
+    }
+}
+
+#undef pushArg
+}//namespace smoothly
