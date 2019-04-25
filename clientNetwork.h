@@ -107,7 +107,6 @@ namespace smoothly{
             
             void setUserPosition(const irr::core::vector3df & p);
             void setUserRotation(const irr::core::vector3df & r);
-            void move(const irr::core::vector3df & delta);
             
             void login(const std::string & name,const std::string & pwd);
             

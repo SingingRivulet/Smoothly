@@ -20,8 +20,7 @@ namespace smoothly{
             
             typedef std::pair<gameEvent,long> gemeEPair;
             std::queue<gemeEPair> eventQueue;
-            float walkSpeed;
-            bool flyDir;
+            
             
             control();
             ~control();
@@ -42,7 +41,6 @@ namespace smoothly{
                     moveDown=false;
                 }
             }status;
-            irr::core::vector3df relativePosition;
             
             void moveFront();
             void moveBack();
@@ -50,7 +48,6 @@ namespace smoothly{
             void moveRight();
             void relativePositionApply();
             
-            bool canFly;
             void moveUp();//飞行模式是升，普通模式是跳
             void moveDown();//飞行模式是降，普通模式是蹲
             
@@ -59,13 +56,6 @@ namespace smoothly{
             void addEventRecv();
             
             void loop();
-            
-            irr::core::vector3df cameraPosition;
-            void setRelativePosition(const irr::core::vector3df & delta);
-            void setCameraPosition(const irr::core::vector3df & delta);
-            
-            void setCameraDirect(const irr::core::vector3df & delta);
-            irr::core::vector2df moveTo;
             
             inline bool ok(){
                 return (device->run() && driver && dynamicsWorld);

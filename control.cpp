@@ -1,86 +1,47 @@
 #include "control.h"
 namespace smoothly{
-void clientNetwork::move(const irr::core::vector3df & mto){
-    //printf("camrea:(%f,%f,%f)\n",mto.X,mto.Y,mto.Z);
-    int cx=mto.X/32;
-    int cy=mto.Z/32;
 
-    visualChunkUpdate(cx,cy,false);
-    updateBuildingChunks(cx,cy,7);
-    setUserPosition(mto);
-}
 control::control(){
-    walkSpeed=0.01;
-    flyDir=true;
+    
 }
 control::~control(){
     
 }
 void control::relativePositionApply(){
-    irr::core::vector3df dt= relativePosition + cameraPosition;
-    clientNetwork::move(dt);
+    
+    int cx=mainControlPosition.X/32;
+    int cy=mainControlPosition.Z/32;
+    
+    //update chunks
+    visualChunkUpdate(cx,cy,false);
+    updateBuildingChunks(cx,cy,7);
+    setUserPosition(mainControlPosition);
+    
+    //get direction
+    irr::core::vector3df dir = camera->getTarget() - camera->getPosition();
+    dir.normalize();
+    
+    irr::core::vector3df dt= mainControlPosition + dir*deltaCamera;
     camera->setPosition(dt);
-}
-void control::setRelativePosition(const irr::core::vector3df & delta){
-    relativePosition+=(delta * this->deltaTime)*walkSpeed;
-}
-void control::setCameraPosition(const irr::core::vector3df & p){
-    clientNetwork::move(p);
-    camera->setPosition(p);
-}
-/*
- * rotate:
- *          |cos(a)  sin(a) |
- * (x,y)  * |               | = ( x*cos(a)-y*sin(a) , x*sin(a)+y*cos(a) )
- *          |-sin(a) cos(a) |
-*/
-static void rotate2d(irr::core::vector2df & v,float a){
-    auto cosa=cos(a);
-    auto sina=sin(a);
-    auto x=v.X*cosa - v.Y*sina;
-    auto y=v.X*sina + v.Y*cosa;
-    v.X=x;
-    v.Y=y;
-    //v.normalize();
 }
 
 void control::moveFront(){
-    irr::core::vector3df p(moveTo.X , 0 , moveTo.Y);
-    setRelativePosition(p);
+    
 }
 void control::moveBack(){
-    irr::core::vector3df p(-moveTo.X , 0 , -moveTo.Y);
-    setRelativePosition(p);
+    
 }
 void control::moveLeft(){
-    irr::core::vector2df p2d=moveTo;
-    rotate2d(p2d, 3.1415926/2);
-    p2d.normalize();
-    irr::core::vector3df p(p2d.X , 0 , p2d.Y);
-    setRelativePosition(p);
+    
 }
 void control::moveRight(){
-    irr::core::vector2df p2d=moveTo;
-    rotate2d(p2d, -3.1415926/2);
-    p2d.normalize();
-    irr::core::vector3df p(p2d.X , 0 , p2d.Y);
-    setRelativePosition(p);
+    
 }
 void control::moveUp(){
-    if(canFly){
-        irr::core::vector3df p(0 , 1 , 0);
-        setRelativePosition(p);
-    }
+    
 }
 void control::moveDown(){
-    if(canFly){
-        irr::core::vector3df p(0 , -1 , 0);
-        setRelativePosition(p);
-    }
-}
-void control::setCameraDirect(const irr::core::vector3df & delta){
-    moveTo.set(delta.X,delta.Z);
-    moveTo.normalize();
+    
 }
 void control::addCamera(){
     camera=scene->addCameraSceneNodeFPS();
@@ -180,26 +141,17 @@ void control::loop(){
     buildingApply();
     deltaTimeUpdate();
     irr::core::line3d<irr::f32> line;
-    cameraPosition           = camera->getPosition();
+    auto cameraPosition      = camera->getPosition();
     line.start               = cameraPosition;
     irr::core::vector3df dir = camera->getTarget()-line.start;
     line.end                 = line.start+dir.normalize()*32.0f;
-    setCameraDirect(dir);
     doBuildUpdate(line);
-    dir.normalize();
-    relativePosition.set(0,0,0);
     
     if(status.moveFront && !status.moveBack){
-        if(flyDir){
-            setRelativePosition(dir);
-        }else
-            moveFront();
+        moveFront();
     }else
     if(!status.moveFront && status.moveBack){
-        if(flyDir){
-            setRelativePosition(-dir);
-        }else
-            moveBack();
+        moveBack();
     }
     
     if(status.moveLeft && !status.moveRight){
