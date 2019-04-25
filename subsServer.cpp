@@ -121,7 +121,9 @@ void subsServer::createSubsForUSer(
             subsCache.put(p->uuid,p);
             subsuuid=p->uuid;
             
-            boardcastSubsCreate(p->uuid,id,posi,irr::core::vector3df(0,0,0),btVector3(0,0,0),btVector3(0,0,0),muuid);
+            boardcastSubsCreate(p->uuid,id,posi,irr::core::vector3df(0,0,0),btVector3(0,0,0),btVector3(0,0,0),muuid,"");
+            
+            p->setConfig("");
             setOwner(p->uuid,muuid);
             p->save(true);
             p->saveToDB();
@@ -138,13 +140,16 @@ void subsServer::createSubs(//添加物体
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & muuid,
+    const std::string & conf,
     const RakNet::SystemAddress & from
 ){
     pthread_rwlock_wrlock(&rwlock);
     
     bool lasting;
     int hp;
-    
+    std::string c=conf;
+    if(c=="[LOADING]")
+        c="";
     if(getSubsConf(id,lasting,hp)){
         if(lasting){
             if(userCanPutSubs(muuid)){
@@ -167,7 +172,9 @@ void subsServer::createSubs(//添加物体
             
                 subsCache.put(p->uuid,p);
                 
-                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos,muuid);
+                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos,muuid,c);
+                
+                p->setConfig(c);
                 setOwner(p->uuid,muuid);
                 p->save(true);
                 p->saveToDB();
@@ -175,7 +182,7 @@ void subsServer::createSubs(//添加物体
             }else
                 sendPutSubsFail(from);
         }else{
-            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,muuid,from);
+            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,muuid,c,from);
         }
     }
     
@@ -251,7 +258,7 @@ void subsServer::sendSubs(const RakNet::SystemAddress & addr,const std::string &
     pthread_rwlock_rdlock(&rwlock);
     auto p=seekSubs(uuid);
     if(p){
-        p->send(addr);
+        p->send(addr,true);
         p->drop();
     }
     pthread_rwlock_unlock(&rwlock);
@@ -309,6 +316,25 @@ bool subsServer::uuidExist(const std::string & uuid){
     snprintf(kbuf,256,"subsNode %s",uuid.c_str());
     
     return (db->Get(leveldb::ReadOptions(),kbuf,&sbuf).ok() && !sbuf.empty());
+}
+
+void subsServer::subs::delConfig(){
+    char kbuf[256];
+    snprintf(kbuf,256,"config %s",uuid.c_str());
+    parent->db->Delete(leveldb::WriteOptions(),kbuf);
+}
+void subsServer::subs::setConfig(const std::string & conf){
+    char kbuf[256];
+    snprintf(kbuf,256,"config %s",uuid.c_str());
+    if(conf=="[LOADING]")
+        parent->db->Put(leveldb::WriteOptions(),kbuf,"");
+    else
+        parent->db->Put(leveldb::WriteOptions(),kbuf,conf);
+}
+void subsServer::subs::getConfig(std::string & conf){
+    char kbuf[256];
+    snprintf(kbuf,256,"config %s",uuid.c_str());
+    parent->db->Get(leveldb::ReadOptions(),kbuf,&conf);
 }
 
 void subsServer::subs::updateChunkPosition(){
@@ -410,12 +436,20 @@ void subsServer::subs::remove(){
     char kbuf[256];
     snprintf(kbuf,256,"subsNode %s",uuid.c_str());
     parent->db->Delete(leveldb::WriteOptions(),kbuf);
+    delConfig();
 }
 void subsServer::subs::send(){
     parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID);
 }
-void subsServer::subs::send(const RakNet::SystemAddress & addr){
-    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,addr);
+void subsServer::subs::send(const RakNet::SystemAddress & addr,bool sendconf){
+    std::string conf;
+    if(sendconf){
+        getConfig(conf);
+        if(conf=="[LOADING]")
+            conf="";
+    }else
+        conf="[LOADING]";
+    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,conf,addr);
 }
 void subsServer::subs::onFree(){
     saveDo();

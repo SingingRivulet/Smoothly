@@ -53,7 +53,8 @@ namespace smoothly{
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
-                const std::string & useruuid
+                const std::string & useruuid,
+                const std::string & config
             );
             virtual void boardcastSubsCreate(
                 long id , 
@@ -62,6 +63,7 @@ namespace smoothly{
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & useruuid,
+                const std::string & config,
                 const RakNet::SystemAddress & ext
             );
             virtual void boardcastSubsStatus(

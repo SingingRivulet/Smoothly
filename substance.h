@@ -2,6 +2,8 @@
 #define SMOOTHLY_SUBSTANCE
 #include "building.h"
 #include "mempool.h"
+#include <mutex>
+#include <queue>
 namespace smoothly{
     class substance:public buildings{
         public:
@@ -15,6 +17,9 @@ namespace smoothly{
                 std::string owner;
                 long id;
                 int status,hp;
+                float walkSpeed;
+                float liftForce;
+                float pushForce;
                 bodyInfo info;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -29,14 +34,35 @@ namespace smoothly{
                 
                 bool wake;
                 
+                bool contacted;
+                
                 bool inWorld;
                 int x,y;//this variable only will be use while initializate;
+                
+                int walkingForward,walkingLeftOrRight;
+                
+                irr::core::vector2df walkDirection;
+                
+                void moveUpdate();
                 
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
                 void setRotation(const irr::core::vector3df & r);
                 void teleport(const irr::core::vector3df & p);
+                void move(const irr::core::vector3df & d);
+                void walk(const irr::core::vector3df & d);
+                
+                void fly(float lift,float push);
+                void fly(float lift,const irr::core::vector3df & push);
+                void jump(const irr::core::vector3df & d);
+                void walk(const irr::core::vector2df & d);
+                void flyUpdate(bool flying,bool lifting);
+                
+                void walk(int forward,int leftOrRight/*-1 left,1 right*/,float length);
+                
+                irr::core::vector3df getDirection();
+                void setDirection(const irr::core::vector3df & d);
                 
                 inline const btVector3 & getAngularVelocity(){
                     return rigidBody->getAngularVelocity();
@@ -151,7 +177,8 @@ namespace smoothly{
                 const irr::core::vector3df & r, 
                 const btVector3& lin_vel ,
                 const btVector3& ang_vel ,
-                int hp,int status
+                int hp,int status,
+                const std::string & conf
             );
             
             
@@ -202,6 +229,7 @@ namespace smoothly{
             
             inline substance():briefSubs(),subses(),subsRMT(){
                 subsPoolInit();
+                deltaTime=0;
             }
             inline ~substance(){
                 subsPoolDestroy();
@@ -237,6 +265,32 @@ namespace smoothly{
             void subsPoolInit();
             void subsPoolDestroy();
             
+        public:
+            float deltaTime;
+            
+            struct subsCommond{
+                std::string uuid;
+                enum Method{
+                    JUMP,
+                    WALK,
+                    WALK_STOP,
+                    FLY,
+                    FLY_STOP,
+                    DIRECT
+                };
+                Method method;
+                int walkForward;
+                int walkLeftOrRight;
+                irr::core::vector3df vec;
+                bool flying;
+                bool lifting;
+            };
+            void pushSubsCommond(const subsCommond & cmd);
+        private:
+            std::mutex commondLocker;
+            std::queue<subsCommond> cmdQueue;
+            void parseAllCommond();
+            void parseCommond(const subsCommond & cmd);
     };
 }
 #endif

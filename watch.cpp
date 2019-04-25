@@ -124,7 +124,8 @@ void watch::boardcastSubsCreate(
     const irr::core::vector3df & rotation, 
     const btVector3& impulse,
     const btVector3& rel_pos,
-    const std::string & useruuid
+    const std::string & useruuid,
+    const std::string & config
 ){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
@@ -132,7 +133,7 @@ void watch::boardcastSubsCreate(
     
     bs.Write((RakNet::MessageID)S_DL_CREATE);
     
-    RakNet::RakString u;
+    RakNet::RakString u,conf;
     
     bs.Write((int64_t)id);
     
@@ -147,6 +148,9 @@ void watch::boardcastSubsCreate(
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
     
+    conf=config.c_str();
+    bs.Write(conf);
+    
     boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
 }
 void watch::boardcastSubsCreate(
@@ -156,6 +160,7 @@ void watch::boardcastSubsCreate(
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & useruuid,
+    const std::string & config,
     const RakNet::SystemAddress & ext
 ){
     RakNet::BitStream bs;
@@ -164,7 +169,7 @@ void watch::boardcastSubsCreate(
     
     bs.Write((RakNet::MessageID)S_DL_CREATE_B);
     
-    RakNet::RakString u;
+    RakNet::RakString u,conf;
     
     bs.Write((int64_t)id);
     
@@ -175,6 +180,9 @@ void watch::boardcastSubsCreate(
     bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
+    
+    conf=config.c_str();
+    bs.Write(conf);
     
     struct tmpc{
         RakNet::SystemAddress ext;
@@ -210,6 +218,7 @@ void watch::boardcastSubsStatus(
     bs.Write((RakNet::MessageID)S_DL_STATUS);
     
     RakNet::RakString u;
+    RakNet::RakString conf="[LOADING]";
     
     bs.Write((int64_t)id);
     
@@ -226,6 +235,8 @@ void watch::boardcastSubsStatus(
     
     bs.Write((int32_t)status);
     bs.Write((int32_t)hp);
+    
+    bs.Write(conf);
     
     boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
 }

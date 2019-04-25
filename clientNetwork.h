@@ -73,7 +73,7 @@ namespace smoothly{
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& lin_vel ,
-                const btVector3& ang_vel
+                const btVector3& ang_vel 
             );
             
             void requestCreateSubs(//请求创建物体
@@ -81,7 +81,8 @@ namespace smoothly{
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
-                const btVector3& rel_pos
+                const btVector3& rel_pos,
+                const std::string & config = std::string("")
             );
             virtual void requestCreateBriefSubs(//请求创建物体（非持久）
                 long id,
@@ -98,6 +99,7 @@ namespace smoothly{
                 const btVector3& rel_pos
             );
             virtual void requestDownloadSubstanceChunk(int x,int y);
+            void requestDownloadSubstanceUUID(const std::string & uuid);
             
             virtual void requestRemoveSubs(const std::string & uuid);//请求删除持久物体（非持久不需要删除）
             virtual void requestTeleport(const std::string & uuid,const irr::core::vector3df & p);

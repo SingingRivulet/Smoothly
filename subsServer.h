@@ -37,12 +37,15 @@ namespace smoothly{
                 void load();
                 void remove();
                 void send();
-                void send(const RakNet::SystemAddress & addr);
+                void send(const RakNet::SystemAddress & addr,bool sendconf=false);
                 void removeFromChunk(int x,int y);
                 void addIntoChunk(int x,int y);
                 virtual void onFree();
                 void encode(char * vbuf,int len);//encode to string
                 void decode(const char * vbuf);//decode string
+                void setConfig(const std::string & conf);
+                void getConfig(std::string & conf);
+                void delConfig();
                 inline subs():manager("NULL"){
                     lastChMan=0;
                     status=0;
@@ -72,6 +75,7 @@ namespace smoothly{
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & muuid,
+                const std::string & config,
                 const RakNet::SystemAddress & from
             );
             void createSubsForUSer(
@@ -105,7 +109,8 @@ namespace smoothly{
                 const irr::core::vector3df & r, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
-                const std::string & useruuid
+                const std::string & useruuid,
+                const std::string & config
             )=0;
             virtual void boardcastSubsCreate(
                 long id , 
@@ -114,6 +119,7 @@ namespace smoothly{
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & useruuid,
+                const std::string & config,
                 const RakNet::SystemAddress & ext
             )=0;
             virtual void boardcastSubsStatus(
@@ -137,6 +143,7 @@ namespace smoothly{
                 int status,
                 int hp,
                 const std::string & useruuid,
+                const std::string & config,
                 const RakNet::SystemAddress & to
             )=0;
             virtual void boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & p)=0;

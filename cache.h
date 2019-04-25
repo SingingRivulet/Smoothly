@@ -3,8 +3,11 @@
 #include "utils.h"
 #include <mutex>
 #include <atomic>
+#include <thread>
 #include <string>
 #include <unordered_map>
+#include <map>
+#include <set>
 #include <stdio.h>
 #include <sys/time.h>
 namespace smoothly{
@@ -25,9 +28,11 @@ namespace smoothly{
                 tablemtx.unlock();
             }
             class node{
-                public:
+                friend class cache;
+                protected:
                     long expire;
                     cache * parent;
+                public:
                     inline node(){
                         parent=NULL;
                         expire=0;
@@ -60,6 +65,21 @@ namespace smoothly{
             friend class node;
         private:
             std::unordered_map<std::string,node*> nodes;
+            std::map<long,std::set<std::string> > expires;
+            std::mutex expiresLocker;
+            inline void addExpire(const std::string & name,long exp){
+                expiresLocker.lock();
+                expires[exp].insert(name);
+                expiresLocker.unlock();
+            }
+            inline void delExpire(const std::string & name,long exp){
+                expiresLocker.lock();
+                auto it=expires.find(exp);
+                if(it!=expires.end()){
+                    it->second.erase(name);
+                }
+                expiresLocker.unlock();
+            }
         public:
             inline static long getTime(){
                 struct timeval tv;
@@ -71,18 +91,24 @@ namespace smoothly{
             std::mutex tablemtx;
         public:
             inline void clearExpire(){
-                tablemtx.lock();
                 auto ntm=getTime();
-                for(auto it=nodes.begin();it!=nodes.end();){
-                    auto tmp=it;
-                    it++;
-                    if(tmp->second->expire < ntm){
-                        auto p=tmp->second;
-                        nodes.erase(tmp);
-                        p->drop();
-                    }
+                expiresLocker.lock();
+                for(auto it=expires.rbegin();it!=expires.rend();++it){
+                    if(it->first  < ntm){
+                        for(auto s:it->second){
+                            tablemtx.lock();
+                            auto itp=nodes.find(s);
+                            if(itp!=nodes.end()){
+                                auto p=itp->second;
+                                nodes.erase(itp);
+                                p->drop();
+                            }
+                            tablemtx.unlock();
+                        }
+                    }else
+                        break;
                 }
-                tablemtx.unlock();
+                expiresLocker.unlock();
             }
             inline node * get(const std::string & name){
                 tablemtx.lock();
@@ -102,12 +128,14 @@ namespace smoothly{
                 auto it=nodes.find(name);
                 if(it!=nodes.end()){
                     auto p=it->second;
+                    delExpire(it->first , p->expire);
                     nodes.erase(it);
                     p->drop();
                 }
                 tablemtx.unlock();
             }
             inline void put(const std::string & name,node * n,int life=600){
+                clearExpire();
                 tablemtx.lock();
                 auto it=nodes.find(name);
                 if(it!=nodes.end()){
@@ -115,11 +143,13 @@ namespace smoothly{
                         tablemtx.unlock();
                         return;
                     }else
+                        delExpire(name,it->second->expire);
                         it->second->drop();
                 }
                 n->parent=this;
                 n->grab();
                 n->expire=getTime()+life;
+                addExpire(name,n->expire);
                 
                 nodes[name]=n;
                 

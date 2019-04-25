@@ -33,6 +33,7 @@ namespace smoothly{
                 int status,
                 int hp,
                 const std::string & useruuid,
+                const std::string & config,
                 const RakNet::SystemAddress & to
             );
             virtual void sendPutSubsFail(const RakNet::SystemAddress & to);
@@ -53,7 +54,7 @@ namespace smoothly{
             inline void kick(const RakNet::SystemAddress & address){
                 if(connection)
                     connection->CloseConnection(address, true, 0);
-                delListener(address);
+                logout(address);
             }
             
             bool loged(const RakNet::SystemAddress & address);

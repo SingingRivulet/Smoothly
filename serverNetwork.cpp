@@ -311,13 +311,17 @@ void serverNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data,const Rak
     irr::core::vector3df position,rotation;
     irr::core::vector3df imp,point;
     
+    RakNet::RakString config;
+    
     if(!data->Read(id))return;
     if(!data->ReadVector(position.X,position.Y,position.Z))return;
     if(!data->ReadVector(rotation.X,rotation.Y,rotation.Z))return;
     if(!data->ReadVector(imp.X,imp.Y,imp.Z))return;
     if(!data->ReadVector(point.X,point.Y,point.Z))return;
     
-    createSubs(id,position,rotation,btVector3(imp.X,imp.Y,imp.Z),btVector3(point.X,point.Y,point.Z),address);
+    data->Read(config);//config can be null
+    
+    createSubs(id,position,rotation,btVector3(imp.X,imp.Y,imp.Z),btVector3(point.X,point.Y,point.Z),config.C_String(),address);
 }
 void serverNetwork::onMessageUpdateSubsRemove(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     RakNet::RakString uuid;
@@ -460,6 +464,7 @@ void serverNetwork::sendSubsStatus(
     int status,
     int hp,
     const std::string & useruuid,
+    const std::string & config,
     const RakNet::SystemAddress & to
 ){
     RakNet::BitStream bs;
@@ -468,7 +473,7 @@ void serverNetwork::sendSubsStatus(
     
     bs.Write((RakNet::MessageID)S_DL_STATUS);
     
-    RakNet::RakString u;
+    RakNet::RakString u,conf;
     
     bs.Write((int64_t)id);
     
@@ -485,6 +490,9 @@ void serverNetwork::sendSubsStatus(
     
     bs.Write((int32_t)status);
     bs.Write((int32_t)hp);
+    
+    conf=config.c_str();
+    bs.Write(conf);
     
     sendMessage(&bs,to);
 }

@@ -379,8 +379,21 @@ void clientNetwork::onMessageUpdateSubsTeleport(RakNet::BitStream * data){
     if(p)
         p->teleport(position);
 }
+void clientNetwork::requestDownloadSubstanceUUID(const std::string & uuid){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
+    
+    bs.Write((RakNet::MessageID)S_RQ_UUID);
+    
+    RakNet::RakString u=uuid.c_str();
+    
+    bs.Write(u);
+    
+    sendMessage(&bs);
+}
 void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
-    RakNet::RakString useruuid,subsuuid;
+    RakNet::RakString useruuid,subsuuid,conf;
     int32_t status,hp;
     int64_t id;
     irr::core::vector3df position,rotation,lin_vel,ang_vel;
@@ -397,6 +410,14 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     if(!data->Read(status))return;
     if(!data->Read(hp))return;
     
+    data->Read(conf);
+    if(std::string("[LOADING]")==conf.C_String()){ //[LOADING] mark means the data is not intace data
+        if(seekSubs(subsuuid.C_String())==NULL){ //substance has not been initialize
+            requestDownloadSubstanceUUID(subsuuid.C_String()); //send a request to download full data
+            return;
+        }
+    }
+    
     //call
     updateSubs(
         id,
@@ -406,7 +427,8 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
         rotation,
         btVector3(lin_vel.X  , lin_vel.Y  , lin_vel.Z),
         btVector3(ang_vel.X  , ang_vel.Y  , ang_vel.Z),
-        hp,status
+        hp,status,
+        conf.C_String()
     );
 }
 void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
@@ -538,9 +560,12 @@ void clientNetwork::requestCreateSubs(//请求创建物体
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
     const btVector3& impulse,
-    const btVector3& rel_pos
+    const btVector3& rel_pos,
+    const std::string & config
+    
 ){
     RakNet::BitStream bs;
+    RakNet::RakString conf;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
     
@@ -551,6 +576,9 @@ void clientNetwork::requestCreateSubs(//请求创建物体
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
+    
+    conf=config.c_str();
+    bs.Write(conf);
     
     sendMessage(&bs);
 }

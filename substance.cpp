@@ -14,6 +14,151 @@ void substance::subs::setMotion(const irr::core::vector3df & p,const irr::core::
     
     bodyState->setWorldTransform(transform);//apply
 }
+
+void substance::pushSubsCommond(const subsCommond & cmd){
+    commondLocker.lock();
+    cmdQueue.push(cmd);
+    commondLocker.unlock();
+}
+void substance::parseAllCommond(){
+    commondLocker.lock();
+    while(!cmdQueue.empty()){
+        parseCommond(cmdQueue.front());
+        cmdQueue.pop();
+    }
+    commondLocker.unlock();
+}
+
+void substance::parseCommond(const subsCommond & cmd){
+    auto p=seekSubs(cmd.uuid);
+    if(p){
+        switch(cmd.method){
+            case subsCommond::JUMP:
+                p->jump(cmd.vec);
+            break;
+            case subsCommond::WALK:
+                p->walkingForward      =cmd.walkForward;
+                p->walkingLeftOrRight  =cmd.walkLeftOrRight;
+            break;
+            case subsCommond::WALK_STOP:
+                p->walkingForward=0;
+                p->walkingLeftOrRight=0;
+            break;
+            case subsCommond::FLY:
+                p->flyUpdate(cmd.flying , cmd.lifting);
+            break;
+            case subsCommond::FLY_STOP:
+                p->flyUpdate(false,false);
+            break;
+            case subsCommond::DIRECT:
+                p->setDirection(cmd.vec);
+            break;
+        }
+    }
+}
+void substance::subs::moveUpdate(){
+    if(walkingForward!=0 || walkingLeftOrRight!=0){
+        walk(walkingForward,walkingLeftOrRight,walkSpeed*parent->deltaTime);
+    }
+}
+void substance::subs::flyUpdate(bool flying,bool lifting){
+    if(flying){
+        if(lifting){
+            fly(liftForce,pushForce);
+        }else{
+            fly(0,pushForce);
+        }
+    }else
+        rigidBody->clearForces();
+}
+
+void substance::subs::fly(float lift,float push){
+    irr::core::vector3df direct=getDirection();
+    direct.normalize();
+    direct*=push;
+    fly(lift,direct);
+}
+void substance::subs::fly(float lift,const irr::core::vector3df & push){
+    btVector3 F(push.X , push.Y+lift , push.Z);
+    rigidBody->applyForce(F , btVector3(0,0,0));
+}
+void substance::subs::jump(const irr::core::vector3df & d){
+    rigidBody->applyImpulse(btVector3(d.X , d.Y , d.Z) , btVector3(0,0,0));
+}
+
+static void rotate2d(irr::core::vector2df & v,float a){
+    auto cosa=cos(a);
+    auto sina=sin(a);
+    auto x=v.X*cosa - v.Y*sina;
+    auto y=v.X*sina + v.Y*cosa;
+    v.X=x;
+    v.Y=y;
+    //v.normalize();
+}
+void substance::subs::setDirection(const irr::core::vector3df & d){
+    irr::core::vector3df rotate=d.getHorizontalAngle();
+    setRotation(rotate);
+}
+irr::core::vector3df substance::subs::getDirection(){
+    btTransform transform;
+    btVector3 btRot;
+    irr::core::vector3df rotate;
+    bodyState->getWorldTransform(transform);
+    btMatrix3x3 & btM = transform.getBasis();
+    btM.getEulerZYX(btRot.m_floats[2], btRot.m_floats[1], btRot.m_floats[0]);
+    rotate.X = irr::core::radToDeg(btRot.x());
+    rotate.Y = irr::core::radToDeg(btRot.y());
+    rotate.Z = irr::core::radToDeg(btRot.z());
+    return rotate.rotationToDirection();
+}
+void substance::subs::walk(int forward,int leftOrRight/*-1 left,1 right*/,float length){
+    if(!contacted)
+        return;
+    irr::core::vector2df delta(0,0);
+    irr::core::vector3df direct=getDirection();
+    irr::core::vector2df direct2d(direct.X , direct.Z);
+    irr::core::vector2df p2d;
+    direct2d.normalize();
+    
+    if(forward==1){
+        delta+=direct2d;
+    }else
+    if(forward==-1){
+        delta-=direct2d;
+    }
+    
+    if(leftOrRight==1){
+        p2d=direct2d;
+        rotate2d(p2d, -3.1415926/2);
+        p2d.normalize();
+        delta+=p2d;
+    }else
+    if(leftOrRight==-1){
+        p2d=direct2d;
+        rotate2d(p2d, 3.1415926/2);
+        p2d.normalize();
+        delta+=p2d;
+    }
+    delta.normalize();
+    delta*=length;
+    walk(delta);
+}
+
+void substance::subs::walk(const irr::core::vector2df & d){
+    walk(irr::core::vector3df(d.X,0,d.Y));
+}
+void substance::subs::walk(const irr::core::vector3df & d){
+    if(contacted)
+        move(d);
+}
+void substance::subs::move(const irr::core::vector3df & delta){
+    btTransform transform;
+    bodyState->getWorldTransform(transform);
+    auto p=transform.getOrigin();
+    irr::core::vector3df np(p.getX(),p.getY(),p.getZ());
+    np+=delta;
+    setPosition(np);
+}
 void substance::subs::teleport(const irr::core::vector3df & p){
     btTransform transform=rigidBody->getWorldTransform();
     transform.setOrigin(btVector3(p.X, p.Y, p.Z));
@@ -26,6 +171,8 @@ void substance::subs::setPosition(const irr::core::vector3df & p){
     bodyState->getWorldTransform(transform);
     transform.setOrigin(btVector3(p.X, p.Y, p.Z));
     bodyState->setWorldTransform(transform);
+    
+    wake=true;
 }
 
 void substance::subs::setRotation(const irr::core::vector3df & r){
@@ -38,6 +185,8 @@ void substance::subs::setRotation(const irr::core::vector3df & r){
     bodyState->getWorldTransform(transform);
     transform.setRotation(rq);
     bodyState->setWorldTransform(transform);
+    
+    wake=true;
 }
 
 void substance::subs::updateByWorld(){
@@ -76,6 +225,11 @@ void substance::subsUpdate(){
         for(auto it:subses){
             //update collision
             it.second->update();//update scene
+            it.second->moveUpdate();
+        }
+        parseAllCommond();
+        for(auto it:subses){
+            it.second->contacted=false;
         }
     }
     {//set camera
@@ -236,7 +390,8 @@ void substance::updateSubs(//更新物体状态，由服务器调用
     const irr::core::vector3df & rota, 
     const btVector3& lin_vel ,
     const btVector3& ang_vel ,
-    int hp,int status
+    int hp,int status,
+    const std::string & conf
 ){
     auto sp=seekSubs(uuid);
     if(sp){
@@ -268,7 +423,8 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
         return;
     
     subsConf=conf;
-    
+    contacted=false;
+    wake=true;
     id=conf->id;
     
     node=parent->scene->addMeshSceneNode(conf->mesh);
@@ -430,6 +586,8 @@ void substance::onCollision(bodyInfo * A,bodyInfo * B,const btManifoldPoint & po
             auto ptrA=(subs*)A->ptr;
             auto scA=ptrA->subsConf;
             
+            ptrA->contacted=true;
+            
             if(B->type==BODY_TERRAIN){
                 if(scA->haveHitTerrainCallback && (!(scA->hitTerrainCallbackOnlyForMe) || (ptrA->owner==myUUID))){
                     scA->onHitTerrainCallback(m->L , this , ptrA->uuid , ptrA->owner , impulse);
@@ -473,6 +631,8 @@ void substance::onCollision(bodyInfo * A,bodyInfo * B,const btManifoldPoint & po
             
             auto ptrB=(subs*)B->ptr;
             auto scB=ptrB->subsConf;
+            
+            ptrB->contacted=true;
             
             if(A->type==BODY_TERRAIN){
                 if(scB->haveHitTerrainCallback && (!(scB->hitTerrainCallbackOnlyForMe) || (ptrB->owner==myUUID))){

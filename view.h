@@ -11,7 +11,7 @@ namespace smoothly{
             void worldLoop();
             void sceneLoop();
             
-            float deltaTime,lastTime;
+            float lastTime;
             bool deltaTimeUpdateFirst;
             void deltaTimeUpdate();
             
