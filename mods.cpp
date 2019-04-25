@@ -390,6 +390,55 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    //set active
+    lua_pushstring(L,"active");
+    lua_gettable(L,-2);
+    if(lua_istable(L,-1)){
+        
+        lua_pushstring(L,"defaultSpeed");
+        lua_gettable(L,-2);
+        if(lua_isnumber(L,-1)){
+            b->defaultSpeed=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"defaultLiftForce");
+        lua_gettable(L,-2);
+        if(lua_isnumber(L,-1)){
+            b->defaultLiftForce=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"defaultPushForce");
+        lua_gettable(L,-2);
+        if(lua_isnumber(L,-1)){
+            b->defaultPushForce=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"defaultJumpImp");
+        lua_gettable(L,-2);
+        if(lua_isnumber(L,-1)){
+            b->defaultJumpImp=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"deltaCamera");
+        lua_gettable(L,-2);
+        if(lua_isnumber(L,-1)){
+            b->deltaCamera=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"noFallDown");
+        lua_gettable(L,-2);
+        if(lua_isboolean(L,-1)){
+            b->noFallDown=lua_toboolean(L,-1);
+        }
+        lua_pop(L,1);
+    }
+    lua_pop(L,1);
+    
     b->friction = friction;
     b->restitution=restitution;
     

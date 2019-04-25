@@ -31,10 +31,17 @@ void substance::parseAllCommond(){
 
 void substance::parseCommond(const subsCommond & cmd){
     auto p=seekSubs(cmd.uuid);
-    if(p){
+    if(p && p->owner==myUUID){
+        irr::core::vector3df tvec;
         switch(cmd.method){
             case subsCommond::JUMP:
-                p->jump(cmd.vec);
+                
+                tvec=cmd.vec;
+                if(tvec.getLengthSQ()!=0){
+                    tvec.normalize();
+                    p->jump(tvec*p->jumpImp);
+                }
+                
             break;
             case subsCommond::WALK:
                 p->walkingForward      =cmd.walkForward;
@@ -56,20 +63,27 @@ void substance::parseCommond(const subsCommond & cmd){
         }
     }
 }
+void substance::subs::setPowerAsDefault(){
+    walkSpeed   =subsConf->defaultSpeed;
+    liftForce   =subsConf->defaultLiftForce;
+    pushForce   =subsConf->defaultPushForce;
+    jumpImp     =subsConf->defaultJumpImp;
+    deltaCamera =subsConf->deltaCamera;
+}
 void substance::subs::moveUpdate(){
     if(walkingForward!=0 || walkingLeftOrRight!=0){
         walk(walkingForward,walkingLeftOrRight,walkSpeed*parent->deltaTime);
     }
 }
 void substance::subs::flyUpdate(bool flying,bool lifting){
+    rigidBody->clearForces();//清除之前的力，设置新的力
     if(flying){
         if(lifting){
             fly(liftForce,pushForce);
         }else{
             fly(0,pushForce);
         }
-    }else
-        rigidBody->clearForces();
+    }
 }
 
 void substance::subs::fly(float lift,float push){
@@ -95,8 +109,14 @@ static void rotate2d(irr::core::vector2df & v,float a){
     v.Y=y;
     //v.normalize();
 }
-void substance::subs::setDirection(const irr::core::vector3df & d){
+void substance::subs::setDirection(const irr::core::vector3df & dir){
+    irr::core::vector3df d(dir);
+    
+    if(noFallDown)
+        d.Y=0;
+    
     irr::core::vector3df rotate=d.getHorizontalAngle();
+        
     setRotation(rotate);
 }
 irr::core::vector3df substance::subs::getDirection(){
@@ -237,6 +257,7 @@ void substance::subsUpdate(){
             auto it=subses.find(mainControlUUID);
             if(it!=subses.end()){
                 mainControlPosition=it->second->node->getPosition();
+                deltaCamera=it->second->deltaCamera;
                 
                 int cx=mainControlPosition.X/32;
                 int cy=mainControlPosition.Z/32;
@@ -426,6 +447,7 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     contacted=false;
     wake=true;
     id=conf->id;
+    setPowerAsDefault();
     
     node=parent->scene->addMeshSceneNode(conf->mesh);
     node->setPosition(p);
@@ -450,6 +472,12 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     
     rigidBody->setFriction(conf->friction);
     rigidBody->setRestitution(conf->restitution);
+    
+    
+    if(conf->noFallDown){
+        setNoFallDown();
+    }else
+        noFallDown=false;
     
     x=p.X/32;
     y=p.Z/32;

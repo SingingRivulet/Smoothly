@@ -17,9 +17,13 @@ namespace smoothly{
                 std::string owner;
                 long id;
                 int status,hp;
+                
                 float walkSpeed;
                 float liftForce;
                 float pushForce;
+                float jumpImp;
+                float deltaCamera;
+                
                 bodyInfo info;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -35,6 +39,7 @@ namespace smoothly{
                 bool wake;
                 
                 bool contacted;
+                bool noFallDown;
                 
                 bool inWorld;
                 int x,y;//this variable only will be use while initializate;
@@ -44,6 +49,13 @@ namespace smoothly{
                 irr::core::vector2df walkDirection;
                 
                 void moveUpdate();
+                
+                void setPowerAsDefault();
+                
+                inline void setNoFallDown(){
+                    noFallDown=true;
+                    rigidBody->setAngularFactor(btVector3(0,1,0));
+                }
                 
                 void updateByWorld();
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
@@ -248,7 +260,7 @@ namespace smoothly{
                     mySubs.erase(subs);
             }
             irr::core::vector3df mainControlPosition;
-            
+            float deltaCamera;
         private:
             std::map<ipair,std::set<subs*> > chunkLocker;
             virtual void onGenChunk(terrain::chunk *);

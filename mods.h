@@ -123,8 +123,16 @@ namespace smoothly{
                     shapeGroup            shape;
                     bool                  useAlpha;
                     int                   hp;
-                    float                 friction;
-                    float                 restitution;
+                    float                 friction;//摩擦力
+                    float                 restitution;//反弹
+                    
+                    float defaultSpeed;     //默认速度
+                    float defaultLiftForce; //默认升力
+                    float defaultPushForce; //默认推力
+                    float defaultJumpImp;   //跳跃冲量
+                    float deltaCamera;      //相机平移量
+                    
+                    bool noFallDown;        //设置不会倒
                     
                     bool haveHitSubsCallback;
                     bool hitSubsCallbackOnlyForMe;
@@ -190,6 +198,13 @@ namespace smoothly{
                         hitTerrainItemCallbackOnlyForMe=false;
                         hitTerrainCallbackOnlyForMe=false;
                         
+                        defaultSpeed=0.5;       //默认速度
+                        defaultLiftForce=0;     //默认升力
+                        defaultPushForce=0;     //默认推力
+                        defaultJumpImp=1;       //跳跃冲量
+                        deltaCamera=0;
+                    
+                        noFallDown=false;       //设置不会倒
                     }
                     
                     inline ~subsConf(){
