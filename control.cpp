@@ -7,7 +7,7 @@ control::control(){
 control::~control(){
     
 }
-void control::relativePositionApply(){
+void control::activeApply(){
     
     int cx=mainControlPosition.X/32;
     int cy=mainControlPosition.Z/32;
@@ -25,24 +25,6 @@ void control::relativePositionApply(){
     camera->setPosition(dt);
 }
 
-void control::moveFront(){
-    
-}
-void control::moveBack(){
-    
-}
-void control::moveLeft(){
-    
-}
-void control::moveRight(){
-    
-}
-void control::moveUp(){
-    
-}
-void control::moveDown(){
-    
-}
 void control::addCamera(){
     camera=scene->addCameraSceneNodeFPS();
 }
@@ -100,6 +82,30 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_KEY_M:
                     if(event.KeyInput.PressedDown)parent->eventQueue.push(gemeEPair(SET_BUILDING_MODE,6));
                 break;
+                case irr::KEY_TAB:
+                    if(event.KeyInput.PressedDown){
+                        parent->flyMode=!parent->flyMode;
+                        if(parent->flyMode==false){
+                            {
+                                if(!parent->mainControlUUID.empty()){//发送命令，关闭飞行模式
+                                    subsCommond cmd;
+                                    cmd.uuid=parent->mainControlUUID;
+                                    cmd.method=subsCommond::FLY_STOP;
+                                    parent->pushSubsCommond(cmd);//该函数是线程安全的，所以可以这样用
+                                }
+                            }
+                        }else{
+                            {
+                                if(!parent->mainControlUUID.empty()){//发送命令，关闭行走模式
+                                    subsCommond cmd;
+                                    cmd.uuid=parent->mainControlUUID;
+                                    cmd.method=subsCommond::WALK_STOP;
+                                    parent->pushSubsCommond(cmd);//该函数是线程安全的，所以可以这样用
+                                }
+                            }
+                        }
+                    }
+                break;
             }
             #undef setStatusEvent
             
@@ -135,8 +141,12 @@ void control::addEventRecv(){
     device->setEventReceiver(&receiver);
 }
 void control::loop(){
-    if(!ok())
+    if(!ok())//engine is not running
         return;
+    
+    if(mainControlUUID.empty())//don't know who am I
+        return;
+    
     recv();
     buildingApply();
     deltaTimeUpdate();
@@ -147,28 +157,83 @@ void control::loop(){
     line.end                 = line.start+dir.normalize()*32.0f;
     doBuildUpdate(line);
     
-    if(status.moveFront && !status.moveBack){
-        moveFront();
-    }else
-    if(!status.moveFront && status.moveBack){
-        moveBack();
+    subsCommond cmd;
+    cmd.uuid=mainControlUUID;
+    
+    //把摄像机的旋转发送给substance
+    cmd.method=subsCommond::DIRECT;
+    cmd.vec=dir;
+    pushSubsCommond(cmd);
+    
+    if(flyMode){
+        if(status.moveFront && !status.moveBack){
+            
+            cmd.method=subsCommond::FLY;
+            if(status.moveUp){
+                cmd.flying  =true;
+                cmd.lifting =true;
+            }else{
+                cmd.flying  =true;
+                cmd.lifting =false;
+            }
+            pushSubsCommond(cmd);
+            
+        }else{
+            cmd.method=subsCommond::FLY_STOP;
+            pushSubsCommond(cmd);
+        }
+    }else{
+        
+        cmd.method=subsCommond::WALK;
+        
+        //前后
+        if(status.moveFront && !status.moveBack){
+            cmd.walkForward=1;
+        }else
+        if(!status.moveFront && status.moveBack){
+            cmd.walkForward=-1;
+        }else{
+            cmd.walkForward=0;
+        }
+        
+        if(status.moveLeft && !status.moveRight){
+            cmd.walkLeftOrRight=1;
+        }else
+        if(!status.moveLeft && status.moveRight){
+            cmd.walkLeftOrRight=-1;
+        }else{
+            cmd.walkLeftOrRight=0;
+        }
+        
+        pushSubsCommond(cmd);
+        
+        if(status.moveUp && !status.moveDown){//处理跳跃
+            status.moveUp=false;//关掉状态，直到下次按键才会重新启动
+            
+            cmd.method=subsCommond::JUMP;
+            irr::core::vector3df dirj=dir;
+            dirj.Y=0;
+            dirj.normalize();
+            
+            cmd.vec.set(0,1,0);
+            
+            if(status.moveFront && !status.moveBack){
+                cmd.vec+=dirj;
+            }else
+            if(!status.moveFront && status.moveBack){
+                cmd.vec-=dirj;
+            }
+        
+            pushSubsCommond(cmd);
+            
+        }else
+        if(!status.moveUp && status.moveDown){
+            
+        }
     }
     
-    if(status.moveLeft && !status.moveRight){
-        moveLeft();
-    }else
-    if(!status.moveLeft && status.moveRight){
-        moveRight();
-    }
     
-    if(status.moveUp && !status.moveDown){
-        moveUp();
-    }else
-    if(!status.moveUp && status.moveDown){
-        moveDown();
-    }
-    
-    relativePositionApply();
+    activeApply();
     
     while(!eventQueue.empty()){
         auto ele=eventQueue.front();

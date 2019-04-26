@@ -42,14 +42,12 @@ namespace smoothly{
                 }
             }status;
             
-            void moveFront();
-            void moveBack();
-            void moveLeft();
-            void moveRight();
-            void relativePositionApply();
+            void activeApply();
             
             void moveUp();//飞行模式是升，普通模式是跳
             void moveDown();//飞行模式是降，普通模式是蹲
+            
+            bool flyMode;
             
             eventRecv receiver;
             void addCamera();

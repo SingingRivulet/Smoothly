@@ -30,8 +30,6 @@ int main(int argc , char * argv[]){
     game.gameInit(iaddr.c_str(),port,iname,ipasswd);
     running=true;
     game.addEventRecv();
-    game.canFly=true;
-    game.setCameraPosition(irr::core::vector3df(0,game.getRealHight(0,0)+2,0));
     
     while(running && game.ok()){
         game.loop();
