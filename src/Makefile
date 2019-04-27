@@ -30,7 +30,7 @@ all:../client ../server
 dblist.o:dblist.h dblist.cpp utils.h
 	$(CC) -c dblist.cpp
 
-subsServer.o:subsServer.h subsServer.cpp utils.h cache.h
+subsServer.o:subsServer.h subsServer.cpp utils.h cache.h dblist.o
 	$(CC) -c subsServer.cpp
 
 user.o:user.h user.cpp subsServer.o
@@ -119,4 +119,7 @@ graphServer.o:graphServer.cpp graphServer.h
 	$(CC) -c graphServer.cpp
 
 clean:
-	rm *.o
+	rm -f *.o
+	rm -f ../client ../server
+	rm -f *.out
+	rm -f *.gch
