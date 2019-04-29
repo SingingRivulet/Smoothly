@@ -2,11 +2,14 @@
 CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ 
 LIBS= -lIrrlicht -lBulletDynamics -lBulletCollision -lLinearMath -luuid -lpthread -lRakNetDLL -llua -ldl
 
-all:../client ../server
+all:../client ../server ../admin
 	
 
 ./a,out:main.cpp perlin.o clientNetwork.o createTerrainMesh.o
 	$(CC) main.cpp perlin.o terrain.o createTerrainMesh.o building.o hbb.o clientNetwork.o $(LIBS)
+
+../admin:utils.h admin.cpp
+	$(CC) admin.cpp -o ../admin $(LIBS)
 
 ../client:client.cpp game.o subsapi.o
 	$(CC) client.cpp \

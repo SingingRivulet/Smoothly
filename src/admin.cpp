@@ -1,0 +1,134 @@
+#include "utils.h"
+#include <string>
+#include <map>
+#include <stdlib.h>
+std::string adminName;
+std::string password;
+std::map<std::string,std::string> args;
+RakNet::RakPeerInterface * connection;
+
+void makeBSHeader(RakNet::BitStream * data){
+    data->Write((RakNet::MessageID)smoothly::MESSAGE_GAME);
+    data->Write((RakNet::MessageID)smoothly::M_ADMIN);
+}
+
+void makeAuth(RakNet::BitStream * data){
+    RakNet::RakString u=args["--adminName"].c_str();
+    RakNet::RakString p=args["--password"].c_str();
+    data->Write(u);
+    data->Write(p);
+}
+
+void sendMessage(RakNet::BitStream * data){
+    connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );  
+}
+
+void createUser(){
+    int64_t id=atoi(args["--nsid"].c_str());
+    irr::core::vector3df position(
+        atof(args["--X"].c_str()),
+        atof(args["--Y"].c_str()),
+        atof(args["--Z"].c_str())
+    );
+    const std::string & p=args["--npwd"];
+    
+    RakNet::BitStream bs;
+    RakNet::RakString pwd=p.c_str();
+    
+    makeBSHeader(&bs);
+    bs.Write((RakNet::MessageID)smoothly::A_CREATE_USER);
+    makeAuth(&bs);
+    
+    bs.Write(id);
+    bs.WriteVector(position.X,position.Y,position.Z);
+    bs.Write(pwd);
+    
+    sendMessage(&bs);
+    
+    while(1){
+        auto pk=connection->Receive();
+        if(pk){
+            RakNet::BitStream recv(pk->data,pk->length,false);
+            recv.IgnoreBytes(3);
+            RakNet::RakString uuid;
+            recv.Read(uuid);
+            printf("[createUser]%s\n",uuid.C_String());
+            break;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//解析参数
+bool isKey(const char * str){
+    return (str[0]=='-' && str[1]=='-');
+}
+
+void getArgs(int argc , char * argv[]){
+    if(argc>1){
+        for(int i=1;i<argc;i++){
+            if(isKey(argv[i])){//这个参数是key
+                if((i+1)<argc){//下一个参数存在
+                    if(isKey(argv[i+1])){//下一个参数是key
+                        args[argv[i]];
+                    }else{
+                        args[argv[i]]=argv[i+1];
+                        ++i;
+                    }
+                }else{
+                    args[argv[i]];
+                }
+            }
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+int main(int argc , char * argv[]){
+    getArgs(argc,argv);
+    
+    printf(
+        "Smoothly Admin Client\n"
+        "A Open Source First Person Sandbox Strategy game\n\n"
+        "Singing Rivulet Project(https://github.com/SingingRivulet)\n"
+        "By cgoxopx<cgoxopx@qq.com>\n\n"
+    );
+    
+    bool connectStatus;
+    {
+        std::string address="127.0.0.1";
+        unsigned short port=39065;
+        auto addrit=args.find("--server");
+        if(addrit!=args.end()){
+            address=addrit->second;
+        }
+        auto portit=args.find("--port");
+        if(portit!=args.end()){
+            port=atoi(portit->second.c_str());
+        }
+        connection=RakNet::RakPeerInterface::GetInstance();
+        RakNet::SocketDescriptor sd;
+        connection->Startup(1,&sd,1);
+        connectStatus=connection->Connect(address.c_str(),port,0,0);
+        printf("[connect]%s:%d\n",address.c_str(),port);
+    }
+    
+    if(!connectStatus){
+        printf("[connect]fail\n");
+        return 1;
+    }
+    
+    {
+        auto it=args.find("--mode");
+        if(it!=args.end()){
+            if(it->second=="createUser"){
+                printf("[mode]createUser\n");
+                createUser();
+            }
+        }
+    }
+    
+    printf("[connect]disconnect\n");
+    connection->Shutdown(300);
+    RakNet::RakPeerInterface::DestroyInstance(connection);
+    return 0;
+}
