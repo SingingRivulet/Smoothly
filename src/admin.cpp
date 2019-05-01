@@ -2,11 +2,15 @@
 #include <string>
 #include <map>
 #include <stdlib.h>
-std::string adminName;
-std::string password;
+#include <math.h>
+#include <time.h>
+
 std::map<std::string,std::string> args;
 RakNet::RakPeerInterface * connection;
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 void makeBSHeader(RakNet::BitStream * data){
     data->Write((RakNet::MessageID)smoothly::MESSAGE_GAME);
     data->Write((RakNet::MessageID)smoothly::M_ADMIN);
@@ -22,7 +26,23 @@ void makeAuth(RakNet::BitStream * data){
 void sendMessage(RakNet::BitStream * data){
     connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );  
 }
+////////////////////////////////////////////////////////////////////////
+int markedTime;
+void markTime(){
+    time_t t;
+    t = time(NULL);
+    markedTime = time(&t);
+}
+bool timeOut(){
+    time_t t;
+    t = time(NULL);
+    int nt = time(&t);
+    return abs(nt-markedTime)>5;
+}
 
+////////////////////////////////////////////////////////////////////////
+//////////////////////////////operate///////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 void createUser(){
     int64_t id=atoi(args["--nsid"].c_str());
     irr::core::vector3df position(
@@ -43,23 +63,38 @@ void createUser(){
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.Write(pwd);
     
+    RakSleep(30);
     sendMessage(&bs);
     
+    markTime();
     while(1){
+        RakSleep(30);
+        if(timeOut()){
+            printf("[connect]time out\n");
+            break;
+        }
         auto pk=connection->Receive();
         if(pk){
-            RakNet::BitStream recv(pk->data,pk->length,false);
-            recv.IgnoreBytes(3);
-            RakNet::RakString uuid;
-            recv.Read(uuid);
-            printf("[createUser]%s\n",uuid.C_String());
-            break;
+            printf("[connect]received\n");
+            if(
+                pk->data[0]==smoothly::MESSAGE_GAME && 
+                pk->data[1]==smoothly::M_ADMIN && 
+                pk->data[2]==smoothly::A_SEND_USER_UUID
+            ){
+                RakNet::BitStream recv(pk->data,pk->length,false);
+                recv.IgnoreBytes(3);
+                RakNet::RakString uuid;
+                recv.Read(uuid);
+                printf("[createUser]%s\n",uuid.C_String());
+                break;
+            }
         }
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//解析参数
+////////////////////////////////////////解析参数/////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
 bool isKey(const char * str){
     return (str[0]=='-' && str[1]=='-');
 }
@@ -83,6 +118,8 @@ void getArgs(int argc , char * argv[]){
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 int main(int argc , char * argv[]){
     getArgs(argc,argv);
     
@@ -93,7 +130,6 @@ int main(int argc , char * argv[]){
         "By cgoxopx<cgoxopx@qq.com>\n\n"
     );
     
-    bool connectStatus;
     {
         std::string address="127.0.0.1";
         unsigned short port=39065;
@@ -108,11 +144,11 @@ int main(int argc , char * argv[]){
         connection=RakNet::RakPeerInterface::GetInstance();
         RakNet::SocketDescriptor sd;
         connection->Startup(1,&sd,1);
-        connectStatus=connection->Connect(address.c_str(),port,0,0);
+        connection->Connect(address.c_str(),port,0,0);
         printf("[connect]%s:%d\n",address.c_str(),port);
     }
     
-    if(!connectStatus){
+    if(!connection->IsActive()){
         printf("[connect]fail\n");
         return 1;
     }

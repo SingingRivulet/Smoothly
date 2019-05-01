@@ -56,6 +56,7 @@ namespace smoothly{
             void loop();
             
             inline bool ok(){
+                //printf("[debug]check status\n");
                 return (device->run() && driver && dynamicsWorld);
             }
             

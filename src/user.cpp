@@ -58,8 +58,10 @@ bool users::userOnline(const std::string & uuid){
 bool users::login(const std::string & uuid,const RakNet::SystemAddress & addr,const std::string & pwd){
     uLocker.lock(uuid);
     
-    if(!checkPasswd(uuid,pwd))
+    if(!checkPasswd(uuid,pwd)){
+        printf("[user]login fail\n");
         return false;
+    }
     
     auto p=seekOnLine(uuid);
     if(p){

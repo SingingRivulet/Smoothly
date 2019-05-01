@@ -143,9 +143,18 @@ bool serverNetwork::loged(const RakNet::SystemAddress & address){
     return (addrExist(address) && getUUIDByAddr(tmpuuid,address));
 }
 void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
+    char addrStr[64];
+    address.ToString(true,addrStr);
+    
     switch(data->data[0]){
         case MESSAGE_GAME:
+            if(data->length<3){
+                //小于3字节的MESSAGE_GAME将导致数组溢出
+                break;
+            }
+            //printf("[connect]on message\n");
             if(data->data[1]==M_ADMIN){
+                printf("[%s admin]login\n",addrStr);
                 onMessageAdmin(data,address);
                 break;
             }
@@ -175,13 +184,13 @@ void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddr
         case ID_NEW_INCOMING_CONNECTION:
             //登录后才有listener
             //setUserPosition(irr::core::vector3df(0,0,0),address);
-            printf("connect\n");
+            printf("[%s client]connect\n",addrStr);
         break;
         case ID_DISCONNECTION_NOTIFICATION:
             logout(address);
             //delListener(address);
             //listener已经被删除
-            printf("disconnect\n");
+            printf("[%s client]disconnect\n",addrStr);
         break;
     }
 }
@@ -193,6 +202,10 @@ void serverNetwork::onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAdd
     
     if(!bs.Read(name))return;
     if(!bs.Read(pwd)) return;
+    
+    char addrStr[64];
+    address.ToString(true,addrStr);
+    printf("[%s admin]success\n",addrStr);
     
     if(checkAdminPwd(name.C_String() , pwd.C_String())){
         switch(data->data[2]){
@@ -221,6 +234,10 @@ void serverNetwork::onMessageAdminCreateUser(RakNet::BitStream * data,const RakN
     bs.Write((RakNet::MessageID)M_ADMIN);
     
     bs.Write((RakNet::MessageID)A_SEND_USER_UUID);
+    
+    char addrStr[64];
+    address.ToString(true,addrStr);
+    printf("[%s user]create user:%s\n",addrStr,uuid.c_str());
     
     RakNet::RakString u;
     u=uuid.c_str();
@@ -386,6 +403,11 @@ void serverNetwork::onMessageUpdateUserLogin(RakNet::BitStream * data,const RakN
     RakNet::RakString pwd;
     if(!data->Read(uuid))return;
     if(!data->Read(pwd)) return;
+    
+    char addrStr[64];
+    address.ToString(true,addrStr);
+    printf("[%s user]login:%s\n",addrStr,uuid.C_String());
+    
     login(uuid.C_String() , address , pwd.C_String());
 }
 void serverNetwork::onMessageUpdateUserChangePwd(RakNet::BitStream * data,const RakNet::SystemAddress & address){
@@ -516,6 +538,7 @@ void serverNetwork::sendSetUserSubs(const RakNet::SystemAddress & to,const std::
     u=uuid.c_str();
     bs.Write(u);
     
+    //printf("[user]send status\n");
     sendMessage(&bs,to);
 }
 void serverNetwork::sendUserSubsUUID(const std::string & uuid,const RakNet::SystemAddress & to){

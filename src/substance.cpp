@@ -212,7 +212,7 @@ void substance::subs::setRotation(const irr::core::vector3df & r){
 void substance::subs::updateByWorld(){
     if(!inWorld)
         return;
-        
+    
     btTransform transform;
     
     bodyState->getWorldTransform(transform);
@@ -233,6 +233,8 @@ void substance::subs::updateByWorld(){
     
     node->setPosition(irrPos);
     node->setRotation(irrRot);
+    
+    //printf("[subtance]%s update by world (%f,%f,%f)\n",uuid.c_str(),btPos.x(), btPos.y(), btPos.z());
     
     x=irrPos.X/32;
     y=irrPos.Z/32;
@@ -436,6 +438,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             sp->type=mods::SUBS_LASTING;
             sp->rigidBody->setLinearVelocity(lin_vel);
             sp->rigidBody->setAngularVelocity(ang_vel);
+            printf("[substance]create substance:%s id=%ld\n",uuid.c_str(),id);
         }
     }
 }
@@ -455,6 +458,7 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     node->updateAbsolutePosition();
     
+    
     if(conf->texture){
         node->setMaterialTexture( 0 , conf->texture);
         if(conf->useAlpha){
@@ -462,11 +466,12 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
         }
     }
     
+    
     info.type=BODY_SUBSTANCE;
     info.ptr=this;
     
     bodyState=setMotionState(node->getAbsoluteTransformation().pointer());
-    rigidBody=createBody(conf->bodyShape , bodyState , conf->mass , conf->localInertia);
+    rigidBody=createBody(conf->bodyShape , bodyState , conf->shape.mass , conf->shape.localInertia);
     
     rigidBody->setUserPointer(&info);
     
@@ -494,7 +499,7 @@ void substance::unlockChunk(int x,int y){
     auto it=chunkLocker.find(ipair(x,y));
     
     if(it!=chunkLocker.end()){
-        
+        //printf("[subtance]unlock(%d,%d)\n",x,y);
         for(auto s:it->second){
             dynamicsWorld->addRigidBody(s->rigidBody);
             s->inWorld=true;
@@ -511,10 +516,12 @@ bool substance::subs::addIntoWorld(){
         //chunnk has not been locked
         parent->dynamicsWorld->addRigidBody(rigidBody);
         inWorld=true;
+        //printf("[subtance]%s has been added into world\n",uuid.c_str());
         return true;
     }else{
         //chunk has been locked
         it->second.insert(this);
+        //printf("[subtance]%s has been locked\n",uuid.c_str());
         inWorld=false;
         return false;
     }

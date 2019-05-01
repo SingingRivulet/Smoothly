@@ -18,19 +18,21 @@ void control::activeApply(){
     setUserPosition(mainControlPosition);
     
     //get direction
-    irr::core::vector3df dir = camera->getTarget() - camera->getPosition();
-    dir.normalize();
+    //irr::core::vector3df dir = camera->getTarget() - camera->getPosition();
+    //dir.normalize();
     
-    irr::core::vector3df dt= mainControlPosition + dir*deltaCamera;
+    irr::core::vector3df dt= mainControlPosition;
     camera->setPosition(dt);
 }
 
 void control::addCamera(){
+    printf("[view]add camera\n");
     camera=scene->addCameraSceneNodeFPS();
 }
 bool control::eventRecv::OnEvent(const irr::SEvent &event){
     parent->camera->OnEvent(event);
     //处理按键
+    //return true;
     switch(event.EventType){
         
         case irr::EET_KEY_INPUT_EVENT:
@@ -144,10 +146,13 @@ void control::loop(){
     if(!ok())//engine is not running
         return;
     
-    if(mainControlUUID.empty())//don't know who am I
-        return;
-    
     recv();
+    
+    if(mainControlUUID.empty()){//don't know who am I
+        //printf("[debug]don't know who an I\n");
+        return;
+    }
+    
     buildingApply();
     deltaTimeUpdate();
     irr::core::line3d<irr::f32> line;

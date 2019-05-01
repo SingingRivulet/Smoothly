@@ -4,5 +4,6 @@
 *.out
 *~
 /server
+/admin
 /data*
 /client

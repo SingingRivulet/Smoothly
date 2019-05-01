@@ -1,3 +1,5 @@
+package.path="./script/?.lua;"..package.path
+require("substance")
 function mapGenerator(x,y,tem,hu,h)
     return {
         {128,0.1},
@@ -28,4 +30,5 @@ function sceneInit(m)
         ["useAlpha"]=true,
         ["maxnum"]  =2
     })
+    loadClientSubtance(m)
 end

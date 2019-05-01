@@ -113,8 +113,6 @@ namespace smoothly{
             class subsConf{
                 public:
                     long id;
-                    float mass;
-                    btVector3 localInertia;
                     int life;
                     subsType type;
                     irr::scene::IMesh  *  mesh;
@@ -183,6 +181,8 @@ namespace smoothly{
                     );
                     
                     inline subsConf(){
+                        texture=NULL;
+                        
                         hitSubsCallback=0;
                         hitBuildingCallback=0;
                         hitTerrainItemCallback=0;

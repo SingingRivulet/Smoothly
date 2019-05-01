@@ -12,6 +12,7 @@ void clientNetwork::init(const char * addr,short port){
 }
 void clientNetwork::connect(){
     connection->Connect(addr.c_str(),port,0,0);
+    RakSleep(30);//sleep 30微秒后才能正常发送，原因未知
 }
 void clientNetwork::sendMessage(RakNet::BitStream * data){
     connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );  
@@ -499,7 +500,7 @@ void clientNetwork::onMessageUpdateSubsFail(RakNet::BitStream * data){
 void clientNetwork::onMessageUpdateSubsSetUserSubs(RakNet::BitStream * data){
     RakNet::RakString subsuuid;
     if(!data->Read(subsuuid))return;
-    
+    printf("[substance]set mainControlUUID:%s\n",subsuuid.C_String());
     mainControlUUID=subsuuid.C_String();
 }
 void clientNetwork::onMessageUpdateSubsAddOneSubs(RakNet::BitStream * data){
@@ -516,6 +517,7 @@ void clientNetwork::onMessageUpdateSubsAddSubs(RakNet::BitStream * data){
     for(int i=0;i<length;i++){
         if(data->Read(subsuuid)){
             mySubs.insert(subsuuid.C_String());
+            printf("[substance]add user substance:%s\n",subsuuid.C_String());
         }else
             break;
     }
@@ -656,6 +658,7 @@ void clientNetwork::requestAttackSubs(const std::string & u,int dmg){
 }
 
 void clientNetwork::login(const std::string & name,const std::string & p){
+    printf("[login]%s\n",name.c_str());
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_USER);

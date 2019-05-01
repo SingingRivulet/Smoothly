@@ -80,7 +80,9 @@ void view::sceneLoop(){
 }
 void view::worldLoop(){
     if(dynamicsWorld && deltaTime!=0.0f){
+        //printf("[world]stepSimulation\n");
         dynamicsWorld->stepSimulation(deltaTime,10);
+        //dynamicsWorld->stepSimulation(1.f / 60.f,10);
         //collision
         auto disp=dynamicsWorld->getDispatcher();
         int numManifolds = disp->getNumManifolds();
