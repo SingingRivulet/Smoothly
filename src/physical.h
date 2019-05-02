@@ -17,6 +17,14 @@ namespace smoothly{
                 const btVector3& localInertia=btVector3(0,0,0)
             );
             static float              getKEnergy      (btRigidBody *);
+            static void               createMeshByTerrain();
+            static void               addQuadIntoMesh (btTriangleMesh * mesh,
+                const btVector3 & A,
+                const btVector3 & B,
+                const btVector3 & C,
+                const btVector3 & D
+            );
+            
             enum bodyType{
                 BODY_TERRAIN,
                 BODY_TERRAIN_ITEM,

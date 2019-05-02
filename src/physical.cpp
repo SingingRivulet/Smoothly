@@ -29,6 +29,15 @@ static btVector3 toBtVector( const irr::core::vector3df & vec ){
     btVector3 bt( vec.X, vec.Y, vec.Z );
     return bt;
 }
+void physical::addQuadIntoMesh(btTriangleMesh * mesh,
+    const btVector3 & A,
+    const btVector3 & B,
+    const btVector3 & C,
+    const btVector3 & D
+){
+    mesh->addTriangle(A,B,C,true);
+    mesh->addTriangle(A,D,C,true);
+}
 btTriangleMesh * physical::createBtMesh(irr::scene::IMesh * mesh){
     const size_t buffercount = mesh->getMeshBufferCount();
     std::vector<irr::video::S3DVertex> verticesList;

@@ -468,6 +468,27 @@ static int mod_addAutoGen(lua_State * L){
     return 1;
 }
 
+static int mod_setWindow(lua_State * L){
+    if(!lua_isfunction(L,-1))
+        return 0;
+    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    int width=luaL_checkinteger(L,2);
+    int height=luaL_checkinteger(L,3);
+    
+    self->windowWidth =width;
+    self->windowHeight=height;
+    
+    lua_pushboolean(L,1);
+    return 1;
+}
+
 void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -477,6 +498,7 @@ void mods::scriptInit(const char * path){
         {"addTerrainMesh"       ,mod_addTerrainMesh},
         {"addBuildingMesh"      ,mod_addBuildingMesh},
         {"addSubstance"         ,mod_addSubstance},
+        {"setWindow"            ,mod_setWindow},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);

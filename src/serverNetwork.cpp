@@ -209,11 +209,24 @@ void serverNetwork::onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAdd
     
     if(checkAdminPwd(name.C_String() , pwd.C_String())){
         switch(data->data[2]){
+            case A_TELEPORT:
+                onMessageAdminTeleport(&bs,address);
+            break;
             case A_CREATE_USER:
                 onMessageAdminCreateUser(&bs,address);
             break;
         }
     }
+}
+
+void serverNetwork::onMessageAdminTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address){
+    RakNet::RakString uuid;
+    irr::core::vector3df position;
+    
+    if(!data->Read(uuid))return;
+    if(!data->ReadVector(position.X,position.Y,position.Z))return;
+    
+    subsServer::teleport(uuid.C_String(),position,false,std::string());//管理员强制传送
 }
 
 void serverNetwork::onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address){
@@ -389,7 +402,7 @@ void serverNetwork::onMessageUpdateSubsTeleport(RakNet::BitStream * data,const R
     if(!data->Read(uuid))return;
     if(!data->ReadVector(position.X,position.Y,position.Z))return;
     
-    teleport(uuid.C_String(),position);
+    teleport(uuid.C_String(),position,address);
 }
 void serverNetwork::onMessageUpdateSubsGiveUp(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     RakNet::RakString uuid;

@@ -216,6 +216,13 @@ namespace smoothly{
             void init();
             void loadMesh();
             void destroy();
+            //////////////////////////////////////////////////////////////////////////////
+            int windowWidth;
+            int windowHeight;
+            mods(){
+                windowWidth=1024;
+                windowHeight=768;
+            }
     };
 }
 #endif

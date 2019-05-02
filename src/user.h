@@ -97,6 +97,16 @@ namespace smoothly{
                     subsServer::giveUpControl(uuid,muuid);
                 }
             }
+            inline void teleport(
+                const std::string & uuid,
+                const irr::core::vector3df & posi,
+                const RakNet::SystemAddress & from
+            ){
+                std::string muuid;
+                if(getUUIDByAddr(muuid,from)){
+                    subsServer::teleport(uuid,posi,true,muuid);
+                }
+            }
             inline void userDestroy(){
                 delete this->db;
             }

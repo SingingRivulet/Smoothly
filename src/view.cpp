@@ -16,7 +16,7 @@ void view::loadScene(){
     setSeed(123456);
     device = irr::createDevice(
         irr::video::EDT_OPENGL,
-        irr::core::dimension2d<irr::u32>(1024,768)
+        irr::core::dimension2d<irr::u32>(m->windowWidth,m->windowHeight)
     );
     driver = device->getVideoDriver();
     scene = device->getSceneManager();

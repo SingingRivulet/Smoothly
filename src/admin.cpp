@@ -92,6 +92,27 @@ void createUser(){
     }
 }
 
+void teleport(){
+    irr::core::vector3df position(
+        atof(args["--X"].c_str()),
+        atof(args["--Y"].c_str()),
+        atof(args["--Z"].c_str())
+    );
+    const std::string & u=args["--substance"];
+    
+    RakNet::BitStream bs;
+    RakNet::RakString uuid=u.c_str();
+    
+    makeBSHeader(&bs);
+    bs.Write((RakNet::MessageID)smoothly::A_TELEPORT);
+    makeAuth(&bs);
+    
+    bs.Write(uuid);
+    bs.WriteVector(position.X,position.Y,position.Z);
+    
+    RakSleep(30);
+    sendMessage(&bs);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////解析参数/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -159,6 +180,10 @@ int main(int argc , char * argv[]){
             if(it->second=="createUser"){
                 printf("[mode]createUser\n");
                 createUser();
+            }else
+            if(it->second=="teleport"){
+                printf("[mode]teleport\n");
+                teleport();
             }
         }
     }

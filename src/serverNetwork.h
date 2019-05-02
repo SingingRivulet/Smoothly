@@ -99,6 +99,7 @@ namespace smoothly{
             
             //admin
             void onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageAdminTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
             serverNetwork();
             serverNetwork(const serverNetwork &)=delete;

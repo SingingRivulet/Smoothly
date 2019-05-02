@@ -17,17 +17,23 @@ subsServer::~subsServer(){
 }
 void subsServer::teleport(
     const std::string & uuid,
-    const irr::core::vector3df & posi
+    const irr::core::vector3df & posi,
+    bool checkOwner,
+    const std::string & owner
 ){
     pthread_rwlock_wrlock(&rwlock);
     auto p=seekSubs(uuid);
     if(p){
-        //set memory
-        p->position=posi;
-        p->updateChunkPosition();
-        //set database
-        p->save(false,true);
-        moveUserPosition(uuid,p->userUUID,posi);
+        if(!checkOwner || owner==p->userUUID){
+            //set memory
+            p->position=posi;
+            p->checkPosition();
+            
+            p->updateChunkPosition();
+            //set database
+            p->save(false,true);
+            moveUserPosition(uuid,p->userUUID,posi);
+        }
         p->drop();
     }
     
@@ -56,6 +62,8 @@ void subsServer::setSubs(
         if(resetMan || p->manager==muuid){
             //set memory
             p->position=posi;
+            p->checkPosition();
+            
             p->rotation=rota;
             p->lin_vel=lin_vel;
             p->ang_vel=ang_vel;
@@ -107,7 +115,10 @@ void subsServer::createSubsForUSer(
             p->userUUID =muuid;
             p->manager  =muuid;
             p->status   =0;
+            
             p->position =posi;
+            p->checkPosition();
+            
             p->rotation =irr::core::vector3df(0,0,0);
             p->lin_vel.setValue(0,0,0);
             p->ang_vel.setValue(0,0,0);
@@ -159,7 +170,10 @@ void subsServer::createSubs(//添加物体
                 p->userUUID =muuid;
                 p->manager  =muuid;
                 p->status   =0;
+                
                 p->position =posi;
+                p->checkPosition();
+                
                 p->rotation =rota;
                 p->lin_vel.setValue(0,0,0);
                 p->ang_vel.setValue(0,0,0);
@@ -388,6 +402,8 @@ void subsServer::subs::decode(const char * vbuf){
     
     manager.clear();
     iss>>manager;
+    
+    checkPosition();
 }
 
 void subsServer::subs::save(bool updateChunk,bool tp){
@@ -413,6 +429,7 @@ void subsServer::subs::saveDo(){
     saveToDB();
 }
 void subsServer::subs::saveToDB(){
+    //printf("[substance]save to db %s\n",uuid.c_str());
     char kbuf[256];
     char vbuf[2048];
     encode(vbuf,sizeof(vbuf));

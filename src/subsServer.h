@@ -46,6 +46,25 @@ namespace smoothly{
                 void setConfig(const std::string & conf);
                 void getConfig(std::string & conf);
                 void delConfig();
+                inline void checkPosition(){
+                    if(position.X<-65535)
+                        position.X=-65535;
+                    else
+                    if(position.X>65535)
+                        position.X=65535;
+                    
+                    if(position.Z<-65535)
+                        position.Z=-65535;
+                    else
+                    if(position.Z>65535)
+                        position.Z=65535;
+                    
+                    if(position.Y<-50)
+                        position.Y=-50;
+                    else
+                    if(position.Y>2000)
+                        position.Y=2000;
+                }
                 inline subs():manager("NULL"){
                     lastChMan=0;
                     status=0;
@@ -66,7 +85,9 @@ namespace smoothly{
             );//move a lasting substance
             void teleport(
                 const std::string & uuid,
-                const irr::core::vector3df & p
+                const irr::core::vector3df & p,
+                bool checkOwner,
+                const std::string & owner
             );//传送，在客户端不会插值
             void createSubs(//添加物体
                 long id , 
