@@ -25,8 +25,9 @@ namespace smoothly{
                 float deltaCamera;
                 
                 bodyInfo info;
-                btRigidBody      * rigidBody;
-                btMotionState    * bodyState;
+                
+                bodyBase * body;
+                
                 irr::scene::ISceneNode * node;
                 
                 mods::subsConf * subsConf;
@@ -36,25 +37,20 @@ namespace smoothly{
                 subs * next;
                 substance * parent;
                 
-                bool wake;
-                
-                bool contacted;
                 bool noFallDown;
                 
                 bool inWorld;
                 int x,y;//this variable only will be use while initializate;
                 
-                int walkingForward,walkingLeftOrRight;
-                
                 irr::core::vector2df walkDirection;
                 
-                void moveUpdate();
+                void moveUpdate(int forward,int leftOrRight);
                 
                 void setPowerAsDefault();
                 
                 inline void setNoFallDown(){
                     noFallDown=true;
-                    rigidBody->setAngularFactor(btVector3(0,1,0));
+                    body->setAngularFactor(btVector3(0,1,0));
                 }
                 
                 void updateByWorld();
@@ -76,11 +72,11 @@ namespace smoothly{
                 irr::core::vector3df getDirection();
                 void setDirection(const irr::core::vector3df & d);
                 
-                inline const btVector3 & getAngularVelocity(){
-                    return rigidBody->getAngularVelocity();
+                inline btVector3 getAngularVelocity(){
+                    return body->getAngularVelocity();
                 }
-                inline const btVector3 & getLinearVelocity(){
-                    return rigidBody->getLinearVelocity();
+                inline btVector3 getLinearVelocity(){
+                    return body->getLinearVelocity();
                 }
                 
                 void setRandUUID();
@@ -88,7 +84,7 @@ namespace smoothly{
                 void release();
                 
                 void setAsBrief(int life);
-                
+                void checkPosition();
                 void update();
                 
                 bool addIntoWorld();

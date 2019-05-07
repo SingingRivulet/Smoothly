@@ -174,6 +174,26 @@ users::user * users::seekOnLine(const std::string & uuid){
     pthread_rwlock_unlock(&rwlock);
     return p;
 }
+bool users::getAddrByUUID(RakNet::SystemAddress & address ,const std::string & uuid){
+    bool rflag=false;
+    user * p=NULL;//player session
+    
+    pthread_rwlock_rdlock(&rwlock);
+    
+    auto it=userUUIDs.find(uuid);//find online user
+    if(it!=userUUIDs.end()){
+        p=it->second;
+        //find the user
+        //get address from session
+        address=p->address;
+        
+        rflag=true;
+    }
+    
+    pthread_rwlock_unlock(&rwlock);
+    
+    return rflag;
+}
 bool users::getUUIDByAddr(std::string & uuid,const RakNet::SystemAddress & address){
     bool rflag=false;
     

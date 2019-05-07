@@ -1,5 +1,6 @@
 #include "mods.h"
 #include "subsapi.h"
+#include <string.h>
 namespace smoothly{
 
 void mods::init(){
@@ -265,12 +266,8 @@ static int mod_addSubstance(lua_State * L){
     lua_gettable(L,-2);
     if(lua_isstring(L,-1)){
         shapeConf=lua_tostring(L,-1);
-        lua_pop(L,1);
-    }else{
-        lua_pop(L,1);
-        lua_pushstring(L,"Draw shape fail!");
-        return 1;
     }
+    lua_pop(L,1);
     
     lua_pushstring(L,"friction");
     lua_gettable(L,-2);
@@ -308,6 +305,40 @@ static int mod_addSubstance(lua_State * L){
     
     b->shape.init(shapeConf);
     b->bodyShape=b->shape.compound;
+    
+    lua_pushstring(L,"type");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        auto p=lua_tostring(L,-1);
+        if(strcmp(p,"lasting")==0){
+            b->type=mods::SUBS_LASTING;
+        }else
+        if(strcmp(p,"brief")==0){
+            b->type=mods::SUBS_BRIEF;
+        }
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"bodyType");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        b->bodyType=lua_tostring(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"characterWidth");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        b->characterWidth=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"characterHeight");
+    lua_gettable(L,-2);
+    if(lua_isnumber(L,-1)){
+        b->characterHeight=lua_tonumber(L,-1);
+    }
+    lua_pop(L,1);
     
     lua_pushstring(L,"texture");
     lua_gettable(L,-2);
@@ -489,6 +520,24 @@ static int mod_setWindow(lua_State * L){
     return 1;
 }
 
+
+static int mod_setBooster(lua_State * L){
+    if(!lua_isfunction(L,-1))
+        return 0;
+    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    self->booster=luaL_checknumber(L,2);
+    
+    lua_pushboolean(L,1);
+    return 1;
+}
+
 void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -499,6 +548,7 @@ void mods::scriptInit(const char * path){
         {"addBuildingMesh"      ,mod_addBuildingMesh},
         {"addSubstance"         ,mod_addSubstance},
         {"setWindow"            ,mod_setWindow},
+        {"setBooster"           ,mod_setBooster},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);

@@ -75,7 +75,8 @@ namespace smoothly{
                 const btVector3& ang_vel,
                 int status,
                 int hp,
-                const std::string & useruuid
+                const std::string & useruuid,
+                const RakNet::SystemAddress & ext
             );
             virtual void boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & p);
             virtual void boardcastSubsAttack(const std::string & subsuuid,const irr::core::vector3df & p,int hp,int delta);

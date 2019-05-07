@@ -62,6 +62,7 @@ void view::loadWorld(){
         solver,
         collisionConfiguration
     );
+    overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->dynamicsWorld->setGravity(btVector3(0, -10, 0));
 }
 void view::destroyWorld(){
@@ -81,7 +82,7 @@ void view::sceneLoop(){
 void view::worldLoop(){
     if(dynamicsWorld && deltaTime!=0.0f){
         //printf("[world]stepSimulation\n");
-        dynamicsWorld->stepSimulation(deltaTime,10);
+        dynamicsWorld->stepSimulation(deltaTime*m->booster,10);
         //dynamicsWorld->stepSimulation(1.f / 60.f,10);
         //collision
         auto disp=dynamicsWorld->getDispatcher();

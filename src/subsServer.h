@@ -123,6 +123,9 @@ namespace smoothly{
             virtual bool userCanPutSubs(const std::string & useruuid)=0;
             virtual void moveUserPosition(const std::string & uuid,const std::string & muuid,const irr::core::vector3df & posi)=0;
             
+            virtual bool getUUIDByAddr(std::string & uuid , const RakNet::SystemAddress & address)=0;
+            virtual bool getAddrByUUID(RakNet::SystemAddress & address , const std::string & uuid)=0;
+            
             virtual void boardcastSubsCreate(
                 const std::string & subsuuid,
                 long id , 
@@ -152,7 +155,8 @@ namespace smoothly{
                 const btVector3& ang_vel,
                 int status,
                 int hp,
-                const std::string & useruuid
+                const std::string & useruuid,
+                const RakNet::SystemAddress & ext
             )=0;
             virtual void sendSubsStatus(
                 const std::string & subsuuid,

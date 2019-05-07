@@ -672,6 +672,7 @@ void clientNetwork::login(const std::string & name,const std::string & p){
     bs.Write(pwd);
     
     sendMessage(&bs);
+    myUUID=name;
 }
 
 void clientNetwork::setUserPosition(const irr::core::vector3df & p){

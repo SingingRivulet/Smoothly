@@ -160,6 +160,7 @@ void physical::setMotionState(btMotionState * motionState,const float * mtx){
     btTransform transform;
     transform.setFromOpenGLMatrix(mtx);
     motionState->setWorldTransform(transform);
+    //motionState->m_centerOfMassOffset.setIdentity();
 }
 btCollisionShape * physical::createShape(btTriangleMesh * mesh){
     return new btBvhTriangleMeshShape( mesh, true );
@@ -333,6 +334,170 @@ void physical::bodyGroup::setFric(float fr){
 }
 void physical::bodyGroup::setResti(float r){
     this->e=r;
+}
+
+void physical::bodyBase::setPosition(const irr::core::vector3df & p){
+    teleport(p);
+}
+void physical::bodyBase::teleport(const irr::core::vector3df & p){
+    btTransform t;
+    getTransform(t);
+    
+    t.setOrigin(btVector3(p.X , p.Y , p.Z));
+    
+    setTransform(t);
+}
+void physical::bodyBase::setRotation(const irr::core::vector3df & r){
+    btTransform t;
+    getTransform(t);
+    
+    btQuaternion rq;
+    euler2quaternion(r,rq);
+    t.setRotation(rq);
+    
+    setTransform(t);
+}
+void physical::bodyBase::getStatus(irr::core::vector3df & irrPos,irr::core::vector3df & irrRot){
+    btTransform transform;
+    getTransform(transform);
+    
+    btVector3 btPos;
+    btVector3 btRot;
+    
+    btPos = transform.getOrigin();
+    irrPos.set(btPos.x(), btPos.y(), btPos.z());
+    
+    btMatrix3x3 & btM = transform.getBasis();
+    btM.getEulerZYX(btRot.m_floats[2], btRot.m_floats[1], btRot.m_floats[0]);
+    irrRot.X = irr::core::radToDeg(btRot.x());
+    irrRot.Y = irr::core::radToDeg(btRot.y());
+    irrRot.Z = irr::core::radToDeg(btRot.z());
+}
+void physical::bodyBase::setDir(const irr::core::vector3df & d){
+    irr::core::vector3df rotate=d.getHorizontalAngle();
+    setRotation(rotate);
+}
+
+physical::character::character(btScalar w,btScalar h,const btVector3 & position,btScalar stepHeight){
+    printf("[body]create character\n");
+    shape = new btCapsuleShape(w,h);
+    
+    btTransform m_trans;
+    m_trans.setIdentity();
+    m_trans.setOrigin(position);
+ 
+    m_ghostObject = new btPairCachingGhostObject();
+    m_ghostObject->setWorldTransform(m_trans);
+    
+    m_ghostObject->setCollisionShape (shape);
+    m_ghostObject->setCollisionFlags (btCollisionObject::CF_CHARACTER_OBJECT);
+    
+    controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
+}
+void physical::character::destruct(){
+    delete controller;
+    delete m_ghostObject;
+    delete shape;
+}
+void physical::character::setTransform(btTransform & t){
+    m_ghostObject->setWorldTransform(t);
+}
+void physical::character::getTransform(btTransform & t){
+    t=m_ghostObject->getWorldTransform();
+}
+void physical::character::addIntoWorld(){
+    world->addCollisionObject(
+        m_ghostObject,
+        btBroadphaseProxy::CharacterFilter, 
+        btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+    world->addAction(controller);
+}
+void physical::character::removeFromWorld(){
+    world->removeAction(controller);
+    world->removeCollisionObject(m_ghostObject);
+}
+void physical::character::setWalkDirection(const btVector3& walkDirection){
+    controller->setWalkDirection(walkDirection);
+}
+void physical::character::jump(const btVector3& dir){
+    controller->jump(dir);
+}
+void physical::character::setUserPointer(void * p){
+    m_ghostObject->setUserPointer(p);
+}
+void physical::character::setAngularFactor(const btVector3 & a){
+    //m_ghostObject->setAngularFactor(a);
+}
+
+physical::rigidBody::rigidBody(
+    btCollisionShape * bodyShape,
+    btTransform & transform,
+    btScalar mass , 
+    const btVector3& localInertia
+){
+    printf("[body]create rigid body\n");
+    bodyState=new btDefaultMotionState(transform);
+    body=createBody(bodyShape , bodyState , mass , localInertia);
+}
+
+void physical::rigidBody::destruct(){
+    delete body;
+    delete bodyState;
+}
+
+void physical::rigidBody::addIntoWorld(){
+    world->addRigidBody(body);
+}
+
+void physical::rigidBody::removeFromWorld(){
+    world->removeRigidBody(body);
+}
+
+void physical::rigidBody::setTransform(btTransform & t){
+    body->setWorldTransform(t);
+    bodyState->m_graphicsWorldTrans=t;
+    bodyState->m_startWorldTrans=t;
+    bodyState->m_centerOfMassOffset.setIdentity();
+    //我也不知道为什么，刚体必须同时设置这个四个
+}
+
+void physical::rigidBody::getTransform(btTransform & t){
+    bodyState->getWorldTransform(t);
+}
+
+void physical::rigidBody::applyImpulse(const btVector3& impluse,const btVector3& point){
+    body->applyImpulse(impluse,point);
+}
+void physical::rigidBody::applyForce(const btVector3& force,const btVector3& point){
+    body->applyForce(force,point);
+}
+void physical::rigidBody::clearForces(){
+    body->clearForces();
+}
+
+void physical::rigidBody::setLinearVelocity(const btVector3& lin_vel){
+    body->setLinearVelocity(lin_vel);
+}
+void physical::rigidBody::setAngularVelocity(const btVector3& ang_vel){
+    body->setAngularVelocity(ang_vel);
+}
+void physical::rigidBody::setFriction(btScalar f){
+    body->setFriction(f);
+}
+void physical::rigidBody::setRestitution(btScalar r){
+    body->setRestitution(r);
+}
+btVector3 physical::rigidBody::getAngularVelocity(){
+    return body->getAngularVelocity();
+}
+btVector3 physical::rigidBody::getLinearVelocity(){
+    return body->getLinearVelocity();
+}
+void physical::rigidBody::setAngularFactor(const btVector3 & a){
+    body->setAngularFactor(a);
+}
+void physical::rigidBody::setUserPointer(void * p){
+    body->setUserPointer(p);
 }
 
 }

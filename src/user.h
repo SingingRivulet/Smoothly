@@ -49,7 +49,8 @@ namespace smoothly{
                 long id
             );
             
-            bool getUUIDByAddr(std::string & uuid,const RakNet::SystemAddress & address);
+            virtual bool getUUIDByAddr(std::string & uuid , const RakNet::SystemAddress & address);
+            virtual bool getAddrByUUID(RakNet::SystemAddress & address , const std::string & uuid);
             
             inline users(){
                 pthread_rwlock_init(&rwlock, NULL);

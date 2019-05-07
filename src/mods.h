@@ -124,6 +124,10 @@ namespace smoothly{
                     float                 friction;//摩擦力
                     float                 restitution;//反弹
                     
+                    std::string         bodyType;//rigid,character,vehicle , default is rigid
+                    
+                    float characterWidth,characterHeight;
+                    
                     float defaultSpeed;     //默认速度
                     float defaultLiftForce; //默认升力
                     float defaultPushForce; //默认推力
@@ -180,8 +184,10 @@ namespace smoothly{
                         int imp
                     );
                     
-                    inline subsConf(){
+                    inline subsConf():bodyType("rigid"){
                         texture=NULL;
+                        
+                        type=SUBS_LASTING;
                         
                         hitSubsCallback=0;
                         hitBuildingCallback=0;
@@ -205,6 +211,9 @@ namespace smoothly{
                         deltaCamera=0;
                     
                         noFallDown=false;       //设置不会倒
+                        
+                        characterHeight=1;
+                        characterWidth=1;
                     }
                     
                     inline ~subsConf(){
@@ -219,9 +228,11 @@ namespace smoothly{
             //////////////////////////////////////////////////////////////////////////////
             int windowWidth;
             int windowHeight;
+            float booster;
             mods(){
                 windowWidth=1024;
                 windowHeight=768;
+                booster=1;
             }
     };
 }

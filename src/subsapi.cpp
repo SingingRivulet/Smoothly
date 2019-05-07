@@ -54,7 +54,7 @@ static int subs_setPosition(lua_State * L){
     
     irr::core::vector3df p(x1,y1,z1);
     ptr->setPosition(p);
-    ptr->wake=true;
+    
     
     lua_pushboolean(L,1);
     return 1;
@@ -79,7 +79,7 @@ static int subs_setRotation(lua_State * L){
     
     irr::core::vector3df r(x1,y1,z1);
     ptr->setRotation(r);
-    ptr->wake=true;
+    
     
     lua_pushboolean(L,1);
     return 1;
@@ -90,7 +90,7 @@ static int subs_getAngularVelocity(lua_State * L){
     getSubsUUID;
     getSubsPtr;
     
-    auto a=ptr->rigidBody->getAngularVelocity();
+    auto a=ptr->body->getAngularVelocity();
     lua_pushnumber(L,a.getX());
     lua_pushnumber(L,a.getY());
     lua_pushnumber(L,a.getZ());
@@ -101,7 +101,7 @@ static int subs_getLinearVelocity(lua_State * L){
     getSubsUUID;
     getSubsPtr;
     
-    auto l=ptr->rigidBody->getLinearVelocity();
+    auto l=ptr->body->getLinearVelocity();
     lua_pushnumber(L,l.getX());
     lua_pushnumber(L,l.getY());
     lua_pushnumber(L,l.getZ());
@@ -115,8 +115,8 @@ static int subs_setAngularVelocity(lua_State * L){
     getVector1;
     
     btVector3 a(x1,y1,z1);
-    ptr->rigidBody->setAngularVelocity(a);
-    ptr->wake=true;
+    ptr->body->setAngularVelocity(a);
+    
     
     lua_pushboolean(L,1);
     return 1;
@@ -129,8 +129,8 @@ static int subs_setLinearVelocity(lua_State * L){
     getVector1;
     
     btVector3 l(x1,y1,z1);
-    ptr->rigidBody->setLinearVelocity(l);
-    ptr->wake=true;
+    ptr->body->setLinearVelocity(l);
+    
     
     lua_pushboolean(L,1);
     return 1;
@@ -200,8 +200,8 @@ static int subs_applyImpulse(lua_State * L){
     
     btVector3 l(x1,y1,z1);
     btVector3 p(x2,y2,z2);
-    ptr->rigidBody->applyImpulse(l,p);
-    ptr->wake=true;
+    ptr->body->applyImpulse(l,p);
+    
     
     lua_pushboolean(L,1);
     return 1;
@@ -215,8 +215,8 @@ static int subs_applyForce(lua_State * L){
     
     btVector3 l(x1,y1,z1);
     btVector3 p(x2,y2,z2);
-    ptr->rigidBody->applyForce(l,p);
-    ptr->wake=true;
+    ptr->body->applyForce(l,p);
+    
     
     lua_pushboolean(L,1);
     return 1;

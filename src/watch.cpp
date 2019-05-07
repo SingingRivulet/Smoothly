@@ -209,7 +209,8 @@ void watch::boardcastSubsStatus(
     const btVector3& ang_vel,
     int status,
     int hp,
-    const std::string & useruuid
+    const std::string & useruuid,
+    const RakNet::SystemAddress & ext
 ){
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
@@ -238,7 +239,25 @@ void watch::boardcastSubsStatus(
     
     bs.Write(conf);
     
-    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+    //boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+    ///////////////////////////////////////////////////////////
+    //The last manager has changed the world
+    //The manager should not reversed it
+    struct tmpc{
+        RakNet::SystemAddress ext;
+        RakNet::BitStream * bs;
+    }arg;
+    
+    arg.ext=ext;
+    arg.bs=&bs;
+    
+    eventHBB.fetchByPoint(HBB::vec3(position.X,0,position.Z),[](HBB::AABB * box , void * argp){
+        auto arg=(tmpc*)argp;
+        auto lst=(listener*)box->data;
+        
+        if(arg->ext!=lst->address)//剔除manager，防止它又改回去了
+            lst->parent->sendMessage(arg->bs,lst->address);
+    },&arg);
 }
 
 void watch::boardcastSubsRemove(const std::string & subsuuid,const irr::core::vector3df & position){

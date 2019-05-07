@@ -29,6 +29,9 @@ void subsServer::teleport(
             p->position=posi;
             p->checkPosition();
             
+            p->lin_vel=btVector3(0,0,0);
+            p->ang_vel=btVector3(0,0,0);
+            
             p->updateChunkPosition();
             //set database
             p->save(false,true);
@@ -456,7 +459,11 @@ void subsServer::subs::remove(){
     delConfig();
 }
 void subsServer::subs::send(){
-    parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID);
+    RakNet::SystemAddress ext;
+    if(parent->getAddrByUUID(ext,manager))//不给操控者发，防止锁死物体
+        parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,ext);
+    else
+        parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,RakNet::SystemAddress());
 }
 void subsServer::subs::send(const RakNet::SystemAddress & addr,bool sendconf){
     std::string conf;

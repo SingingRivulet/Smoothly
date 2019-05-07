@@ -13,6 +13,7 @@ function loadClientSubtance(m) -- config for client
     smoothly.addSubstance(m,1,{ --player
         ["shape"]   =readFile("./res/model/testplayer/testplayer.subs"),
         ["mesh"]    ="./res/model/testplayer/testplayer.obj",
+        ["bodyType"]="character",
         ["active"]  ={
             ["noFallDown"]      =true,
             ["defaultSpeed"]    =1,
