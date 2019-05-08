@@ -337,6 +337,7 @@ void physical::bodyGroup::setResti(float r){
 }
 
 void physical::bodyBase::setPosition(const irr::core::vector3df & p){
+    //printf("[bodyBase]setPosition\n");
     teleport(p);
 }
 void physical::bodyBase::teleport(const irr::core::vector3df & p){
@@ -393,13 +394,23 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     m_ghostObject->setCollisionFlags (btCollisionObject::CF_CHARACTER_OBJECT);
     
     controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
+    
+    controller->setGravity(btVector3(0, -10, 0));
 }
 void physical::character::destruct(){
     delete controller;
     delete m_ghostObject;
     delete shape;
 }
+void physical::character::setDir(const irr::core::vector3df & d){
+    //return;
+    irr::core::vector3df rotate=d.getHorizontalAngle();
+    float yaw=rotate.Y;
+    btQuaternion quaternion(btVector3(0,1,0),yaw);
+    m_ghostObject->getWorldTransform().setRotation(quaternion);
+}
 void physical::character::setTransform(btTransform & t){
+    //printf("[character]setTransform\n");
     m_ghostObject->setWorldTransform(t);
 }
 void physical::character::getTransform(btTransform & t){
@@ -417,6 +428,7 @@ void physical::character::removeFromWorld(){
     world->removeCollisionObject(m_ghostObject);
 }
 void physical::character::setWalkDirection(const btVector3& walkDirection){
+    //printf("[character]walk (%f,%f,%f)\n",walkDirection.getX(),walkDirection.getY(),walkDirection.getZ());
     controller->setWalkDirection(walkDirection);
 }
 void physical::character::jump(const btVector3& dir){

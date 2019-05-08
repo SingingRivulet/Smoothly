@@ -56,6 +56,7 @@ void substance::parseCommond(const subsCommond & cmd){
                 p->flyUpdate(false,false);
             break;
             case subsCommond::DIRECT:
+                //break;
                 p->setDirection(cmd.vec);
             break;
         }
@@ -271,6 +272,8 @@ void substance::subs::updateByWorld(){
     irrRot.X = irr::core::radToDeg(btRot.x());
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
+    
+    //printf("[updateByWorld]irrPos (%f,%f,%f)\n",irrPos.X,irrPos.Y,irrPos.Z);
     
     node->setPosition(irrPos);
     node->setRotation(irrRot);
@@ -517,14 +520,14 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     transform.setFromOpenGLMatrix(node->getAbsoluteTransformation().pointer());
     
     if(conf->bodyType=="character"){
-        printf("[substance]create character:%s\n");
+        printf("[substance]create character:%s\n",uuid.c_str());
         body=new character(
             conf->characterWidth , 
             conf->characterHeight , 
             btVector3(p.X , p.Y , p.Z)
         );
     }else{
-        printf("[substance]create rigid body:%s\n");
+        printf("[substance]create rigid body:%s\n",uuid.c_str());
         body=new rigidBody(conf->bodyShape , transform , conf->shape.mass , conf->shape.localInertia);
     }
     

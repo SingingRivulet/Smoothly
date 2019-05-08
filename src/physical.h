@@ -131,6 +131,8 @@ namespace smoothly{
                     
                     virtual void setTransform(btTransform & );
                     virtual void getTransform(btTransform & );
+                    
+                    virtual void setDir(const irr::core::vector3df & );
             };
             
             class rigidBody:public bodyBase{
