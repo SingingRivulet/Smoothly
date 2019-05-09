@@ -238,7 +238,6 @@ void control::loop(){
     }
     
     
-    activeApply();
     
     while(!eventQueue.empty()){
         auto ele=eventQueue.front();
@@ -258,8 +257,9 @@ void control::loop(){
     }
     
     worldLoop();
-    sceneLoop();
     terrainLoop();
+    activeApply();
+    sceneLoop();
 }
 
 }

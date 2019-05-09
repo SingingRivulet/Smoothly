@@ -19,7 +19,7 @@ function loadClientSubtance(m) -- config for client
             ["defaultSpeed"]    =0.01,
             ["defaultLiftForce"]=0,
             ["defaultPushForce"]=0,
-            ["defaultJumpImp"]  =10
+            ["defaultJumpImp"]  =5
         }
     })
 end
