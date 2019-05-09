@@ -42,6 +42,8 @@ namespace smoothly{
                 bool inWorld;
                 int x,y;//this variable only will be use while initializate;
                 
+                irr::core::vector3df direction;
+                
                 irr::core::vector2df walkDirection;
                 
                 void moveUpdate(int forward,int leftOrRight);

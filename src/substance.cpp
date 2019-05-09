@@ -109,18 +109,20 @@ static void rotate2d(irr::core::vector2df & v,float a){
 }
 void substance::subs::setDirection(const irr::core::vector3df & dir){
     body->setDir(dir);
+    direction=dir;
 }
 irr::core::vector3df substance::subs::getDirection(){
-    btTransform transform;
-    btVector3 btRot;
-    irr::core::vector3df rotate;
-    body->getTransform(transform);
-    btMatrix3x3 & btM = transform.getBasis();
-    btM.getEulerZYX(btRot.m_floats[2], btRot.m_floats[1], btRot.m_floats[0]);
-    rotate.X = irr::core::radToDeg(btRot.x());
-    rotate.Y = irr::core::radToDeg(btRot.y());
-    rotate.Z = irr::core::radToDeg(btRot.z());
-    return rotate.rotationToDirection();
+    //btTransform transform;
+    //btVector3 btRot;
+    //irr::core::vector3df rotate;
+    //body->getTransform(transform);
+    //btMatrix3x3 & btM = transform.getBasis();
+    //btM.getEulerZYX(btRot.m_floats[2], btRot.m_floats[1], btRot.m_floats[0]);
+    //rotate.X = irr::core::radToDeg(btRot.x());
+    //rotate.Y = irr::core::radToDeg(btRot.y());
+    //rotate.Z = irr::core::radToDeg(btRot.z());
+    //return rotate.rotationToDirection();
+    return direction;
 }
 void substance::subs::walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed){
     //printf("[control]walk\n");
@@ -142,13 +144,13 @@ void substance::subs::walk(int forward,int leftOrRight/*-1 left,1 right*/,float 
     
     if(leftOrRight==1){
         p2d=direct2d;
-        rotate2d(p2d, -3.1415926/2);
+        rotate2d(p2d, 3.1415926/2);
         p2d.normalize();
         delta+=p2d;
     }else
     if(leftOrRight==-1){
         p2d=direct2d;
-        rotate2d(p2d, 3.1415926/2);
+        rotate2d(p2d, -3.1415926/2);
         p2d.normalize();
         delta+=p2d;
     }
@@ -460,10 +462,10 @@ void substance::updateSubs(//更新物体状态，由服务器调用
     const std::string & conf
 ){
     //printf("[substance]updateSubs\n");
+    //printf("[substance]set position:(%f %f %f)\n",posi.X , posi.Y , posi.Z);
     auto sp=seekSubs(uuid);
     if(sp){
         sp->setMotion(posi,rota);
-        //printf("[substance]set position:(%f %f %f)\n",posi.X , posi.Y , posi.Z);
         sp->owner=owner;
         //setOwner(uuid,owner);
         sp->hp=hp;

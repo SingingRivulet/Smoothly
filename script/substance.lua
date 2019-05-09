@@ -16,7 +16,7 @@ function loadClientSubtance(m) -- config for client
         ["bodyType"]="character",
         ["active"]  ={
             ["noFallDown"]      =true,
-            ["defaultSpeed"]    =1,
+            ["defaultSpeed"]    =0.01,
             ["defaultLiftForce"]=0,
             ["defaultPushForce"]=0,
             ["defaultJumpImp"]  =10

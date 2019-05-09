@@ -404,6 +404,7 @@ void physical::character::destruct(){
 }
 void physical::character::setDir(const irr::core::vector3df & d){
     //return;
+    //printf("[character]setDir (%f,%f,%f)\n",d.X,d.Y,d.Z);
     irr::core::vector3df rotate=d.getHorizontalAngle();
     float yaw=rotate.Y;
     btQuaternion quaternion(btVector3(0,1,0),yaw);

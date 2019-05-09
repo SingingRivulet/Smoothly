@@ -539,6 +539,7 @@ void clientNetwork::uploadBodyStatus(//上传持久型物体状态
     const btVector3& lin ,
     const btVector3& ang
 ){
+    //printf("[clientNetwork]uploadBodyStatus (%f,%f,%f)\n",position.X,position.Y,position.Z);
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_SUBS);

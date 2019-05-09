@@ -59,8 +59,8 @@ namespace smoothly{
                     if(position.Z>65535)
                         position.Z=65535;
                     
-                    if(position.Y<-50)
-                        position.Y=-50;
+                    if(position.Y<-2000)
+                        position.Y=-2000;
                     else
                     if(position.Y>2000)
                         position.Y=2000;
