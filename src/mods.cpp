@@ -467,6 +467,20 @@ static int mod_addSubstance(lua_State * L){
             b->noFallDown=lua_toboolean(L,-1);
         }
         lua_pop(L,1);
+        
+        lua_pushstring(L,"walkInSky");
+        lua_gettable(L,-2);
+        if(lua_isboolean(L,-1)){
+            b->walkInSky=lua_toboolean(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_pushstring(L,"jumpInSky");
+        lua_gettable(L,-2);
+        if(lua_isboolean(L,-1)){
+            b->jumpInSky=lua_toboolean(L,-1);
+        }
+        lua_pop(L,1);
     }
     lua_pop(L,1);
     

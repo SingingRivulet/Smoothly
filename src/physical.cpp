@@ -379,8 +379,12 @@ void physical::bodyBase::setDir(const irr::core::vector3df & d){
     setRotation(rotate);
 }
 
-physical::character::character(btScalar w,btScalar h,const btVector3 & position,btScalar stepHeight){
-    printf("[body]create character\n");
+physical::character::character(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis,btScalar stepHeight){
+    //printf("[body]create character\n");
+    
+    walkInSky=wis;
+    jumpInSky=jis;
+    
     shape = new btCapsuleShape(w,h);
     
     btTransform m_trans;
@@ -430,9 +434,13 @@ void physical::character::removeFromWorld(){
 }
 void physical::character::setWalkDirection(const btVector3& walkDirection){
     //printf("[character]walk (%f,%f,%f)\n",walkDirection.getX(),walkDirection.getY(),walkDirection.getZ());
+    if(!walkInSky && !controller->onGround())
+        return;
     controller->setWalkDirection(walkDirection);
 }
 void physical::character::jump(const btVector3& dir){
+    if(!jumpInSky && !controller->onGround())
+        return;
     controller->jump(dir);
 }
 void physical::character::setUserPointer(void * p){
@@ -448,7 +456,7 @@ physical::rigidBody::rigidBody(
     btScalar mass , 
     const btVector3& localInertia
 ){
-    printf("[body]create rigid body\n");
+    //printf("[body]create rigid body\n");
     bodyState=new btDefaultMotionState(transform);
     body=createBody(bodyShape , bodyState , mass , localInertia);
 }

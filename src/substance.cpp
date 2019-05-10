@@ -169,54 +169,8 @@ void substance::subs::move(const irr::core::vector3df & delta){
     body->setWalkDirection(btVector3(delta.X , delta.Y , delta.Z));
 }
 void substance::subs::teleport(const irr::core::vector3df & p){
+    //printf("[substance]teleport substance %s to (%f,%f,%f)\n",uuid.c_str(),p.X,p.Y,p.Z);
     body->teleport(p);
-}
-void substance::subs::checkPosition(){
-    if(!inWorld)
-        return;
-    
-    bool flag=false;
-    
-    btTransform transform;
-    body->getTransform(transform);
-    btVector3 position = transform.getOrigin();
-    
-    if(position.getX()<-65535){
-        position.setX(-65535);
-        flag=true;
-    }else
-    if(position.getX()>65535){
-        position.setX(65535);
-        flag=true;
-    }
-    
-    if(position.getZ()<-65535){
-        position.setZ(-65535);
-        flag=true;
-    }else
-    if(position.getZ()>65535){
-        position.setZ(65535);
-        flag=true;
-    }
-    
-    if(position.getY()<-50){
-        position.setY(-50);
-        flag=true;
-    }else
-    if(position.getY()>500){
-        position.setY(500);
-        flag=true;
-    }else{
-        auto h=parent->getRealHight(position.getX(),position.getZ());
-        if(position.getY()<h){
-            position.setY(h);
-            flag=true;
-        }
-    }
-    
-    if(flag){
-        body->setTransform(transform);
-    }
 }
 void substance::subs::setPosition(const irr::core::vector3df & p){
     body->setPosition(p);
@@ -293,7 +247,6 @@ void substance::subsUpdate(){
         for(auto it:subses){
             //update collision
             it.second->update();//update scene
-            //it.second->checkPosition();
         }
         parseAllCommond();
     }
@@ -526,7 +479,9 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
         body=new character(
             conf->characterWidth , 
             conf->characterHeight , 
-            btVector3(p.X , p.Y , p.Z)
+            btVector3(p.X , p.Y , p.Z),
+            conf->walkInSky , 
+            conf->jumpInSky 
         );
     }else{
         printf("[substance]create rigid body:%s\n",uuid.c_str());

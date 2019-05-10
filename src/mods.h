@@ -124,6 +124,9 @@ namespace smoothly{
                     float                 friction;//摩擦力
                     float                 restitution;//反弹
                     
+                    bool walkInSky;
+                    bool jumpInSky;
+                    
                     std::string         bodyType;//rigid,character,vehicle , default is rigid
                     
                     float characterWidth,characterHeight;
@@ -193,6 +196,9 @@ namespace smoothly{
                         hitBuildingCallback=0;
                         hitTerrainItemCallback=0;
                         hitTerrainCallback=0;
+                        
+                        walkInSky=false;
+                        jumpInSky=false;
                         
                         haveHitSubsCallback=false;
                         haveHitBuildingCallback=false;

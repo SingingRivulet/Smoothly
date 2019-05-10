@@ -86,7 +86,6 @@ namespace smoothly{
                 void release();
                 
                 void setAsBrief(int life);
-                void checkPosition();
                 void update();
                 
                 bool addIntoWorld();

@@ -117,7 +117,16 @@ namespace smoothly{
                     btKinematicCharacterController * controller;
                     btPairCachingGhostObject * m_ghostObject;
                     btConvexShape* shape;
-                    character(btScalar w,btScalar h,const btVector3 & position,btScalar stepHeight = btScalar(0.35));
+                    bool walkInSky;
+                    bool jumpInSky;
+                    character(
+                        btScalar w,
+                        btScalar h,
+                        const btVector3 & position,
+                        bool wis,
+                        bool jis,
+                        btScalar stepHeight = btScalar(0.35)
+                    );
                     virtual void destruct();
                     virtual void addIntoWorld();
                     virtual void removeFromWorld();

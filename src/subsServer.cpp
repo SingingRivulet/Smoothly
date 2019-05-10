@@ -36,6 +36,7 @@ void subsServer::teleport(
             //set database
             p->save(false,true);
             moveUserPosition(uuid,p->userUUID,posi);
+            //printf("[subsServer]teleport substance %s to (%f,%f,%f)\n",p->userUUID.c_str(),posi.X,posi.Y,posi.Z);
         }
         p->drop();
     }

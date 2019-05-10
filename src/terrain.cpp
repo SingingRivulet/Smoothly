@@ -385,8 +385,10 @@ int terrain::chunk::add(
     ptr->node->setName(buf);
     
     if(mit->second->bodyShape){
-        ptr->node->updateAbsolutePosition();
-        ptr->bodyState=setMotionState(ptr->node->getAbsoluteTransformation().pointer());
+        auto dp=ptr->nodeLOD[0]->getPosition();
+        //printf("[terrain::chunk]add body(%f,%f,%f)\n",dp.X,dp.Y,dp.Z);
+        ptr->nodeLOD[0]->updateAbsolutePosition();
+        ptr->bodyState=setMotionState(ptr->nodeLOD[0]->getAbsoluteTransformation().pointer());
         //btTransform transform;
         ptr->rigidBody=createBody(mit->second->bodyShape,ptr->bodyState);
         ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
