@@ -286,11 +286,17 @@ void substance::removeSubs(substance::subs * p){
         }
     }
 }
+void substance::subs::playAnimation(float dtm,const irr::core::vector3df & dl){
+    
+}
 void substance::subs::update(){
     if(parent){
         updateByWorld();
         if(inWorld){
-            body->loop();
+            body->loop(parent->deltaTime);
+            irr::core::vector3df p;
+            body->getDeltaL(p);
+            playAnimation(parent->deltaTime,p);
         }
         if(type==mods::SUBS_LASTING){
             //upload to server
@@ -299,6 +305,7 @@ void substance::subs::update(){
                 status,
                 node->getPosition(),
                 node->getRotation(),
+                body->getDir(),
                 getLinearVelocity(),
                 getAngularVelocity()
             );
@@ -321,19 +328,21 @@ substance::subs * substance::addLastingSubs(//添加持久物体
     long id , 
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
     //向服务器发送创建命令，服务器再向自己发送
     auto p=seekSubsConf(id);
     if(p && p->type==mods::SUBS_LASTING)
-        requestCreateLastingSubs(id,posi,rota,impulse,rel_pos);
+        requestCreateLastingSubs(id,posi,rota,dire,impulse,rel_pos);
 }
 
 substance::subs * substance::addBriefSubs(//添加非持久物体
     long id , 
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
@@ -346,13 +355,13 @@ substance::subs * substance::addBriefSubs(//添加非持久物体
         sp->owner=myUUID;
         sp->hp=p->hp;
         sp->status=0;
-        sp->init(p,posi,rota);
+        sp->init(p,posi,rota,dire);
         sp->type=mods::SUBS_BRIEF;
         sp->body->applyImpulse(impulse,rel_pos);
         
         sp->setAsBrief(p->life);
         
-        requestCreateBriefSubs(id,posi,rota,impulse,rel_pos);
+        requestCreateBriefSubs(id,posi,rota,dire,impulse,rel_pos);
     }
 }
 void substance::genSubs(//添加物体（持久），由服务器调用
@@ -361,6 +370,7 @@ void substance::genSubs(//添加物体（持久），由服务器调用
     long id , 
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3 & impulse,
     const btVector3 & rel_pos
 ){
@@ -376,7 +386,7 @@ void substance::genSubs(//添加物体（持久），由服务器调用
         setOwner(uuid,owner);
         sp->hp=p->hp;
         sp->status=0;
-        sp->init(p,posi,rota);
+        sp->init(p,posi,rota,dire);
         sp->type=mods::SUBS_LASTING;
         sp->body->applyImpulse(impulse,rel_pos);
     }
@@ -386,6 +396,7 @@ void substance::genSubs(//添加物体（非持久）
     const std::string & owner ,
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
@@ -397,7 +408,7 @@ void substance::genSubs(//添加物体（非持久）
         sp->owner=owner;
         sp->hp=p->hp;
         sp->status=0;
-        sp->init(p,posi,rota);
+        sp->init(p,posi,rota,dire);
         sp->type=mods::SUBS_BRIEF;
         sp->body->applyImpulse(impulse,rel_pos);
         sp->setAsBrief(p->life);
@@ -409,6 +420,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
     const std::string & owner ,
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& lin_vel ,
     const btVector3& ang_vel ,
     int hp,int status,
@@ -423,6 +435,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
         //setOwner(uuid,owner);
         sp->hp=hp;
         sp->status=status;
+        sp->setDirection(dire);
         sp->body->setLinearVelocity(lin_vel);
         sp->body->setAngularVelocity(ang_vel);
     }else{
@@ -436,7 +449,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             setOwner(uuid,owner);
             sp->hp=hp;
             sp->status=status;
-            sp->init(p,posi,rota);
+            sp->init(p,posi,rota,dire);
             sp->type=mods::SUBS_LASTING;
             sp->body->setLinearVelocity(lin_vel);
             sp->body->setAngularVelocity(ang_vel);
@@ -444,7 +457,12 @@ void substance::updateSubs(//更新物体状态，由服务器调用
         }
     }
 }
-void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,const irr::core::vector3df & r){
+void substance::subs::init(
+    mods::subsConf * conf,
+    const irr::core::vector3df & p,
+    const irr::core::vector3df & r,
+    const irr::core::vector3df & d
+){
     printf("[substance]init\n");
     if(uuid.empty() || parent==NULL)
         return;
@@ -494,6 +512,8 @@ void substance::subs::init(mods::subsConf * conf,const irr::core::vector3df & p,
     
     body->setFriction(conf->friction);
     body->setRestitution(conf->restitution);
+    
+    body->setDir(d);
     
     if(conf->noFallDown){
         setNoFallDown();

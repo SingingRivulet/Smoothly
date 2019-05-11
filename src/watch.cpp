@@ -122,6 +122,7 @@ void watch::boardcastSubsCreate(
     long id , 
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & useruuid,
@@ -145,6 +146,7 @@ void watch::boardcastSubsCreate(
     
     bs.WriteVector(position.X , position.Y , position.Z);
     bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(direction.X , direction.Y , direction.Z);
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
     
@@ -157,6 +159,7 @@ void watch::boardcastSubsCreate(
     long id , 
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & useruuid,
@@ -178,6 +181,7 @@ void watch::boardcastSubsCreate(
     
     bs.WriteVector(position.X , position.Y , position.Z);
     bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(direction.X , direction.Y , direction.Z);
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
     
@@ -205,6 +209,7 @@ void watch::boardcastSubsStatus(
     long id , 
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& lin_vel,
     const btVector3& ang_vel,
     int status,
@@ -231,6 +236,7 @@ void watch::boardcastSubsStatus(
     
     bs.WriteVector(position.X , position.Y , position.Z);
     bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(direction.X , direction.Y , direction.Z);
     bs.WriteVector(lin_vel.getX(),lin_vel.getY(),lin_vel.getZ());
     bs.WriteVector(ang_vel.getX(),ang_vel.getY(),ang_vel.getZ());
     

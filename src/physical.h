@@ -76,6 +76,7 @@ namespace smoothly{
                     virtual void setPosition(const irr::core::vector3df & );
                     virtual void setRotation(const irr::core::vector3df & );
                     virtual void setDir(const irr::core::vector3df & );
+                    virtual irr::core::vector3df getDir();
                     virtual void getStatus(irr::core::vector3df & ,irr::core::vector3df & );
                     virtual void setTransform(btTransform & )=0;
                     virtual void getTransform(btTransform & )=0;
@@ -105,20 +106,29 @@ namespace smoothly{
                     
                     virtual void setUserPointer(void *)=0;
                     
-                    virtual void loop(){}
+                    virtual void loop(float t){}
+                    
+                    virtual void getDeltaL(irr::core::vector3df &){}//获取位置变化
                     
                     btDynamicsWorld * world;
                     
                     virtual void destruct(){}
+                    
+                    bodyBase():direction(0,0,1){}
+                    
+                    irr::core::vector3df direction;
             };
             
             class character:public bodyBase{
-                public:
+                private:
                     btKinematicCharacterController * controller;
                     btPairCachingGhostObject * m_ghostObject;
                     btConvexShape* shape;
                     bool walkInSky;
                     bool jumpInSky;
+                    bool firstUpdate;
+                    irr::core::vector3df lastPosition;
+                public:
                     character(
                         btScalar w,
                         btScalar h,
@@ -142,6 +152,9 @@ namespace smoothly{
                     virtual void getTransform(btTransform & );
                     
                     virtual void setDir(const irr::core::vector3df & );
+                    virtual irr::core::vector3df getDir();
+                    
+                    virtual void getDeltaL(irr::core::vector3df &);
             };
             
             class rigidBody:public bodyBase{

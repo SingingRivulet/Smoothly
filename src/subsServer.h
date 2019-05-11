@@ -26,6 +26,7 @@ namespace smoothly{
                 std::string uuid;
                 irr::core::vector3df position;
                 irr::core::vector3df rotation;
+                irr::core::vector3df direction;
                 btVector3 lin_vel;
                 btVector3 ang_vel;
                 int x,y;
@@ -78,6 +79,7 @@ namespace smoothly{
                 const std::string & uuid,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& lin_vel ,
                 const btVector3& ang_vel ,
                 int status,
@@ -93,6 +95,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & muuid,
@@ -130,7 +133,8 @@ namespace smoothly{
                 const std::string & subsuuid,
                 long id , 
                 const irr::core::vector3df & p,
-                const irr::core::vector3df & r, 
+                const irr::core::vector3df & r ,
+                const irr::core::vector3df & direction, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & useruuid,
@@ -140,6 +144,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & direction, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & useruuid,
@@ -150,7 +155,8 @@ namespace smoothly{
                 const std::string & subsuuid,
                 long id , 
                 const irr::core::vector3df & p,
-                const irr::core::vector3df & r, 
+                const irr::core::vector3df & r ,
+                const irr::core::vector3df & direction, 
                 const btVector3& lin_vel,
                 const btVector3& ang_vel,
                 int status,
@@ -163,6 +169,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & direction, 
                 const btVector3& lin_vel,
                 const btVector3& ang_vel,
                 int status,

@@ -71,15 +71,17 @@ namespace smoothly{
                 const std::string & uuid , 
                 int status,
                 const irr::core::vector3df & p,
-                const irr::core::vector3df & r, 
+                const irr::core::vector3df & r ,
+                const irr::core::vector3df & direction , 
                 const btVector3& lin_vel ,
-                const btVector3& ang_vel 
+                const btVector3& ang_vel
             );
             
             void requestCreateSubs(//请求创建物体
                 long id,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & config = std::string("")
@@ -88,6 +90,7 @@ namespace smoothly{
                 long id,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             );
@@ -95,6 +98,7 @@ namespace smoothly{
                 long id,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             );

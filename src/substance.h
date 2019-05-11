@@ -74,6 +74,8 @@ namespace smoothly{
                 irr::core::vector3df getDirection();
                 void setDirection(const irr::core::vector3df & d);
                 
+                void playAnimation(float dtm,const irr::core::vector3df & dl);
+                
                 inline btVector3 getAngularVelocity(){
                     return body->getAngularVelocity();
                 }
@@ -82,7 +84,12 @@ namespace smoothly{
                 }
                 
                 void setRandUUID();
-                void init(mods::subsConf *,const irr::core::vector3df & p,const irr::core::vector3df & r);
+                void init(
+                    mods::subsConf *,
+                    const irr::core::vector3df & p,
+                    const irr::core::vector3df & r,
+                    const irr::core::vector3df & dir
+                );
                 void release();
                 
                 void setAsBrief(int life);
@@ -147,6 +154,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             );
@@ -154,6 +162,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             );
@@ -166,6 +175,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3 & impulse,
                 const btVector3 & rel_pos
             );
@@ -174,6 +184,7 @@ namespace smoothly{
                 const std::string & owner ,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             );
@@ -184,6 +195,7 @@ namespace smoothly{
                 const std::string & owner ,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& lin_vel ,
                 const btVector3& ang_vel ,
                 int hp,int status,
@@ -215,6 +227,7 @@ namespace smoothly{
                 int status,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& lin_vel ,
                 const btVector3& ang_vel
             )=0;
@@ -223,6 +236,7 @@ namespace smoothly{
                 long id,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             )=0;
@@ -230,6 +244,7 @@ namespace smoothly{
                 long id,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos
             )=0;

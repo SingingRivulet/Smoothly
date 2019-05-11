@@ -47,6 +47,7 @@ void subsServer::setSubs(
     const std::string & uuid,
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& lin_vel ,
     const btVector3& ang_vel ,
     int status,
@@ -69,6 +70,7 @@ void subsServer::setSubs(
             p->checkPosition();
             
             p->rotation=rota;
+            p->direction=dire;
             p->lin_vel=lin_vel;
             p->ang_vel=ang_vel;
             p->status=status;
@@ -124,6 +126,7 @@ void subsServer::createSubsForUSer(
             p->checkPosition();
             
             p->rotation =irr::core::vector3df(0,0,0);
+            p->direction =irr::core::vector3df(0,0,1);
             p->lin_vel.setValue(0,0,0);
             p->ang_vel.setValue(0,0,0);
             p->hp       =hp;
@@ -136,7 +139,7 @@ void subsServer::createSubsForUSer(
             subsCache.put(p->uuid,p);
             subsuuid=p->uuid;
             
-            boardcastSubsCreate(p->uuid,id,posi,irr::core::vector3df(0,0,0),btVector3(0,0,0),btVector3(0,0,0),muuid,"");
+            boardcastSubsCreate(p->uuid,id,posi,irr::core::vector3df(0,0,0),irr::core::vector3df(0,0,1),btVector3(0,0,0),btVector3(0,0,0),muuid,"");
             
             p->setConfig("");
             setOwner(p->uuid,muuid);
@@ -152,6 +155,7 @@ void subsServer::createSubs(//添加物体
     long id , 
     const irr::core::vector3df & posi,
     const irr::core::vector3df & rota, 
+    const irr::core::vector3df & dire, 
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & muuid,
@@ -179,6 +183,8 @@ void subsServer::createSubs(//添加物体
                 p->checkPosition();
                 
                 p->rotation =rota;
+                p->direction=dire;
+                
                 p->lin_vel.setValue(0,0,0);
                 p->ang_vel.setValue(0,0,0);
                 p->hp       =hp;
@@ -190,7 +196,7 @@ void subsServer::createSubs(//添加物体
             
                 subsCache.put(p->uuid,p);
                 
-                boardcastSubsCreate(p->uuid,id,posi,rota,impulse,rel_pos,muuid,c);
+                boardcastSubsCreate(p->uuid,id,posi,rota,dire,impulse,rel_pos,muuid,c);
                 
                 p->setConfig(c);
                 setOwner(p->uuid,muuid);
@@ -200,7 +206,7 @@ void subsServer::createSubs(//添加物体
             }else
                 sendPutSubsFail(from);
         }else{
-            boardcastSubsCreate(id,posi,rota,impulse,rel_pos,muuid,c,from);
+            boardcastSubsCreate(id,posi,rota,dire,impulse,rel_pos,muuid,c,from);
         }
     }
     
@@ -369,13 +375,15 @@ void subsServer::subs::encode(char * vbuf,int len){
         "%f %f %f "
         "%f %f %f "
         "%f %f %f "
-        "%s %s ",
+        "%s %s "
+        "%f %f %f ",
         id,hp,status,
         position.X,position.Y,position.Z ,
         rotation.X,rotation.Y,rotation.Z ,
         lin_vel.getX(),lin_vel.getY(),lin_vel.getZ() ,
         ang_vel.getX(),ang_vel.getY(),ang_vel.getZ() ,
-        userUUID.c_str() , manager.c_str() 
+        userUUID.c_str() , manager.c_str() ,
+        direction.X,direction.Y,direction.Z 
     );
 }
 void subsServer::subs::decode(const char * vbuf){
@@ -406,6 +414,10 @@ void subsServer::subs::decode(const char * vbuf){
     
     manager.clear();
     iss>>manager;
+    
+    iss>>direction.X;
+    iss>>direction.Y;
+    iss>>direction.Z;
     
     checkPosition();
 }
@@ -462,9 +474,9 @@ void subsServer::subs::remove(){
 void subsServer::subs::send(){
     RakNet::SystemAddress ext;
     if(parent->getAddrByUUID(ext,manager))//不给操控者发，防止锁死物体
-        parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,ext);
+        parent->boardcastSubsStatus(uuid,id,position,rotation,direction,lin_vel,ang_vel,status,hp,userUUID,ext);
     else
-        parent->boardcastSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,RakNet::SystemAddress());
+        parent->boardcastSubsStatus(uuid,id,position,rotation,direction,lin_vel,ang_vel,status,hp,userUUID,RakNet::SystemAddress());
 }
 void subsServer::subs::send(const RakNet::SystemAddress & addr,bool sendconf){
     std::string conf;
@@ -474,7 +486,7 @@ void subsServer::subs::send(const RakNet::SystemAddress & addr,bool sendconf){
             conf="";
     }else
         conf="[LOADING]";
-    parent->sendSubsStatus(uuid,id,position,rotation,lin_vel,ang_vel,status,hp,userUUID,conf,addr);
+    parent->sendSubsStatus(uuid,id,position,rotation,direction,lin_vel,ang_vel,status,hp,userUUID,conf,addr);
 }
 void subsServer::subs::onFree(){
     saveDo();

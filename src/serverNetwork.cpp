@@ -338,7 +338,7 @@ void serverNetwork::onMessageUpdateSubs(RakNet::Packet * data,const RakNet::Syst
 }
 void serverNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     int64_t id;
-    irr::core::vector3df position,rotation;
+    irr::core::vector3df position,rotation,direction;
     irr::core::vector3df imp,point;
     
     RakNet::RakString config;
@@ -346,12 +346,23 @@ void serverNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data,const Rak
     if(!data->Read(id))return;
     if(!data->ReadVector(position.X,position.Y,position.Z))return;
     if(!data->ReadVector(rotation.X,rotation.Y,rotation.Z))return;
+    if(!data->ReadVector(direction.X,direction.Y,direction.Z))return;
+    
     if(!data->ReadVector(imp.X,imp.Y,imp.Z))return;
     if(!data->ReadVector(point.X,point.Y,point.Z))return;
     
     data->Read(config);//config can be null
     
-    createSubs(id,position,rotation,btVector3(imp.X,imp.Y,imp.Z),btVector3(point.X,point.Y,point.Z),config.C_String(),address);
+    createSubs(
+        id,
+        position,
+        rotation,
+        direction,
+        btVector3(imp.X,imp.Y,imp.Z),
+        btVector3(point.X,point.Y,point.Z),
+        config.C_String(),
+        address
+    );
 }
 void serverNetwork::onMessageUpdateSubsRemove(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     RakNet::RakString uuid;
@@ -382,7 +393,7 @@ void serverNetwork::onMessageUpdateSubsRequestUUID(RakNet::BitStream * data,cons
 }
 void serverNetwork::onMessageUpdateSubsSetSubs(RakNet::BitStream * data,const RakNet::SystemAddress & address){//所有用户不断调用，至于采纳谁的，由服务器决定
     RakNet::RakString uuid;
-    irr::core::vector3df position,rotation;
+    irr::core::vector3df position,rotation,direction;
     irr::core::vector3df lin,ang;
     int32_t status;
     
@@ -390,10 +401,20 @@ void serverNetwork::onMessageUpdateSubsSetSubs(RakNet::BitStream * data,const Ra
     if(!data->Read(status))return;
     if(!data->ReadVector(position.X,position.Y,position.Z))return;
     if(!data->ReadVector(rotation.X,rotation.Y,rotation.Z))return;
+    if(!data->ReadVector(direction.X,direction.Y,direction.Z))return;
     if(!data->ReadVector(lin.X,lin.Y,lin.Z))return;
     if(!data->ReadVector(ang.X,ang.Y,ang.Z))return;
     
-    setSubs(uuid.C_String(),position,rotation,btVector3(lin.X,lin.Y,lin.Z),btVector3(ang.X,ang.Y,ang.Z),status,address);
+    setSubs(
+        uuid.C_String(),
+        position,
+        rotation,
+        direction,
+        btVector3(lin.X,lin.Y,lin.Z),
+        btVector3(ang.X,ang.Y,ang.Z),
+        status,
+        address
+    );
 }
 void serverNetwork::onMessageUpdateSubsTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     RakNet::RakString uuid;
@@ -494,6 +515,7 @@ void serverNetwork::sendSubsStatus(
     long id , 
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& lin_vel,
     const btVector3& ang_vel,
     int status,
@@ -520,6 +542,7 @@ void serverNetwork::sendSubsStatus(
     
     bs.WriteVector(position.X , position.Y , position.Z);
     bs.WriteVector(rotation.X , rotation.Y , rotation.Z);
+    bs.WriteVector(direction.X , direction.Y , direction.Z);
     bs.WriteVector(lin_vel.getX(),lin_vel.getY(),lin_vel.getZ());
     bs.WriteVector(ang_vel.getX(),ang_vel.getY(),ang_vel.getZ());
     

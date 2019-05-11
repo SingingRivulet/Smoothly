@@ -397,7 +397,7 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     RakNet::RakString useruuid,subsuuid,conf;
     int32_t status,hp;
     int64_t id;
-    irr::core::vector3df position,rotation,lin_vel,ang_vel;
+    irr::core::vector3df position,rotation,direction,lin_vel,ang_vel;
     
     if(!data->Read(id))return;
     if(!data->Read(subsuuid))return;
@@ -405,8 +405,11 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     
     if(!data->ReadVector(position.X , position.Y , position.Z))return;
     if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(direction.X , direction.Y , direction.Z))return;
     if(!data->ReadVector(lin_vel.X  , lin_vel.Y  , lin_vel.Z))return;
     if(!data->ReadVector(ang_vel.X  , ang_vel.Y  , ang_vel.Z))return;
+    
+    //printf("[clientNetwork]onMessageUpdateSubsSetStatus direction=(%f,%f,%f)\n",direction.X,direction.Y,direction.Z);
     
     if(!data->Read(status))return;
     if(!data->Read(hp))return;
@@ -426,6 +429,7 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
         useruuid.C_String(),
         position,
         rotation,
+        direction,
         btVector3(lin_vel.X  , lin_vel.Y  , lin_vel.Z),
         btVector3(ang_vel.X  , ang_vel.Y  , ang_vel.Z),
         hp,status,
@@ -435,7 +439,7 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
 void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
     RakNet::RakString useruuid,subsuuid;
     int64_t id;
-    irr::core::vector3df position,rotation,impulse,rel_pos;
+    irr::core::vector3df position,rotation,direction,impulse,rel_pos;
     
     if(!data->Read(id))return;
     if(!data->Read(subsuuid))return;
@@ -443,8 +447,11 @@ void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
     
     if(!data->ReadVector(position.X , position.Y , position.Z))return;
     if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(direction.X , direction.Y , direction.Z))return;
     if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
     if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
+    
+    //printf("[clientNetwork]onMessageUpdateSubsCreate direction=(%f,%f,%f)\n",direction.X,direction.Y,direction.Z);
     
     genSubs(
         subsuuid.C_String(),
@@ -452,6 +459,7 @@ void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
         id,
         position,
         rotation,
+        direction,
         btVector3(impulse.X  , impulse.Y  , impulse.Z),
         btVector3(rel_pos.X  , rel_pos.Y  , rel_pos.Z)
     );
@@ -459,13 +467,14 @@ void clientNetwork::onMessageUpdateSubsCreate(RakNet::BitStream * data){
 void clientNetwork::onMessageUpdateSubsCreateBrief(RakNet::BitStream * data){
     RakNet::RakString useruuid;
     int64_t id;
-    irr::core::vector3df position,rotation,impulse,rel_pos;
+    irr::core::vector3df position,rotation,direction,impulse,rel_pos;
     
     if(!data->Read(id))return;
     if(!data->Read(useruuid))return;
     
     if(!data->ReadVector(position.X , position.Y , position.Z))return;
     if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
+    if(!data->ReadVector(direction.X , direction.Y , direction.Z))return;
     if(!data->ReadVector(impulse.X  , impulse.Y  , impulse.Z))return;
     if(!data->ReadVector(rel_pos.X  , rel_pos.Y  , rel_pos.Z))return;
     
@@ -474,6 +483,7 @@ void clientNetwork::onMessageUpdateSubsCreateBrief(RakNet::BitStream * data){
         useruuid.C_String(),
         position,
         rotation,
+        direction,
         btVector3(impulse.X  , impulse.Y  , impulse.Z),
         btVector3(rel_pos.X  , rel_pos.Y  , rel_pos.Z)
     );
@@ -536,10 +546,12 @@ void clientNetwork::uploadBodyStatus(//上传持久型物体状态
     int status,
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& lin ,
     const btVector3& ang
 ){
     //printf("[clientNetwork]uploadBodyStatus (%f,%f,%f)\n",position.X,position.Y,position.Z);
+    //printf("[clientNetwork]direction (%f,%f,%f)\n",direction.X,direction.Y,direction.Z);
     RakNet::BitStream bs;
     bs.Write((RakNet::MessageID)MESSAGE_GAME);
     bs.Write((RakNet::MessageID)M_UPDATE_SUBS);
@@ -552,6 +564,7 @@ void clientNetwork::uploadBodyStatus(//上传持久型物体状态
     bs.Write((int32_t)status);
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
+    bs.WriteVector(direction.X,direction.Y,direction.Z);
     bs.WriteVector(lin.getX(),lin.getY(),lin.getZ());
     bs.WriteVector(ang.getX(),ang.getY(),ang.getZ());
     
@@ -562,6 +575,7 @@ void clientNetwork::requestCreateSubs(//请求创建物体
     long id,
     const irr::core::vector3df & position,
     const irr::core::vector3df & rotation, 
+    const irr::core::vector3df & direction, 
     const btVector3& impulse,
     const btVector3& rel_pos,
     const std::string & config
@@ -577,6 +591,7 @@ void clientNetwork::requestCreateSubs(//请求创建物体
     bs.Write((int64_t)id);
     bs.WriteVector(position.X,position.Y,position.Z);
     bs.WriteVector(rotation.X,rotation.Y,rotation.Z);
+    bs.WriteVector(direction.X,direction.Y,direction.Z);
     bs.WriteVector(impulse.getX(),impulse.getY(),impulse.getZ());
     bs.WriteVector(rel_pos.getX(),rel_pos.getY(),rel_pos.getZ());
     
@@ -590,20 +605,22 @@ void clientNetwork::requestCreateBriefSubs(//请求创建物体（非持久）
     long id,
     const irr::core::vector3df & p,
     const irr::core::vector3df & r, 
+    const irr::core::vector3df & d, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
-    requestCreateSubs(id,p,r,impulse,rel_pos);
+    requestCreateSubs(id,p,r,d,impulse,rel_pos);
 }
 
 void clientNetwork::requestCreateLastingSubs(//请求创建物体（持久）
     long id,
     const irr::core::vector3df & p,
     const irr::core::vector3df & r, 
+    const irr::core::vector3df & d, 
     const btVector3& impulse,
     const btVector3& rel_pos
 ){
-    requestCreateSubs(id,p,r,impulse,rel_pos);
+    requestCreateSubs(id,p,r,d,impulse,rel_pos);
 }
 
 void clientNetwork::requestDownloadSubstanceChunk(int x,int y){

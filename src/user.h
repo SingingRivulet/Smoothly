@@ -68,6 +68,7 @@ namespace smoothly{
                 long id , 
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& impulse,
                 const btVector3& rel_pos,
                 const std::string & config,
@@ -75,13 +76,14 @@ namespace smoothly{
             ){
                 std::string muuid;
                 if(getUUIDByAddr(muuid,from)){
-                    subsServer::createSubs(id,p,r,impulse,rel_pos,muuid,config,from);
+                    subsServer::createSubs(id,p,r,d,impulse,rel_pos,muuid,config,from);
                 }
             }
             inline void setSubs(
                 const std::string & uuid,
                 const irr::core::vector3df & p,
                 const irr::core::vector3df & r, 
+                const irr::core::vector3df & d, 
                 const btVector3& lin_vel ,
                 const btVector3& ang_vel ,
                 int status,
@@ -89,7 +91,7 @@ namespace smoothly{
             ){
                 std::string muuid;
                 if(getUUIDByAddr(muuid,from)){
-                    subsServer::setSubs(uuid,p,r,lin_vel,ang_vel,status,muuid);
+                    subsServer::setSubs(uuid,p,r,d,lin_vel,ang_vel,status,muuid);
                 }
             }
             inline void giveUpControl(const std::string & uuid,const RakNet::SystemAddress & from){

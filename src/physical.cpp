@@ -374,7 +374,12 @@ void physical::bodyBase::getStatus(irr::core::vector3df & irrPos,irr::core::vect
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
 }
+irr::core::vector3df physical::bodyBase::getDir(){
+    return direction;
+}
 void physical::bodyBase::setDir(const irr::core::vector3df & d){
+    //printf("[physical::bodyBase]setDir direction=(%f,%f,%f)\n",d.X,d.Y,d.Z);
+    direction=d;
     irr::core::vector3df rotate=d.getHorizontalAngle();
     setRotation(rotate);
 }
@@ -400,15 +405,40 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
     
     controller->setGravity(btVector3(0, -10, 0));
+    
+    firstUpdate=true;
 }
 void physical::character::destruct(){
     delete controller;
     delete m_ghostObject;
     delete shape;
 }
+void physical::character::getDeltaL(irr::core::vector3df & out){
+    btTransform transform;
+    getTransform(transform);
+    
+    btVector3 btPos;
+    btVector3 btRot;
+    
+    btPos = transform.getOrigin();
+    irr::core::vector3df irrPos(btPos.x(), btPos.y(), btPos.z());
+    
+    if(firstUpdate){
+        out.set(0,0,0);
+    }else{
+        out=irrPos-lastPosition;
+    }
+    
+    lastPosition=irrPos;
+    firstUpdate=false;
+}
+irr::core::vector3df physical::character::getDir(){
+    return direction;
+}
 void physical::character::setDir(const irr::core::vector3df & d){
     //return;
     //printf("[character]setDir (%f,%f,%f)\n",d.X,d.Y,d.Z);
+    direction=d;//real direction
     irr::core::vector3df rotate=d.getHorizontalAngle();
     float yaw=rotate.Y;
     btQuaternion quaternion(btVector3(0,1,0),yaw);
