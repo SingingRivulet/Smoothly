@@ -176,6 +176,9 @@ void serverNetwork::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddr
                 case M_UPDATE_USER:
                     onMessageUpdateUser(data,address);
                 break;
+                case M_UPDATE_ATTACHING:
+                    onMessageUpdateAttaching(data,address);
+                break;
                 case M_UPDATE_SUBS:
                     onMessageUpdateSubs(data,address);
                 break;
@@ -257,6 +260,16 @@ void serverNetwork::onMessageAdminCreateUser(RakNet::BitStream * data,const RakN
     bs.Write(u);
     
     sendMessage(&bs,address);
+}
+
+void serverNetwork::onMessageUpdateAttaching(RakNet::Packet * data,const RakNet::SystemAddress & address){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case C_UPLOAD_ATTACHING:
+            onMessageUpdateAttachingUpload(&bs,address);
+        break;
+    }
 }
 
 void serverNetwork::onMessageUpdateBuilding(RakNet::Packet * data,const RakNet::SystemAddress & address){
@@ -431,6 +444,23 @@ void serverNetwork::onMessageUpdateSubsGiveUp(RakNet::BitStream * data,const Rak
     
     giveUpControl(uuid.C_String(),address);
 }
+void serverNetwork::onMessageUpdateAttachingUpload(RakNet::BitStream * data,const RakNet::SystemAddress & address){
+    RakNet::RakString uuid;
+    std::string user;
+    if(getUUIDByAddr(user,address)){
+        
+        if(!data->Read(uuid))return;
+    
+        bodyAttaching att;
+        
+        if(att.loadBitStream(data)){
+            
+            setAttaching(user,uuid.C_String(),att);
+            
+        }
+        
+    }
+}
 
 void serverNetwork::onMessageUpdateUserLogin(RakNet::BitStream * data,const RakNet::SystemAddress & address){
     RakNet::RakString uuid;
@@ -509,6 +539,20 @@ void serverNetwork::onMessageUpdateTerrainRemove(RakNet::BitStream * data,const 
     if(!data->Read(mapid))
         return;
     removeTerrain(x,y,itemid,mapid);
+}
+void serverNetwork::sendAttaching(const std::string & subs,const bodyAttaching & att,const RakNet::SystemAddress & to){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_ATTACHING);
+    
+    bs.Write((RakNet::MessageID)C_SET_ATTACHING);
+    
+    RakNet::RakString u=subs.c_str();
+    
+    bs.Write(u);
+    att.toBitStream(&bs);
+    
+    sendMessage(&bs,to);
 }
 void serverNetwork::sendSubsStatus(
     const std::string & subsuuid,

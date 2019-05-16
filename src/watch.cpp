@@ -313,6 +313,26 @@ void watch::boardcastTeleport(
     
     boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
 }
+
+void watch::boardcastAttaching(
+    const std::string & subs,
+    const bodyAttaching & att,
+    const irr::core::vector3df & position
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_ATTACHING);
+    
+    bs.Write((RakNet::MessageID)C_SET_ATTACHING);
+    
+    RakNet::RakString u=subs.c_str();
+    
+    bs.Write(u);
+    att.toBitStream(&bs);
+    
+    boardcastByPoint(HBB::vec3(position.X,0,position.Z),&bs);
+}
+
 watch::listener * watch::createListener(){
     auto pool=(lpool*)listenerPool;
     auto p=pool->get();

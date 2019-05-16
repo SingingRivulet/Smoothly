@@ -602,7 +602,6 @@ void substance::subs::release(){
     }
     
     body->destruct();
-    delete body;
     
     body=NULL;
     node=NULL;

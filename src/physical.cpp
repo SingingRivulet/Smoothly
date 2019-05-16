@@ -412,6 +412,7 @@ void physical::character::destruct(){
     delete controller;
     delete m_ghostObject;
     delete shape;
+    delete this;
 }
 void physical::character::getDeltaL(irr::core::vector3df & out){
     btTransform transform;
@@ -494,6 +495,7 @@ physical::rigidBody::rigidBody(
 void physical::rigidBody::destruct(){
     delete body;
     delete bodyState;
+    delete this;
 }
 
 void physical::rigidBody::addIntoWorld(){

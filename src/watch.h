@@ -87,6 +87,11 @@ namespace smoothly{
                 const std::string & subsuuid,
                 const irr::core::vector3df & p
             );
+            virtual void boardcastAttaching(
+                const std::string & subs,
+                const bodyAttaching & att,
+                const irr::core::vector3df & p
+            );
     };
 }
 #endif

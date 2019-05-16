@@ -187,6 +187,8 @@ namespace smoothly{
             )=0;
             virtual void sendChunkRun(int x,int y,const RakNet::SystemAddress & to)=0;
             virtual bool userOnline(const std::string & uuid)=0;
+            
+            virtual void delAttaching(const std::string & subs)=0;
         
         public:
             subs * seekSubs(const std::string & uuid);

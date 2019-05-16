@@ -36,8 +36,11 @@ dblist.o:dblist.h dblist.cpp utils.h
 subsServer.o:subsServer.h subsServer.cpp utils.h cache.h dblist.o
 	$(CC) -c subsServer.cpp
 
-user.o:user.h user.cpp subsServer.o
+user.o:user.h user.cpp attaching.o
 	$(CC) -c user.cpp
+
+attaching.o:attaching.h attaching.cpp subsServer.o
+	$(CC) -c attaching.cpp
 
 RealisticWater.o:RealisticWater.h RealisticWater.cpp
 	$(CC) -c RealisticWater.cpp
@@ -93,7 +96,7 @@ game.o:game.h game.cpp control.o
 building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp
 
-../server:server.cpp serverNetwork.o
+../server:server.cpp serverNetwork.o ../serverCallback.so
 	$(CC) server.cpp \
 	serverNetwork.o \
 	watch.o \
@@ -104,6 +107,7 @@ building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	user.o \
 	dblist.o \
 	subsServer.o \
+	../serverCallback.so \
 	-lleveldb -o ../server $(LIBS)
 
 serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
@@ -112,7 +116,7 @@ serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
 watch.o:serverMod.o watch.cpp watch.h
 	$(CC) -c watch.cpp
 
-serverMod.o:removeTable.o graphServer.o user.o serverMod.cpp serverMod.h
+serverMod.o:removeTable.o graphServer.o attaching.o serverMod.cpp serverMod.h
 	$(CC) -c serverMod.cpp
 
 removeTable.o:removeTable.cpp removeTable.h
@@ -120,6 +124,9 @@ removeTable.o:removeTable.cpp removeTable.h
 
 graphServer.o:graphServer.cpp graphServer.h
 	$(CC) -c graphServer.cpp
+
+../serverCallback.so:serverCallback.cpp
+	$(CC) -c serverCallback.cpp -shared -fPIC -o ../serverCallback.so
 
 clean:
 	rm -f *.o

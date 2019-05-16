@@ -228,6 +228,8 @@ namespace smoothly{
             };
             std::map<long,subsConf *> subsConfs;
             //////////////////////////////////////////////////////////////////////////////
+            std::map<int,irr::scene::IAnimatedMesh*> animations;
+            //////////////////////////////////////////////////////////////////////////////
             void init();
             void loadMesh();
             void destroy();

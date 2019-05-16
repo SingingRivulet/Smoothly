@@ -42,7 +42,7 @@ namespace smoothly{
             virtual void sendUserSubsUUID(const std::string & uuid,const RakNet::SystemAddress & address);
             virtual void sendUserSubsUUIDs(const std::list<std::string> & uuid,const RakNet::SystemAddress & address);
             virtual void sendChunkRun(int x,int y,const RakNet::SystemAddress & to);
-            
+            virtual void sendAttaching(const std::string & subs,const bodyAttaching & att,const RakNet::SystemAddress & to);
             inline void sendMessage(RakNet::BitStream * data,const RakNet::SystemAddress & address){
                 if(connection)
                     connection->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, address, false );
@@ -69,6 +69,7 @@ namespace smoothly{
             void onMessageUpdateTerrain(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateUser(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageUpdateSubs(RakNet::Packet * data,const RakNet::SystemAddress & address);
+            void onMessageUpdateAttaching(RakNet::Packet * data,const RakNet::SystemAddress & address);
             void onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAddress & address);
             
             //user
@@ -97,6 +98,8 @@ namespace smoothly{
             void onMessageUpdateSubsSetSubs(RakNet::BitStream * data,const RakNet::SystemAddress & address);//所有用户不断调用，至于采纳谁的，由服务器决定
             void onMessageUpdateSubsTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageUpdateSubsGiveUp(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            
+            void onMessageUpdateAttachingUpload(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
             //admin
             void onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address);

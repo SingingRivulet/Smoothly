@@ -1,11 +1,11 @@
 #ifndef SMOOTHLY_USER
 #define SMOOTHLY_USER
-#include "subsServer.h"
+#include "attaching.h"
 #include "nameLocker.h"
 #include <map>
 #include <atomic>
 namespace smoothly{
-    class users:public subsServer{
+    class users:public attaching{
         protected:
             leveldb::DB * db;
             pthread_rwlock_t rwlock;

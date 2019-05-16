@@ -9,7 +9,11 @@
 #include <raknet/RakSleep.h>
 #include <leveldb/db.h>
 #include <list>
+#include <map>
+#include <set>
 #include <stdio.h>
+#include <string>
+#include <sstream>
 #include <stdlib.h>
 #include <math.h>
 #include <lua.hpp>
@@ -25,7 +29,13 @@ namespace smoothly{
         M_UPDATE_OBJECT   = 'o',
         M_UPDATE_SUBS     = 's',
         M_UPDATE_USER     = 'u',
+        M_UPDATE_ATTACHING= 'c',
         M_ADMIN           = 'a'
+    };
+    enum AttachingMethod{
+        C_SET_ATTACHING    ='s',
+        C_GET_ATTACHING    ='g',
+        C_UPLOAD_ATTACHING ='u'
     };
     enum SubsMethod{
         S_UL_TELEPORT   ='p',
@@ -247,6 +257,102 @@ namespace smoothly{
                 }
                 return i;
             }
+    };
+    
+    struct bodyAttaching{
+        //角色状态机
+        //发送接收，比较更新差异
+        private:
+        std::set<ipair> attachings;
+        
+        public:
+        
+        inline void add(int attOn,int objId){
+            attachings.insert(ipair(attOn,objId));
+        }
+        
+        inline void clear(){
+            attachings.clear();
+        }
+        
+        inline void loadString(const std::string & str){
+            int buf1,buf2;
+            lineReader lr(str.c_str());
+            char buf[64];
+            buf[0]='\0';
+            while(!lr.eof){
+                if(lr.read(buf,sizeof(buf))>0){
+                    
+                    if(strlen(buf)==0)
+                        continue;
+                    
+                    if(sscanf(buf , "%d %d" , &buf1 , &buf2)!=2)
+                        continue;
+                    
+                    add(buf1,buf2);
+                    
+                    buf[0]='\0';//往buf第一字节写入0，防止下一次读到相同值
+                }
+            }
+        }
+        
+        inline void toString(std::string & str)const{
+            str.clear();
+            char buf[64];
+            for(auto it:attachings){
+                snprintf(buf,sizeof(buf),"%d %d\n" , it.x , it.y);
+                str+=buf;
+            }
+        }
+        
+        inline bool loadBitStream(RakNet::BitStream * data){
+            int32_t num,buf1,buf2;
+            if(!data->Read(num))return false;
+            for(auto i=0;i<num;++i){
+                if(!data->Read(buf1))return true;
+                if(!data->Read(buf2))return true;
+                add(buf1,buf2);
+            }
+            return true;
+        }
+        
+        inline void toBitStream(RakNet::BitStream * data)const{
+            data->Write((int32_t)attachings.size());
+            for(auto it:attachings){
+                data->Write((int32_t)it.x);
+                data->Write((int32_t)it.y);
+            }
+        }
+        
+        inline void diff(const bodyAttaching & b,std::list<ipair> & added,std::list<ipair> & removed){
+            //从自身变化至目标，需要的变化
+            std::set_difference(
+                //removed=self-b
+                //自身有，目标没有，需要删除
+                attachings.begin() , attachings.end(),
+                b.attachings.begin() , b.attachings.end(),
+                back_inserter(removed)
+            );
+            std::set_difference(
+                //added=b-self
+                //目标有，自身没有，需要添加
+                b.attachings.begin() , b.attachings.end(),
+                attachings.begin() , attachings.end(),
+                back_inserter(added)
+            );
+        }
+        
+        inline bodyAttaching(const bodyAttaching & b):attachings(b.attachings){}
+        inline bodyAttaching():attachings(){}
+        inline ~bodyAttaching(){}
+        
+        inline bool operator=(const bodyAttaching & b){
+            attachings=b.attachings;
+        }
+        
+        inline const std::set<ipair> & getList()const{
+            return attachings;
+        }
     };
 }
 #endif

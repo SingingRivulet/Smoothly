@@ -466,6 +466,7 @@ void subsServer::subs::remove(){
     parent->boardcastSubsRemove(uuid,position);
     removeFromChunk(x,y);
     parent->removeFromOwner(uuid,userUUID);
+    parent->delAttaching(uuid);
     char kbuf[256];
     snprintf(kbuf,256,"subsNode %s",uuid.c_str());
     parent->db->Delete(leveldb::WriteOptions(),kbuf);
