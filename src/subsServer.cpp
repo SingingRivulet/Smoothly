@@ -488,6 +488,7 @@ void subsServer::subs::send(const RakNet::SystemAddress & addr,bool sendconf){
     }else
         conf="[LOADING]";
     parent->sendSubsStatus(uuid,id,position,rotation,direction,lin_vel,ang_vel,status,hp,userUUID,conf,addr);
+    parent->getAttaching(uuid,addr);
 }
 void subsServer::subs::onFree(){
     saveDo();

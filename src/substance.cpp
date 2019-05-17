@@ -3,6 +3,20 @@ namespace smoothly{
 
 typedef mempool<substance::subs> subsPool;
 
+void substance::subs::setAttaching(const bodyAttaching & att){
+    std::list<ipair> added;
+    std::list<ipair> removed;
+    attaching.diff(att,added,removed);
+    attaching=att;
+}
+
+void substance::setAttaching(const std::string & subsuuid,const bodyAttaching & att){
+    auto p=seekSubs(subsuuid);
+    if(p){
+        p->setAttaching(att);
+    }
+}
+
 void substance::subs::setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r){
     btTransform transform;
     
@@ -463,7 +477,7 @@ void substance::subs::init(
     const irr::core::vector3df & r,
     const irr::core::vector3df & d
 ){
-    printf("[substance]init\n");
+    //printf("[substance]init\n");
     if(uuid.empty() || parent==NULL)
         return;
     
@@ -477,6 +491,7 @@ void substance::subs::init(
     node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     node->updateAbsolutePosition();
     
+    attaching.clear();
     
     if(conf->texture){
         node->setMaterialTexture( 0 , conf->texture);

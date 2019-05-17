@@ -46,6 +46,8 @@ namespace smoothly{
                 
                 irr::core::vector2df walkDirection;
                 
+                bodyAttaching attaching;
+                
                 void moveUpdate(int forward,int leftOrRight);
                 
                 void setPowerAsDefault();
@@ -62,6 +64,7 @@ namespace smoothly{
                 void teleport(const irr::core::vector3df & p);
                 void move(const irr::core::vector3df & d);
                 void walk(const irr::core::vector3df & d);
+                void setAttaching(const bodyAttaching & att);
                 
                 void fly(float lift,float push);
                 void fly(float lift,const irr::core::vector3df & push);
@@ -202,6 +205,7 @@ namespace smoothly{
                 const std::string & conf
             );
             
+            void setAttaching(const std::string & subsuuid,const bodyAttaching & att);
             
             inline void removeLocalSubs(const std::string & uuid){//删除本地对象（仅添加至删除表）
                 subsRMT.insert(uuid);

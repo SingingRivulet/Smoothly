@@ -107,7 +107,8 @@ building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	user.o \
 	dblist.o \
 	subsServer.o \
-	../serverCallback.so \
+	attaching.o \
+	./serverCallback.so \
 	-lleveldb -o ../server $(LIBS)
 
 serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
@@ -126,7 +127,8 @@ graphServer.o:graphServer.cpp graphServer.h
 	$(CC) -c graphServer.cpp
 
 ../serverCallback.so:serverCallback.cpp
-	$(CC) -c serverCallback.cpp -shared -fPIC -o ../serverCallback.so
+	$(CC) -c serverCallback.cpp -shared -fPIC -o serverCallback.so
+	cp serverCallback.so ../serverCallback.so
 
 clean:
 	rm -f *.o

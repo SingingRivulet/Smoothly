@@ -54,6 +54,9 @@ void clientNetwork::onRecvMessage(RakNet::Packet * data){
                 case M_UPDATE_TERRAIN:
                     onMessageUpdateTerrain(data);
                 break;
+                case M_UPDATE_ATTACHING:
+                    onMessageUpdateAttaching(data);
+                break;
                 case M_UPDATE_SUBS:
                     onMessageUpdateSubs(data);
                 break;
@@ -64,6 +67,16 @@ void clientNetwork::onRecvMessage(RakNet::Packet * data){
         break;
     }
 }
+void clientNetwork::onMessageUpdateAttaching(RakNet::Packet * data){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case C_SET_ATTACHING:
+            onMessageUpdateAttachingSet(&bs);
+        break;
+    }
+}
+
 void clientNetwork::onMessageUpdateBuilding(RakNet::Packet * data){
     RakNet::BitStream bs(data->data,data->length,false);
     bs.IgnoreBytes(3);
@@ -539,6 +552,20 @@ void clientNetwork::onMessageUpdateSubsRunChunk(RakNet::BitStream * data){
     if(!data->Read(y))return;
     
     unlockChunk(x,y);
+}
+
+void clientNetwork::onMessageUpdateAttachingSet(RakNet::BitStream * data){
+    RakNet::RakString subsuuid;
+    if(!data->Read(subsuuid))return;
+    
+    bodyAttaching att;
+    
+    if(att.loadBitStream(data)){
+        //attaching
+        
+        setAttaching(subsuuid.C_String() , att);
+        
+    }
 }
 
 void clientNetwork::uploadBodyStatus(//上传持久型物体状态

@@ -18,6 +18,10 @@ namespace smoothly{
             
             virtual void doAttaching(const bodyAttaching & )=0;
             
+            virtual const irr:core::matrix4 & getAbsoluteTransformation()=0;
+            
+            virtual void updateAbsolutePosition()=0;
+            
             irr::scene::ISceneManager * scene;
             mods * m;
     };

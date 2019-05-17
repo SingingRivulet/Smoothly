@@ -31,7 +31,7 @@ void attaching::getAttaching(const std::string & subs,const RakNet::SystemAddres
 }
 
 /*
-此函数因存在大量业务逻辑，被单独定义为so文件
+此函数因存在大量业务逻辑，被单独定义
 bool attaching::setAttachingCallback(
     const std::string & user , 
     subs * p, 

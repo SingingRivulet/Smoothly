@@ -11,7 +11,9 @@ namespace smoothly{
                 const std::string & subs , 
                 bodyAttaching & att//不声明const是因为可以被回调函数修改
             );
-            void getAttaching(const std::string & subs,const RakNet::SystemAddress & to);
+            
+            virtual void getAttaching(const std::string & subs,const RakNet::SystemAddress & to);
+            
             virtual void delAttaching(const std::string & subs);
             
             void getAttachingFromDB(const std::string & subs,bodyAttaching & att);

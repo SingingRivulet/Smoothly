@@ -105,6 +105,9 @@ void serverNetwork::start(const char * pre,short port,int maxcl){
     snprintf(path,sizeof(path),"%s/user",pre);
     users::usersInit(path);
     
+    snprintf(path,sizeof(path),"%s/attaching",pre);
+    attachingInit(path);
+    
     connection=RakNet::RakPeerInterface::GetInstance();
     if(connection==NULL){
         printf("RakNet::RakPeerInterface::GetInstance() Error!\n");
@@ -124,6 +127,8 @@ void serverNetwork::release(){
     removeTable::destroy();
     graphServer::destroy();
     scriptDestroy();
+    attachingDestroy();
+    
     lstPoolFree();
 }
 void serverNetwork::recv(){
