@@ -2,6 +2,7 @@
 #define SMOOTHLY_SUBSTANCE
 #include "building.h"
 #include "mempool.h"
+#include "subsani.h"
 #include <mutex>
 #include <queue>
 namespace smoothly{
@@ -28,7 +29,8 @@ namespace smoothly{
                 
                 bodyBase * body;
                 
-                irr::scene::ISceneNode * node;
+                //irr::scene::ISceneNode * node;
+                subsani * node;
                 
                 mods::subsConf * subsConf;
                 

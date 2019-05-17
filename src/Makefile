@@ -26,6 +26,7 @@ all:../client ../server ../admin
 	mods.o \
 	physical.o \
 	substance.o \
+	subsani.o \
 	subsapi.o \
 	-o ../client \
 	$(LIBS)
@@ -75,11 +76,14 @@ hbb.o:hbb.h hbb.cpp
 hbb_test.out:hbb_test.cpp hbb.o
 	$(CC) hbb_test.cpp hbb.o -o hbb_test.out $(LIBS)
 
-substance.o:substance.cpp substance.h building.o
+substance.o:substance.cpp substance.h building.o subsani.o
 	$(CC) -c substance.cpp
 
 clientNetwork.o:clientNetwork.cpp clientNetwork.h substance.o
 	$(CC) -c clientNetwork.cpp
+
+subsani.o:subsani.cpp subsani.h physical.o
+	$(CC) -c subsani.cpp
 
 subsapi.o:subsapi.cpp subsapi.h substance.o
 	$(CC) -c subsapi.cpp

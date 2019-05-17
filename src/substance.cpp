@@ -8,6 +8,8 @@ void substance::subs::setAttaching(const bodyAttaching & att){
     std::list<ipair> removed;
     attaching.diff(att,added,removed);
     attaching=att;
+    
+    node->doAttaching(added,removed);
 }
 
 void substance::setAttaching(const std::string & subsuuid,const bodyAttaching & att){
@@ -485,20 +487,22 @@ void substance::subs::init(
     id=conf->id;
     setPowerAsDefault();
     
-    node=parent->scene->addMeshSceneNode(conf->mesh);
-    node->setPosition(p);
-    node->setRotation(r);
-    node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    node->updateAbsolutePosition();
+    node=subsaniFactory(parent->scene,conf,p,r,d);
+    
+    //node=parent->scene->addMeshSceneNode(conf->mesh);
+    //node->setPosition(p);
+    //node->setRotation(r);
+    //node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    //node->updateAbsolutePosition();
     
     attaching.clear();
     
-    if(conf->texture){
-        node->setMaterialTexture( 0 , conf->texture);
-        if(conf->useAlpha){
-            node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-        }
-    }
+    //if(conf->texture){
+    //    node->setMaterialTexture( 0 , conf->texture);
+    //    if(conf->useAlpha){
+    //        node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    //    }
+    //}
     
     
     info.type=BODY_SUBSTANCE;
@@ -600,7 +604,7 @@ void substance::subs::release(){
     if(uuid.empty() || parent==NULL)
         return;
     
-    node->remove();
+    node->destruct();
     
     parent->subses.erase(uuid);
     

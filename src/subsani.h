@@ -1,13 +1,19 @@
 #ifndef SMOOTHLY_SUBTANCE_ANIMATION
 #define SMOOTHLY_SUBTANCE_ANIMATION
 #include "utils.h"
+#include "physical.h"
+#include "mods.h"
 namespace smoothly{
+    
     class subsani{
         public:
             
             virtual void setLOD(float len)=0;
             
             virtual void playAnimation(float dtm,const irr::core::vector3df & dl)=0;
+            
+            virtual const irr::core::vector3df & getPosition()=0;
+            virtual const irr::core::vector3df & getRotation()=0;
             
             virtual void setPosition(const irr::core::vector3df &)=0;
             virtual void setRotation(const irr::core::vector3df &)=0;
@@ -16,9 +22,9 @@ namespace smoothly{
             
             virtual void destruct()=0;
             
-            virtual void doAttaching(const bodyAttaching & )=0;
+            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed)=0;
             
-            virtual const irr:core::matrix4 & getAbsoluteTransformation()=0;
+            virtual const irr::core::matrix4 & getAbsoluteTransformation()=0;
             
             virtual void updateAbsolutePosition()=0;
             
@@ -75,5 +81,14 @@ namespace smoothly{
             
             static void doAni(irr::scene::IAnimatedMesh*,int speed,int start,int end ,bool loop);
     };
+    
+    subsani * subsaniFactory(
+        irr::scene::ISceneManager * ,
+        mods::subsConf *,
+        const irr::core::vector3df & p,
+        const irr::core::vector3df & r,
+        const irr::core::vector3df & d
+    );
+    
 }
 #endif
