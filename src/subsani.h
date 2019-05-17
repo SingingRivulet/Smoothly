@@ -45,6 +45,12 @@ namespace smoothly{
             
             virtual void destruct();
             
+            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed);
+            
+            virtual const irr::core::matrix4 & getAbsoluteTransformation();
+            
+            virtual void updateAbsolutePosition();
+            
             irr::scene::ISceneNode * node;
     };
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,27 +65,59 @@ namespace smoothly{
             virtual void setDirection(const irr::core::vector3df &);
             virtual void setStatus(int id);
             
+            virtual void playAnimation(float dtm,const irr::core::vector3df & dl);
+            
             virtual void destruct();
             
-            subsaniChar(irr::scene::ISceneManager * scene);
+            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed);
+            
+            virtual const irr::core::matrix4 & getAbsoluteTransformation();
+            
+            virtual void updateAbsolutePosition();
+            
+            subsaniChar(
+                irr::scene::ISceneManager * scene,
+                mods::subsConf * sconf,
+                mods * gconf,
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r,
+                const irr::core::vector3df & d
+            );
             
         private:
-            irr::scene::IAnimatedMesh * body;//物体贴body上
-            std::set<irr::u32,irr::scene::IAnimatedMesh*> items;//物体
-            std::set<irr::u32,irr::scene::IAnimatedMesh*> parts;//伴随body，如衣服等
+            irr::scene::IAnimatedMeshSceneNode * body;//物体贴body上
+            std::map<irr::u32,irr::scene::IAnimatedMeshSceneNode*> items;//物体
+            std::map<irr::u32,irr::scene::IAnimatedMeshSceneNode*> parts;//伴随body，如衣服等
             
             void doAniItem(irr::u32,int speed,int start,int end ,bool loop);
             void doAniPart(irr::u32,int speed,int start,int end ,bool loop);
             void doAni(int speed,int start,int end ,bool loop);
+            void doAni(int id);
             void setItem(irr::u32,irr::scene::IAnimatedMesh*);
             void setPart(irr::u32,irr::scene::IAnimatedMesh*);
             void setBody(irr::scene::IAnimatedMesh*);
             void removeItem(irr::u32);
             void removePart(irr::u32);
             
+            void mount(int p,int mesh);
+            void umount(int p);
+            /*
+             * 骨骼挂载：
+             * 1. id映射到真实骨骼id
+             * 2. 获取mesh
+             * 3. 挂载
+            */
             void removeAll();
             
-            static void doAni(irr::scene::IAnimatedMesh*,int speed,int start,int end ,bool loop);
+            void updateAnimation();
+            
+            bool walking;
+            int status;
+            float speed;
+            
+            static void doAni(irr::scene::IAnimatedMeshSceneNode*,int speed,int start,int end ,bool loop);
+            
+            mods::subsConf * conf;
     };
     
     subsani * subsaniFactory(

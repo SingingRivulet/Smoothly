@@ -110,12 +110,24 @@ namespace smoothly{
                 SUBS_LASTING,
                 SUBS_BRIEF
             };
+            struct boneAnimate{
+                int id;
+                int speed;
+                int start;
+                int end;
+                bool loop;
+            };
+            struct boneAnimateGroup{
+                boneAnimate body;
+                std::list<boneAnimate> item;
+                std::list<boneAnimate> pair;
+            };
             class subsConf{
                 public:
                     long id;
                     int life;
                     subsType type;
-                    irr::scene::IMesh  *  mesh;
+                    irr::scene::IAnimatedMesh  *  mesh;
                     btCollisionShape   *  bodyShape;
                     irr::video::ITexture* texture;
                     shapeGroup            shape;
@@ -128,6 +140,10 @@ namespace smoothly{
                     bool jumpInSky;
                     
                     std::string         bodyType;//rigid,character,vehicle , default is rigid
+                    
+                    std::map<int,boneAnimateGroup> boneAnimation;
+                    
+                    std::map<int,std::pair<bool,int> > boneMapping;
                     
                     float characterWidth,characterHeight;
                     

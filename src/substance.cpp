@@ -303,7 +303,7 @@ void substance::removeSubs(substance::subs * p){
     }
 }
 void substance::subs::playAnimation(float dtm,const irr::core::vector3df & dl){
-    
+    node->playAnimation(dtm,dl);
 }
 void substance::subs::update(){
     if(parent){
@@ -451,6 +451,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
         //setOwner(uuid,owner);
         sp->hp=hp;
         sp->status=status;
+        sp->setStatus(status);
         sp->setDirection(dire);
         sp->body->setLinearVelocity(lin_vel);
         sp->body->setAngularVelocity(ang_vel);
@@ -469,6 +470,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             sp->type=mods::SUBS_LASTING;
             sp->body->setLinearVelocity(lin_vel);
             sp->body->setAngularVelocity(ang_vel);
+            sp->setStatus(status);
             printf("[substance]create substance:%s id=%ld\n",uuid.c_str(),id);
         }
     }

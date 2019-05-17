@@ -27,6 +27,7 @@ all:../client ../server ../admin
 	physical.o \
 	substance.o \
 	subsani.o \
+	bone.o \
 	subsapi.o \
 	-o ../client \
 	$(LIBS)
@@ -82,8 +83,11 @@ substance.o:substance.cpp substance.h building.o subsani.o
 clientNetwork.o:clientNetwork.cpp clientNetwork.h substance.o
 	$(CC) -c clientNetwork.cpp
 
-subsani.o:subsani.cpp subsani.h physical.o
+subsani.o:subsani.cpp subsani.h physical.o bone.o
 	$(CC) -c subsani.cpp
+
+bone.o:bone.cpp subsani.h physical.o
+	$(CC) -c bone.cpp
 
 subsapi.o:subsapi.cpp subsapi.h substance.o
 	$(CC) -c subsapi.cpp

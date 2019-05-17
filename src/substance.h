@@ -74,6 +74,10 @@ namespace smoothly{
                 void walk(const irr::core::vector2df & d);
                 void flyUpdate(bool flying,bool lifting);
                 
+                inline void setStatus(int s){
+                    node->setStatus(s);
+                }
+                
                 void walk(int forward,int leftOrRight/*-1 left,1 right*/,float length);
                 
                 irr::core::vector3df getDirection();
