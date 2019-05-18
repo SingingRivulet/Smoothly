@@ -57,7 +57,7 @@ void subsaniChar::setPart(irr::u32 id,irr::scene::IAnimatedMesh * mesh){
     parts[id]=p;
 }
 void subsaniChar::setBody(irr::scene::IAnimatedMesh * mesh){
-    if(body==NULL)
+    if(body!=NULL)
         return;//body不允许现场修改
     body=scene->addAnimatedMeshSceneNode(mesh);
 }
@@ -135,7 +135,10 @@ void subsaniChar::setPosition(const irr::core::vector3df & p){
         body->setPosition(p);
     }
 }
-void subsaniChar::setRotation(const irr::core::vector3df & r){
+void subsaniChar::setRotation(const irr::core::vector3df & ir){
+    irr::core::vector3df r=ir;
+    r.X=0;
+    r.Z=0;
     for(auto it:parts){
         it.second->setRotation(r);
     }
@@ -209,7 +212,7 @@ subsaniChar::subsaniChar(
     setBody(sconf->mesh);
     
     body->setPosition(p);
-    body->setRotation(r);
+    body->setRotation(irr::core::vector3df(0 , r.Y , 0));
     body->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     body->updateAbsolutePosition();
     
@@ -223,7 +226,14 @@ void subsaniChar::doAttaching(const std::list<ipair> & added,const std::list<ipa
         umount(it.x);
     }
 }
-            
+
+const irr::core::vector3df & subsaniChar::getPosition(){
+    return body->getPosition();
+}
+const irr::core::vector3df & subsaniChar::getRotation(){
+    return body->getRotation();
+}
+
 const irr::core::matrix4 & subsaniChar::getAbsoluteTransformation(){
     return body->getAbsoluteTransformation();
 }

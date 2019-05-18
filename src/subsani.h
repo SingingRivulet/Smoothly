@@ -38,6 +38,9 @@ namespace smoothly{
             
             virtual void playAnimation(float dtm,const irr::core::vector3df & dl);
             
+            virtual const irr::core::vector3df & getPosition();
+            virtual const irr::core::vector3df & getRotation();
+            
             virtual void setPosition(const irr::core::vector3df &);
             virtual void setRotation(const irr::core::vector3df &);
             virtual void setDirection(const irr::core::vector3df &);
@@ -51,7 +54,18 @@ namespace smoothly{
             
             virtual void updateAbsolutePosition();
             
+            subsaniStatic(
+                irr::scene::ISceneManager * scene,
+                mods::subsConf * sconf,
+                mods * gconf,
+                const irr::core::vector3df & p,
+                const irr::core::vector3df & r,
+                const irr::core::vector3df & d
+            );
+            
+        public:
             irr::scene::ISceneNode * node;
+            mods::subsConf * conf;
     };
     //////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -59,6 +73,9 @@ namespace smoothly{
         public:
             
             virtual void setLOD(float len);
+            
+            virtual const irr::core::vector3df & getPosition();
+            virtual const irr::core::vector3df & getRotation();
             
             virtual void setPosition(const irr::core::vector3df &);
             virtual void setRotation(const irr::core::vector3df &);
@@ -123,6 +140,7 @@ namespace smoothly{
     subsani * subsaniFactory(
         irr::scene::ISceneManager * ,
         mods::subsConf *,
+        mods * m,
         const irr::core::vector3df & p,
         const irr::core::vector3df & r,
         const irr::core::vector3df & d

@@ -489,8 +489,10 @@ void substance::subs::init(
     id=conf->id;
     setPowerAsDefault();
     
-    node=subsaniFactory(parent->scene,conf,p,r,d);
+    node=subsaniFactory(parent->scene,conf,parent->m,p,r,d);
     
+    if(node==NULL)
+        return;
     //node=parent->scene->addMeshSceneNode(conf->mesh);
     //node->setPosition(p);
     //node->setRotation(r);

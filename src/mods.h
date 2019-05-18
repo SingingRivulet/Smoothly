@@ -140,7 +140,7 @@ namespace smoothly{
                     bool jumpInSky;
                     
                     std::string         bodyType;//rigid,character,vehicle , default is rigid
-                    
+                    std::string         animationType;//static,character,vehicle
                     std::map<int,boneAnimateGroup> boneAnimation;
                     
                     std::map<int,std::pair<bool,int> > boneMapping;
@@ -203,7 +203,7 @@ namespace smoothly{
                         int imp
                     );
                     
-                    inline subsConf():bodyType("rigid"){
+                    inline subsConf():bodyType("rigid"),animationType("static"){
                         texture=NULL;
                         
                         type=SUBS_LASTING;
