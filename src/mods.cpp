@@ -326,6 +326,13 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"animationType");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        b->animationType=lua_tostring(L,-1);
+    }
+    lua_pop(L,1);
+    
     lua_pushstring(L,"characterWidth");
     lua_gettable(L,-2);
     if(lua_isnumber(L,-1)){
@@ -483,6 +490,115 @@ static int mod_addSubstance(lua_State * L){
         lua_pop(L,1);
     }
     lua_pop(L,1);
+    
+    lua_pushstring(L,"boneAnimation");
+    lua_gettable(L,-2);
+    if(lua_istable(L,-1)){
+        int len=luaL_len(L,-1);
+        for(int i=1;i<=len;i++){
+            lua_rawgeti(L,-1,i);
+            if(lua_istable(L,-1)){
+                
+                mods::boneAnimateGroup ag;
+                mods::boneAnimate am;
+                
+                #define getAmArg \
+                    lua_rawgeti(L,-1,1); \
+                    am.id=lua_tointeger(L,-1); \
+                    lua_pop(L,1); \
+                    lua_rawgeti(L,-1,2); \
+                    am.speed=lua_tointeger(L,-1); \
+                    lua_pop(L,1); \
+                    lua_rawgeti(L,-1,3); \
+                    am.start=lua_tointeger(L,-1); \
+                    lua_pop(L,1); \
+                    lua_rawgeti(L,-1,4); \
+                    am.end=lua_tointeger(L,-1); \
+                    lua_pop(L,1); \
+                    lua_rawgeti(L,-1,5); 
+                    am.loop=lua_toboolean(L,-1); \
+                    lua_pop(L,1);
+                            
+                
+                lua_rawgeti(L,-1,1);
+                int id=lua_tointeger(L,-1);
+                lua_pop(L,1);
+                
+                lua_pushstring(L,"body");
+                lua_gettable(L,-2);
+                if(lua_istable(L,-1)){
+                    getAmArg;
+                    ag.body=am;
+                }
+                lua_pop(L,1);
+                
+                lua_pushstring(L,"pair");
+                lua_gettable(L,-2);
+                if(lua_istable(L,-1)){
+                    int len=luaL_len(L,-1);
+                    for(int i=1;i<=len;i++){
+                        lua_rawgeti(L,-1,i);
+                        if(lua_istable(L,-1)){
+                            
+                            getAmArg;
+                            
+                            ag.pair.push_back(am);
+                        }
+                        lua_pop(L,1);
+                    }
+                }
+                lua_pop(L,1);
+                
+                lua_pushstring(L,"item");
+                lua_gettable(L,-2);
+                if(lua_istable(L,-1)){
+                    int len=luaL_len(L,-1);
+                    for(int i=1;i<=len;i++){
+                        lua_rawgeti(L,-1,i);
+                        if(lua_istable(L,-1)){
+                            
+                            getAmArg;
+                            
+                            ag.item.push_back(am);
+                        }
+                        lua_pop(L,1);
+                    }
+                }
+                lua_pop(L,1);
+                
+                b->boneAnimation[id]=ag;
+                
+                #undef getAmArg
+            }
+            lua_pop(L,1);
+        }
+    }
+    
+    lua_pushstring(L,"boneMapping");
+    lua_gettable(L,-2);
+    if(lua_istable(L,-1)){
+        int len=luaL_len(L,-1);
+        for(int i=1;i<=len;i++){
+            lua_rawgeti(L,-1,i);
+            if(lua_istable(L,-1)){
+                
+                lua_rawgeti(L,-1,1);
+                int id=lua_tointeger(L,-1);
+                lua_pop(L,1);
+                
+                lua_rawgeti(L,-1,2);
+                bool onbody=lua_toboolean(L,-1);
+                lua_pop(L,1);
+                
+                lua_rawgeti(L,-1,3);
+                int mapping=lua_tointeger(L,-1);
+                lua_pop(L,1);
+                
+                b->boneMapping[id]=std::pair<bool,int>(onbody,mapping);
+            }
+            lua_pop(L,1);
+        }
+    }
     
     b->friction = friction;
     b->restitution=restitution;
