@@ -730,8 +730,120 @@ static int mod_setAnimation(lua_State * L){
     lua_pushstring(L,"ok");
     return 1;
 }
-static int mod_getCharAnimationId(lua_State * L){
+
+static int getCharAnimationId(
+    int foot,
+    int hand,
+    int range,
+    int move
+){
+    const static int amMap[7][4]={
+        {0  ,   1  ,  2  ,  3},
+        {4  ,   5  ,  6  ,  7},
+        {8  ,   9  ,  10 , 11},
+        {12 ,   13 ,  14 , 15},
+        {16 ,   17 ,  18 , 19},
+        {20 ,   21 ,  22 , 23},
+        {24 ,   25 ,  26 , 27}
+    };
+    int c=foot;
+    int r=0;
     
+    if(hand==0){
+        r=0;
+    }else
+    if(hand==1 && range==1){
+        r=1;
+    }else
+    if(hand==2 && range==1){
+        r=2;
+    }else
+    if(hand==3 && range==1){
+        r=5;
+    }else
+    if(hand==1 && range==2){
+        r=3;
+    }else
+    if(hand==2 && range==2){
+        r=4;
+    }else
+    if(hand==3 && range==2){
+        r=6;
+    }
+    
+    return amMap[r][c]*8+move;
+}
+
+static int mod_getCharAnimationId(lua_State * L){
+    //           站     蹲     趴    飞
+    //0          0      1     2     3
+    //1单手近战    4      5     6     7
+    //2双手近战    8      9     10   11
+    //3单手远战    12     13    14   15
+    //4双手远战    16     17    18   19
+    //5双持近战    20     21    22   23
+    //6双持远战    24     25    26   27
+    //数值乘8加0为站立，加1为行走，加2为奔跑
+    
+    auto foot =luaL_checkstring(L,1);//站 蹲 趴 飞
+    auto hand =luaL_checkstring(L,2);//空手 单手 双手 双持
+    auto range=luaL_checkstring(L,3);//无攻击 近战 远战
+    auto move =luaL_checkstring(L,4);//站立 行走 奔跑
+    
+    int ifoot=0,ihand=0,irange=0,imove=0;
+    
+    if(strcmp(foot,"stand")==0){
+        ifoot=0;
+    }else
+    if(strcmp(foot,"squat")==0){
+        ifoot=1;
+    }else
+    if(strcmp(foot,"prostrate")==0){
+        ifoot=2;
+    }else
+    if(strcmp(foot,"fly")==0){
+        ifoot=3;
+    }
+    
+    
+    
+    if(strcmp(hand,"empty")==0){
+        ihand=0;
+    }else
+    if(strcmp(hand,"single")==0){
+        ihand=1;
+    }else
+    if(strcmp(hand,"both")==0){
+        ihand=2;
+    }else
+    if(strcmp(hand,"double")==0){
+        ihand=3;
+    }
+    
+    
+    
+    if(strcmp(range,"none")==0){
+        irange=0;
+    }else
+    if(strcmp(range,"close")==0){
+        irange=1;
+    }else
+    if(strcmp(range,"ranged")==0){
+        irange=2;
+    }
+    
+    
+    if(strcmp(move,"stand")==0){
+        imove=0;
+    }else
+    if(strcmp(move,"walk")==0){
+        imove=1;
+    }else
+    if(strcmp(move,"run")==0){
+        imove=2;
+    }
+    
+    return getCharAnimationId(ifoot,ihand,irange,imove);
 }
 
 void mods::scriptInit(const char * path){

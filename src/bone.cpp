@@ -182,12 +182,7 @@ void subsaniChar::playAnimation(float dtm,const irr::core::vector3df & dl){
     updateAnimation();
 }
 void subsaniChar::setStatus(int id){
-    //          站     蹲     趴    飞
-    //          0      1     2     3
-    //单手近战    4      5     6     7
-    //双手近战    8      9     10   11
-    //单手远战    12     13    14   15
-    //双手远战    16     17    18   19
+    
     status=id;
     
     updateAnimation();
