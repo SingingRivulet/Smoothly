@@ -244,7 +244,19 @@ namespace smoothly{
             };
             std::map<long,subsConf *> subsConfs;
             //////////////////////////////////////////////////////////////////////////////
-            std::map<int,irr::scene::IAnimatedMesh*> animations;
+            struct animationConf{
+                irr::scene::IAnimatedMesh   * mesh;
+                irr::video::ITexture        * texture;
+                bool useAlpha;
+                ~animationConf(){
+                    if(mesh)
+                        mesh->drop();
+                    if(texture)
+                        texture->drop();
+                }
+            };
+            
+            std::map<int,animationConf*> animations;
             //////////////////////////////////////////////////////////////////////////////
             void init();
             void loadMesh();

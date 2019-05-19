@@ -668,6 +668,72 @@ static int mod_setBooster(lua_State * L){
     return 1;
 }
 
+static int mod_setAnimation(lua_State * L){
+    if(!lua_isfunction(L,-1))
+        return 0;
+    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    int id=luaL_checkinteger(L,2);
+    
+    auto it=self->animations.find(id);
+    
+    if(it!=self->animations.end()){
+        lua_pushstring(L,"animation exists");
+        return 1;
+    }
+    
+    if(!lua_istable(L,-1))
+        return 0;
+    
+    mods::animationConf * ac=NULL;
+    irr::scene::IAnimatedMesh * mesh=NULL;
+    irr::video::ITexture * texture=NULL;
+    
+    lua_pushstring(L,"mesh");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        mesh = self->scene->getMesh(lua_tostring(L,-1));
+    }
+    lua_pop(L,1);
+    
+    if(!mesh){
+        lua_pushstring(L,"load mesh fail");
+        return 1;
+    }
+    
+    lua_pushstring(L,"texture");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        texture = self->scene->getVideoDriver()->getTexture(lua_tostring(L,-1));
+    }
+    lua_pop(L,1);
+    
+    ac=new mods::animationConf;
+    ac->mesh=mesh;
+    ac->texture=texture;
+    
+    lua_pushstring(L,"useAlpha");
+    lua_gettable(L,-2);
+    if(lua_isboolean(L,-1)){
+        ac->useAlpha=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    self->animations[id]=ac;
+    
+    lua_pushstring(L,"ok");
+    return 1;
+}
+static int mod_getCharAnimationId(lua_State * L){
+    
+}
+
 void mods::scriptInit(const char * path){
     L=luaL_newstate();
     luaL_openlibs(L);
@@ -679,6 +745,8 @@ void mods::scriptInit(const char * path){
         {"addSubstance"         ,mod_addSubstance},
         {"setWindow"            ,mod_setWindow},
         {"setBooster"           ,mod_setBooster},
+        {"setAnimation"         ,mod_setAnimation},
+        {"getCharAnimationId"   ,mod_getCharAnimationId},
         {NULL,NULL}
     };
     luaL_newlib(L,funcs);
@@ -807,6 +875,11 @@ void mods::destroy(){
         delete it.second;
     }
     subsConfs.clear();
+    
+    for(auto it:animations){
+        delete it.second;
+    }
+    animations.clear();
 }
 void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
     std::map<long,float> pl;

@@ -110,9 +110,8 @@ namespace smoothly{
             void doAniPart(irr::u32,int speed,int start,int end ,bool loop);
             void doAni(int speed,int start,int end ,bool loop);
             void doAni(int id);
-            void setItem(irr::u32,irr::scene::IAnimatedMesh*);
-            void setPart(irr::u32,irr::scene::IAnimatedMesh*);
-            void setBody(irr::scene::IAnimatedMesh*);
+            void setItem(irr::u32,mods::animationConf*);
+            void setPart(irr::u32,mods::animationConf*);
             void removeItem(irr::u32);
             void removePart(irr::u32);
             

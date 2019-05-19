@@ -29,7 +29,7 @@ void subsaniChar::doAni(int speed,int start,int end ,bool loop){
     if(body)
         doAni(body,speed,start,end,loop);
 }
-void subsaniChar::setItem(irr::u32 id,irr::scene::IAnimatedMesh * mesh){
+void subsaniChar::setItem(irr::u32 id,mods::animationConf * am){
     if(body==NULL)
         return;
     auto it=items.find(id);
@@ -38,16 +38,32 @@ void subsaniChar::setItem(irr::u32 id,irr::scene::IAnimatedMesh * mesh){
         it->second->remove();
     }
     auto joint = body->getJointNode(id);
-    auto p = scene->addAnimatedMeshSceneNode(mesh,joint);
+    auto p = scene->addAnimatedMeshSceneNode(am->mesh,joint);
+    
+    if(am->texture){
+        p->setMaterialTexture( 0 , am->texture);
+        if(am->useAlpha){
+            p->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
+    
     items[id]=p;
 }
-void subsaniChar::setPart(irr::u32 id,irr::scene::IAnimatedMesh * mesh){
+void subsaniChar::setPart(irr::u32 id,mods::animationConf * am){
     auto it=parts.find(id);
     if(it!=parts.end()){
         it->second->removeAll();
         it->second->remove();
     }
-    auto p=scene->addAnimatedMeshSceneNode(mesh);
+    auto p=scene->addAnimatedMeshSceneNode(am->mesh);
+    
+    if(am->texture){
+        p->setMaterialTexture( 0 , am->texture);
+        if(am->useAlpha){
+            p->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
+    
     
     p->setPosition(body->getPosition());
     p->setRotation(body->getRotation());
@@ -56,11 +72,7 @@ void subsaniChar::setPart(irr::u32 id,irr::scene::IAnimatedMesh * mesh){
     
     parts[id]=p;
 }
-void subsaniChar::setBody(irr::scene::IAnimatedMesh * mesh){
-    if(body!=NULL)
-        return;//body不允许现场修改
-    body=scene->addAnimatedMeshSceneNode(mesh);
-}
+
 void subsaniChar::removeItem(irr::u32 id){
     auto it=items.find(id);
     if(it!=items.end()){
@@ -207,9 +219,14 @@ subsaniChar::subsaniChar(
     this->m     =gconf;
     this->scene =sc;
     
-    body=NULL;
+    body=scene->addAnimatedMeshSceneNode(sconf->mesh);
     
-    setBody(sconf->mesh);
+    if(conf->texture){
+        body->setMaterialTexture( 0 , conf->texture);
+        if(conf->useAlpha){
+            body->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
     
     body->setPosition(p);
     body->setRotation(irr::core::vector3df(0 , r.Y , 0));

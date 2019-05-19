@@ -43,6 +43,13 @@ subsaniStatic::subsaniStatic(
     
     node=scene->addAnimatedMeshSceneNode(sconf->mesh);
     
+    if(conf->texture){
+        node->setMaterialTexture( 0 , conf->texture);
+        if(conf->useAlpha){
+            node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
+    
     node->setPosition(p);
     node->setRotation(r);
     node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
