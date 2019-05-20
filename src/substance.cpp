@@ -47,7 +47,9 @@ void substance::parseAllCommond(){
 
 void substance::parseCommond(const subsCommond & cmd){
     auto p=seekSubs(cmd.uuid);
+    //if(p)printf("[control]parseCommond begin %s\n",p->owner.c_str());
     if(p && p->owner==myUUID){
+        //printf("[control]parseCommond\n");
         irr::core::vector3df tvec;
         switch(cmd.method){
             case subsCommond::JUMP:
@@ -463,6 +465,7 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             auto sp=createSubs();
             sp->uuid=uuid;
             sp->owner=owner;
+            //printf("[updateSubs]owner:%s\n",owner.c_str());
             setOwner(uuid,owner);
             sp->hp=hp;
             sp->status=status;
@@ -472,6 +475,8 @@ void substance::updateSubs(//更新物体状态，由服务器调用
             sp->body->setAngularVelocity(ang_vel);
             sp->setStatus(status);
             printf("[substance]create substance:%s id=%ld\n",uuid.c_str(),id);
+        }else{
+            printf("[substance]substance:%s id=%ld \e[0;31mno found\e[0m\n",uuid.c_str(),id);
         }
     }
 }

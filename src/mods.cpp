@@ -573,6 +573,7 @@ static int mod_addSubstance(lua_State * L){
             lua_pop(L,1);
         }
     }
+    lua_pop(L,1);
     
     lua_pushstring(L,"boneMapping");
     lua_gettable(L,-2);
@@ -599,6 +600,7 @@ static int mod_addSubstance(lua_State * L){
             lua_pop(L,1);
         }
     }
+    lua_pop(L,1);
     
     b->friction = friction;
     b->restitution=restitution;
@@ -865,14 +867,14 @@ void mods::scriptInit(const char * path){
     lua_setglobal(L,"smoothly");
     
     if(luaL_loadfile(L,path) || lua_pcall(L, 0,0,0)){
-        printf("error %s\n", lua_tostring(L,-1));
+        printf("[scriptInit:loadfile]\e[0;31merror:\e[0m %s\n", lua_tostring(L,-1));
         return;
     }
     
     lua_getglobal(L,"gameInit");
     lua_pushlightuserdata(L,this);
     if(lua_pcall(L, 1, 0, 0) != 0){
-        printf("error %s\n", lua_tostring(L,-1));
+        printf("[scriptInit:gameInit]\e[0;31merror:\e[0m %s\n", lua_tostring(L,-1));
         return;
     }
 }
@@ -935,7 +937,7 @@ void mods::loadConfig(){
     lua_getglobal(L,"sceneInit");
     lua_pushlightuserdata(L,this);
     if(lua_pcall(L, 1, 0, 0) != 0){
-        printf("script error %s\n", lua_tostring(L,-1));
+        printf("[sceneInit]\e[0;31merror:\e[0m %s\n", lua_tostring(L,-1));
         return;
     }
 }

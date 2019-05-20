@@ -38,7 +38,7 @@ dblist.o:dblist.h dblist.cpp utils.h
 subsServer.o:subsServer.h subsServer.cpp utils.h cache.h dblist.o
 	$(CC) -c subsServer.cpp
 
-user.o:user.h user.cpp attaching.o
+user.o:user.h user.cpp attaching.o nameLocker.h
 	$(CC) -c user.cpp
 
 attaching.o:attaching.h attaching.cpp subsServer.o
@@ -119,7 +119,7 @@ building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	./serverCallback.so \
 	-lleveldb -o ../server $(LIBS)
 
-serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h
+serverNetwork.o:watch.o serverNetwork.cpp serverNetwork.h user.o
 	$(CC) -c serverNetwork.cpp
 
 watch.o:serverMod.o watch.cpp watch.h

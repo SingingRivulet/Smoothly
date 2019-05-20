@@ -10,9 +10,13 @@ namespace smoothly{
                 while(!lock_noblock(n)){}
             }
             bool lock_noblock(const T & n){
-                bool res;
+                bool res=false;
                 locker.lock();
-                res=lst.insert(n).second;
+                auto it=lst.find(n);
+                if(it==lst.end()){
+                    res=true;
+                    lst.insert(n);
+                }
                 locker.unlock();
                 return res;
             }

@@ -241,7 +241,16 @@ void subsServer::changeManager(const std::string & uuid,const std::string & muui
     }
     pthread_rwlock_unlock(&rwlock);
 }
-
+void subsServer::setSubsOwner(const std::string & uuid,const std::string & owner){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        p->userUUID=owner;
+        p->drop();
+        printf("[setSubsOwner]owner:%s\n",owner.c_str());
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
 void subsServer::removeSubs(const std::string & uuid){
     pthread_rwlock_wrlock(&rwlock);
     auto p=seekSubs(uuid);
@@ -445,7 +454,7 @@ void subsServer::subs::saveDo(){
     saveToDB();
 }
 void subsServer::subs::saveToDB(){
-    //printf("[substance]save to db %s\n",uuid.c_str());
+    printf("[substance]save to db:%s\n",uuid.c_str());
     char kbuf[256];
     char vbuf[2048];
     encode(vbuf,sizeof(vbuf));

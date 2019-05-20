@@ -113,6 +113,25 @@ void teleport(){
     RakSleep(30);
     sendMessage(&bs);
 }
+
+void setOwner(){
+    const std::string & u=args["--substance"];
+    const std::string & o=args["--owner"];
+    
+    RakNet::BitStream bs;
+    RakNet::RakString uuid =u.c_str();
+    RakNet::RakString owner=o.c_str();
+    
+    makeBSHeader(&bs);
+    bs.Write((RakNet::MessageID)smoothly::A_SET_OWNER);
+    makeAuth(&bs);
+    
+    bs.Write(uuid);
+    bs.Write(owner);
+    
+    RakSleep(30);
+    sendMessage(&bs);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////解析参数/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +203,10 @@ int main(int argc , char * argv[]){
             if(it->second=="teleport"){
                 printf("[mode]teleport\n");
                 teleport();
+            }else
+            if(it->second=="setOwner"){
+                printf("[mode]setOwner\n");
+                setOwner();
             }
         }
     }

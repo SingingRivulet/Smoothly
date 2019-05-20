@@ -110,6 +110,7 @@ namespace smoothly{
             );
             void giveUpControl(const std::string & uuid,const std::string & muuid);
             void changeManager(const std::string & uuid,const std::string & muuid);
+            void setSubsOwner(const std::string & uuid,const std::string & owner);
             void removeSubs(const std::string & uuid);
             void attackSubs(const std::string & uuid,int dmg);
             void sendSubs(const RakNet::SystemAddress & addr,int x,int y);

@@ -223,8 +223,20 @@ void serverNetwork::onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAdd
             case A_CREATE_USER:
                 onMessageAdminCreateUser(&bs,address);
             break;
+            case A_SET_OWNER:
+                onMessageAdminSetOwner(&bs,address);
+            break;
         }
     }
+}
+
+void serverNetwork::onMessageAdminSetOwner(RakNet::BitStream * data,const RakNet::SystemAddress & address){
+    //printf("[admin]onMessageAdminSetOwner\n");
+    RakNet::RakString uuid;
+    RakNet::RakString owner;
+    if(!data->Read(uuid))return;
+    if(!data->Read(owner))return;
+    subsServer::setSubsOwner(uuid.C_String(),owner.C_String());
 }
 
 void serverNetwork::onMessageAdminTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address){

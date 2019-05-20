@@ -86,7 +86,8 @@ namespace smoothly{
     enum AdminMethod{
         A_CREATE_USER       = 'a',
         A_SEND_USER_UUID    = 'u',
-        A_TELEPORT          = 't'
+        A_TELEPORT          = 't',
+        A_SET_OWNER         = 'o'
     };
     
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){

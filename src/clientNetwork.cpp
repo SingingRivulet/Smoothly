@@ -415,6 +415,7 @@ void clientNetwork::onMessageUpdateSubsSetStatus(RakNet::BitStream * data){
     if(!data->Read(id))return;
     if(!data->Read(subsuuid))return;
     if(!data->Read(useruuid))return;
+    //printf("[onMessageUpdateSubsSetStatus]useruuid:%s\n",useruuid.C_String());
     
     if(!data->ReadVector(position.X , position.Y , position.Z))return;
     if(!data->ReadVector(rotation.X , rotation.Y , rotation.Z))return;
