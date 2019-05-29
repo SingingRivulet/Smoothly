@@ -89,6 +89,15 @@ void substance::subs::setPowerAsDefault(){
 }
 void substance::subs::moveUpdate(int forward,int leftOrRight){
     //printf("[control]move update\n");
+    if(forward==1){
+        setStatusPair(4,1);//4号是move
+    }else
+    if(forward==-1){
+        setStatusPair(4,3);
+    }else
+    if(forward==0){
+        setStatusPair(4,0);
+    }
     walk(forward,leftOrRight,walkSpeed);
 }
 void substance::subs::flyUpdate(bool flying,bool lifting){
@@ -307,6 +316,16 @@ void substance::removeSubs(substance::subs * p){
 void substance::subs::playAnimation(float dtm,const irr::core::vector3df & dl){
     node->playAnimation(dtm,dl);
 }
+bool substance::subs::haveChanging(){
+    return changing.diff(
+        node->getPosition(),
+        node->getRotation(),
+        body->getDir(),
+        getLinearVelocity(),
+        getAngularVelocity(),
+        status
+    );
+}
 void substance::subs::update(){
     if(parent){
         updateByWorld();
@@ -316,8 +335,9 @@ void substance::subs::update(){
             body->getDeltaL(p);
             playAnimation(parent->deltaTime,p);
         }
-        if(type==mods::SUBS_LASTING){
+        if(type==mods::SUBS_LASTING && node!=NULL && haveChanging()){
             //upload to server
+            //printf("[substance]upload body:%s\n",uuid.c_str());
             parent->uploadBodyStatus(
                 uuid,
                 status,
@@ -505,6 +525,8 @@ void substance::subs::init(
     //node->updateAbsolutePosition();
     
     attaching.clear();
+    
+    changing.init();
     
     //if(conf->texture){
     //    node->setMaterialTexture( 0 , conf->texture);

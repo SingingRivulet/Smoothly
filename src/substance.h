@@ -3,6 +3,7 @@
 #include "building.h"
 #include "mempool.h"
 #include "subsani.h"
+#include "subsChanging.h"
 #include <mutex>
 #include <queue>
 namespace smoothly{
@@ -50,6 +51,8 @@ namespace smoothly{
                 
                 bodyAttaching attaching;
                 
+                subsChanging changing;
+                
                 void moveUpdate(int forward,int leftOrRight);
                 
                 void setPowerAsDefault();
@@ -68,6 +71,12 @@ namespace smoothly{
                 void walk(const irr::core::vector3df & d);
                 void setAttaching(const bodyAttaching & att);
                 
+                inline void setStatusPair(int k,int v){
+                    if(node){
+                        status=node->setStatusPair(k,v);
+                    }
+                }
+                
                 void fly(float lift,float push);
                 void fly(float lift,const irr::core::vector3df & push);
                 void jump(const irr::core::vector3df & d);
@@ -75,7 +84,8 @@ namespace smoothly{
                 void flyUpdate(bool flying,bool lifting);
                 
                 inline void setStatus(int s){
-                    node->setStatus(s);
+                    if(node)node->setStatus(s);
+                    status=s;
                 }
                 
                 void walk(int forward,int leftOrRight/*-1 left,1 right*/,float length);
@@ -105,6 +115,8 @@ namespace smoothly{
                 void update();
                 
                 bool addIntoWorld();
+                
+                bool haveChanging();
 
             };
             

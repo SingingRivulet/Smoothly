@@ -166,6 +166,8 @@ void subsaniChar::setDirection(const irr::core::vector3df & d){
     setRotation(rotate);
 }
 void subsaniChar::playAnimation(float dtm,const irr::core::vector3df & dl){
+    /*
+     * 行走由status设置
     if(dtm==0)//时间没变
         return;
     
@@ -180,6 +182,26 @@ void subsaniChar::playAnimation(float dtm,const irr::core::vector3df & dl){
     this->speed=sp;
     
     updateAnimation();
+     */
+}
+int subsaniChar::setStatusPair(int key,int sta){
+    switch(key){
+        case 1:
+            foot=sta;
+        break;
+        case 2:
+            hand=sta;
+        break;
+        case 3:
+            range=sta;
+        break;
+        case 4:
+            move=sta;
+        break;
+    }
+    status = getCharAnimationId(foot,hand,range,move);
+    updateAnimation();
+    return status;
 }
 void subsaniChar::setStatus(int id){
     
@@ -189,12 +211,12 @@ void subsaniChar::setStatus(int id){
 }
 
 void subsaniChar::updateAnimation(){
-    int aniId=status*8;
+    //int aniId=status*8;
     
-    if(walking)
-        aniId+=1;
+    //if(walking)
+    //    aniId+=1;
     
-    doAni(aniId);
+    doAni(status);
 }
 
 void subsaniChar::destruct(){
@@ -213,6 +235,11 @@ subsaniChar::subsaniChar(
     this->conf  =sconf;
     this->m     =gconf;
     this->scene =sc;
+    
+    foot=0;
+    hand=0;
+    range=0;
+    move=0;
     
     body=scene->addAnimatedMeshSceneNode(sconf->mesh);
     

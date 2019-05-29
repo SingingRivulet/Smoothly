@@ -6,6 +6,7 @@
 #include "perlin.h"
 #include "physical.h"
 namespace smoothly{
+    int getCharAnimationId(int foot,int hand,int range,int move);
     class mods:public physical{
         public:
             lua_State * L;

@@ -733,7 +733,7 @@ static int mod_setAnimation(lua_State * L){
     return 1;
 }
 
-static int getCharAnimationId(
+int getCharAnimationId(
     int foot,
     int hand,
     int range,
@@ -785,7 +785,7 @@ static int mod_getCharAnimationId(lua_State * L){
     //4双手远战    16     17    18   19
     //5双持近战    20     21    22   23
     //6双持远战    24     25    26   27
-    //数值乘8加0为站立，加1为行走，加2为奔跑
+    //数值乘8加0为站立，加1为行走，加2为奔跑，加3倒走，加4倒跑
     
     auto foot =luaL_checkstring(L,1);//站 蹲 趴 飞
     auto hand =luaL_checkstring(L,2);//空手 单手 双手 双持

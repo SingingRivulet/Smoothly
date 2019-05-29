@@ -20,6 +20,8 @@ namespace smoothly{
             virtual void setDirection(const irr::core::vector3df &)=0;
             virtual void setStatus(int id)=0;
             
+            virtual int setStatusPair(int key,int sta)=0;//通过键值对的方式设置id，并返回id
+            
             virtual void destruct()=0;
             
             virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed)=0;
@@ -53,6 +55,10 @@ namespace smoothly{
             virtual const irr::core::matrix4 & getAbsoluteTransformation();
             
             virtual void updateAbsolutePosition();
+            
+            virtual int setStatusPair(int key,int sta){
+                return 0;
+            }
             
             subsaniStatic(
                 irr::scene::ISceneManager * scene,
@@ -92,6 +98,8 @@ namespace smoothly{
             
             virtual void updateAbsolutePosition();
             
+            virtual int setStatusPair(int key,int sta);
+            
             subsaniChar(
                 irr::scene::ISceneManager * scene,
                 mods::subsConf * sconf,
@@ -127,9 +135,14 @@ namespace smoothly{
             
             void updateAnimation();
             
-            bool walking;
+            //bool walking;
             int status;
-            float speed;
+            //float speed;
+            
+            int foot;
+            int hand;
+            int range;
+            int move;
             
             static void doAni(irr::scene::IAnimatedMeshSceneNode*,int speed,int start,int end ,bool loop);
             

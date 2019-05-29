@@ -27,6 +27,7 @@ all:../client ../server ../admin
 	physical.o \
 	substance.o \
 	subsani.o \
+	subsChanging.o \
 	bone.o \
 	subsapi.o \
 	-o ../client \
@@ -34,6 +35,9 @@ all:../client ../server ../admin
 
 dblist.o:dblist.h dblist.cpp utils.h
 	$(CC) -c dblist.cpp
+
+subsChanging.o:subsChanging.h subsChanging.cpp utils.h
+	$(CC) -c subsChanging.cpp
 
 subsServer.o:subsServer.h subsServer.cpp utils.h cache.h dblist.o
 	$(CC) -c subsServer.cpp
@@ -77,7 +81,7 @@ hbb.o:hbb.h hbb.cpp
 hbb_test.out:hbb_test.cpp hbb.o
 	$(CC) hbb_test.cpp hbb.o -o hbb_test.out $(LIBS)
 
-substance.o:substance.cpp substance.h building.o subsani.o
+substance.o:substance.cpp substance.h building.o subsani.o subsChanging.o
 	$(CC) -c substance.cpp
 
 clientNetwork.o:clientNetwork.cpp clientNetwork.h substance.o
