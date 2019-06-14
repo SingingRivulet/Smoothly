@@ -105,6 +105,7 @@ namespace smoothly{
             void onMessageAdminCreateUser(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageAdminTeleport(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             void onMessageAdminSetOwner(RakNet::BitStream * data,const RakNet::SystemAddress & address);
+            void onMessageAdminSetSubsStr(RakNet::BitStream * data,const RakNet::SystemAddress & address);
             
             serverNetwork();
             serverNetwork(const serverNetwork &)=delete;

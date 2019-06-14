@@ -42,7 +42,7 @@ namespace smoothly{
                 void removeFromChunk(int x,int y);
                 void addIntoChunk(int x,int y);
                 virtual void onFree();
-                void encode(char * vbuf,int len);//encode to string
+                //void encode(char * vbuf,int len);//encode to string
                 void decode(const char * vbuf);//decode string
                 void setConfig(const std::string & conf);
                 void getConfig(std::string & conf);
@@ -91,6 +91,7 @@ namespace smoothly{
                 bool checkOwner,
                 const std::string & owner
             );//传送，在客户端不会插值
+            void setSubsStr(const std::string & uuid,const char * str);
             void createSubs(//添加物体
                 long id , 
                 const irr::core::vector3df & p,

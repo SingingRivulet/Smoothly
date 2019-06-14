@@ -33,6 +33,9 @@ all:../client ../server ../admin
 	-o ../client \
 	$(LIBS)
 
+cJSON.o:cJSON.h cJSON.c
+	$(CC) -c cJSON.c
+
 dblist.o:dblist.h dblist.cpp utils.h
 	$(CC) -c dblist.cpp
 
@@ -108,7 +111,7 @@ game.o:game.h game.cpp control.o
 building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	$(CC) -c building.cpp
 
-../server:server.cpp serverNetwork.o ../serverCallback.so
+../server:server.cpp serverNetwork.o ../serverCallback.so cJSON.o
 	$(CC) server.cpp \
 	serverNetwork.o \
 	watch.o \
@@ -120,6 +123,7 @@ building.o:terrain.o building.h remoteGraph.o hbb.o building.cpp
 	dblist.o \
 	subsServer.o \
 	attaching.o \
+	cJSON.o \
 	./serverCallback.so \
 	-lleveldb -o ../server $(LIBS)
 

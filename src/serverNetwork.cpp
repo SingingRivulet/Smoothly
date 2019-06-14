@@ -213,18 +213,28 @@ void serverNetwork::onMessageAdmin(RakNet::Packet * data,const RakNet::SystemAdd
     
     char addrStr[64];
     address.ToString(true,addrStr);
-    printf("[%s admin]success\n",addrStr);
     
     if(checkAdminPwd(name.C_String() , pwd.C_String())){
+        printf("[%s admin]success\n",addrStr);
         switch(data->data[2]){
             case A_TELEPORT:
+                printf("[%s admin]teleport\n",addrStr);
                 onMessageAdminTeleport(&bs,address);
             break;
             case A_CREATE_USER:
+                printf("[%s admin]create user\n",addrStr);
                 onMessageAdminCreateUser(&bs,address);
             break;
             case A_SET_OWNER:
+                printf("[%s admin]set owner\n",addrStr);
                 onMessageAdminSetOwner(&bs,address);
+            break;
+            case A_SET_SUBS_STR:
+                printf("[%s admin]set subs str\n",addrStr);
+                onMessageAdminSetSubsStr(&bs,address);
+            break;
+            default:
+                printf("[%s admin]unknow method '%c'\n",addrStr,data->data[2]);
             break;
         }
     }
@@ -236,6 +246,7 @@ void serverNetwork::onMessageAdminSetOwner(RakNet::BitStream * data,const RakNet
     RakNet::RakString owner;
     if(!data->Read(uuid))return;
     if(!data->Read(owner))return;
+    printf("[admin]set %s owner:%s\n",uuid.C_String(),owner.C_String());
     subsServer::setSubsOwner(uuid.C_String(),owner.C_String());
 }
 
@@ -277,6 +288,15 @@ void serverNetwork::onMessageAdminCreateUser(RakNet::BitStream * data,const RakN
     bs.Write(u);
     
     sendMessage(&bs,address);
+}
+
+void serverNetwork::onMessageAdminSetSubsStr(RakNet::BitStream * data,const RakNet::SystemAddress & address){
+    RakNet::RakString uuid;
+    RakNet::RakString str;
+    if(!data->Read(uuid))return;
+    if(!data->Read(str))return;
+    printf("[admin]set %s:%s\n",uuid.C_String(),str.C_String());
+    subsServer::setSubsStr(uuid.C_String(),str.C_String());
 }
 
 void serverNetwork::onMessageUpdateAttaching(RakNet::Packet * data,const RakNet::SystemAddress & address){

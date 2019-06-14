@@ -132,6 +132,25 @@ void setOwner(){
     RakSleep(30);
     sendMessage(&bs);
 }
+
+void setSubsStr(){
+    const std::string & u=args["--substance"];
+    const std::string & s=args["--json"];
+    
+    RakNet::BitStream bs;
+    RakNet::RakString uuid =u.c_str();
+    RakNet::RakString json =s.c_str();
+    
+    makeBSHeader(&bs);
+    bs.Write((RakNet::MessageID)smoothly::A_SET_SUBS_STR);
+    makeAuth(&bs);
+    
+    bs.Write(uuid);
+    bs.Write(json);
+    
+    RakSleep(30);
+    sendMessage(&bs);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////解析参数/////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +226,10 @@ int main(int argc , char * argv[]){
             if(it->second=="setOwner"){
                 printf("[mode]setOwner\n");
                 setOwner();
+            }else
+            if(it->second=="setSubsStr"){
+                printf("[mode]setSubsStr\n");
+                setSubsStr();
             }
         }
     }

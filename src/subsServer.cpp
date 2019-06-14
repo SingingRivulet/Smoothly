@@ -1,4 +1,5 @@
 #include "subsServer.h"
+#include "cJSON.h"
 namespace smoothly{
 void subsServer::subsInit(const char * path){
     leveldb::Options opt;
@@ -326,6 +327,17 @@ subsServer::subs * subsServer::seekSubs(const std::string & uuid){
     return p;
 }
 
+void subsServer::setSubsStr(const std::string & uuid,const char * str){
+    pthread_rwlock_wrlock(&rwlock);
+    auto p=seekSubs(uuid);
+    if(p){
+        p->decode(str);
+        p->saveDo();
+        p->drop();
+    }
+    pthread_rwlock_unlock(&rwlock);
+}
+
 subsServer::subs * subsServer::createSubs(const std::string & uuid){
     std::string sbuf;
     char kbuf[256];
@@ -377,6 +389,8 @@ void subsServer::subs::updateChunkPosition(){
 void subsServer::subs::genUUID(){
     getUUID(uuid);
 }
+/*
+ * 由于使用了cjson，此函数可被移除
 void subsServer::subs::encode(char * vbuf,int len){
     snprintf(vbuf,len,
         "%ld %d %d "
@@ -395,38 +409,91 @@ void subsServer::subs::encode(char * vbuf,int len){
         direction.X,direction.Y,direction.Z 
     );
 }
+*/
 void subsServer::subs::decode(const char * vbuf){
-    float fbuf;
-    std::istringstream iss(vbuf);
-    iss>>id;
-    iss>>hp;
-    iss>>status;
     
-    iss>>position.X;
-    iss>>position.Y;
-    iss>>position.Z;
-    
-    iss>>rotation.X;
-    iss>>rotation.Y;
-    iss>>rotation.Z;
-    
-    fbuf=0;iss>>fbuf;lin_vel.setX(fbuf);
-    fbuf=0;iss>>fbuf;lin_vel.setY(fbuf);
-    fbuf=0;iss>>fbuf;lin_vel.setZ(fbuf);
-    
-    fbuf=0;iss>>fbuf;ang_vel.setX(fbuf);
-    fbuf=0;iss>>fbuf;ang_vel.setY(fbuf);
-    fbuf=0;iss>>fbuf;ang_vel.setZ(fbuf);
-    
+    id=0;
+    hp=0;
+    status=0;
     userUUID.clear();
-    iss>>userUUID;
-    
     manager.clear();
-    iss>>manager;
+    position.set(0,0,0);
+    rotation.set(0,0,0);
+    direction.set(0,0,0);
+    ang_vel=btVector3(0,0,0);
+    lin_vel=btVector3(0,0,0);
     
-    iss>>direction.X;
-    iss>>direction.Y;
-    iss>>direction.Z;
+    cJSON * json=cJSON_Parse(vbuf);
+    if(json){
+        cJSON * item;
+        //cjson的查找是遍历，故不应使用cJSON_GetObjectItem
+        cJSON *c=json->child;
+        while (c){
+            if(strcmp(c->string,"id")==0 && c->type==cJSON_Number){
+                id=c->valueint;
+            }else
+            if(strcmp(c->string,"hp")==0 && c->type==cJSON_Number){
+                hp=c->valueint;
+            }else
+            if(strcmp(c->string,"status")==0 && c->type==cJSON_Number){
+                status=c->valueint;
+            }else
+            if(strcmp(c->string,"userUUID")==0 && c->type==cJSON_String){
+                userUUID=c->valuestring;
+            }else
+            if(strcmp(c->string,"manager")==0 && c->type==cJSON_String){
+                manager=c->valuestring;
+            }else
+            if(strcmp(c->string,"positionX")==0 && c->type==cJSON_Number){
+                position.X=c->valuedouble;
+            }else
+            if(strcmp(c->string,"positionY")==0 && c->type==cJSON_Number){
+                position.Y=c->valuedouble;
+            }else
+            if(strcmp(c->string,"positionZ")==0 && c->type==cJSON_Number){
+                position.Z=c->valuedouble;
+            }else
+            if(strcmp(c->string,"rotationX")==0 && c->type==cJSON_Number){
+                rotation.X=c->valuedouble;
+            }else
+            if(strcmp(c->string,"rotationY")==0 && c->type==cJSON_Number){
+                rotation.Y=c->valuedouble;
+            }else
+            if(strcmp(c->string,"rotationZ")==0 && c->type==cJSON_Number){
+                rotation.Z=c->valuedouble;
+            }else
+            if(strcmp(c->string,"linvelX")==0 && c->type==cJSON_Number){
+                lin_vel.setX(c->valuedouble);
+            }else
+            if(strcmp(c->string,"linvelY")==0 && c->type==cJSON_Number){
+                lin_vel.setY(c->valuedouble);
+            }else
+            if(strcmp(c->string,"linvelZ")==0 && c->type==cJSON_Number){
+                lin_vel.setZ(c->valuedouble);
+            }else
+            if(strcmp(c->string,"angvelX")==0 && c->type==cJSON_Number){
+                ang_vel.setX(c->valuedouble);
+            }else
+            if(strcmp(c->string,"angvelY")==0 && c->type==cJSON_Number){
+                ang_vel.setY(c->valuedouble);
+            }else
+            if(strcmp(c->string,"angvelZ")==0 && c->type==cJSON_Number){
+                ang_vel.setZ(c->valuedouble);
+            }else
+            if(strcmp(c->string,"directionX")==0 && c->type==cJSON_Number){
+                direction.X=c->valuedouble;
+            }else
+            if(strcmp(c->string,"directionY")==0 && c->type==cJSON_Number){
+                direction.Y=c->valuedouble;
+            }else
+            if(strcmp(c->string,"directionZ")==0 && c->type==cJSON_Number){
+                direction.Z=c->valuedouble;
+            }
+            c=c->next;
+        }
+        
+        cJSON_Delete(json);
+    }
     
     checkPosition();
 }
@@ -456,10 +523,44 @@ void subsServer::subs::saveDo(){
 void subsServer::subs::saveToDB(){
     printf("[substance]save to db:%s\n",uuid.c_str());
     char kbuf[256];
-    char vbuf[2048];
-    encode(vbuf,sizeof(vbuf));
+    //char vbuf[2048];
+    //encode(vbuf,sizeof(vbuf));
+    cJSON *json=cJSON_CreateObject();
+    char * out;
     snprintf(kbuf,256,"subsNode %s",uuid.c_str());
-    parent->db->Put(leveldb::WriteOptions(),kbuf,vbuf);
+    
+    cJSON_AddStringToObject(json,"userUUID",userUUID.c_str());
+    cJSON_AddStringToObject(json,"manager",manager.c_str());
+    
+    cJSON_AddNumberToObject(json,"id",id);
+    cJSON_AddNumberToObject(json,"hp",hp);
+    cJSON_AddNumberToObject(json,"status",status);
+    
+    cJSON_AddNumberToObject(json,"positionX",position.X);
+    cJSON_AddNumberToObject(json,"positionY",position.Y);
+    cJSON_AddNumberToObject(json,"positionZ",position.Z);
+    
+    cJSON_AddNumberToObject(json,"rotationX",rotation.X);
+    cJSON_AddNumberToObject(json,"rotationY",rotation.Y);
+    cJSON_AddNumberToObject(json,"rotationZ",rotation.Z);
+    
+    cJSON_AddNumberToObject(json,"directionX",direction.X);
+    cJSON_AddNumberToObject(json,"directionY",direction.Y);
+    cJSON_AddNumberToObject(json,"directionZ",direction.Z);
+    
+    cJSON_AddNumberToObject(json,"linvelX",lin_vel.getX());
+    cJSON_AddNumberToObject(json,"linvelY",lin_vel.getY());
+    cJSON_AddNumberToObject(json,"linvelZ",lin_vel.getZ());
+    
+    cJSON_AddNumberToObject(json,"angvelX",ang_vel.getX());
+    cJSON_AddNumberToObject(json,"angvelY",ang_vel.getY());
+    cJSON_AddNumberToObject(json,"angvelZ",ang_vel.getZ());
+    
+    out=cJSON_PrintUnformatted(json);
+    parent->db->Put(leveldb::WriteOptions(),kbuf,out);
+    
+    cJSON_Delete(json);
+    free(out);
 }
 void subsServer::subs::load(){
     std::string sbuf;
