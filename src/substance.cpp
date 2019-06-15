@@ -256,7 +256,7 @@ void substance::subs::updateByWorld(){
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
     
-    //printf("[updateByWorld]irrPos (%f,%f,%f)\n",irrPos.X,irrPos.Y,irrPos.Z);
+    //printf("[updateByWorld]irrRot (%f,%f,%f)\n",irrRot.X,irrRot.Y,irrRot.Z);
     
     node->setPosition(irrPos);
     node->setRotation(irrRot);

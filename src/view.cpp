@@ -37,6 +37,7 @@ void view::loadScene(){
     //updateBuildingChunks(0,0,3);
     
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
+    scene->setShadowColor(irr::video::SColor(150, 0, 0, 0));
     
     auto light=scene->addLightSceneNode();
     irr::video::SLight liconf;

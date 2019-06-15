@@ -28,9 +28,9 @@ void control::activeApply(){
 void control::addCamera(){
     printf("[view]add camera\n");
     camera=scene->addCameraSceneNodeFPS();
+    device->getCursorControl()->setVisible(false); 
 }
 bool control::eventRecv::OnEvent(const irr::SEvent &event){
-    parent->camera->OnEvent(event);
     //处理按键
     //return true;
     switch(event.EventType){
@@ -136,6 +136,8 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
             }
         break;
     }
+    parent->camera->OnEvent(event);
+    return true;
 }
 void control::addEventRecv(){
     auto old=device->getEventReceiver();

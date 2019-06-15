@@ -441,7 +441,8 @@ void physical::character::setDir(const irr::core::vector3df & d){
     //printf("[character]setDir (%f,%f,%f)\n",d.X,d.Y,d.Z);
     direction=d;//real direction
     irr::core::vector3df rotate=d.getHorizontalAngle();
-    float yaw=rotate.Y;
+    //注意：这里必须用弧度，不能用角度
+    float yaw=irr::core::degToRad(rotate.Y);
     btQuaternion quaternion(btVector3(0,1,0),yaw);
     m_ghostObject->getWorldTransform().setRotation(quaternion);
 }

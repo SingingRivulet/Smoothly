@@ -45,10 +45,11 @@ namespace smoothly{
                     inline void remove(){
                         for(int i=0;i<4;i++){
                             if(nodeLOD[i]){
-                                nodeLOD[i]->remove();
+                                //nodeLOD[i]->remove();
                                 nodeLOD[i]=NULL;
                             }
                         }
+                        node->removeAll();
                         node->remove();
                         inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
                         if(rigidBody){

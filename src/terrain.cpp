@@ -339,6 +339,7 @@ int terrain::chunk::add(
     
     ptr->nodeLOD[0]=parent->scene->addMeshSceneNode(ptr->mesh,ptr->node,-1,p,r,s);
     ptr->nodeLOD[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    ptr->nodeLOD[0]->addShadowVolumeSceneNode();
     if(mit->second->texture){
         ptr->nodeLOD[0]->setMaterialTexture( 0 , mit->second->texture);
         if(mit->second->useAlpha){
@@ -349,6 +350,7 @@ int terrain::chunk::add(
     if(mit->second->meshv2){
         ptr->nodeLOD[1]=parent->scene->addMeshSceneNode(mit->second->meshv2,ptr->node,-1,p,r,s);
         ptr->nodeLOD[1]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        ptr->nodeLOD[1]->addShadowVolumeSceneNode();
         if(mit->second->texture){
             ptr->nodeLOD[1]->setMaterialTexture( 0 , mit->second->texture);
             if(mit->second->useAlpha){
@@ -360,6 +362,7 @@ int terrain::chunk::add(
     if(mit->second->meshv3){
         ptr->nodeLOD[2]=parent->scene->addMeshSceneNode(mit->second->meshv3,ptr->node,-1,p,r,s);
         ptr->nodeLOD[2]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        ptr->nodeLOD[2]->addShadowVolumeSceneNode();
         if(mit->second->texture){
             ptr->nodeLOD[2]->setMaterialTexture( 0 , mit->second->texture);
             if(mit->second->useAlpha){
@@ -371,6 +374,7 @@ int terrain::chunk::add(
     if(mit->second->meshv4){
         ptr->nodeLOD[3]=parent->scene->addMeshSceneNode(mit->second->meshv4,ptr->node,-1,p,r,s);
         ptr->nodeLOD[3]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        ptr->nodeLOD[3]->addShadowVolumeSceneNode();
         if(mit->second->texture){
             ptr->nodeLOD[3]->setMaterialTexture( 0 , mit->second->texture);
             if(mit->second->useAlpha){
@@ -518,6 +522,7 @@ void terrain::updateChunk(int x,int y){
     ch->node->setPosition(irr::core::vector3df(ch->x*32.0f , 0 , ch->y*32.0f));
     //printf("position:(%f,%f)(%d,%d)\n",x*32.0f,y*32.0f,x,y);
     ch->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    ch->node->addShadowVolumeSceneNode();
     
     ch->bodyMesh  =createBtMesh(ch->mesh);
     ch->bodyShape =createShape(ch->bodyMesh);
