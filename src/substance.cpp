@@ -89,6 +89,13 @@ void substance::subs::setPowerAsDefault(){
 }
 void substance::subs::moveUpdate(int forward,int leftOrRight){
     //printf("[control]move update\n");
+    /*
+    if(!body->onGround()){
+        
+    }else{
+        
+    }
+    */
     if(forward==1){
         setStatusPair(4,1);//4号是move
     }else

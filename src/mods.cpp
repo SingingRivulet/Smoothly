@@ -159,13 +159,18 @@ static int mod_addTerrainMesh(lua_State * L){
     auto b=new mods::itemConfig;
     b->mesh=mesh;
     
+    b->haveBody=false;
     if(havebody){
-        b->bodyMesh=physical::createBtMesh(mesh);
-        if(b->bodyMesh)
-            b->bodyShape=physical::createShape(b->bodyMesh);
+        lua_pushstring(L,"shape");
+        lua_gettable(L,-2);
+        if(lua_isstring(L,-1)){
+            auto subsConf=lua_tostring(L,-1);
+            b->shape.init(subsConf);
+            b->haveBody=true;
+        }
+        lua_pop(L,1);
     }else{
-        b->bodyMesh =NULL;
-        b->bodyShape=NULL;
+        
     }
     
     b->BB=mesh->getBoundingBox();
@@ -220,6 +225,56 @@ static int mod_addTerrainMesh(lua_State * L){
     lua_gettable(L,-2);
     if(lua_isboolean(L,-1)){
         b->useAlpha=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"deltaPosition");
+    lua_gettable(L,-2);
+    if(lua_istable(L,-1)){
+        
+        lua_rawgeti(L,-1,1);
+        if(lua_isnumber(L,-1)){
+            b->deltaPosition.X=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_rawgeti(L,-1,2);
+        if(lua_isnumber(L,-1)){
+            b->deltaPosition.Y=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_rawgeti(L,-1,3);
+        if(lua_isnumber(L,-1)){
+            b->deltaPosition.Z=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"scale");
+    lua_gettable(L,-2);
+    if(lua_istable(L,-1)){
+        
+        lua_rawgeti(L,-1,1);
+        if(lua_isnumber(L,-1)){
+            b->scale.X=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_rawgeti(L,-1,2);
+        if(lua_isnumber(L,-1)){
+            b->scale.Y=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
+        lua_rawgeti(L,-1,3);
+        if(lua_isnumber(L,-1)){
+            b->scale.Z=lua_tonumber(L,-1);
+        }
+        lua_pop(L,1);
+        
     }
     lua_pop(L,1);
     
@@ -777,7 +832,7 @@ int getCharAnimationId(
 }
 
 static int mod_getCharAnimationId(lua_State * L){
-    //           站     蹲     趴    飞
+    //           站     蹲     趴    飞/跳
     //0          0      1     2     3
     //1单手近战    4      5     6     7
     //2双手近战    8      9     10   11
@@ -786,8 +841,9 @@ static int mod_getCharAnimationId(lua_State * L){
     //5双持近战    20     21    22   23
     //6双持远战    24     25    26   27
     //数值乘8加0为站立，加1为行走，加2为奔跑，加3倒走，加4倒跑
+    //加100为乘坐，加200骑跨
     
-    auto foot =luaL_checkstring(L,1);//站 蹲 趴 飞
+    auto foot =luaL_checkstring(L,1);//站 蹲 趴 飞/跳
     auto hand =luaL_checkstring(L,2);//空手 单手 双手 双持
     auto range=luaL_checkstring(L,3);//无攻击 近战 远战
     auto move =luaL_checkstring(L,4);//站立 行走 奔跑
@@ -1018,7 +1074,7 @@ void mods::mapGenerator::autoGen(int x,int y,int tem,int hu,float h,mods * mod){
             if(pr>delta){
                 float mx=(randg.frand()+x)*32;
                 float my=(randg.frand()+y)*32;
-                float mr=randg.frand()*3.14159*2;
+                float mr=randg.frand()*360;
                 float mh=getRealHight(mx,my);
                 //printf("autoGen:%f %f %f %f\n",mx,my,mh,mr);
                 this->add(

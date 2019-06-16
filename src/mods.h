@@ -31,21 +31,24 @@ namespace smoothly{
             struct itemConfig:itemBase{
                 bool haveBB;
                 irr::core::aabbox3d<float> BB;
-                btCollisionShape * bodyShape;
-                btTriangleMesh   * bodyMesh;
+                irr::core::vector3df deltaPosition;
+                irr::core::vector3df scale;
+                
+                bool                 haveBody;
+                shapeGroup           shape;
+                
                 irr::scene::IMesh * meshv2;
                 irr::scene::IMesh * meshv3;
                 irr::scene::IMesh * meshv4;
                 irr::video::ITexture* texture;
                 bool                useAlpha;
-                itemConfig(){
+                itemConfig():deltaPosition(0,0,0),scale(1,1,1){
                     mesh=NULL;
                     meshv2=NULL;
                     meshv3=NULL;
                     meshv4=NULL;
                     texture=NULL;
-                    bodyMesh=NULL;
-                    bodyShape=NULL;
+                    haveBody=false;
                     useAlpha=false;
                 }
                 inline void destroy(){
@@ -54,8 +57,10 @@ namespace smoothly{
                     //if(meshv3)   meshv3->drop();
                     //if(meshv4)   meshv4->drop();
                     //irr可以自动回收
-                    if(bodyMesh) delete bodyMesh;
-                    if(bodyShape)delete bodyShape;
+                    if(haveBody){
+                        shape.release();
+                        haveBody=false;
+                    }
                 }
             };
             std::map<long,itemConfig*> items;
@@ -137,6 +142,7 @@ namespace smoothly{
                     float                 friction;//摩擦力
                     float                 restitution;//反弹
                     
+                    int rideMode;//0:不允许，1:允许乘坐，2:骑跨
                     bool walkInSky;
                     bool jumpInSky;
                     

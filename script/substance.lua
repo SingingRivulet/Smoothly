@@ -1,10 +1,5 @@
-local function readFile(fileName)
-    local f = assert(io.open(fileName,'r'))
-    local content = f:read('*all')
-    f:close()
-    return content
-end
-
+package.path="./script/?.lua;"..package.path
+require("utils")
 function loadServerSubtance(server) -- config for server
     smoothly.addSubsConf(server,1,true,100) -- player
 end

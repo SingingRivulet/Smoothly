@@ -304,9 +304,9 @@ bool terrain::remove(const mapid & mid){
 
 int terrain::chunk::add(
     long id,
-    const irr::core::vector3df & p,
+    const irr::core::vector3df & op,
     const irr::core::vector3df & r,
-    const irr::core::vector3df & s
+    const irr::core::vector3df & os
 ){
     auto mit=parent->m->items.find(id);
     if(mit==parent->m->items.end()){
@@ -326,6 +326,15 @@ int terrain::chunk::add(
     
     if(parent->allItems.find(mapid(x,y,id,mapId))!=parent->allItems.end())
         return -2;
+    
+    irr::core::vector3df p=op;
+    p+=mit->second->deltaPosition;
+    
+    const irr::core::vector3df & ds=mit->second->scale;
+    irr::core::vector3df s=os;
+    s.X*=ds.X;
+    s.Y*=ds.Y;
+    s.Z*=ds.Z;
     
     char buf[256];
     auto ptr=parent->createItem();
@@ -388,13 +397,13 @@ int terrain::chunk::add(
     parent->getItemName(buf,sizeof(buf),x,y,id,mapId);
     ptr->node->setName(buf);
     
-    if(mit->second->bodyShape){
+    if(mit->second->haveBody){
         auto dp=ptr->nodeLOD[0]->getPosition();
         //printf("[terrain::chunk]add body(%f,%f,%f)\n",dp.X,dp.Y,dp.Z);
         ptr->nodeLOD[0]->updateAbsolutePosition();
         ptr->bodyState=setMotionState(ptr->nodeLOD[0]->getAbsoluteTransformation().pointer());
         //btTransform transform;
-        ptr->rigidBody=createBody(mit->second->bodyShape,ptr->bodyState);
+        ptr->rigidBody=createBody(mit->second->shape.compound,ptr->bodyState);
         ptr->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
         
         ptr->info.type=BODY_TERRAIN_ITEM;

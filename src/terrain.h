@@ -51,8 +51,9 @@ namespace smoothly{
                         }
                         node->removeAll();
                         node->remove();
-                        inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
+                        
                         if(rigidBody){
+                            inChunk->parent->dynamicsWorld->removeRigidBody(rigidBody);
                             delete rigidBody;
                             delete bodyState;
                         }

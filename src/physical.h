@@ -81,6 +81,8 @@ namespace smoothly{
                     virtual void setTransform(btTransform & )=0;
                     virtual void getTransform(btTransform & )=0;
                     
+                    virtual bool onGround()=0;
+                    
                     virtual void setAngularFactor(const btVector3&)=0;
                     
                     virtual void teleport(const irr::core::vector3df &);
@@ -155,6 +157,10 @@ namespace smoothly{
                     virtual irr::core::vector3df getDir();
                     
                     virtual void getDeltaL(irr::core::vector3df &);
+                    
+                    virtual bool onGround(){
+                        return controller->onGround();
+                    }
             };
             
             class rigidBody:public bodyBase{
@@ -187,6 +193,10 @@ namespace smoothly{
                     virtual void setAngularFactor(const btVector3&);
                     
                     virtual void setUserPointer(void *);
+                    
+                    virtual bool onGround(){
+                        return true;
+                    }
                     
                     virtual void setTransform(btTransform & );
                     virtual void getTransform(btTransform & );

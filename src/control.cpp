@@ -22,6 +22,7 @@ void control::activeApply(){
     //dir.normalize();
     
     irr::core::vector3df dt= mainControlPosition;
+    dt.Y+=deltaCamera;
     camera->setPosition(dt);
 }
 
