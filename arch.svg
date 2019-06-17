@@ -1,0 +1,109 @@
+<svg width="2000" height="1500" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <g>
+  <title>background</title>
+  <rect fill="#ffffff" id="canvas_background" height="1502" width="2002" y="-1" x="-1"/>
+  <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <text transform="matrix(1.11117, 0, 0, 1, -100.608, 0)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_4" y="495.675427" x="375.889103" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">客</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_5" y="562.897649" x="316.216704" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">户</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_6" y="629.971722" x="314.364852" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">端</text>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_7" y="494.35285" x="1669.486099" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">服</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_8" y="561.278776" x="1667.634247" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">务</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="48" id="svg_9" y="634.908405" x="1670.337951" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">器</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_11" y2="1494.023166" x2="1019.885292" y1="9.999924" x1="1020.000014" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_12" height="176.845622" width="593.358833" y="42.916001" x="725.072042" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text transform="matrix(1, 0, 0, 0.96824, 0, 1.31303)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_14" y="70.079731" x="971.296127" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">场景系统</text>
+  <rect id="svg_15" height="33.33326" width="120.237829" y="64.2855" x="744.045952" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_16" y="90.47592" x="755.950711" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">地形生成</text>
+  <rect id="svg_17" height="34.523733" width="119.047356" y="103.571127" x="746.426899" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_19" y="130.952021" x="758.331663" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">物件生成</text>
+  <rect id="svg_20" height="36.90468" width="123.80925" y="99.999706" x="1167.854538" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_22" y="128.571072" x="1171.425959" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">物件删除表</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_23" y2="119.047283" x2="873.80757" y1="117.85681" x1="1157.140276" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_24" y2="110.28078" x2="889.108169" y1="119.103243" x1="874.404065" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <path id="svg_27" d="m861.945374,161.194977" opacity="0.5" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_26" y2="127.435568" x2="888.618032" y1="118.613106" x1="874.404065" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_28" height="32.836014" width="152.239696" y="163.433796" x="744.034212" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_29" y="190.299625" x="747.765568" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">地形物件交互</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_30" y2="182.090626" x2="1224.634057" y1="182.090622" x1="900.005268" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_31" y2="182.095334" x2="1224.449169" y1="141.920824" x1="1222.702451" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_32" y2="142.392088" x2="1222.953891" y1="156.954915" x1="1210.332774" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_33" y2="143.039324" x2="1222.630273" y1="155.013204" x1="1233.956916" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_34" y="291.429229" x="969.446121" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">建筑系统</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_36" y="307.142784" x="752.380933" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">添加建筑</text>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_37" y="352.380879" x="735.714267" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">建筑连接计算器</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_38" y2="81.564175" x2="675.418955" y1="82.122834" x1="738.547444" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line transform="translate(675.495, 81.373) scale(0.571429, 1) translate(-675.495, -81.373)" stroke-linecap="null" stroke-linejoin="null" id="svg_39" y2="345.100195" x2="675.984785" y1="81.373012" x1="675.494584" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_40" y2="344.300965" x2="714.839074" y1="344.300965" x1="675.483321" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_41" y2="344.053445" x2="714.344034" y1="338.360474" x1="704.690736" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_42" y2="344.300965" x2="714.591554" y1="349.993936" x1="704.938256" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_43" y="398.575465" x="757.581185" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">删除建筑</text>
+  <rect id="svg_44" height="33.814164" width="171.94862" y="283.463418" x="729.522624" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_45" height="32.375263" width="174.106969" y="330.227687" x="729.783638" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_46" height="31.655813" width="172.668071" y="374.833605" x="728.803174" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_47" y2="329.515424" x2="806.828205" y1="317.841415" x1="806.828205" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_48" y2="362.775335" x2="807.268734" y1="374.22908" x1="807.488998" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_49" y2="329.955952" x2="807.048469" y1="325.77093" x1="802.643183" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_51" y2="325.991194" x2="810.352441" y1="329.515418" x1="806.828203" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_52" y2="362.9956" x2="806.828205" y1="367.400886" x1="803.964769" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_53" y2="363.215864" x2="806.828205" y1="366.960357" x1="810.13217" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_55" y="353.187334" x="1134.909518" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">建筑连接计算器</text>
+  <rect id="svg_56" height="32.375263" width="174.106969" y="331.034142" x="1129.785345" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_57" y2="338.711134" x2="1117.746762" y1="298.388379" x1="904.036167" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_58" y2="363.711242" x2="1118.553216" y1="397.582355" x1="904.036166" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_59" y2="346.775685" x2="909.681351" y1="350.001505" x1="1117.746761" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_63" y2="339.785693" x2="1117.595604" y1="328.870298" x1="1113.722399" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_64" y2="339.081474" x2="1117.595604" y1="345.067336" x1="1109.144975" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_66" y2="363.377031" x2="1117.947713" y1="358.095388" x1="1111.257632" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_67" y2="364.081254" x2="1117.947701" y1="371.475552" x1="1111.609749" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_68" y2="346.475774" x2="909.498877" y1="339.785693" x1="914.42841" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_69" y2="346.475774" x2="908.794657" y1="352.109526" x1="914.0763" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_70" height="157.799075" width="631.195984" y="256.882214" x="688.07766" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_71" y="477.964634" x="972.878368" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">物体系统</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_72" y="522.933655" x="997.243538" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">角色</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_73" y="570.639884" x="973.390423" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">简单刚体</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_74" y="614.676403" x="997.243538" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">车辆</text>
+  <rect id="svg_75" height="30.275107" width="53.210794" y="498.163113" x="993.573829" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_76" height="31.192534" width="99.999595" y="546.786769" x="969.720714" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_77" height="31.192534" width="55.963076" y="590.823288" x="993.573829" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_79" y="520.162766" x="655.93717" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">玩家</text>
+  <rect id="svg_80" height="35.778391" width="60.548046" y="494.475716" x="648.598013" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_81" y2="511.906214" x2="984.36445" y1="511.906214" x1="716.485216" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_82" y2="512.826015" x2="985.485329" y1="503.017867" x1="973.808962" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_83" y2="512.358959" x2="984.551232" y1="519.831834" x1="973.808974" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_84" y="517.307716" x="824.038479" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">控制</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_85" y2="562.500026" x2="963.461561" y1="524.038486" x1="716.346168" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_86" y2="611.134859" x2="984.11792" y1="535.173318" x1="700.464064" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text style="cursor: move;" transform="rotate(15.32, 844.231, 571.635)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_87" y="581.730797" x="820.192325" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">乘坐</text>
+  <text transform="rotate(7.63424, 849.039, 540.865)" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_88" y="550.961564" x="825.000018" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">发射</text>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_89" y2="554.739928" x2="957.656327" y1="562.404099" x1="962.765777" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_90" y2="567.13207" x2="957.29137" y1="562.387584" x1="962.400817" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_91" y2="611.673765" x2="985.028367" y1="605.834397" x1="981.378762" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_93" y2="614.593449" x2="980.283881" y1="611.308804" x1="984.663407" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <rect id="svg_94" height="192.10748" width="695.622064" y="452.023563" x="632.310308" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_96" y2="177.195027" x2="644.744159" y1="176.317824" x1="736.850485" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_97" y2="304.389478" x2="668.09628" y1="303.512275" x1="727.201251" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_98" y2="489.479334" x2="691.235923" y1="398.25021" x1="723.692438" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_100" y2="486.847724" x2="650.007384" y1="177.053376" x1="645.479709" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_101" y2="487.724927" x2="668.428643" y1="303.583104" x1="668.428643" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_102" y2="401.978448" x2="716.465024" y1="398.752943" x1="723.319221" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_103" y2="398.752945" x2="723.319221" y1="404.800764" x1="725.738349" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_104" y2="303.197392" x2="726.544725" y1="299.971888" x1="720.093716" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_105" y2="304.003768" x2="726.947913" y1="308.438836" x1="720.093716" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_106" y2="176.193162" x2="735.818049" y1="168.935778" x1="730.173417" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_107" y2="176.193162" x2="736.624426" y1="183.853735" x1="729.36703" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_108" y="604.545753" x="654.545712" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">背包</text>
+  <rect id="svg_109" height="29.54547" width="57.954575" y="582.954833" x="648.863891" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_110" y2="573.863919" x2="676.136633" y1="536.3639" x1="675.000268" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_111" y="720.454902" x="1176.13689" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">道具系统</text>
+  <rect id="svg_112" height="35.227291" width="96.590959" y="694.318525" x="1176.13689" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_113" y2="605.401003" x2="714.033156" y1="713.355604" x1="1159.48793" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_114" y2="604.124728" x2="714.215797" y1="614.21641" x1="717.885499" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+  <line stroke-linecap="null" stroke-linejoin="null" id="svg_116" y2="599.599883" x2="722.743051" y1="604.9719" x1="714.065173" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="none"/>
+ </g>
+</svg>

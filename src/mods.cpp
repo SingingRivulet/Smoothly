@@ -1029,17 +1029,29 @@ void mods::loadMesh(){
     b = new building(
         creator->createCubeMesh(irr::core::vector3df(5.0f , 0.1f , 5.0f)),
         scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
-        "+b0 0 0 0 0 0 1 2.5 0.1 2.5\nM5 1 1 1",
+        "+b0 0 0 0 0 0 1 2.5 0.05 2.5\nM5 1 1 1",
         true,
         0.5,
         0.5
     );
+    b->onAimAtBuildingCFunc=[](
+        const irr::core::vector3df & aimAt,
+        const irr::core::vector3df & trg,
+        const irr::core::vector3df & trgRot,
+        const irr::core::vector3df & camRot,
+        int aimId,
+        irr::core::vector3df & outPosi,
+        irr::core::vector3df & outRot
+    )->bool{
+        
+    };
+    //b->haveOnAimAtBuilding=true;
     buildings[1]= b;
     
     b = new building(
         creator->createCubeMesh(irr::core::vector3df(5.0f , 5.0f , 0.1f)),
         scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
-        "+b0 0 0 0 0 0 1 5.0 5.0 0.1\nM5 1 1 1",
+        "+b0 0 0 0 0 0 1 2.5 2.5 0.05\nM5 1 1 1",
         true,
         0.5,
         0.5
@@ -1049,7 +1061,7 @@ void mods::loadMesh(){
     b = new building(
         creator->createCubeMesh(irr::core::vector3df(1.0f , 5.0f , 1.0f)),
         scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
-        "+b0 0 0 0 0 0 1 1.0 5.0 1.0\nM5 1 1 1",
+        "+b0 0 0 0 0 0 1 0.5 2.5 0.5\nM5 1 1 1",
         true,
         0.5,
         0.5
