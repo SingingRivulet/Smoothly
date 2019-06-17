@@ -111,6 +111,8 @@ namespace smoothly{
             irr::scene::IMeshSceneNode * buildingNode;
             mods::building * buildingConfig;
             bool allowBuild;
+            
+            building * aimAtBuilding;
     };
 }
 #endif

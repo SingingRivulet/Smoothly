@@ -101,6 +101,10 @@ buildings::building * buildings::collisionWithBuildings(const irr::core::line3d<
     arg.self=this;
     arg.ray=ray;
     arg.node=NULL;
+    
+    //拾取到指针置零
+    aimAtBuilding=NULL;
+    
     buildingHBB.rayTest(ray,[](HBB::AABB * box , void * argp){
         auto bd=(building*)(box->data);
         if(bd->type==building::BUILDING_TERRAIN)
@@ -146,6 +150,10 @@ buildings::building * buildings::collisionWithBuildings(const irr::core::line3d<
     getTriangleNormal(arg.triangle , ray.start , n);
     normal.start=arg.position;
     normal.end=arg.position+n;
+    
+    //把值赋给缓冲区，交给脚本处理，重新设置坐标，实现自动吸附
+    aimAtBuilding=arg.node;
+    
     return arg.node;
 }
 
@@ -160,8 +168,12 @@ void buildings::onGenBuilding(remoteGraph::item * i){
     i->node->setPosition(i->position);
     i->node->setRotation(i->rotation);
     i->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    if(it->second->useAlpha){
-        i->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    
+    if(it->second->texture){//设置纹理
+        i->node->setMaterialTexture( 0 , it->second->texture);
+        if(it->second->useAlpha){
+            i->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
     }
     
     irr::core::aabbox3d<irr::f32> box=it->second->BB;
@@ -279,7 +291,7 @@ bool buildings::getNormalByRay(const irr::core::line3d<irr::f32> & ray,irr::core
             return true;
         }
     }else
-        return collisionWithBuildings(ray,normal);
+        return collisionWithBuildings(ray,normal)!=NULL;
 }
 
 void buildings::transformByNormal(irr::scene::IMeshSceneNode * n,const irr::core::line3d<irr::f32> & normal){
@@ -290,6 +302,7 @@ void buildings::transformByNormal(irr::scene::IMeshSceneNode * n,const irr::core
     auto vc=cameraRay.end-cameraRay.start;
     vc.normalize();
     auto ang=vc.getHorizontalAngle();
+    ang.Z=0;
     ang.X=0;
     
     //irr::core::vector3df eu;
@@ -330,10 +343,19 @@ void buildings::doBuildBegin(long type){
         return;
     }
     buildingConfig=mit->second;
+    
     buildingNode=scene->addMeshSceneNode(
         buildingConfig->mesh,
         0,-1
     );
+    
+    if(mit->second->texture){//设置纹理
+        buildingNode->setMaterialTexture( 0 , buildingConfig->texture);
+        if(buildingConfig->useAlpha){
+            buildingNode->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        }
+    }
+    
     buildingNode->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     buildingNode->setVisible(false);
 }
@@ -353,8 +375,49 @@ void buildings::doBuildUpdate(const irr::core::line3d<irr::f32> & ray){
     cameraRay.start=ray.start;
     cameraRay.end=cameraRay.start+nr.normalize()*5.0f;
     
+    //拾取到指针置零
+    aimAtBuilding=NULL;
+    
     irr::core::line3d<irr::f32> buildingNormal;
     if(getNormalByRay(cameraRay,buildingNormal)){
+        
+        //检查是否拾取到物体
+        if(aimAtBuilding && aimAtBuilding->type==building::BUILDING_ITEM){
+            //调用脚本，吸附坐标
+            auto itm=(remoteGraph::item*)(aimAtBuilding->data);
+            if(itm){
+                auto it=m->buildings.find(buildingType);//找到现在要创建物体配置信息
+                if(it!=m->buildings.end() && it->second->haveOnAimAtBuilding){//存在回调函数，跳过正常途径，使用回调函数
+                    
+                    auto vc=cameraRay.end-cameraRay.start;
+                    vc.normalize();
+                    irr::core::vector3df camAng=vc.getHorizontalAngle();//摄像机的旋转角度
+                    
+                    irr::core::vector3df npos,nrot;
+                    
+                    if(it->second->callOnAimAtBuilding(
+                        m->L,//lua vm
+                        buildingNormal.start,//起点为瞄准目标
+                        itm->position,
+                        itm->rotation,
+                        camAng,
+                        itm->type,
+                        npos,nrot
+                    )){
+                        buildingNode->setPosition(npos);//更新n的坐标
+                        buildingNode->setRotation(nrot);//更新n的旋转欧拉角
+                        buildingNode->updateAbsolutePosition();//更新矩阵
+                        buildingNode->setVisible(true);
+                        allowBuild=true;
+                    }else{
+                        buildingNode->setVisible(false);
+                        allowBuild=false;
+                    }
+                    return;
+                }
+            }
+        }
+        
         transformByNormal(buildingNode,buildingNormal);
         buildingNode->setVisible(true);
         allowBuild=true;
@@ -379,12 +442,33 @@ void buildings::doBuildApply(){
                     buildingNode->getRotation()
                 );
             else{
+                
+                if(aimAtBuilding){//把瞄准的指针插入链表
+                    bool insed=false;
+                    for(auto it:l){
+                        if(it==aimAtBuilding){
+                            insed=true;
+                            break;
+                        }
+                    }
+                    if(!insed){
+                        l.push_back(aimAtBuilding);
+                    }
+                }
+                
                 for(auto it:l){
                     if(it && it->type==building::BUILDING_ITEM){
                         auto pitem=(remoteGraph::item*)it->data;
                         sislist.push_back(pitem->uuid);
                     }
                 }
+                
+                //此步在指针阶段进行，提高效率
+                ////把拾取到的物体也加入，并去重
+                //sislist.push_back( );
+                //sislist.sort();
+                //sislist.erase(unique(sislist.begin() , sislist.end()) , sislist.end());
+                
                 if(sislist.empty())
                     return;
                 buildOn(

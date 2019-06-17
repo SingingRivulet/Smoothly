@@ -33,7 +33,7 @@ static int mod_addBuildingMesh(lua_State * L){
         return 1;
     }
     
-    std::string scmpath;
+    std::string scmpath,texture,shape;
     bool havebody=false;
     bool useAlpha=false;
     
@@ -59,6 +59,28 @@ static int mod_addBuildingMesh(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"texture");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        texture=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Texture doesn't exist!");
+        return 1;
+    }
+    
+    lua_pushstring(L,"shape");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        shape=lua_tostring(L,-1);
+        lua_pop(L,1);
+    }else{
+        lua_pop(L,1);
+        lua_pushstring(L,"Shape doesn't exist!");
+        return 1;
+    }
+    
     lua_pushstring(L,"mesh");
     lua_gettable(L,-2);
     if(lua_isstring(L,-1)){
@@ -69,13 +91,6 @@ static int mod_addBuildingMesh(lua_State * L){
         lua_pushstring(L,"Mesh doesn't exist!");
         return 1;
     }
-    
-    lua_pushstring(L,"havebody");
-    lua_gettable(L,-2);
-    if(lua_isboolean(L,-1)){
-        havebody=lua_toboolean(L,-1);
-    }
-    lua_pop(L,1);
     
     auto mesh=self->scene->getMesh(scmpath.c_str());
     if(mesh==NULL){
@@ -90,14 +105,23 @@ static int mod_addBuildingMesh(lua_State * L){
     }
     lua_pop(L,1);
     
-    auto b  = new mods::building;
-    b->mesh = mesh;
-    b->BB   = b->mesh->getBoundingBox();
-    b->bodyMesh = physical::createBtMesh(b->mesh);
-    b->bodyShape= physical::createShape(b->bodyMesh);
-    b->useAlpha = useAlpha;
-    b->friction = friction;
-    b->restitution=restitution;
+    auto b  = new mods::building(
+        mesh,
+        self->scene->getVideoDriver()->getTexture(texture.c_str()),
+        shape,
+        useAlpha,
+        friction,
+        restitution
+    );
+    
+    lua_pushstring(L,"onAimAtBuilding");
+    lua_gettable(L,-2);
+    if(lua_isfunction(L,-1)){
+        b->onAimAtBuilding=luaL_ref(L,LUA_REGISTRYINDEX);
+        b->haveOnAimAtBuilding=true;
+    }
+    lua_pop(L,1);
+    
     self->buildings[id]=b;
     
     lua_pushstring(L,"OK");
@@ -999,49 +1023,52 @@ void mods::loadConfig(){
 }
 void mods::loadMesh(){
     building * b;
+    
     auto creator=scene->getGeometryCreator();
     
-    b           = new building;
-    b->mesh     = creator->createCubeMesh(irr::core::vector3df(5.0f , 0.1f , 5.0f));
-    b->BB       = b->mesh->getBoundingBox();
-    b->bodyMesh = createBtMesh(b->mesh);
-    b->bodyShape= createShape(b->bodyMesh);
+    b = new building(
+        creator->createCubeMesh(irr::core::vector3df(5.0f , 0.1f , 5.0f)),
+        scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
+        "+b0 0 0 0 0 0 1 2.5 0.1 2.5\nM5 1 1 1",
+        true,
+        0.5,
+        0.5
+    );
     buildings[1]= b;
     
-    b       = new building;
-    b->mesh = creator->createCubeMesh(irr::core::vector3df(5.0f , 5.0f , 0.1f));
-    b->BB   = b->mesh->getBoundingBox();
-    b->bodyMesh = createBtMesh(b->mesh);
-    b->bodyShape= createShape(b->bodyMesh);
+    b = new building(
+        creator->createCubeMesh(irr::core::vector3df(5.0f , 5.0f , 0.1f)),
+        scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
+        "+b0 0 0 0 0 0 1 5.0 5.0 0.1\nM5 1 1 1",
+        true,
+        0.5,
+        0.5
+    );
     buildings[2]=b;
     
-    b       = new building;
-    b->mesh = creator->createCubeMesh(irr::core::vector3df(1.0f , 5.0f , 1.0f));
-    b->BB   = b->mesh->getBoundingBox();
-    b->bodyMesh = createBtMesh(b->mesh);
-    b->bodyShape= createShape(b->bodyMesh);
+    b = new building(
+        creator->createCubeMesh(irr::core::vector3df(1.0f , 5.0f , 1.0f)),
+        scene->getVideoDriver()->getTexture("./res/model/tree1/tree_trunk.tga"),
+        "+b0 0 0 0 0 0 1 1.0 5.0 1.0\nM5 1 1 1",
+        true,
+        0.5,
+        0.5
+    );
     buildings[3]=b;
+    
 }
 void mods::destroy(){
     for(auto it:items){
-        it.second->destroy();
         delete it.second;
     }
     items.clear();
     
     for(auto it:buildings){
-        it.second->mesh->drop();
-        //if(it.second->texture)   it.second->texture->drop();
-        if(it.second->bodyShape)delete it.second->bodyShape;
-        if(it.second->bodyMesh) delete it.second->bodyMesh;
         delete it.second;
     }
     buildings.clear();
     
     for(auto it:subsConfs){
-        it.second->mesh->drop();
-        if(it.second->texture)it.second->texture->drop();
-        it.second->shape.release();
         delete it.second;
     }
     subsConfs.clear();

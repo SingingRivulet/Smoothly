@@ -51,7 +51,7 @@ namespace smoothly{
                     haveBody=false;
                     useAlpha=false;
                 }
-                inline void destroy(){
+                inline ~itemConfig(){
                     //if(mesh)     mesh->drop();
                     //if(meshv2)   meshv2->drop();
                     //if(meshv3)   meshv3->drop();
@@ -67,9 +67,9 @@ namespace smoothly{
             /////////////////////////////////////////////////////////////////////////////
             class mapGenerator{
                 public:
-                    irr::IrrlichtDevice * device;
-                    irr::scene::ISceneManager * scene;//场景
-                    irr::scene::IMeshSceneNode * node;
+                    irr::IrrlichtDevice         * device;
+                    irr::scene::ISceneManager   * scene;//场景
+                    irr::scene::IMeshSceneNode  * node;
                     perlin3d * generator;
                     virtual int add(
                         long id,
@@ -98,13 +98,217 @@ namespace smoothly{
             };
             class building:public buildingBase{
                 public:
-                    irr::scene::IMesh * mesh;
+                    irr::scene::IMesh    * mesh;
+                    irr::video::ITexture * texture;
+                    
                     btCollisionShape  * bodyShape;
-                    btTriangleMesh    * bodyMesh;
+                    //btTriangleMesh    * bodyMesh;
+                    shapeGroup           shape;
+                    
                     bool                useAlpha;
                     float               friction;
                     float               restitution;
+                    
+                    /*
+                    table callback({
+                      x,y,z,//瞄准坐标
+                      x,y,z,//瞄准物体的坐标
+                      x,y,z,//瞄准物体的旋转角度
+                      x,y,z,//摄像头旋转角度
+                      aimId   //瞄准物体的id
+                    })
+                     * return:
+                     *   nil:不放置物体
+                     * 
+                     *   {
+                     *     x,y,z,     //放置位置
+                     *     ax,ay,az   //放置角度
+                     *   }
+                     */
+                    int         onAimAtBuilding;
+                    bool        haveOnAimAtBuilding;
+                    bool (*onAimAtBuildingCFunc)(
+                        const irr::core::vector3df & aimAt,
+                        const irr::core::vector3df & trg,
+                        const irr::core::vector3df & trgRot,
+                        const irr::core::vector3df & camRot,
+                        int aimId,
+                        irr::core::vector3df & outPosi,
+                        irr::core::vector3df & outRot
+                    );
+                    
+                    bool callOnAimAtBuilding(
+                        lua_State * L,
+                        const irr::core::vector3df & aimAt,
+                        const irr::core::vector3df & trg,
+                        const irr::core::vector3df & trgRot,
+                        const irr::core::vector3df & camRot,
+                        int aimId,
+                        irr::core::vector3df & outPosi,
+                        irr::core::vector3df & outRot
+                    ){
+                        if(!haveOnAimAtBuilding)
+                            return false;
+                        
+                        if(onAimAtBuildingCFunc){
+                            return onAimAtBuildingCFunc(aimAt,trg,trgRot,camRot,aimId,outPosi,outRot);
+                        }else{
+                            
+                            lua_settop(L,0);
+                            lua_rawgeti(L,LUA_REGISTRYINDEX,onAimAtBuilding);
+                            if(!lua_isfunction(L,-1)){
+                                lua_pop(L,1);
+                                return false;
+                            }
+                            
+                            lua_newtable(L);
+                            
+                                lua_newtable(L);
+                                lua_pushnumber(L,aimAt.X);
+                                lua_rawseti(L, -2, 1);
+                                lua_pushnumber(L,aimAt.Y);
+                                lua_rawseti(L, -2, 2);
+                                lua_pushnumber(L,aimAt.Z);
+                                lua_rawseti(L, -2, 3);
+                            
+                            lua_rawseti(L, -2, 1);
+                            
+                                lua_newtable(L);
+                                lua_pushnumber(L,trg.X);
+                                lua_rawseti(L, -2, 1);
+                                lua_pushnumber(L,trg.Y);
+                                lua_rawseti(L, -2, 2);
+                                lua_pushnumber(L,trg.Z);
+                                lua_rawseti(L, -2, 3);
+                            
+                            lua_rawseti(L, -2, 2);
+                            
+                                lua_newtable(L);
+                                lua_pushnumber(L,trgRot.X);
+                                lua_rawseti(L, -2, 1);
+                                lua_pushnumber(L,trgRot.Y);
+                                lua_rawseti(L, -2, 2);
+                                lua_pushnumber(L,trgRot.Z);
+                                lua_rawseti(L, -2, 3);
+                            
+                            lua_rawseti(L, -2, 3);
+                            
+                                lua_newtable(L);
+                                lua_pushnumber(L,camRot.X);
+                                lua_rawseti(L, -2, 1);
+                                lua_pushnumber(L,camRot.Y);
+                                lua_rawseti(L, -2, 2);
+                                lua_pushnumber(L,camRot.Z);
+                                lua_rawseti(L, -2, 3);
+                            
+                            lua_rawseti(L, -2, 4);
+                            
+                            lua_pushinteger(L,aimId);
+                            lua_rawseti(L, -2, 5);
+                            
+                            if(lua_pcall(L, 1, 1, 0) != 0){
+                                printf("[callOnAimAtBuilding]error %s\n", lua_tostring(L,-1));
+                                return false;
+                            }else{
+                                if(lua_istable(L,-1)){
+                                    
+                                    if(luaL_len(L,-1)<6)
+                                        return false;
+                                    
+                                    lua_rawgeti(L,-1,1);
+                                    outPosi.X=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    lua_rawgeti(L,-1,2);
+                                    outPosi.Y=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    lua_rawgeti(L,-1,3);
+                                    outPosi.Z=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    lua_rawgeti(L,-1,4);
+                                    outRot.X=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    lua_rawgeti(L,-1,5);
+                                    outRot.Y=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    lua_rawgeti(L,-1,6);
+                                    outRot.Z=lua_tonumber(L,-1);
+                                    lua_pop(L,1);
+                                    
+                                    return true;
+                                }else
+                                    return false;
+                            }
+                            
+                        }
+                        return false;
+                    }
+                    
                     irr::core::aabbox3d<float> BB;
+                    
+                    inline building(
+                        irr::scene::IMesh * m,
+                        irr::video::ITexture* tu,
+                        const std::string & shape,
+                        bool ualpha,
+                        float f,
+                        float r
+                    ){
+                        init(m,tu,shape,ualpha,f,r);
+                    }
+                    
+                    inline building(
+                        irr::scene::ISceneManager * scene,
+                        const char * mpath,
+                        const char * tpath,
+                        const std::string & shape,
+                        bool ualpha,
+                        float f,
+                        float r
+                    ){
+                        init(
+                            scene->getMesh(mpath),
+                            scene->getVideoDriver()->getTexture(tpath),
+                            shape,
+                            ualpha,
+                            f,r
+                        );
+                    }
+                    
+                    inline void init(
+                        irr::scene::IMesh * m,
+                        irr::video::ITexture* tu,
+                        const std::string & shape,
+                        bool ualpha,
+                        float f,
+                        float r
+                    ){
+                        this->mesh      = m;
+                        BB              = this->mesh->getBoundingBox();
+                        this->texture   = tu;
+                        this->shape.init(shape);
+                        this->bodyShape = this->shape.compound;
+                        useAlpha        = ualpha;
+                        friction        = f;
+                        restitution     = r;
+                        haveOnAimAtBuilding = false;
+                        onAimAtBuildingCFunc=NULL;
+                    }
+                    inline ~building(){
+                        if(mesh)        mesh->drop();
+                        //if(it.second->texture)   it.second->texture->drop();
+                        //if(bodyShape)   delete bodyShape;
+                        //if(bodyMesh)    delete bodyMesh;
+                        
+                        //if(texture)     texture->drop();
+                        
+                        shape.release();
+                        this->bodyShape=NULL;
+                    }
             };
             std::map<long,building*> buildings;
             
@@ -246,7 +450,9 @@ namespace smoothly{
                     }
                     
                     inline ~subsConf(){
-                        
+                        if(mesh)    mesh->drop();
+                        if(texture) texture->drop();
+                        shape.release();
                     }
             };
             std::map<long,subsConf *> subsConfs;
