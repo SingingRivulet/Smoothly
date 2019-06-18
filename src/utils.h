@@ -103,6 +103,10 @@ namespace smoothly{
         auto l=t-f;
         return (l.X*l.X + l.Y*l.Y + l.Z*l.Z);
     }
+    inline float mhtDist(const irr::core::vector3df & A,const irr::core::vector3df & B){
+        irr::core::vector3df d=A-B;
+        return fabs(d.X)+fabs(d.Y)+fabs(d.Z);
+    }
     
     class ipair{
         public:

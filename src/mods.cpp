@@ -1044,8 +1044,59 @@ void mods::loadMesh(){
         irr::core::vector3df & outRot
     )->bool{
         
+        if(aimId!=1){
+            outPosi = aimAt;
+            outRot.set(0,camRot.Y,0);
+            return true;
+        }
+        
+        //自动吸附
+        irr::core::vector2df p1(5 , 0),p2(0 , 5),p3(-5, 0),p4(0 ,-5);
+        
+        float rt=trgRot.Y;
+        
+        //p1=p1.rotateBy(rt);
+        //p2=p2.rotateBy(rt);
+        //p3=p3.rotateBy(rt);
+        //p4=p4.rotateBy(rt);
+        
+        irr::core::vector3df rp[4];
+        
+        rp[0].set(p1.X+trg.X , trg.Y , p1.Y+trg.Z),//计算出四个吸附点位置
+        rp[1].set(p2.X+trg.X , trg.Y , p2.Y+trg.Z),
+        rp[2].set(p3.X+trg.X , trg.Y , p3.Y+trg.Z),
+        rp[3].set(p4.X+trg.X , trg.Y , p4.Y+trg.Z);
+        
+        for(int i=0;i<4;i++){
+            //printf("[onAimAtBuildingCFunc]rp(%f,%f,%f)\n",rp[i].X,rp[i].Y,rp[i].Z);
+            rp[i].rotateXZBy(rt,trg);
+        }
+        
+        //printf("[onAimAtBuildingCFunc]");
+        
+        float mind = mhtDist(rp[0],aimAt);
+        int minp   = 0;
+        
+        //printf("%f ",mind);
+        
+        for(int i=1;i<4;i++){
+            float tmp = mhtDist(rp[i],aimAt);//计算出曼哈顿距离，找出最小的
+            //printf("%f ",tmp);
+            if(tmp<mind){
+                mind = tmp;
+                minp = i;
+            }
+        }
+        
+        //printf("select:%d\n",minp);
+        
+        outPosi = rp[minp];
+        
+        outRot  = trgRot;
+        
+        return true;
     };
-    //b->haveOnAimAtBuilding=true;
+    b->haveOnAimAtBuilding=true;
     buildings[1]= b;
     
     b = new building(
@@ -1056,6 +1107,21 @@ void mods::loadMesh(){
         0.5,
         0.5
     );
+    b->onAimAtBuildingCFunc=[](
+        const irr::core::vector3df & aimAt,
+        const irr::core::vector3df & trg,
+        const irr::core::vector3df & trgRot,
+        const irr::core::vector3df & camRot,
+        int aimId,
+        irr::core::vector3df & outPosi,
+        irr::core::vector3df & outRot
+    )->bool{
+        outPosi = aimAt;
+        outPosi.Y+=2.5;
+        outRot.set(0,camRot.Y,0);
+        return true;
+    };
+    b->haveOnAimAtBuilding=true;
     buildings[2]=b;
     
     b = new building(
@@ -1066,6 +1132,21 @@ void mods::loadMesh(){
         0.5,
         0.5
     );
+    b->onAimAtBuildingCFunc=[](
+        const irr::core::vector3df & aimAt,
+        const irr::core::vector3df & trg,
+        const irr::core::vector3df & trgRot,
+        const irr::core::vector3df & camRot,
+        int aimId,
+        irr::core::vector3df & outPosi,
+        irr::core::vector3df & outRot
+    )->bool{
+        outPosi = aimAt;
+        outPosi.Y+=2.5;
+        outRot.set(0,camRot.Y,0);
+        return true;
+    };
+    b->haveOnAimAtBuilding=true;
     buildings[3]=b;
     
 }
