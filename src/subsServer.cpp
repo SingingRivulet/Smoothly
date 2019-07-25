@@ -1,5 +1,4 @@
 #include "subsServer.h"
-#include "cJSON.h"
 namespace smoothly{
 void subsServer::subsInit(const char * path){
     leveldb::Options opt;

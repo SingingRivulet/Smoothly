@@ -4,13 +4,13 @@ namespace smoothly{
 void subsaniChar::doAniItem(irr::u32 id,int speed,int start,int end ,bool loop){
     auto it=items.find(id);
     if(it!=items.end()){
-        doAni(it->second,speed,start,end,loop);
+        doAni(it->second.node,speed,start,end,loop);
     }
 }
 void subsaniChar::doAniPart(irr::u32 id,int speed,int start,int end ,bool loop){
     auto it=parts.find(id);
     if(it!=parts.end()){
-        doAni(it->second,speed,start,end,loop);
+        doAni(it->second.node,speed,start,end,loop);
     }
 }
 void subsaniChar::doAni(int id){
@@ -29,13 +29,13 @@ void subsaniChar::doAni(int speed,int start,int end ,bool loop){
     if(body)
         doAni(body,speed,start,end,loop);
 }
-void subsaniChar::setItem(irr::u32 id,mods::animationConf * am){
+void subsaniChar::setItem(irr::u32 id,mods::animationConf * am,int objId,const std::string & uuid){
     if(body==NULL)
         return;
     auto it=items.find(id);
     if(it!=items.end()){
-        it->second->removeAll();
-        it->second->remove();
+        it->second.node->removeAll();
+        it->second.node->remove();
     }
     auto joint = body->getJointNode(id);
     auto p = scene->addAnimatedMeshSceneNode(am->mesh,joint);
@@ -47,13 +47,17 @@ void subsaniChar::setItem(irr::u32 id,mods::animationConf * am){
         }
     }
     
-    items[id]=p;
+    tool t;
+    t.node=p;
+    t.uuid=uuid;
+    t.objId=objId;
+    items[id]=t;
 }
-void subsaniChar::setPart(irr::u32 id,mods::animationConf * am){
+void subsaniChar::setPart(irr::u32 id,mods::animationConf * am,int objId,const std::string & uuid){
     auto it=parts.find(id);
     if(it!=parts.end()){
-        it->second->removeAll();
-        it->second->remove();
+        it->second.node->removeAll();
+        it->second.node->remove();
     }
     auto p=scene->addAnimatedMeshSceneNode(am->mesh);
     
@@ -70,22 +74,26 @@ void subsaniChar::setPart(irr::u32 id,mods::animationConf * am){
     p->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->updateAbsolutePosition();
     
-    parts[id]=p;
+    tool t;
+    t.node=p;
+    t.uuid=uuid;
+    t.objId=objId;
+    parts[id]=t;
 }
 
 void subsaniChar::removeItem(irr::u32 id){
     auto it=items.find(id);
     if(it!=items.end()){
-        it->second->removeAll();
-        it->second->remove();
+        it->second.node->removeAll();
+        it->second.node->remove();
         items.erase(it);
     }
 }
 void subsaniChar::removePart(irr::u32 id){
     auto it=parts.find(id);
     if(it!=parts.end()){
-        it->second->removeAll();
-        it->second->remove();
+        it->second.node->removeAll();
+        it->second.node->remove();
         parts.erase(it);
     }
 }
@@ -96,18 +104,18 @@ void subsaniChar::doAni(irr::scene::IAnimatedMeshSceneNode * n,int speed,int sta
     n->setFrameLoop(start,end); 
 }
 
-void subsaniChar::mount(int p,int mesh){
-    auto it=conf->boneMapping.find(p);
+void subsaniChar::mount(const attachingStatus & p){
+    auto it=conf->boneMapping.find(p.attOn);
     if(it!=conf->boneMapping.end()){
         
-        auto mit=m->animations.find(mesh);
+        auto mit=m->animations.find(p.objId);
         if(mit==m->animations.end())
             return;
         
         if(it->second.first){//on body
-            setItem(it->second.second , mit->second);
+            setItem(it->second.second , mit->second , p.objId , p.uuid);
         }else{
-            setPart(it->second.second , mit->second);
+            setPart(it->second.second , mit->second , p.objId , p.uuid);
         }
     }
 }
@@ -127,12 +135,12 @@ irr::scene::IAnimatedMeshSceneNode * subsaniChar::getNode(int p){
         if(it->second.first){//on body
             auto it2=items.find(it->second.second);
             if(it2!=items.end()){
-                return it2->second;
+                return it2->second.node;
             }
         }else{
             auto it2=parts.find(it->second.second);
             if(it2!=parts.end()){
-                return it2->second;
+                return it2->second.node;
             }
         }
     }
@@ -140,8 +148,8 @@ irr::scene::IAnimatedMeshSceneNode * subsaniChar::getNode(int p){
 }
 void subsaniChar::removeAll(){
     for(auto it:parts){
-        it.second->removeAll();
-        it.second->remove();
+        it.second.node->removeAll();
+        it.second.node->remove();
     }
     if(body){
         body->removeAll();
@@ -157,7 +165,7 @@ void subsaniChar::setLOD(float len){
 
 void subsaniChar::setPosition(const irr::core::vector3df & p){
     for(auto it:parts){
-        it.second->setPosition(p);
+        it.second.node->setPosition(p);
     }
     if(body){
         body->setPosition(p);
@@ -168,7 +176,7 @@ void subsaniChar::setRotation(const irr::core::vector3df & ir){
     r.X=0;
     r.Z=0;
     for(auto it:parts){
-        it.second->setRotation(r);
+        it.second.node->setRotation(r);
     }
     if(body){
         body->setRotation(r);
@@ -273,12 +281,12 @@ subsaniChar::subsaniChar(
     
 }
 
-void subsaniChar::doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed){
-    for(auto it:added){
-        mount(it.x,it.y);
-    }
+void subsaniChar::doAttaching(const std::list<attachingStatus> & added,const std::list<attachingStatus> & removed){
     for(auto it:removed){
-        umount(it.x);
+        umount(it.attOn);
+    }//先执行umount，因为可能有不同uuid的绑定过来
+    for(auto it:added){
+        mount(it);
     }
 }
 

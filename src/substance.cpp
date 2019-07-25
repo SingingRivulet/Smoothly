@@ -143,8 +143,8 @@ bool substance::subs::doAttackActive(
 }
 
 void substance::subs::setAttaching(const bodyAttaching & att){
-    std::list<ipair> added;
-    std::list<ipair> removed;
+    std::list<attachingStatus> added;
+    std::list<attachingStatus> removed;
     attaching.diff(att,added,removed);
     attaching=att;
     

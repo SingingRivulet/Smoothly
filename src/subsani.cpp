@@ -61,7 +61,7 @@ void subsaniStatic::destruct(){
     delete this;
 }
 
-void subsaniStatic::doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed){
+void subsaniStatic::doAttaching(const std::list<attachingStatus> & added,const std::list<attachingStatus> & removed){
     //nothing
 }
 

@@ -26,7 +26,7 @@ namespace smoothly{
             
             virtual void destruct()=0;
             
-            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed)=0;
+            virtual void doAttaching(const std::list<attachingStatus> & added,const std::list<attachingStatus> & removed)=0;
             
             virtual const irr::core::matrix4 & getAbsoluteTransformation()=0;
             
@@ -56,7 +56,7 @@ namespace smoothly{
             
             virtual void destruct();
             
-            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed);
+            virtual void doAttaching(const std::list<attachingStatus> & added,const std::list<attachingStatus> & removed);
             
             virtual const irr::core::matrix4 & getAbsoluteTransformation();
             
@@ -102,7 +102,7 @@ namespace smoothly{
             
             virtual void destruct();
             
-            virtual void doAttaching(const std::list<ipair> & added,const std::list<ipair> & removed);
+            virtual void doAttaching(const std::list<attachingStatus> & added,const std::list<attachingStatus> & removed);
             
             virtual const irr::core::matrix4 & getAbsoluteTransformation();
             
@@ -121,19 +121,24 @@ namespace smoothly{
             
         private:
             irr::scene::IAnimatedMeshSceneNode * body;//物体贴body上
-            std::map<irr::u32,irr::scene::IAnimatedMeshSceneNode*> items;//物体
-            std::map<irr::u32,irr::scene::IAnimatedMeshSceneNode*> parts;//伴随body，如衣服等
+            struct tool{
+                irr::scene::IAnimatedMeshSceneNode * node;
+                std::string                          uuid;
+                int                                  objId;
+            };
+            std::map<irr::u32,tool> items;//物体
+            std::map<irr::u32,tool> parts;//伴随body，如衣服等
             
             void doAniItem(irr::u32,int speed,int start,int end ,bool loop);
             void doAniPart(irr::u32,int speed,int start,int end ,bool loop);
             void doAni(int speed,int start,int end ,bool loop);
             void doAni(int id);
-            void setItem(irr::u32,mods::animationConf*);
-            void setPart(irr::u32,mods::animationConf*);
+            void setItem(irr::u32,mods::animationConf*,int objId,const std::string & uuid);
+            void setPart(irr::u32,mods::animationConf*,int objId,const std::string & uuid);
             void removeItem(irr::u32);
             void removePart(irr::u32);
             
-            void mount(int p,int mesh);
+            void mount(const attachingStatus & p);
             void umount(int p);
             irr::scene::IAnimatedMeshSceneNode * getNode(int);
             /*
