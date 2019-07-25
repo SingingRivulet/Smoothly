@@ -10,6 +10,8 @@ namespace smoothly{
             
             virtual void setLOD(float len)=0;
             
+            virtual irr::scene::IAnimatedMeshSceneNode * getWeapon(int)=0;
+            
             virtual void playAnimation(float dtm,const irr::core::vector3df & dl)=0;
             
             virtual const irr::core::vector3df & getPosition()=0;
@@ -42,6 +44,10 @@ namespace smoothly{
             
             virtual const irr::core::vector3df & getPosition();
             virtual const irr::core::vector3df & getRotation();
+            
+            virtual irr::scene::IAnimatedMeshSceneNode * getWeapon(int){
+                return NULL;
+            }
             
             virtual void setPosition(const irr::core::vector3df &);
             virtual void setRotation(const irr::core::vector3df &);
@@ -82,6 +88,10 @@ namespace smoothly{
             
             virtual const irr::core::vector3df & getPosition();
             virtual const irr::core::vector3df & getRotation();
+            
+            virtual irr::scene::IAnimatedMeshSceneNode * getWeapon(int p){
+                return this->getNode(p);
+            }
             
             virtual void setPosition(const irr::core::vector3df &);
             virtual void setRotation(const irr::core::vector3df &);
@@ -125,6 +135,7 @@ namespace smoothly{
             
             void mount(int p,int mesh);
             void umount(int p);
+            irr::scene::IAnimatedMeshSceneNode * getNode(int);
             /*
              * 骨骼挂载：
              * 1. id映射到真实骨骼id

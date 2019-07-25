@@ -121,7 +121,23 @@ void subsaniChar::umount(int p){
         }
     }
 }
-
+irr::scene::IAnimatedMeshSceneNode * subsaniChar::getNode(int p){
+    auto it=conf->boneMapping.find(p);
+    if(it!=conf->boneMapping.end()){
+        if(it->second.first){//on body
+            auto it2=items.find(it->second.second);
+            if(it2!=items.end()){
+                return it2->second;
+            }
+        }else{
+            auto it2=parts.find(it->second.second);
+            if(it2!=parts.end()){
+                return it2->second;
+            }
+        }
+    }
+    return NULL;
+}
 void subsaniChar::removeAll(){
     for(auto it:parts){
         it.second->removeAll();
