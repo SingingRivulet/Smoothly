@@ -12,10 +12,11 @@
 namespace smoothly{
     class terrain:public physical{
         public:
-            irr::IrrlichtDevice * device;
+            irr::IrrlichtDevice       * device;
             irr::scene::ISceneManager * scene;//场景
-            irr::ITimer * timer;
-            btDiscreteDynamicsWorld * dynamicsWorld;
+            irr::gui::IGUIEnvironment * gui;
+            irr::ITimer               * timer;
+            btDiscreteDynamicsWorld   * dynamicsWorld;
             mods * m;
             terrain();
             ~terrain();

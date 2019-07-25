@@ -17,6 +17,7 @@ namespace smoothly{
             void onMessageUpdateSubs(RakNet::Packet * data);
             void onMessageUpdateTerrain(RakNet::Packet * data);
             void onMessageUpdateAttaching(RakNet::Packet * data);
+            void onMessageUpdateAttack(RakNet::Packet * data);
             
             //building
             void onMessageUpdateBuildingGen(RakNet::BitStream * data);
@@ -43,6 +44,16 @@ namespace smoothly{
             void onMessageUpdateSubsRunChunk(RakNet::BitStream * data);
             
             void onMessageUpdateAttachingSet(RakNet::BitStream * data);
+            
+            //attack
+            void onMessageUpdateAttackDo(RakNet::BitStream * data);
+            
+            virtual void uploadAttackAm(
+                const std::string & uuid,
+                const irr::core::vector3df & dir,
+                uint32_t bid,
+                int id
+            );
             
             virtual void uploadAttack(const std::string & uuid , int hurt);
             virtual void downloadBuilding(int x,int y);

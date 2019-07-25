@@ -60,10 +60,22 @@ void clientNetwork::onRecvMessage(RakNet::Packet * data){
                 case M_UPDATE_SUBS:
                     onMessageUpdateSubs(data);
                 break;
+                case M_UPDATE_ATTACK:
+                    onMessageUpdateAttack(data);
+                break;
                 case M_UPDATE_OBJECT:
                 
                 break;
             }
+        break;
+    }
+}
+void clientNetwork::onMessageUpdateAttack(RakNet::Packet * data){
+    RakNet::BitStream bs(data->data,data->length,false);
+    bs.IgnoreBytes(3);
+    switch(data->data[2]){
+        case K_ADD_ATTACK_AM:
+            onMessageUpdateAttackDo(&bs);
         break;
     }
 }
@@ -76,7 +88,6 @@ void clientNetwork::onMessageUpdateAttaching(RakNet::Packet * data){
         break;
     }
 }
-
 void clientNetwork::onMessageUpdateBuilding(RakNet::Packet * data){
     RakNet::BitStream bs(data->data,data->length,false);
     bs.IgnoreBytes(3);
@@ -154,6 +165,43 @@ void clientNetwork::onMessageUpdateTerrain(RakNet::Packet * data){
         case T_APPLY:
             onMessageUpdateTerrainRMTApply(&bs);
         break;
+    }
+}
+
+void clientNetwork::uploadAttackAm(
+    const std::string & uuid,
+    const irr::core::vector3df & dir,
+    uint32_t bid,
+    int id
+){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)M_UPDATE_ATTACK);
+    bs.Write((RakNet::MessageID)K_UPLOAD_ATTACK_AM);
+    
+    RakNet::RakString u=uuid.c_str();
+    
+    bs.Write(u);
+    bs.WriteVector(dir.X , dir.Y , dir.Z);
+    bs.Write((uint32_t)bid);
+    bs.Write((int32_t)id);
+    
+    sendMessage(&bs);
+}
+void clientNetwork::onMessageUpdateAttackDo(RakNet::BitStream * data){
+    RakNet::RakString uuid;
+    uint32_t bid;
+    int32_t id;
+    irr::core::vector3df dir;
+    
+    data->Read(uuid);
+    data->ReadVector(dir.X , dir.Y , dir.Z);
+    data->Read(bid);
+    data->Read(id);
+    
+    auto subs=seekSubs(uuid.C_String());
+    if(subs){
+        subs->doAttackActive(dir,bid,id);
     }
 }
 void clientNetwork::onMessageUpdateBuildingGen(RakNet::BitStream * data){

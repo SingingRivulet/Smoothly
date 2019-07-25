@@ -4,10 +4,11 @@
 #include "mempool.h"
 #include "subsani.h"
 #include "subsChanging.h"
+#include "attack.h"
 #include <mutex>
 #include <queue>
 namespace smoothly{
-    class substance:public buildings{
+    class substance:public buildings,public attackInter{
         public:
             typedef mods::subsType subsType;
             struct subs;
@@ -62,7 +63,7 @@ namespace smoothly{
                     body->setAngularFactor(btVector3(0,1,0));
                 }
                 
-                void updateByWorld();
+                void updateByWorld();//从物理世界更新到irrlicht
                 void setMotion(const irr::core::vector3df & p,const irr::core::vector3df & r);
                 void setPosition(const irr::core::vector3df & p);
                 void setRotation(const irr::core::vector3df & r);
@@ -70,6 +71,50 @@ namespace smoothly{
                 void move(const irr::core::vector3df & d);
                 void walk(const irr::core::vector3df & d);
                 void setAttaching(const bodyAttaching & att);
+                
+                void attackBody(mods::attackConf *,const btCollisionObject *);
+                
+                void shoot(mods::attackConf *,const irr::core::vector3df & from,const irr::core::vector3df & dir);//发射
+                
+                bool doAttackActive(
+                    int wpid,
+                    const irr::core::vector3df & from,
+                    irr::core::vector3df & dir
+                );
+                
+                inline void doAttackActive(
+                    const irr::core::vector3df & dir,
+                    uint32_t bid,
+                    int id//收到服务端消息后，执行动画
+                ){
+                    if(node){
+                        auto wpnode=node->getWeapon(bid);
+                        if(wpnode){
+                            auto absPosi=wpnode->getAbsolutePosition();
+                            parent->doAttackAm(absPosi , dir , id , wpnode);
+                        }
+                    }
+                }
+                
+                inline void attack(int mode,const irr::core::vector3df & d){
+                    //调用attackInter执行动画
+                    //mode是mods中的攻击映射表的id
+                    if(node!=NULL && parent!=NULL){
+                        
+                        irr::core::vector3df dir=d;
+                        
+                        attackOri::attackOri ori;
+                        node->getAttackOri(mode,ori);
+                        for(auto it:ori){
+                            auto absPosi=it.node->getAbsolutePosition();//绝对位置
+                            if(doAttackActive(it.activity , absPosi , dir)){//执行攻击计算
+                                parent->doAttackAm(absPosi , dir , it.activity , it.node);
+                                parent->uploadAttackAm(uuid , dir , it.boneId , it.activity);
+                            }
+                        }
+                        
+                    }
+                }
                 
                 inline void setStatusPair(int k,int v){
                     if(node){

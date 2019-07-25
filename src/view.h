@@ -21,7 +21,6 @@ namespace smoothly{
             btCollisionDispatcher* dispatcher;
             btBroadphaseInterface* overlappingPairCache;
             btSequentialImpulseConstraintSolver* solver;
-            irr::IrrlichtDevice * device;
             irr::video::IVideoDriver * driver;
             
             view();

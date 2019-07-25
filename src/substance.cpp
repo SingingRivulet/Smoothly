@@ -3,6 +3,145 @@ namespace smoothly{
 
 typedef mempool<substance::subs> subsPool;
 
+class closeCombCallback:public btCollisionWorld::ConvexResultCallback{
+    public:
+        substance::subs * parent;
+        mods::attackConf * attconf;
+        virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult & convexResult,bool normalInWorldSpace){
+            parent->attackBody(attconf , convexResult.m_hitCollisionObject);
+        }
+};
+void substance::subs::shoot(
+    mods::attackConf * att,
+    const irr::core::vector3df & from,
+    const irr::core::vector3df & dir
+){//发射
+    
+    irr::core::vector3df rd=dir;
+    rd.normalize();
+    rd*=10;
+    
+    auto rgen = parent->device->getRandomizer();
+    
+    for(int i=0;i < att->bulletNum ;i++){
+    
+        rd.X+=rgen->frand() * att->scatter;
+        rd.Y+=rgen->frand() * att->scatter;
+        rd.Z+=rgen->frand() * att->scatter;
+        
+        parent->addBriefSubs(
+            att->bulletSubsId,
+            from,
+            irr::core::vector3df(0,0,0),
+            rd,
+            btVector3(rd.X , rd.Y , rd.Z),
+            att->rel_pos
+        );
+        
+    }
+}
+void substance::subs::attackBody(mods::attackConf * att,const btCollisionObject * body){//处理攻击结果
+    auto ptr=(bodyInfo*)body->getUserPointer();
+    if(ptr){
+        if(ptr->type==BODY_TERRAIN){
+            auto target=(terrain::chunk*)ptr->ptr;
+            
+        }else
+        if(ptr->type==BODY_TERRAIN_ITEM){
+            auto target=(terrain::item*)ptr->ptr;
+            auto mid=mapid(target->inChunk->x , target->inChunk->y , target->id , target->mapId);
+            att->onAttackTerrainItem(parent,uuid,mid);
+        }else
+        if(ptr->type==BODY_BUILDING){
+            auto target=(remoteGraph::item*)ptr->ptr;
+            auto tuuid=target->uuid;
+            att->onAttackBuilding(parent,uuid,tuuid);
+        }else
+        if(ptr->type==BODY_SUBSTANCE || ptr->type==BODY_CHARACTER){
+            auto target=(substance::subs*)ptr->ptr;
+            auto tuuid=target->uuid;
+            att->onAttackSubstance(parent,uuid,tuuid);
+        }
+    }
+}
+
+bool substance::subs::doAttackActive(
+    int wpid,
+    const irr::core::vector3df & from,
+    irr::core::vector3df & dir
+){
+    auto it=parent->m->attackings.find(wpid);
+    if(it==parent->m->attackings.end())
+        return false;
+    //获取类型为bodyInfo
+    
+    if(dir.X==0 && dir.Y==0 && dir.Z==0)
+        return false;
+    
+    dir.normalize();
+    dir*=it->second->range;//取得射程
+    
+    if(it->second->type==WEAPON_LASER){
+        
+        auto to=from+dir;
+        
+        btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
+        
+        btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom,bto);
+        parent->dynamicsWorld->rayTest(bfrom, bto, rayCallback);//使用bullet的rayTest接口
+        
+        if (rayCallback.hasHit()){
+            //攻击到物体
+            //被攻击的物体是m_collisionObject
+            //激光终点是m_hitPointWorld
+            irr::core::vector3df targ(
+                rayCallback.m_hitPointWorld.getX(),
+                rayCallback.m_hitPointWorld.getY(),
+                rayCallback.m_hitPointWorld.getZ()
+            );
+            dir=targ-from;
+            attackBody(it->second , rayCallback.m_collisionObject);
+        }
+        
+    }else
+    if(it->second->type==WEAPON_CLOSE || it->second->type==WEAPON_EXPLODE){
+        
+        if(it->second->castShape){
+            
+            btTransform bfrom,bto;
+            
+            auto rotate=dir.getHorizontalAngle();//旋转角度
+            
+            irr::core::matrix4 matF,matT;//从矩阵F到矩阵T
+            
+            matF.setRotationDegrees(rotate);
+            matT=matF;
+            
+            matF.setTranslation(from);
+            matT.setTranslation(from+dir);
+            
+            bfrom.setFromOpenGLMatrix(matF.pointer());
+            bto.setFromOpenGLMatrix(matT.pointer());
+            
+            closeCombCallback callback;
+            callback.parent=this;
+            callback.attconf=it->second;
+            //使用convexSweepTest实现
+            parent->dynamicsWorld->convexSweepTest(
+                it->second->castShape,
+                bfrom,
+                bto,
+                callback
+            );
+        }
+        
+    }else
+    if(it->second->type==WEAPON_SHOT){
+        shoot(it->second,from,dir);//发射
+    }
+    return true;
+}
+
 void substance::subs::setAttaching(const bodyAttaching & att){
     std::list<ipair> added;
     std::list<ipair> removed;
@@ -132,15 +271,6 @@ void substance::subs::jump(const irr::core::vector3df & d){
     body->jump(btVector3(d.X , d.Y , d.Z));
 }
 
-static void rotate2d(irr::core::vector2df & v,float a){
-    auto cosa=cos(a);
-    auto sina=sin(a);
-    auto x=v.X*cosa - v.Y*sina;
-    auto y=v.X*sina + v.Y*cosa;
-    v.X=x;
-    v.Y=y;
-    //v.normalize();
-}
 void substance::subs::setDirection(const irr::core::vector3df & dir){
     body->setDir(dir);
     direction=dir;
@@ -178,13 +308,13 @@ void substance::subs::walk(int forward,int leftOrRight/*-1 left,1 right*/,float 
     
     if(leftOrRight==1){
         p2d=direct2d;
-        rotate2d(p2d, 3.1415926/2);
+        rotate2d(p2d, 3.1415926535897/2);
         p2d.normalize();
         delta+=p2d;
     }else
     if(leftOrRight==-1){
         p2d=direct2d;
-        rotate2d(p2d, -3.1415926/2);
+        rotate2d(p2d, -3.1415926535897/2);
         p2d.normalize();
         delta+=p2d;
     }
@@ -522,6 +652,7 @@ void substance::subs::init(
     setPowerAsDefault();
     
     node=subsaniFactory(parent->scene,conf,parent->m,p,r,d);
+    //node->m=m;//设置全局配置信息
     
     if(node==NULL)
         return;

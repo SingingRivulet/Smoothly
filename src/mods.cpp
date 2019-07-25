@@ -442,6 +442,13 @@ static int mod_addSubstance(lua_State * L){
     }
     lua_pop(L,1);
     
+    lua_pushstring(L,"lifeTime");
+    lua_gettable(L,-2);
+    if(lua_isinteger(L,-1)){
+        b->life=lua_tointeger(L,-1);
+    }
+    lua_pop(L,1);
+    
     //callbacks
     //subs
     lua_pushstring(L,"hitSubsCallback");
@@ -1046,19 +1053,28 @@ void mods::loadMesh(){
         
         if(aimId!=1){
             outPosi = aimAt;
+            outPosi.Y+=0.06;
             outRot.set(0,camRot.Y,0);
             return true;
         }
         
         //自动吸附
-        irr::core::vector2df p1(5 , 0),p2(0 , 5),p3(-5, 0),p4(0 ,-5);
+        irr::core::vector2df p1,p2,p3,p4;
         
-        float rt=trgRot.Y;
+        irr::core::vector3df rt(0,trgRot.Y,0);
+        irr::core::vector3df dir=rt.rotationToDirection();
         
-        //p1=p1.rotateBy(rt);
-        //p2=p2.rotateBy(rt);
-        //p3=p3.rotateBy(rt);
-        //p4=p4.rotateBy(rt);
+        p1.set(dir.X,dir.Z);
+        p2=-p1;
+        p3=p1;
+        p4=p1;
+        rotate2d(p3, 3.1415926/2);
+        rotate2d(p4, -3.1415926/2);
+        
+        p1.normalize();p1*=5;
+        p2.normalize();p2*=5;
+        p3.normalize();p3*=5;
+        p4.normalize();p4*=5;
         
         irr::core::vector3df rp[4];
         
@@ -1067,12 +1083,7 @@ void mods::loadMesh(){
         rp[2].set(p3.X+trg.X , trg.Y , p3.Y+trg.Z),
         rp[3].set(p4.X+trg.X , trg.Y , p4.Y+trg.Z);
         
-        for(int i=0;i<4;i++){
-            //printf("[onAimAtBuildingCFunc]rp(%f,%f,%f)\n",rp[i].X,rp[i].Y,rp[i].Z);
-            rp[i].rotateXZBy(rt,trg);
-        }
-        
-        //printf("[onAimAtBuildingCFunc]");
+        //printf("[onAimAtBuildingCFunc](%f,%f,%f)(%f,%f,%f)\n",rp[0].X,rp[0].Y,rp[0].Z,trg.X,trg.Y,trg.Z);
         
         float mind = mhtDist(rp[0],aimAt);
         int minp   = 0;
@@ -1117,7 +1128,7 @@ void mods::loadMesh(){
         irr::core::vector3df & outRot
     )->bool{
         outPosi = aimAt;
-        outPosi.Y+=2.5;
+        outPosi.Y+=2.55;
         outRot.set(0,camRot.Y,0);
         return true;
     };
@@ -1142,7 +1153,7 @@ void mods::loadMesh(){
         irr::core::vector3df & outRot
     )->bool{
         outPosi = aimAt;
-        outPosi.Y+=2.5;
+        outPosi.Y+=2.55;
         outRot.set(0,camRot.Y,0);
         return true;
     };

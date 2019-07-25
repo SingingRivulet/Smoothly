@@ -19,8 +19,9 @@ void view::loadScene(){
         irr::core::dimension2d<irr::u32>(m->windowWidth,m->windowHeight)
     );
     driver = device->getVideoDriver();
-    scene = device->getSceneManager();
-    timer = device->getTimer();
+    scene  = device->getSceneManager();
+    gui    = device->getGUIEnvironment();
+    timer  = device->getTimer();
     device->setWindowCaption(L"Smoothly");
     
     driver->setFog(
@@ -78,6 +79,7 @@ void view::sceneLoop(){
         return;
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     scene->drawAll();
+    gui->drawAll();
     driver->endScene();
 }
 void view::worldLoop(){

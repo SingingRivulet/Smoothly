@@ -11,6 +11,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <vector>
 #include <stdio.h>
 #include <string>
 #include <sstream>
@@ -30,13 +31,22 @@ namespace smoothly{
         M_UPDATE_SUBS     = 's',
         M_UPDATE_USER     = 'u',
         M_UPDATE_ATTACHING= 'c',
+        M_UPDATE_ATTACK   = 'k',
         M_ADMIN           = 'a'
     };
+    
+    
+    enum AttackMethod{
+        K_ADD_ATTACK_AM     = 'a',
+        K_UPLOAD_ATTACK_AM  = 'A'
+    };
+    
     enum AttachingMethod{
         C_SET_ATTACHING    ='s',
         C_GET_ATTACHING    ='g',
         C_UPLOAD_ATTACHING ='u'
     };
+    
     enum SubsMethod{
         S_UL_TELEPORT   ='p',
         S_DL_TELEPORT   ='P',
@@ -57,13 +67,13 @@ namespace smoothly{
         S_SUBS_UUIDS    ='o',
         S_RUN_CHUNK     ='N'
     };
+    
     enum UserMethod{
         U_MOVE          ='m',
         U_LOGIN         ='l',
         U_LOGOUT        ='o',
         U_CHANGE_PWD    ='c'
     };
-    
     enum BuildingMethod{
         B_ATTACK            ='a',
         B_ATTACK_UPLOAD     ='u',
@@ -91,6 +101,26 @@ namespace smoothly{
         A_SET_SUBS_STR      = 'j'
     };
     
+    enum WeaponType{
+        WEAPON_LASER,
+        WEAPON_CLOSE,
+        WEAPON_EXPLODE,
+        WEAPON_SHOT,
+        WEAPON_NONE
+    };
+    
+    typedef std::vector<WeaponType> WeaponsType;
+    
+    enum AttackMode{
+        ATTACK_RANGE_SINGLE,
+        ATTACK_RANGE_DOUBLE,
+        ATTACK_RANGE_BOTH,
+        ATTACK_CLOSE_SINGLE,
+        ATTACK_CLOSE_DOUBLE,
+        ATTACK_CLOSE_BOTH,
+        ATTACK_NONE
+    };
+    
     inline void quaternion2euler(const btQuaternion & q , irr::core::vector3df & e){
         irr::core::quaternion irrq(q.x(),q.y(),q.z(),q.w());
         irrq.toEuler(e);
@@ -106,6 +136,15 @@ namespace smoothly{
     inline float mhtDist(const irr::core::vector3df & A,const irr::core::vector3df & B){
         irr::core::vector3df d=A-B;
         return fabs(d.X)+fabs(d.Y)+fabs(d.Z);
+    }
+    inline void rotate2d(irr::core::vector2df & v,double a){
+        auto cosa=cos(a);
+        auto sina=sin(a);
+        auto x=v.X*cosa - v.Y*sina;
+        auto y=v.X*sina + v.Y*cosa;
+        v.X=x;
+        v.Y=y;
+        //v.normalize();
     }
     
     class ipair{

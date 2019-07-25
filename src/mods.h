@@ -358,6 +358,8 @@ namespace smoothly{
                     
                     float characterWidth,characterHeight;
                     
+                    std::vector<uint32_t> hand;//持武器的骨骼id
+                    
                     float defaultSpeed;     //默认速度
                     float defaultLiftForce; //默认升力
                     float defaultPushForce; //默认推力
@@ -467,10 +469,61 @@ namespace smoothly{
                     if(texture)
                         texture->drop();
                 }
+                inline irr::scene::IAnimatedMeshSceneNode * create(irr::scene::ISceneManager * scene,irr::scene::ISceneNode * par=NULL){
+                    auto p=scene->addAnimatedMeshSceneNode(mesh,par);
+                    if(texture){
+                        p->setMaterialTexture( 0 , texture);
+                        if(useAlpha){
+                            p->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                        }
+                    }
+                    return p;
+                }
             };
             
             std::map<int,animationConf*> animations;
             //////////////////////////////////////////////////////////////////////////////
+            struct attackConf{
+                WeaponType  type;
+                
+                //激光 近战 爆炸使用range，子弹使用lifeTime
+                float       range;
+                int         lifeTime;
+                
+                const btConvexShape * castShape;
+                
+                int         bulletNum;//子弹数量
+                float       scatter;//发散
+                float       impulse;//动量
+                btVector3   rel_pos;//动量施加点
+                int         bulletSubsId;//子弹的substance id
+                
+                int  onAttackTerrainItemLuaFunc;
+                bool haveOnAttackTerrainItem;
+                
+                int  onAttackBuildingLuaFunc;
+                bool haveOnAttackBuilding;
+                
+                int  onAttackSubstanceLuaFunc;
+                bool haveOnAttackSubstance;
+                
+                void onAttackTerrainItem(void * substance , const std::string & uuid,const mapid & mid);
+                void onAttackBuilding(void * substance , const std::string & uuid , const std::string & tuuid);
+                void onAttackSubstance(void * substance , const std::string & uuid , const std::string & tuuid);
+            };
+            std::map<int,attackConf*> attackings;
+            //////////////////////////////////////////////////////////////////////////////
+            class attackLaunchConf{
+                public:
+                    struct activity{
+                        int handIndex;
+                        int attackingId;
+                    };
+                    std::vector<activity> mapping;//对应subsConf::hand的下标
+            };
+            std::map<int,attackLaunchConf*> attackLaunchMapping;
+            //////////////////////////////////////////////////////////////////////////////
+            
             void init();
             void loadMesh();
             void destroy();
