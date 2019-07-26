@@ -358,7 +358,8 @@ namespace smoothly{
                     
                     float characterWidth,characterHeight;
                     
-                    std::vector<uint32_t> hand;//持武器的骨骼id
+                    //std::vector<int> hand;//持武器的骨骼id
+                    //已移除。直接用boneMapping定义
                     
                     float defaultSpeed;     //默认速度
                     float defaultLiftForce; //默认升力
@@ -463,6 +464,7 @@ namespace smoothly{
                 irr::scene::IAnimatedMesh   * mesh;
                 irr::video::ITexture        * texture;
                 bool useAlpha;
+                int  attackActivity;
                 ~animationConf(){
                     if(mesh)
                         mesh->drop();
@@ -519,7 +521,7 @@ namespace smoothly{
                         int handIndex;
                         int attackingId;
                     };
-                    std::vector<activity> mapping;//对应subsConf::hand的下标
+                    std::list<activity> mapping;//对应subsConf::hand的下标
             };
             std::map<int,attackLaunchConf*> attackLaunchMapping;
             //////////////////////////////////////////////////////////////////////////////

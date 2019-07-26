@@ -103,7 +103,7 @@ namespace smoothly{
                         
                         irr::core::vector3df dir=d;
                         
-                        attackOri::attackOri ori;
+                        attackOri ori;
                         node->getAttackOri(mode,ori);
                         for(auto it:ori){
                             auto absPosi=it.node->getAbsolutePosition();//绝对位置

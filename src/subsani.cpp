@@ -1,6 +1,13 @@
 #include "subsani.h"
 namespace smoothly{
 
+void subsani::getAttackOri(int mode,attackOri & ori){
+    ori.clear();
+    auto it=m->attackLaunchMapping.find(mode);
+    if(it!=m->attackLaunchMapping.end()){
+        getAttackNode(it->second->mapping,ori);
+    }
+}
 void subsaniStatic::setLOD(float len){
     
 }

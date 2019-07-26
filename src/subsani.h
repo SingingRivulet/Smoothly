@@ -5,8 +5,17 @@
 #include "mods.h"
 namespace smoothly{
     
+    struct attackEvent{
+        int activity;
+        irr::scene::IAnimatedMeshSceneNode * node;
+        int32_t boneId;
+    };
+    typedef std::list<attackEvent> attackOri;
+    
     class subsani{
         public:
+            void getAttackOri(int mode,attackOri & ori);//获取攻击发起节点
+            virtual void getAttackNode(const std::list<mods::attackLaunchConf::activity> & mapping,attackOri & ori)=0;
             
             virtual void setLOD(float len)=0;
             
@@ -39,6 +48,9 @@ namespace smoothly{
         public:
             
             virtual void setLOD(float len);
+            virtual void getAttackNode(const std::list<mods::attackLaunchConf::activity> & mapping,attackOri & ori){
+                
+            }
             
             virtual void playAnimation(float dtm,const irr::core::vector3df & dl);
             
@@ -85,6 +97,7 @@ namespace smoothly{
         public:
             
             virtual void setLOD(float len);
+            virtual void getAttackNode(const std::list<mods::attackLaunchConf::activity> & mapping,attackOri & ori);
             
             virtual const irr::core::vector3df & getPosition();
             virtual const irr::core::vector3df & getRotation();
@@ -125,6 +138,7 @@ namespace smoothly{
                 irr::scene::IAnimatedMeshSceneNode * node;
                 std::string                          uuid;
                 int                                  objId;
+                mods::animationConf                * amc;
             };
             std::map<irr::u32,tool> items;//物体
             std::map<irr::u32,tool> parts;//伴随body，如衣服等
@@ -150,6 +164,8 @@ namespace smoothly{
             void removeAll();
             
             void updateAnimation();
+            
+            void pushAttackInfo(int bid,tool & t,attackOri & ori);
             
             //bool walking;
             int status;

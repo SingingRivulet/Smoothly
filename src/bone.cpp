@@ -1,6 +1,35 @@
 #include "subsani.h"
 namespace smoothly{
 
+void subsaniChar::pushAttackInfo(int boneId,tool & t,attackOri & ori){
+    attackEvent ev;
+    ev.activity =t.amc->attackActivity;
+    ev.node     =t.node;
+    ev.boneId   =boneId;
+    ori.push_back(ev);
+}
+
+void subsaniChar::getAttackNode(const std::list<mods::attackLaunchConf::activity> & mapping,attackOri & ori){
+    for(auto it:mapping){
+        
+        auto itb=conf->boneMapping.find(it.handIndex);//handIndex即起始节点
+        if(itb!=conf->boneMapping.end()){
+            if(itb->second.first){//on body
+                auto itn=items.find(itb->second.second);
+                if(itn!=items.end()){
+                    pushAttackInfo(it.handIndex,itn->second,ori);
+                }
+            }else{
+                auto itn=parts.find(itb->second.second);
+                if(itn!=parts.end()){
+                    pushAttackInfo(it.handIndex,itn->second,ori);
+                }
+            }
+        }
+        
+    }
+}
+
 void subsaniChar::doAniItem(irr::u32 id,int speed,int start,int end ,bool loop){
     auto it=items.find(id);
     if(it!=items.end()){
@@ -51,6 +80,7 @@ void subsaniChar::setItem(irr::u32 id,mods::animationConf * am,int objId,const s
     t.node=p;
     t.uuid=uuid;
     t.objId=objId;
+    t.amc=am;
     items[id]=t;
 }
 void subsaniChar::setPart(irr::u32 id,mods::animationConf * am,int objId,const std::string & uuid){
@@ -78,6 +108,7 @@ void subsaniChar::setPart(irr::u32 id,mods::animationConf * am,int objId,const s
     t.node=p;
     t.uuid=uuid;
     t.objId=objId;
+    t.amc=am;
     parts[id]=t;
 }
 
