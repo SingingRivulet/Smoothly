@@ -40,6 +40,12 @@ namespace smoothly{
                         const irr::core::vector3df & dir
                     )=0;
                     virtual void destroy()=0;
+                    
+                    static inline void setVanishingTime(irr::scene::ISceneNode * node,irr::scene::ISceneManager * scene,int tm){//设置指定时间后消失
+                        auto delAct=scene->createDeleteAnimator(tm);
+                        node->addAnimator(delAct);
+                        delAct->drop();
+                    }
             };
             //添加攻击动画，所有attackAm由下面几种组成，但是攻击只能是单个类型
             
@@ -54,6 +60,9 @@ namespace smoothly{
                         const irr::core::vector3df & dir
                     );
                     virtual void destroy();
+                    
+                    irr::video::ITexture* texture;//纹理
+                    int delayMs;
             };
             
             class attackAmCloseComb:public attackAmBase{
@@ -67,6 +76,8 @@ namespace smoothly{
                         const irr::core::vector3df & dir
                     );
                     virtual void destroy();
+                    
+                    irr::video::SColor minStartColor,maxStartColor;
             };
             
             class attackAmExplode:public attackAmBase{
