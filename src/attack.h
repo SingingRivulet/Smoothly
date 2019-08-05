@@ -39,6 +39,7 @@ namespace smoothly{
                         const irr::core::vector3df & from,
                         const irr::core::vector3df & dir
                     )=0;
+                    virtual void init(const std::map<std::string,std::string> & )=0;
                     virtual void destroy()=0;
                     
                     static inline void setVanishingTime(irr::scene::ISceneNode * node,irr::scene::ISceneManager * scene,int tm){//设置指定时间后消失
@@ -78,6 +79,12 @@ namespace smoothly{
                     virtual void destroy();
                     
                     irr::video::SColor minStartColor,maxStartColor;
+                    int delayMs;
+                    float particleSpeed;//粒子速度
+                    irr::u32 minParticlesPerSecond,
+                             maxParticlesPerSecond,
+                             lifeTimeMin,
+                             lifeTimeMax;
             };
             
             class attackAmExplode:public attackAmBase{
@@ -91,6 +98,15 @@ namespace smoothly{
                         const irr::core::vector3df & dir
                     );
                     virtual void destroy();
+                    
+                    irr::video::SColor minStartColor,maxStartColor;
+                    int delayMs;
+                    float particleSpeed;//粒子速度
+                    irr::u32 minParticlesPerSecond,
+                             maxParticlesPerSecond,
+                             lifeTimeMin,
+                             lifeTimeMax;
+                    int      timeForceLost;
             };
             
             class attackAmShot:public attackAmBase{
@@ -104,6 +120,15 @@ namespace smoothly{
                         const irr::core::vector3df & dir
                     );
                     virtual void destroy();
+                    
+                    irr::video::SColor minStartColor,maxStartColor;
+                    int delayMs;
+                    float particleSpeed;//粒子速度
+                    int      maxAngleDegrees;
+                    irr::u32 minParticlesPerSecond,
+                             maxParticlesPerSecond,
+                             lifeTimeMin,
+                             lifeTimeMax;
             };
             /*
              * 可使用大量子弹代替

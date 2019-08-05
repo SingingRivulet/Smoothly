@@ -84,7 +84,10 @@ hbb.o:hbb.h hbb.cpp
 hbb_test.out:hbb_test.cpp hbb.o
 	$(CC) hbb_test.cpp hbb.o -o hbb_test.out $(LIBS)
 
-substance.o:substance.cpp substance.h building.o subsani.o subsChanging.o
+attackAm.o:attackAm.cpp attack.h utils.h
+	$(CC) -c attackAm.cpp
+
+substance.o:substance.cpp substance.h building.o subsani.o subsChanging.o attackAm.o
 	$(CC) -c substance.cpp
 
 clientNetwork.o:clientNetwork.cpp clientNetwork.h substance.o
