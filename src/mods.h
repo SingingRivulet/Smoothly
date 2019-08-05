@@ -521,7 +521,7 @@ namespace smoothly{
                         int handIndex;
                         int attackingId;
                     };
-                    std::list<activity> mapping;//对应subsConf::hand的下标
+                    std::list<activity> mapping;//对应subsConf::boneMapping
             };
             std::map<int,attackLaunchConf*> attackLaunchMapping;
             //////////////////////////////////////////////////////////////////////////////

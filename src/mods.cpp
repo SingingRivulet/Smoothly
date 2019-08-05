@@ -519,6 +519,14 @@ static int mod_addSubstance(lua_State * L){
     lua_gettable(L,-2);
     if(lua_istable(L,-1)){
         
+        b->rideMode=0;
+        lua_pushstring(L,"rideMode");
+        lua_gettable(L,-2);
+        if(lua_isinteger(L,-1)){
+            b->rideMode=lua_tointeger(L,-1);
+        }
+        lua_pop(L,1);
+        
         lua_pushstring(L,"defaultSpeed");
         lua_gettable(L,-2);
         if(lua_isnumber(L,-1)){
@@ -718,9 +726,6 @@ static int mod_addAutoGen(lua_State * L){
 }
 
 static int mod_setWindow(lua_State * L){
-    if(!lua_isfunction(L,-1))
-        return 0;
-    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
     if(!lua_isuserdata(L,1))
         return 0;
     void * ptr=lua_touserdata(L,1);
@@ -740,9 +745,6 @@ static int mod_setWindow(lua_State * L){
 
 
 static int mod_setBooster(lua_State * L){
-    if(!lua_isfunction(L,-1))
-        return 0;
-    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
     if(!lua_isuserdata(L,1))
         return 0;
     void * ptr=lua_touserdata(L,1);
@@ -757,9 +759,6 @@ static int mod_setBooster(lua_State * L){
 }
 
 static int mod_setAnimation(lua_State * L){
-    if(!lua_isfunction(L,-1))
-        return 0;
-    int ref = luaL_ref(L,LUA_REGISTRYINDEX);
     if(!lua_isuserdata(L,1))
         return 0;
     void * ptr=lua_touserdata(L,1);
@@ -810,6 +809,13 @@ static int mod_setAnimation(lua_State * L){
     lua_gettable(L,-2);
     if(lua_isboolean(L,-1)){
         ac->useAlpha=lua_toboolean(L,-1);
+    }
+    lua_pop(L,1);
+    
+    lua_pushstring(L,"attackActivity");
+    lua_gettable(L,-2);
+    if(lua_isinteger(L,-1)){
+        ac->attackActivity=lua_tointeger(L,-1);
     }
     lua_pop(L,1);
     
