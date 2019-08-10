@@ -825,6 +825,87 @@ static int mod_setAnimation(lua_State * L){
     return 1;
 }
 
+static int mod_setAttackActivity(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    int id=luaL_checkinteger(L,2);
+    
+    auto it=self->attackings.find(id);
+    
+    if(it!=self->attackings.end()){
+        lua_pushstring(L,"AttackActivity exists");
+        return 1;
+    }
+    
+    if(!lua_istable(L,-1))
+        return 0;
+    
+    auto p=new mods::attackConf;
+    
+    
+    
+    self->attackings[id]=p;
+    
+    lua_pushstring(L,"ok");
+    return 1;
+}
+static int mod_setAttackLaunchMapping(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(mods*)ptr;
+    
+    int id=luaL_checkinteger(L,2);
+    
+    auto it=self->attackLaunchMapping.find(id);
+    
+    if(it!=self->attackLaunchMapping.end()){
+        lua_pushstring(L,"AttackLaunchMapping exists");
+        return 1;
+    }
+    
+    if(!lua_istable(L,-1))
+        return 0;
+    
+    auto p=new mods::attackLaunchConf;
+    
+    int len=luaL_len(L,-1);
+    for(int i=1;i<=len;i++){
+        lua_rawgeti(L,-1,i);
+            if(lua_istable(L,-1)){
+                int lm=luaL_len(L,-1);
+                if(lm>=2){
+                    mods::attackLaunchConf::activity am;
+                    
+                    lua_rawgeti(L,-1,1);
+                    if(lua_isinteger(L,-1))
+                        am.handIndex   = lua_tointeger(L,-1);
+                    lua_pop(L,1);
+                    
+                    lua_rawgeti(L,-1,2);
+                    if(lua_isinteger(L,-1))
+                        am.attackingId = lua_tointeger(L,-1);
+                    lua_pop(L,1);
+                    
+                    p->mapping.push_back(am);
+                }
+            }
+        lua_pop(L,1);
+    }
+    
+    self->attackLaunchMapping[id]=p;
+    
+    lua_pushstring(L,"ok");
+    return 1;
+}
+
 int getCharAnimationId(
     int foot,
     int hand,
