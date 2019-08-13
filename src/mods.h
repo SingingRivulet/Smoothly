@@ -492,9 +492,9 @@ namespace smoothly{
                 float       range;
                 int         lifeTime;
                 
-                const btConvexShape * castShape;
+                btConvexShape * castShape;
                 
-                int         bulletNum;//子弹数量
+                int         bulletNum;//子弹数量 这里的bullet不是指子弹引擎，而是真的子弹！！！
                 float       scatter;//发散
                 float       impulse;//动量
                 btVector3   rel_pos;//动量施加点

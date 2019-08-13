@@ -845,9 +845,78 @@ static int mod_setAttackActivity(lua_State * L){
     if(!lua_istable(L,-1))
         return 0;
     
+    std::string shape;
+    lua_pushstring(L,"shape");
+    lua_gettable(L,-2);
+    if(lua_isstring(L,-1)){
+        shape=lua_tostring(L,-1);
+    }
+    lua_pop(L,1);
+    
+    btConvexShape * pshape;
+    float rad=1,height=1,bx=1,by=1,bz=1;
+    
+    #define getFloatValue(name,var) \
+        lua_pushstring(L,name); \
+        lua_gettable(L,-2); \
+        if(lua_isnumber(L,-1)){ \
+            var=lua_tonumber(L,-1); \
+        } \
+        lua_pop(L,1);
+    
+    #define getIntValue(name,var) \
+        lua_pushstring(L,name); \
+        lua_gettable(L,-2); \
+        if(lua_isinteger(L,-1)){ \
+            var=lua_tointeger(L,-1); \
+        } \
+        lua_pop(L,1);
+    
+    getFloatValue("rad",rad);
+    getFloatValue("height",height);
+    getFloatValue("bx",bx);
+    getFloatValue("by",by);
+    getFloatValue("bz",bz);
+    
+    //检查形状
+    if(shape=="capsule"){
+        pshape = new btCapsuleShape(rad,height);
+    }else
+    if(shape=="cylinder"){
+        pshape = new btCylinderShape(btVector3(bx,by,bz));
+    }else
+    if(shape=="cone"){
+        pshape = new btConeShape(rad,height);
+    }else
+    if(shape=="box"){
+        pshape = new btBoxShape(btVector3(bx,by,bz));
+    }else{
+        pshape = new btSphereShape(rad);
+    }
+    
     auto p=new mods::attackConf;
     
+    p->castShape = pshape;
     
+    getIntValue("lifeTime",p->lifeTime);
+    getIntValue("bulletNum",p->bulletNum);
+    getIntValue("bulletSubsId",p->bulletSubsId);
+    
+    getFloatValue("range",p->range);
+    getFloatValue("scatter",p->scatter);
+    getFloatValue("impulse",p->impulse);
+    
+    float tx,ty,tz;
+    getFloatValue("applyX",tx);
+    getFloatValue("applyY",ty);
+    getFloatValue("applyZ",tz);
+    p->rel_pos = btVector3(tx,ty,tz);
+    
+    p->castShape=new btSphereShape(1);
+    
+    #undef getValue
+    
+    //加载回调函数
     
     self->attackings[id]=p;
     
