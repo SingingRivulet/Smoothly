@@ -4,8 +4,10 @@
 *.gch
 *.out
 *~
-/server
-/admin
+*.d
+*.lo
+server
+admin
 /data*
-/client
+client
 /bin*
