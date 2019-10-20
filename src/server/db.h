@@ -2,6 +2,10 @@
 #define SMOOTHLY_SERVER_DB
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <sys/stat.h>
+
+#define logError() logger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
 
 namespace smoothly{
 namespace server{
@@ -9,14 +13,18 @@ namespace server{
 class datas{
     public:
         inline datas(){
+            mkdir("log",0777);
+            logger = spdlog::rotating_logger_mt("server", "log/server.log", 1024 * 1024 * 5, 3);
             leveldb::Options options;
             options.create_if_missing = true;
             leveldb::DB::Open(options, "./data", &db);
+            logger->info("open database");
         }
         inline ~datas(){
             delete db;
         }
         leveldb::DB * db;
+        std::shared_ptr<spdlog::logger> logger;
 };
 
 inline bool isPrefix(const std::string & pfx , const std::string & str){

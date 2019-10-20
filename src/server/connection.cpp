@@ -99,7 +99,7 @@ void connection::sendBodyToAddr(const RakNet::SystemAddress & addr,const std::st
         wearing_get(uuid,wearing);
         sendAddr_body(addr,uuid,id,hp,status,owner,position,rotation,lookAt,wearing);
     }catch(...){
-        
+        logError();
     }
 }
 void connection::logout(const RakNet::SystemAddress & addr){
@@ -156,7 +156,7 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
                     bs.IgnoreBytes(4);
                     onMessage(uuid,address,data->data[2],data->data[3],&bs);
                 }catch(...){
-                    
+                    logError();
                 }
             }
         break;
@@ -183,7 +183,7 @@ void connection::send_body(const std::string & to,
         getAddrByUUID(to , addr);
         sendAddr_body(addr,uuid,id,hp,status,owner,p,r,l,wearing);
     }catch(...){
-        
+        logError();
     }
 }
 /////////////////

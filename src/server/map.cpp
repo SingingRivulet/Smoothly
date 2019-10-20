@@ -31,7 +31,7 @@ void map::updateNode(const std::string & uuid,int x,int y,std::set<ipair> & nwTa
     
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
-        
+        logError();
     }
 }
 void map::addNode(const std::string & uuid,const std::string & owner,int x,int y){
@@ -82,7 +82,7 @@ void map::removeNode(const std::string & uuid){
         }
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
-        
+        logError();
     }
 }
 ipair map::getNodePosi(const std::string & uuid){
@@ -184,7 +184,7 @@ void map::getUserNodes(const std::string & owner,std::set<ipair> & o){
                     }
                 }
             }catch(...){
-                
+                logError();
             }
         }
         

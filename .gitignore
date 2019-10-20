@@ -8,6 +8,7 @@
 *.lo
 server
 !server/
+log/
 admin
 data/
 client

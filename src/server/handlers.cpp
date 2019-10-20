@@ -127,7 +127,7 @@ void handlers::sendRemoveTable(const ipair & p , const std::string & to){
         getAddrByUUID(to,addr);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
     }catch(...){
-        
+        logError();
     }
 }
 void handlers::sendAddr_removeTable(const RakNet::SystemAddress & addr,
@@ -162,7 +162,7 @@ void handlers::boardcast(int x,int y,RakNet::BitStream * data){
             getAddrByUUID(it,addr);
             sendMessage(data,addr);
         }catch(...){
-            
+            logError();
         }
     }
 }

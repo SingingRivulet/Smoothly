@@ -1,4 +1,4 @@
-CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ -I ../
+CC=g++ -std=c++11 -ggdb -I /usr/local/include/bullet/ -I ../ -I ../../dep/
 LIBS= -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl
 
 server:main.cpp server.o
@@ -12,7 +12,11 @@ server:main.cpp server.o
 	removeTable.o \
 	map.o \
 	$(LIBS)
-
+clean:
+	-rm *.o
+	-rm server
+	-rm -rf data
+	-rm -rf log
 server.o:server.h server.cpp controllers.o
 	$(CC) server.cpp -c $(LIBS)
 
