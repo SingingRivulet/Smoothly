@@ -4,6 +4,7 @@
 #include <leveldb/write_batch.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <sys/stat.h>
+#include "fontcolor.h"
 
 #define logError() logger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
 
@@ -14,6 +15,7 @@ class datas{
     public:
         inline datas(){
             mkdir("log",0777);
+            printf(L_GREEN "[status]" NONE"open log file\n" );
             logger = spdlog::rotating_logger_mt("server", "log/server.log", 1024 * 1024 * 5, 3);
             leveldb::Options options;
             options.create_if_missing = true;

@@ -2,6 +2,7 @@
 #ifndef SMOOTHLY_WORLD_TERRAIN_ITEM
 #define SMOOTHLY_WORLD_TERRAIN_ITEM
 #include <list>
+#include <lua.hpp>
 namespace smoothly{
 namespace world{
 namespace terrain{
@@ -27,29 +28,63 @@ class terrain_item{
             int id,num;
             float prob;
         };
-        inline void gen(int x,int y,int tem,int hu,float h){
-            std::list<genProb> pl;//物体->概率
-            predictableRand randg;
-            
-            getGenList(x,y,tem,hu,h,pl);
-            
-            randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
-            
-            for(auto it:pl){
-                int delta=it.prob*1000;
-                for(int i=0;i<it.num;i++){
-                    int pr=(randg.rand())%1000;
-                    if(pr>delta){
-                        float mx=(randg.frand()+x)*32;
-                        float my=(randg.frand()+y)*32;
-                        float mr=randg.frand()*360;
-                        gen(mx,my,mr,it.id);
+        terrain_item(){
+            L = luaL_newstate();
+            luaL_openlibs(L);
+            if (luaL_loadfile(L, "script/terrainItem.lua") || lua_pcall(L, 0, 0, 0))
+                printf("[error]terrainItem:%s\n" , lua_tostring(L, -1));
+        }
+        ~terrain_item(){
+            lua_close(L);
+        }
+    private:
+        lua_State * L;
+    public:
+        void getGenList(int x,int y,int tem,int hu,float h, std::list<genProb> & pl){
+            lua_settop(L,0);
+            lua_getglobal(L, "main");
+            if(!lua_isfunction(L,-1)){
+                lua_pop(L,1);
+                printf("[error]getGenList:'main' no found\n");
+                return;
+            }
+            lua_pushinteger(L,x);
+            lua_pushinteger(L,y);
+            lua_pushinteger(L,tem);
+            lua_pushinteger(L,hu);
+            lua_pushnumber(L,h);
+            if(lua_pcall(L, 5, 1, 0) != 0){
+                printf("[error]getGenList:%s\n", lua_tostring(L,-1));
+                lua_settop(L,0);
+                return;
+            }
+            if(lua_istable(L,-1)){
+                int len=luaL_len(L,-1);
+                for(int i=1;i<=len;i++){
+                    lua_rawgeti(L,-1,i);
+                    if(lua_istable(L,-1)){
+                        
+                        genProb pb;
+                        
+                        lua_rawgeti(L,-1,1);
+                        pb.id=lua_tointeger(L,-1);
+                        lua_pop(L,1);
+                        
+                        lua_rawgeti(L,-1,2);
+                        pb.prob=lua_tonumber(L,-1);
+                        lua_pop(L,1);
+                        
+                        lua_rawgeti(L,-1,3);
+                        pb.num=lua_tointeger(L,-1);
+                        lua_pop(L,1);
+                        
+                        pl.push_back(pb);
                     }
+                    lua_pop(L,1);
                 }
             }
+            lua_settop(L,0);
         }
-        virtual void getGenList(int x,int y,int tem,int hu,float h, std::list<genProb> & pl)=0;
-        virtual void gen(float x,float y,float r,int id)=0;
 };
 ////////////////
 }//////terrain

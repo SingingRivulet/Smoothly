@@ -89,7 +89,12 @@ void handlers::boardcast_createBody(const std::string & uuid,int x,int y,
     
     boardcast(x,y,&bs);
 }
-
+void handlers::sendAddr_mainControl(const RakNet::SystemAddress & addr,const std::string & uuid){
+    makeHeader('B','/');
+    RakNet::RakString u=uuid.c_str();
+    bs.Write(u);
+    sendMessage(&bs,addr);
+}
 void handlers::sendAddr_body(const RakNet::SystemAddress & addr,
     const std::string & uuid,
     int id,int hp,int status,const std::string & owner,
@@ -117,7 +122,7 @@ void handlers::sendAddr_body(const RakNet::SystemAddress & addr,
         bs.Write((int32_t)it);
     }
     
-    boardcast(p.X/32 , p.Z/32 , &bs);
+    sendMessage(&bs,addr);
 }
 void handlers::sendRemoveTable(const ipair & p , const std::string & to){
     try{
@@ -135,12 +140,14 @@ void handlers::sendAddr_removeTable(const RakNet::SystemAddress & addr,
     const std::list<std::pair<int,int> > & rmt){
     
     makeHeader('R','=');
+    bs.Write((int32_t)x);
+    bs.Write((int32_t)y);
     bs.Write((int32_t)rmt.size());
     for(auto it:rmt){
         bs.Write((int32_t)it.first);
         bs.Write((int32_t)it.second);
     }
-    boardcast(x,y,&bs);
+    sendMessage(&bs,addr);
     
 }
 

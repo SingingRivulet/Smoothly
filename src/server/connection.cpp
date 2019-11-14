@@ -73,7 +73,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     //sendMapToUser(uuid);
     //直接发address效率更高
     std::set<ipair> m;
-    getUserNodes(uuid,m);
+    getUserNodes(uuid,m);//发送用户的节点
     for(auto p:m){
         std::set<std::string> em;
         getNode(p.x , p.y , em);
@@ -84,6 +84,13 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
         std::list<std::pair<int,int> > rmt;
         getRemovedItem(p.x,p.y, rmt);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
+    }
+    //发送main control
+    try{
+        auto s = getMainControl(uuid);
+        sendAddr_mainControl(addr,s);
+    }catch(...){
+        logError();
     }
 }
 void connection::sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid){

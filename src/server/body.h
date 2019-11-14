@@ -46,6 +46,9 @@ class body:public removeTable{
         int getStatus(const std::string & uuid);
         int getHP(const std::string & uuid);
         std::string getOwner(const std::string & uuid);
+
+        std::string getMainControl(const std::string & user);
+        void setMainControl(const std::string & user,const std::string & uuid);
         
         void sendMapToUser(const std::string & to);
         

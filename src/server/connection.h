@@ -47,6 +47,8 @@ class connection:public body{
         
         virtual void onMessage(const std::string & uuid,const RakNet::SystemAddress &,char c,char a,RakNet::BitStream * data)=0;
         
+        virtual void sendAddr_mainControl(const RakNet::SystemAddress & addr,const std::string & uuid)=0;
+
         virtual void sendAddr_body(const RakNet::SystemAddress & addr,
             const std::string & uuid,
             int id,int hp,int status,const std::string & owner,

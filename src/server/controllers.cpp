@@ -55,7 +55,7 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
     }
 }
 //===========================================================================================================
-void controllers::ctl_addRemovedItem(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){
+void controllers::ctl_addRemovedItem(const std::string & ,const RakNet::SystemAddress &,RakNet::BitStream * data){
     int32_t x,y,id,index;
     data->Read(x);
     data->Read(y);
@@ -79,7 +79,7 @@ void controllers::ctl_wearing_remove(const std::string & uuid,const RakNet::Syst
     data->Read(d);
     wearing_remove(uuid , u.C_String() , d);
 }
-void controllers::ctl_wearing_get(const std::string & uuid,const RakNet::SystemAddress & addr,RakNet::BitStream * data){
+void controllers::ctl_wearing_get(const std::string & ,const RakNet::SystemAddress & addr,RakNet::BitStream * data){
     RakNet::RakString u;
     data->Read(u);
     std::set<int> wearing;
@@ -128,14 +128,14 @@ void controllers::ctl_interactive(const std::string & uuid,const RakNet::SystemA
     data->Read(s);
     interactive(uuid , u.C_String() , s.C_String());
 }
-void controllers::ctl_HPInc(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){
+void controllers::ctl_HPInc(const std::string & ,const RakNet::SystemAddress &,RakNet::BitStream * data){
     RakNet::RakString u;
     int32_t d;
     data->Read(u);
     data->Read(d);
     HPInc(u.C_String() , d);
 }
-void controllers::ctl_getBody(const std::string & uuid,const RakNet::SystemAddress & addr,RakNet::BitStream * data){
+void controllers::ctl_getBody(const std::string & ,const RakNet::SystemAddress & addr,RakNet::BitStream * data){
     RakNet::RakString u;
     data->Read(u);
     sendBodyToAddr(addr , u.C_String());

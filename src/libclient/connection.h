@@ -6,8 +6,10 @@
 #include <raknet/BitStream.h>
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakSleep.h>
-#include <chrono>   
-#include <string>   
+#include <chrono>
+#include <string>
+#include <map>
+#include <set>
 namespace smoothly{
 namespace client{
 ///////////////////////
@@ -17,6 +19,40 @@ namespace client{
     bs.Write((RakNet::MessageID)'.'); \
     bs.Write((RakNet::MessageID)c); \
     bs.Write((RakNet::MessageID)a);
+class mapItem{
+    public:
+        int32_t id,index;
+        inline bool operator==(const mapItem & i)const{
+            return (id==i.id) && (index==i.index);
+        }
+        inline bool operator<(const mapItem & i)const{
+            if(id<i.id)
+                return true;
+            else
+            if(id==i.id){
+                if(index<i.index)
+                    return true;
+            }
+                return false;
+        }
+        inline mapItem & operator=(const mapItem & i){
+            id=i.id;
+            index=i.index;
+            return *this;
+        }
+        inline mapItem(const mapItem & i){
+            id=i.id;
+            index=i.index;
+        }
+        inline mapItem(const int & ix , const int & iy){
+            id=ix;
+            index=iy;
+        }
+        inline mapItem(){
+            id=0;
+            index=0;
+        }
+};
 ///////////////////////
 class connection{
     public:
@@ -198,23 +234,175 @@ class connection{
             bs.Write(s);
             sendMessage(&bs);
         }
-        
+        inline void cmd_login(const std::string & uuid,const std::string & pwd){
+            RakNet::BitStream bs;
+            bs.Write((RakNet::MessageID)(ID_USER_PACKET_ENUM+1));
+            bs.Write((RakNet::MessageID)'+');
+            RakNet::RakString u=uuid.c_str();
+            RakNet::RakString p=pwd.c_str();
+            bs.Write(u);
+            bs.Write(p);
+            sendMessage(&bs);
+        }
+    private:
         //controllers
-        virtual void ctl_addRemovedItem(RakNet::BitStream * data)=0;
-        virtual void ctl_setRemovedItem(RakNet::BitStream * data)=0;
-        
-        virtual void ctl_wearing_add(RakNet::BitStream * data)=0;
-        virtual void ctl_wearing_remove(RakNet::BitStream * data)=0;
-        virtual void ctl_wearing_set(RakNet::BitStream * data)=0;
-        virtual void ctl_HPInc(RakNet::BitStream * data)=0;
-        virtual void ctl_setStatus(RakNet::BitStream * data)=0;
-        virtual void ctl_setLookAt(RakNet::BitStream * data)=0;
-        virtual void ctl_setPosition(RakNet::BitStream * data)=0;
-        virtual void ctl_setRotation(RakNet::BitStream * data)=0;
-        virtual void ctl_interactive(RakNet::BitStream * data)=0;
-        virtual void ctl_removeBody(RakNet::BitStream * data)=0;
-        virtual void ctl_createBody(RakNet::BitStream * data)=0;
-        virtual void ctl_setBody(RakNet::BitStream * data)=0;
+        inline void ctl_addRemovedItem(RakNet::BitStream * data){
+            int32_t x,y,id,index;
+            data->Read(x);
+            data->Read(y);
+            data->Read(id);
+            data->Read(index);
+            msg_addRemovedItem(x,y,id,index);
+        }
+        inline void ctl_setRemovedItem(RakNet::BitStream * data){
+            std::set<mapItem> rmt;
+            int32_t x,y,len,buf1,buf2;
+            data->Read(x);
+            data->Read(y);
+            data->Read(len);
+            for(int i=0;i<len;i++){
+                data->Read(buf1);
+                data->Read(buf2);
+                rmt.insert(mapItem(buf1,buf2));
+            }
+            msg_setRemovedItem(x,y,rmt);
+        }
+        inline void ctl_wearing_add(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t d;
+            data->Read(u);
+            data->Read(d);
+            msg_wearing_add(u.C_String(),d);
+        }
+        inline void ctl_wearing_remove(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t d;
+            data->Read(u);
+            data->Read(d);
+            msg_wearing_remove(u.C_String(),d);
+        }
+        inline void ctl_wearing_set(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t len,buf;
+            std::set<int> wearing;
+            data->Read(u);
+            data->Read(len);
+            for(int i=0;i<len;i++){
+                data->Read(buf);
+                wearing.insert(buf);
+            }
+            msg_wearing_set(u.C_String(),wearing);
+        }
+        inline void ctl_HPInc(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t d;
+            data->Read(u);
+            data->Read(d);
+            msg_HPInc(u.C_String(),d);
+        }
+        inline void ctl_setStatus(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t d;
+            data->Read(u);
+            data->Read(d);
+            msg_setStatus(u.C_String(),d);
+        }
+        inline void ctl_setLookAt(RakNet::BitStream * data){
+            float x,y,z;
+            RakNet::RakString u;
+            data->Read(u);
+            data->ReadVector(x,y,z);
+            msg_setLookAt(u.C_String(),x,y,z);
+        }
+        inline void ctl_setPosition(RakNet::BitStream * data){
+            float x,y,z;
+            RakNet::RakString u;
+            data->Read(u);
+            data->ReadVector(x,y,z);
+            msg_setPosition(u.C_String(),x,y,z);
+        }
+        inline void ctl_setRotation(RakNet::BitStream * data){
+            float x,y,z;
+            RakNet::RakString u;
+            data->Read(u);
+            data->ReadVector(x,y,z);
+            msg_setRotation(u.C_String(),x,y,z);
+        }
+        inline void ctl_interactive(RakNet::BitStream * data){
+            RakNet::RakString u,s;
+            data->Read(u);
+            data->Read(s);
+            msg_interactive(u.C_String() , s.C_String());
+        }
+        inline void ctl_removeBody(RakNet::BitStream * data){
+            RakNet::RakString u;
+            data->Read(u);
+            msg_removeBody(u.C_String());
+        }
+        inline void ctl_createBody(RakNet::BitStream * data){
+            RakNet::RakString u,owner;
+            int32_t id,hp,status;
+            float px,py,pz,
+                  rx,ry,rz,
+                  lx,ly,lz;
+            data->Read(u);
+            data->Read(id);
+            data->Read(hp);
+            data->Read(status);
+            data->Read(owner);
+            data->ReadVector(px,py,pz);
+            data->ReadVector(rx,ry,rz);
+            data->ReadVector(lx,ly,lz);
+            msg_createBody(
+                u.C_String(),id,hp,status,owner.C_String(),
+                px,py,pz,
+                rx,ry,rz,
+                lx,ly,lz
+            );
+        }
+        inline void ctl_setBody(RakNet::BitStream * data){
+            RakNet::RakString u,owner;
+            int32_t id,hp,status,len,buf;
+            std::set<int> wearing;
+            float px,py,pz,
+                  rx,ry,rz,
+                  lx,ly,lz;
+            data->Read(u);
+            data->Read(id);
+            data->Read(hp);
+            data->Read(status);
+            data->Read(owner);
+            data->ReadVector(px,py,pz);
+            data->ReadVector(rx,ry,rz);
+            data->ReadVector(lx,ly,lz);
+            data->Read(len);
+            for(int i=0;i<len;i++){
+                data->Read(buf);
+                wearing.insert(buf);
+            }
+            msg_setBody(
+                u.C_String(),id,hp,status,owner.C_String(),
+                px,py,pz,
+                rx,ry,rz,
+                lx,ly,lz,
+                wearing
+            );
+        }
+    public:
+        virtual void msg_addRemovedItem(int x,int y,int,int)=0;
+        virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)=0;
+        virtual void msg_wearing_add(const char*,int d)=0;
+        virtual void msg_wearing_set(const char*,const std::set<int> &)=0;
+        virtual void msg_wearing_remove(const char*,int d)=0;
+        virtual void msg_HPInc(const char*,int d)=0;
+        virtual void msg_setStatus(const char*,int d)=0;
+        virtual void msg_setLookAt(const char*,float,float,float)=0;
+        virtual void msg_setPosition(const char*,float,float,float)=0;
+        virtual void msg_setRotation(const char*,float,float,float)=0;
+        virtual void msg_interactive(const char*,const char*)=0;
+        virtual void msg_removeBody(const char*)=0;
+        virtual void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float)=0;
+        virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)=0;
 };
 ///////////////////////
 }//////client

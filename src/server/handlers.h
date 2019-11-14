@@ -22,6 +22,8 @@ class handlers:public connection{
         virtual void boardcast_setRotation(const std::string & uuid,int x,int y,const vec3 & v);
         virtual void boardcast_interactive(const std::string & uuid,int x,int y,const std::string & s);
         
+        virtual void sendAddr_mainControl(const RakNet::SystemAddress & addr,const std::string & uuid);
+
         virtual void boardcast_bodyRemove(const std::string & uuid,int x,int y);
         
         virtual void boardcast_createBody(const std::string & uuid,int x,int y,

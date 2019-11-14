@@ -1,4 +1,3 @@
-//smoothly/world/terrain
 //地形生成
 #ifndef SMOOTHLY_WORLD_TERRAIN
 #define SMOOTHLY_WORLD_TERRAIN

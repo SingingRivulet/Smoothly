@@ -13,3 +13,5 @@ admin
 data/
 client
 /bin*
+
+build-*-*-*

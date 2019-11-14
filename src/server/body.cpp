@@ -237,6 +237,13 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     std::set<ipair> nwTable;
     
     try{
+        auto p = getCharPosition(uuid);//发送到之前的chunk，便于范围边缘玩家收到删除
+        boardcast_setPosition(uuid , p.x , p.y , v);
+    }catch(...){
+        logError();
+    }
+    
+    try{
         auto ow = getOwner(uuid);
         updateNode(uuid,cx,cy,nwTable);
         for(auto it:nwTable){
@@ -246,7 +253,6 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
         logError();
     }
     
-    boardcast_setPosition(uuid , v.X/32 , v.Z/32 , v);
 }
 void body::sendChunk(const ipair & p , const std::string & to){
     std::set<std::string> m;
@@ -541,6 +547,22 @@ void body::getBody(
 ipair body::getCharPosition(const std::string & uuid){
     auto r = getPosition(uuid);
     return ipair(r.X/32 , r.Z/32);
+}
+std::string body::getMainControl(const std::string & user){
+    char key[256];
+    snprintf(key,sizeof(key),"bM:%s",user.c_str());
+    std::string value;
+    db->Get(leveldb::ReadOptions(), key , &value);
+    if(value.empty())
+        throw std::out_of_range("getMainControl");
+    else{
+        return value;
+    }
+}
+void body::setMainControl(const std::string & user,const std::string & uuid){
+    char key[256];
+    snprintf(key,sizeof(key),"bM:%s",user.c_str());
+    db->Put(leveldb::WriteOptions(), key, uuid);
 }
 ////////////////
 }//////server
