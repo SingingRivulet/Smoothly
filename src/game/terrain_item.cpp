@@ -8,6 +8,8 @@ namespace smoothly{
 
 void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
     chunk * ptr;
+    if(!chunkLoaded(x,y))//chunk未被创建，将不再创建items
+        return;
     findChunk(x,y){
         ptr = it->second;
         releaseChildren(ptr);
@@ -47,6 +49,24 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
                 im->parent = ptr;
             }
         }
+    }
+}
+
+void terrain_item::showChunk(int x,int y){
+    terrain::showChunk(x,y);
+    setChunkVis(x,y,true);
+}
+void terrain_item::hideChunk(int x,int y){
+    terrain::hideChunk(x,y);
+    setChunkVis(x,y,false);
+}
+void terrain_item::releaseChunk(int x,int y){
+    terrain::releaseChunk(x,y);
+    auto it = chunks.find(ipair(x,y));
+    if(it!=chunks.end()){
+        releaseChildren(it->second);
+        chunks.erase(it);
+        delete it->second;
     }
 }
 void terrain_item::releaseChunk(chunk * ch){

@@ -7,15 +7,19 @@
 #include "../libclient/terrainDispather.h"
 namespace smoothly{
     typedef smoothly::world::terrain::ipair ipair;
+    typedef irr::core::vector3df vec3;
     class terrain:public engine{
         public:
             terrain();
             ~terrain();
             
-            void createChunk(int x,int y);
-            void showChunk(int x,int y);
-            void hideChunk(int x,int y);
-            void releaseChunk(int x,int y);
+            virtual void createChunk(int x,int y);
+            virtual void showChunk(int x,int y);
+            virtual void hideChunk(int x,int y);
+            virtual void releaseChunk(int x,int y);
+
+            virtual bool chunkLoaded(int x,int y);
+            virtual bool chunkShowing(int x,int y);
         private:
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(

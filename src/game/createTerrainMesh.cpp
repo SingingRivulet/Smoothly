@@ -10,7 +10,7 @@ scene::IMesh * terrain::createTerrainMesh(
     const core::dimension2d<f32>& stretchSize,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
     bool debugBorders
-)const{
+){
     if (!texture || !heightmap)
 		return 0;
 

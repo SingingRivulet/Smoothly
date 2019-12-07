@@ -100,32 +100,30 @@ namespace smoothly{
                     //character只能使用walk，rigid body只能使用force
                     //能被推动的物体不能被控制，能被控制的物体不能被推动
                     //真不知道bullet作者怎么想的
-                    virtual void setWalkDirection(const btVector3& walkDirection){}
-                    virtual void jump(const btVector3& dir){}
+                    virtual void setWalkDirection(const btVector3& walkDirection)=0;
+                    virtual void jump(const btVector3& dir)=0;
                     
-                    virtual void applyImpulse(const btVector3& impluse,const btVector3& point){}
-                    virtual void applyForce(const btVector3& force,const btVector3& point){}
-                    virtual void clearForces(){}
-                    virtual void setLinearVelocity(const btVector3& lin_vel){}
-                    virtual void setAngularVelocity(const btVector3& ang_vel){}
-                    virtual void setFriction(btScalar){}
-                    virtual void setRestitution(btScalar){}
-                    virtual btVector3 getAngularVelocity(){}
-                    virtual btVector3 getLinearVelocity(){}
+                    virtual void applyImpulse(const btVector3& impluse,const btVector3& point)=0;
+                    virtual void applyForce(const btVector3& force,const btVector3& point)=0;
+                    virtual void clearForces()=0;
+                    virtual void setLinearVelocity(const btVector3& lin_vel)=0;
+                    virtual void setAngularVelocity(const btVector3& ang_vel)=0;
+                    virtual void setFriction(btScalar)=0;
+                    virtual void setRestitution(btScalar)=0;
+                    virtual btVector3 getAngularVelocity()=0;
+                    virtual btVector3 getLinearVelocity()=0;
                     
                     virtual void addIntoWorld()=0;
                     virtual void removeFromWorld()=0;
                     
                     virtual void setUserPointer(void *)=0;
                     
-                    virtual void loop(float t){}
+                    virtual void loop(float t)=0;
                     
                     virtual void getDeltaL(irr::core::vector3df &){}//获取位置变化
                     
                     btDynamicsWorld * world;
-                    
-                    virtual void destruct(){}
-                    
+
                     bodyBase():direction(0,0,1){}
                     
                     irr::core::vector3df direction;
@@ -149,7 +147,7 @@ namespace smoothly{
                         bool jis,
                         btScalar stepHeight = btScalar(0.35)
                     );
-                    virtual void destruct();
+                    ~character();
                     virtual void addIntoWorld();
                     virtual void removeFromWorld();
                     
@@ -171,6 +169,17 @@ namespace smoothly{
                     virtual bool onGround(){
                         return controller->onGround();
                     }
+
+                    virtual void applyImpulse(const btVector3& impluse,const btVector3& point);
+                    virtual void applyForce(const btVector3& force,const btVector3& point);
+                    virtual void clearForces();
+                    virtual void setLinearVelocity(const btVector3& lin_vel);
+                    virtual void setAngularVelocity(const btVector3& ang_vel);
+                    virtual void setFriction(btScalar);
+                    virtual void setRestitution(btScalar);
+                    virtual btVector3 getAngularVelocity();
+                    virtual btVector3 getLinearVelocity();
+                    virtual void loop(float t);
             };
             
             class rigidBody:public bodyBase{
@@ -184,7 +193,7 @@ namespace smoothly{
                         btScalar mass=0.0f , 
                         const btVector3& localInertia=btVector3(0,0,0)
                     );
-                    virtual void destruct();
+                    ~rigidBody();
                     
                     virtual void addIntoWorld();
                     virtual void removeFromWorld();

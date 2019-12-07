@@ -1,6 +1,6 @@
 #ifndef SMOOTHLY_SERVER_HANDLERS
 #define SMOOTHLY_SERVER_HANDLERS
-#include "connection.h"
+#include "admin.h"
 namespace smoothly{
 namespace server{
 /////////////////
@@ -11,7 +11,7 @@ namespace server{
     bs.Write((RakNet::MessageID)c); \
     bs.Write((RakNet::MessageID)a);
 
-class handlers:public connection{
+class handlers:public admin{
     public:
         virtual void boardcast_wearing_add(const std::string & uuid,int x,int y,int d);
         virtual void boardcast_wearing_remove(const std::string & uuid,int x,int y,int d);

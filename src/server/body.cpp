@@ -1,7 +1,66 @@
 #include "body.h"
+#include "../utils/uuid.h"
+#include "../utils/cJSON.h"
+#include <QFile>
+#include <QByteArray>
 namespace smoothly{
 namespace server{
 ////////////////
+body::body(){
+    config.clear();
+    printf(L_GREEN "[status]" NONE "get body config\n" );
+    QFile file("../config/body.json");
+    if(!file.open(QFile::ReadOnly)){
+        printf(L_RED "[error]" NONE "fail to read ../config/body.json\n" );
+        return;
+    }
+    QByteArray allData = file.readAll();
+    file.close();
+    auto str = allData.toStdString();
+    cJSON * json=cJSON_Parse(str.c_str());
+    if(json){
+        if(json->type==cJSON_Array){
+            cJSON *c=json->child;
+            while (c){
+                if(c->type==cJSON_Object){
+                    auto idnode = cJSON_GetObjectItem(c,"id");
+                    if(idnode && idnode->type==cJSON_Number){
+                        int id = idnode->valueint;
+                        if(config.find(id)!=config.end()){
+                            printf(L_RED "[error]" NONE "can't redefine body %d\n" , id);
+                        }else{
+                            auto ptr  = new bconf;
+                            config[id]= ptr;
+                            auto item = c->child;
+                            while(item){
+                                if(item->type==cJSON_Number){
+                                    if(strcmp(item->string,"hp")==0){
+                                        ptr->hp = item->valueint;
+                                    }
+                                }
+                                item = item->next;
+                            }
+                        }
+                    }else{
+                        printf(L_RED "[error]" NONE "can't get id\n");
+                    }
+                }
+                c=c->next;
+            }
+        }else{
+            printf(L_RED "[error]" NONE "root in ../config/body.json is not Array!\n" );
+        }
+        cJSON_Delete(json);
+    }else{
+        printf(L_RED "[error]" NONE "fail to load json\n" );
+    }
+}
+body::~body(){
+    for(auto it:config){
+        delete it.second;
+    }
+    config.clear();
+}
 void body::updateBody(const std::string & uuid , int x , int y){
     leveldb::WriteBatch batch;
     char buf[256];
@@ -334,6 +393,17 @@ void body::HPInc(const std::string & uuid,int delta){
         logError();
     }
 }
+
+std::string body::addCharacter(const std::string & owner,int id,const vec3 & posi){
+    auto it = config.find(id);
+    if(it==config.end())
+        return std::string();
+    std::string uuid;
+    getUUID(uuid);
+    addCharacter(uuid,owner,id,it->second->hp,posi);
+    return uuid;
+}
+
 void body::addCharacter(const std::string & uuid,const std::string & owner,int id,int hp,const vec3 & posi){
     addNode(uuid , owner , posi.X/32 , posi.Z/32);
     

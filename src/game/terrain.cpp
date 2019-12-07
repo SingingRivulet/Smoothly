@@ -19,11 +19,11 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
     float h;
     float ix,iy;
     float max=0;
-    float mx=0,my=0;
     float begX=x*32;
     float begY=y*32;
     float len=33.0f/((float)pointNum);
-    
+    int mx = 0;
+    int my = 0;
     for(int i=0;i<pointNum;i++){
         for(int j=0;j<pointNum;j++){
             //ix=len*(pointNum-i+1)+begX;
@@ -120,6 +120,14 @@ void terrain::releaseChunk(int x,int y){
         freeChunk(it->second);
         chunks.erase(it);
     }
+}
+bool terrain::chunkLoaded(int x,int y){
+    auto it = chunks.find(ipair(x,y));
+    return it!=chunks.end();
+}
+bool terrain::chunkShowing(int x,int y){
+    auto it = showing.find(ipair(x,y));
+    return it!=showing.end();
 }
 
 }

@@ -5,9 +5,10 @@ namespace server{
 void connection::start(unsigned short port,int maxcl){
     con=RakNet::RakPeerInterface::GetInstance();
     if(con==NULL){
-        printf("RakNet::RakPeerInterface::GetInstance() Error!\n");
+        printf(L_RED "[error]" NONE "RakNet::RakPeerInterface::GetInstance() Error!\n");
         return;
-    }
+    }else
+        printf(L_GREEN "[status]" NONE "open raknet at port" L_CYAN " %d" NONE "\n",port);
     RakNet::SocketDescriptor desc(port, 0);
     con->Startup( maxcl, &desc, 1 );
     con->SetMaximumIncomingConnections( maxcl );
@@ -77,7 +78,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     for(auto p:m){
         std::set<std::string> em;
         getNode(p.x , p.y , em);
-        for(auto it:em){
+        for(auto it:em){//先发送body
             sendBodyToAddr(addr,it);
         }
         //发rmt
@@ -165,6 +166,11 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
                 }catch(...){
                     logError();
                 }
+            }else
+            if(data->data[1]=='a'){
+                RakNet::BitStream bs(data->data,data->length,false);
+                bs.IgnoreBytes(2);
+                adminMessage(&bs , address);
             }
         break;
         case ID_NEW_INCOMING_CONNECTION:

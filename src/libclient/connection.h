@@ -57,7 +57,8 @@ class mapItem{
 class connection{
     public:
         RakNet::RakPeerInterface * connection;
-        
+        std::string myUUID;
+
         inline void connect(const char * addr,unsigned short port){
             connection->Connect(addr,port,0,0);
             RakSleep(30);//sleep 30微秒后才能正常发送，原因未知
@@ -152,6 +153,9 @@ class connection{
                                         case '=':
                                             ctl_setBody(&bs);
                                         break;
+                                        case '/':
+                                            ctl_setMainControl(&bs);
+                                        break;
                                     }
                                 break;
                             }
@@ -235,6 +239,7 @@ class connection{
             sendMessage(&bs);
         }
         inline void cmd_login(const std::string & uuid,const std::string & pwd){
+            myUUID = uuid;
             RakNet::BitStream bs;
             bs.Write((RakNet::MessageID)(ID_USER_PACKET_ENUM+1));
             bs.Write((RakNet::MessageID)'+');
@@ -388,6 +393,11 @@ class connection{
                 wearing
             );
         }
+        inline void ctl_setMainControl(RakNet::BitStream * data){
+            RakNet::RakString u;
+            data->Read(u);
+            msg_setMainControl(u.C_String());
+        }
     public:
         virtual void msg_addRemovedItem(int x,int y,int,int)=0;
         virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)=0;
@@ -403,6 +413,7 @@ class connection{
         virtual void msg_removeBody(const char*)=0;
         virtual void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float)=0;
         virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)=0;
+        virtual void msg_setMainControl(const char *)=0;
 };
 ///////////////////////
 }//////client

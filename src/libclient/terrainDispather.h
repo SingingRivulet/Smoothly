@@ -139,7 +139,7 @@ class bodyDispather:public dispatherQueue{
                 }
             }
         }
-        inline void incPosi(int x,int y,const std::string & name,int dt){
+        inline void incPosi(int x,int y,const std::string & ,int dt){
             ipair p(x,y);
             auto it = chunks.find(p);
             if(it==chunks.end()){//未观察的区域

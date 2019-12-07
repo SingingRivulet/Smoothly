@@ -1,4 +1,8 @@
 QT -= gui
+QT += xml
+
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -22,7 +26,10 @@ SOURCES += main.cpp \
     handlers.cpp \
     map.cpp \
     removeTable.cpp \
-    server.cpp
+    server.cpp \
+    admin.cpp \
+    admin_handler.cpp \
+    ../utils/cJSON.c
 
 SUBDIRS += \
     server.pro
@@ -42,7 +49,11 @@ HEADERS += \
     map.h \
     removeTable.h \
     server.h \
-    fontcolor.h
+    fontcolor.h \
+    admin.h \
+    ../utils/uuid.h \
+    ../utils/cJSON.h \
+    ../utils/uuid.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

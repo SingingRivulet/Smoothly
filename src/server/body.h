@@ -2,6 +2,7 @@
 #define SMOOTHLY_SERVER_BODY
 #include "removeTable.h"
 #include <functional>
+#include <map>
 namespace smoothly{
 namespace server{
 
@@ -33,7 +34,8 @@ class body:public removeTable{
         void interactive(const std::string & user,const std::string & uuid , const std::string & s);
         
         void HPInc(const std::string & uuid,int delta);
-        
+
+        std::string addCharacter(const std::string & owner,int id,const vec3 & posi);
         void addCharacter(const std::string & uuid,const std::string & owner,int id,int hp,const vec3 & posi);
         void removeCharacter(const std::string & uuid);
         
@@ -88,6 +90,15 @@ class body:public removeTable{
             int id,int hp,int status,const std::string & owner,
             const vec3 & p,const vec3 & r,const vec3 & l,
             const std::set<int> & wearing)=0;
+
+        body();
+        ~body();
+
+    private:
+        struct bconf{
+            int hp;
+        };
+        std::map<int,bconf*> config;
 };
 
 }//////server

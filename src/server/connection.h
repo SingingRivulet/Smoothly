@@ -44,6 +44,8 @@ class connection:public body{
         enum GameMessage{
             MESSAGE_GAME=ID_USER_PACKET_ENUM+1
         };
+
+        virtual void adminMessage(RakNet::BitStream * data,const RakNet::SystemAddress &)=0;
         
         virtual void onMessage(const std::string & uuid,const RakNet::SystemAddress &,char c,char a,RakNet::BitStream * data)=0;
         

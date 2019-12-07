@@ -27,7 +27,7 @@ namespace smoothly{
                 virtual void removeChunk(int x , int y);
             }b;
             struct vDs:public world::terrain::viewDispather{
-                terrainDispather * parent
+                terrainDispather * parent;
                 virtual void createChunk(int x , int y);
                 virtual void removeChunk(int x , int y);
             }v;

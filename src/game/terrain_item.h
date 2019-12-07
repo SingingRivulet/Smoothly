@@ -1,7 +1,7 @@
 #ifndef SMOOTHLY_TERRAIN_ITEM
 #define SMOOTHLY_TERRAIN_ITEM
 #include "terrain.h"
-#include "cJSON.h"
+#include "../utils/cJSON.h"
 #include <map>
 namespace smoothly{
     typedef client::mapItem mapItem;
@@ -18,6 +18,9 @@ namespace smoothly{
             };
             virtual void msg_addRemovedItem(int x,int y,int,int);
             virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &);
+            virtual void releaseChunk(int x,int y);
+            virtual void showChunk(int x,int y);
+            virtual void hideChunk(int x,int y);
         private:
             struct chunk;
             struct item{
@@ -39,6 +42,17 @@ namespace smoothly{
             void releaseAllChunk();
             void removeTerrainItem(chunk * ,int index,int id);
             item * makeTerrainItem(int,int,float,float,float);
+
+            inline void setChunkVis(int x,int y,bool md){
+                auto it = chunks.find(ipair(x,y));
+                if(it!=chunks.end()){
+                    for(auto im:it->second->children){
+                        irr::scene::IMeshSceneNode  * n = im.second->node;
+                        if(n)
+                            n->setVisible(md);
+                    }
+                }
+            }
         private:
             struct conf{
                 bool                 haveBody;

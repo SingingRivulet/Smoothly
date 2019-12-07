@@ -34,7 +34,7 @@ btTriangleMesh * physical::createBtMesh(irr::scene::IMesh * mesh){
         const irr::video::E_INDEX_TYPE  indexType  = buffer->getIndexType();
 
         // Get working data
-        const size_t numVerts    = buffer->getVertexCount();
+        const int    numVerts    = buffer->getVertexCount();
         const size_t numInd      = buffer->getIndexCount();
 
         void * vertices = buffer->getVertices();
@@ -146,7 +146,7 @@ btRigidBody * physical::createBody(
     btCollisionShape * shape , 
     btMotionState * motionState , 
     btScalar mass , 
-    const btVector3 & localInertia
+    const btVector3 &
 ){
     return new btRigidBody( mass , motionState, shape );
 }
@@ -285,8 +285,8 @@ void physical::shapeGroup::add(btCollisionShape * obj,const btVector3& position,
     children.push_back(obj);
     compound->addChildShape(t, obj);
 }
-void physical::shapeGroup::setFric(float f){}
-void physical::shapeGroup::setResti(float r){}
+void physical::shapeGroup::setFric(float ){}
+void physical::shapeGroup::setResti(float ){}
 
 void physical::bodyGroup::init(const std::string & conf){
     shapeGroup::init(conf);
@@ -385,11 +385,10 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     
     firstUpdate=true;
 }
-void physical::character::destruct(){
+physical::character::~character(){
     delete controller;
     delete m_ghostObject;
     delete shape;
-    delete this;
 }
 void physical::character::getDeltaL(irr::core::vector3df & out){
     btTransform transform;
@@ -458,6 +457,20 @@ void physical::character::setUserPointer(void * p){
 void physical::character::setAngularFactor(const btVector3 & a){
     //m_ghostObject->setAngularFactor(a);
 }
+void physical::character::applyImpulse(const btVector3& ,const btVector3& ){}
+void physical::character::applyForce(const btVector3& ,const btVector3& ){}
+void physical::character::clearForces(){}
+void physical::character::setLinearVelocity(const btVector3& ){}
+void physical::character::setAngularVelocity(const btVector3& ){}
+void physical::character::setFriction(btScalar){}
+void physical::character::setRestitution(btScalar){}
+btVector3 physical::character::getAngularVelocity(){
+    return btVector3(0,0,0);}
+btVector3 physical::character::getLinearVelocity(){
+    return btVector3(0,0,0);
+}
+void physical::character::loop(float){}
+//===============================================================================
 
 physical::rigidBody::rigidBody(
     btCollisionShape * bodyShape,
@@ -470,10 +483,9 @@ physical::rigidBody::rigidBody(
     body=createBody(bodyShape , bodyState , mass , localInertia);
 }
 
-void physical::rigidBody::destruct(){
+physical::rigidBody::~rigidBody(){
     delete body;
     delete bodyState;
-    delete this;
 }
 
 void physical::rigidBody::addIntoWorld(){
