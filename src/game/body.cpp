@@ -27,15 +27,58 @@ void body::removeBody(const std::string & uuid){
     if(it!=bodies.end()){
         releaseBody(it->second);
         bodies.erase(it);
+        myBodies.erase(it);
     }
 }
 
 void body::bodyItem::updateFromWorld(){
     if(node==NULL)
         return;
-    btTransform t;
-    m_character.getTransform(t);
-    setPositionByTransform(node,t);
+    btTransform transform;
+    m_character.getTransform(transform);
+
+    //从world复制到scene
+    btVector3 btPos;
+    btVector3 btRot;
+    irr::core::vector3df irrPos;
+    irr::core::vector3df irrRot;
+
+    btPos = transform.getOrigin();
+    irrPos.set(btPos.x(), btPos.y(), btPos.z());
+
+    const btMatrix3x3 & btM = transform.getBasis();
+    btM.getEulerZYX(btRot.m_floats[2], btRot.m_floats[1], btRot.m_floats[0]);
+    irrRot.X = irr::core::radToDeg(btRot.x());
+    irrRot.Y = irr::core::radToDeg(btRot.y());
+    irrRot.Z = irr::core::radToDeg(btRot.z());
+
+    if(owner==parent->myUUID){//拥有的物体
+        //尝试上传
+        if(lastPosition!=irrPos){
+            node->setPosition(irrPos);
+            lastPosition = irrPos;
+            parent->cmd_setPosition(uuid,irrPos.X,irrPos.Y,irrPos.Z);
+        }
+        if(lastRotation!=irrRot){
+            node->setRotation(irrRot);
+            lastRotation = irrRot;
+            parent->cmd_setRotation(uuid,irrPos.X,irrPos.Y,irrPos.Z);
+        }
+        if(lastLookAt!=lookAt){
+            lastLookAt = lookAt;
+            parent->cmd_setLookAt(uuid,irrPos.X,irrPos.Y,irrPos.Z);
+        }
+    }else{
+        node->setRotation(irrRot);
+        node->setPosition(irrPos);
+    }
+
+    //setPositionByTransform(node,t);
+
+    //如果是视角物体，更新摄像机
+    if(uuid==parent->mainControl){
+        parent->camera->setPosition(irrPos);
+    }
 }
 
 void body::bodyItem::doAnimation(int speed, int start, int end, bool loop){
@@ -62,7 +105,8 @@ void body::bodyItem::updateStatus(bool finish){
     lua_getglobal(parent->L,it->second->aniCallback.c_str());
     if(lua_isfunction(parent->L,-1)){
 
-        lua_pushboolean(parent->L, status.walking);
+        lua_pushboolean(parent->L, status.walk_forward);
+        lua_pushboolean(parent->L, status.walk_leftOrRight);
         lua_pushboolean(parent->L, status.useLeft);
         lua_pushboolean(parent->L, status.useRight);
 
@@ -114,7 +158,7 @@ void body::bodyItem::updateStatus(bool finish){
         lua_pushboolean(parent->L,finish);
 
         // do the call (2 arguments, 1 result)
-        if (lua_pcall(parent->L, 6, 4, 0) != 0)
+        if (lua_pcall(parent->L, 7, 4, 0) != 0)
              printf("error running function : %s \n",lua_tostring(parent->L, -1));
         else{
             if(lua_isboolean(parent->L,-1) && lua_isinteger(parent->L,-2) && lua_isinteger(parent->L,-3) && lua_isinteger(parent->L,-4)){
@@ -128,6 +172,10 @@ void body::bodyItem::updateStatus(bool finish){
 
     }
     lua_settop(parent->L , 0);
+}
+
+void body::bodyItem::interactive(const char * t){
+    parent->setInteractiveNode(this , t);
 }
 
 void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const std::string & owner,const vec3 & posi,const vec3 & r,const vec3 & l){
@@ -145,12 +193,18 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->m_character.addIntoWorld();
     p->m_character.setRotation(r);
     p->lookAt = l;
+
+    p->lastLookAt   = l;
+    p->lastPosition = posi;
+    p->lastRotation = r;
+
     p->uuid   = uuid;
     p->owner  = owner;
     p->id     = id;
     p->hp     = hp;
     p->status = sta_mask;
     p->status_mask = sta_mask;
+    p->config = c;
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->parent = this;
 
@@ -164,6 +218,12 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->updateStatus();
 
     bodies[uuid] = p;
+    if(owner==myUUID)
+        myBodies[uuid] = p;
+
+    if(uuid==mainControl){
+        mainControlBody = p;
+    }
 }
 void body::setWearing(bodyItem * n, const std::set<int> & wearing){
     std::set<int> rm;
@@ -201,6 +261,7 @@ void body::addWearingNode(bodyItem * n, int wearing){
     n->wearing[wearing] = wn;
 }
 body::body(){
+    mainControlBody = NULL;
     loadBodyConfig();
     loadWearingConfig();
     L = luaL_newstate();
@@ -235,8 +296,19 @@ void body::setPositionByTransform(irr::scene::ISceneNode * node, const btTransfo
 
 int32_t body::bodyStatus::toMask()const{
     int32_t res = 0;
-    if(walking)
-        res |= 1;
+
+    if(walk_forward==1)
+        res |= BM_WALK_F;
+    else if (walk_forward==-1) {
+        res |= BM_WALK_B;
+    }
+
+    if(walk_leftOrRight==1){
+        res |= BM_WALK_R;
+    }else if (walk_leftOrRight==-1) {
+        res |= BM_WALK_L;
+    }
+
     res |= bodyPosture;
     res |= handPosture;
     if(useLeft)
@@ -267,10 +339,17 @@ void body::bodyStatus::loadMask(int32_t m){
     handPosture = (handPosture_t)(m & BS_HAND_LIFT);
     bodyPosture = (bodyPosture_t)(m & (BS_BODY_SQUAT | BS_BODY_SIT | BS_BODY_RIDE));
 
-    if(m & BM_WALK)
-        walking = true;
-    else
-        walking = false;
+    if(m & BM_WALK_F){
+        walk_forward = 1;
+    }else if (m & BM_WALK_B) {
+        walk_forward = -1;
+    }
+
+    if(m & BM_WALK_L){
+        walk_leftOrRight = -1;
+    }else if (m & BM_WALK_R) {
+        walk_leftOrRight = 1;
+    }
 
     if(m & BM_ACT_SHOT_L)
         shotLeft = true;
@@ -297,7 +376,8 @@ body::bodyStatus::bodyStatus(){
     handPosture = BS_HAND_NONE;
     useLeft  = false;
     useRight = false;
-    walking  = false;
+    walk_leftOrRight = 0;
+    walk_forward     = 0;
     shotLeft = false;
     shotRight= false;
     throwing = false;
@@ -308,7 +388,8 @@ body::bodyStatus::bodyStatus(const bodyStatus & i){
     bodyPosture = i.bodyPosture;
     useLeft     = i.useLeft;
     useRight    = i.useRight;
-    walking     = i.walking;
+    walk_leftOrRight = i.walk_leftOrRight;
+    walk_forward     = i.walk_forward;
     shotLeft    = i.shotLeft;
     shotRight   = i.shotRight;
     throwing    = i.throwing;
@@ -322,7 +403,8 @@ const body::bodyStatus & body::bodyStatus::operator=(const bodyStatus & i){
     bodyPosture = i.bodyPosture;
     useLeft     = i.useLeft;
     useRight    = i.useRight;
-    walking     = i.walking;
+    walk_leftOrRight = i.walk_leftOrRight;
+    walk_forward     = i.walk_forward;
     shotLeft    = i.shotLeft;
     shotRight   = i.shotRight;
     throwing    = i.throwing;
@@ -337,7 +419,29 @@ const body::bodyStatus & body::bodyStatus::operator=(int32_t m){
 void body::releaseBody(bodyItem * b){
     b->m_character.removeFromWorld();
     b->node->addAnimator(scene->createDeleteAnimator(1));
+    if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的
+        removeCharacterChunk(b->uuid);
+    }
+    if(!mainControl.empty() && mainControl==b->uuid){//是视角物体
+        mainControl.clear();
+        mainControlBody=NULL;
+    }
     delete b;
+}
+
+body::bodyItem * body::seekBody(const std::string & u){
+    auto it = bodies.find(u);
+    if(it==bodies.end())
+        return NULL;
+    else
+        return it->second;
+}
+body::bodyItem * body::seekMyBody(const std::string & u){
+    auto it = myBodies.find(u);
+    if(it==myBodies.end())
+        return NULL;
+    else
+        return it->second;
 }
 
 }

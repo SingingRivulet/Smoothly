@@ -74,10 +74,10 @@ void body::msg_setRotation(const char* uuid,float x,float y,float z){
     }
 }
 
-void body::msg_interactive(const char* uuid,const char*){
+void body::msg_interactive(const char* uuid,const char * s){
     returnInMine;
     findBody(uuid){
-        it->second->updateStatus();
+        it->second->interactive(s);
     }
 }
 
@@ -90,7 +90,10 @@ void body::msg_createBody(
         float px,float py,float pz,
         float rx,float ry,float rz,
         float lx,float ly,float lz){
-
+    addBody(uuid,id,hp,status,owner,
+            vec3(px,py,pz),
+            vec3(rx,ry,rz),
+            vec3(lx,ly,lz));
 }
 
 void body::msg_setBody(
@@ -99,11 +102,20 @@ void body::msg_setBody(
         float rx,float ry,float rz,
         float lx,float ly,float lz,
         const std::set<int> & wearing){
-
+    addBody(uuid,id,hp,status,owner,
+            vec3(px,py,pz),
+            vec3(rx,ry,rz),
+            vec3(lx,ly,lz));
+    findBody(uuid){
+        setWearing(it->second , wearing);
+    }
 }
 
 void body::msg_setMainControl(const char * uuid){//设置第一人称的body
     mainControl = uuid;
+    findBody(uuid){
+        mainControlBody = it->second;
+    }
 }
 
 }

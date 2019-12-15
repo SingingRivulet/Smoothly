@@ -36,7 +36,8 @@ HEADERS += \
     ../libclient/terrainGen.h \
     ../utils/cJSON.h \
     ../utils/uuid.h \
-    body.h
+    body.h \
+    interactive.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -50,4 +51,7 @@ SOURCES += \
     ../utils/cJSON.c \
     body.cpp \
     body_handler.cpp \
-    body_config.cpp
+    body_config.cpp \
+    interactive.cpp \
+    body_control.cpp \
+    body_loop.cpp

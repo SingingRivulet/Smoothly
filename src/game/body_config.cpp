@@ -49,6 +49,9 @@ void body::loadBodyConfig(){
                                             }else
                                             if(strcmp(item->string,"jumpInSky")==0){
                                                 ptr->jumpInSky = (item->valueint!=0);
+                                            }else
+                                            if(strcmp(item->string,"walkVelocity")==0){
+                                                ptr->walkVelocity = (item->valuedouble!=0);
                                             }
                                         }else
                                         if(item->type==cJSON_String){

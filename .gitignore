@@ -14,4 +14,7 @@ data/
 client
 /bin*
 
+*.user
+*.user.*
+
 build-*-*-*

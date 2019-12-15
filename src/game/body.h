@@ -26,9 +26,9 @@ class body:public terrainDispather{
         virtual void msg_setMainControl(const char *);//设置第一人称的body
 
     public:
-        typedef enum{//身体姿势掩码
+        typedef enum:int32_t{//身体姿势掩码
 
-            BM_WALK         = 1,            //行走(为0表示停止行走)
+            BM_VANISH       = 1,
 
             //姿势，六选一
             BM_SQUAT        = 1<<1,         //蹲
@@ -53,13 +53,20 @@ class body:public terrainDispather{
             BM_ACT_SHOT_L   = 1<<9,                 //左射击
             BM_ACT_SHOT_R   = 1<<10,                //右射击
             BM_ACT_THROW    = 1<<11,                //投掷
-            BM_ACT_CHOP     = 1<<12                 //砍
+            BM_ACT_CHOP     = 1<<12,                //砍
+
+            BM_WALK_F       = 1<<13,            //前行走
+            BM_WALK_B       = 1<<14,            //后行走
+            BM_WALK_L       = 1<<15,            //左行走
+            BM_WALK_R       = 1<<16             //右行走
 
         }bodyStatusMask;
 
         struct bodyStatus{
-            bool walking;
-            typedef enum{
+            int walk_forward;
+            int walk_leftOrRight;
+
+            typedef enum:int32_t{
                 BS_BODY_STAND   = 0,
                 BS_BODY_SQUAT   = 1<<1,
                 BS_BODY_SIT     = 1<<2,
@@ -67,7 +74,8 @@ class body:public terrainDispather{
                 BS_BODY_LIE     = 1<<1 & 1<<2,
                 BS_BODY_LIEP    = 1<<1 & 1<<3
             }bodyPosture_t;
-            typedef enum{
+
+            typedef enum:int32_t{
                 BS_HAND_NONE    = 0,
                 BS_HAND_AIM     = 1<<6,
                 BS_HAND_THROW   = 1<<7,
@@ -76,6 +84,7 @@ class body:public terrainDispather{
                 BS_HAND_OPERATE = 1<<8 & 1<<7,
                 BS_HAND_LIFT    = 1<<8 & 1<<7 & 1<<6
             }handPosture_t;
+
             bodyPosture_t bodyPosture;
             handPosture_t handPosture;
             bool useLeft,useRight,shotLeft,shotRight,throwing,chop;
@@ -90,30 +99,57 @@ class body:public terrainDispather{
 
         };
 
+    public:
+        class bodyItem;
+
     private:
-        struct bodyItem;
+        struct bodyConf;
         class bodyAmCallback:public irr::scene::IAnimationEndCallBack{
             public:
                 void OnAnimationEnd(irr::scene::IAnimatedMeshSceneNode *);
                 bodyItem * parent;
         };
-        struct bodyItem{
-            character                            m_character;
-            bodyStatus                           status;
-            int32_t                              status_mask;
-            int                                  id,hp;
-            std::string                          uuid,owner;
-            irr::scene::IAnimatedMeshSceneNode * node;
-            vec3                                 lookAt;
-            body                               * parent;
-            std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
-            bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
-            void updateFromWorld();
-            void updateStatus(bool finish = false);
-            void doAnimation(int speed,int start,int end ,bool loop);
+
+    public:
+        class bodyItem{
+            friend class body;
+            public:
+                character                            m_character;
+                bodyStatus                           status;
+                int32_t                              status_mask;
+                int                                  id,hp;
+                std::string                          uuid,owner;
+                irr::scene::IAnimatedMeshSceneNode * node;
+                vec3                                 lookAt;
+                body                               * parent;
+                bodyConf                           * config;
+                std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
+            protected:
+                bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
+                void updateFromWorld();
+                void updateStatus(bool finish = false);
+                void doAnimation(int speed,int start,int end ,bool loop);
+                void interactive(const char *);
+                void walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed);
+
+                //向服务器发送数据
+                void interactive_c(const std::string & );
+                void wearing_add_c(int d);
+                void wearing_remove_c(int d);
+                void wearing_clear_c();
+
+                vec3 lastPosition,lastRotation,lastLookAt;
+
+            public:
+                void setLookAt(const vec3 &);
+
+                void HP_inc_c(int d);//设置body血量
         };
+
+    private:
         lua_State * L;//
         std::unordered_map<std::string,bodyItem*> bodies;
+        std::unordered_map<std::string,bodyItem*> myBodies;
         void setBodyPosition(const std::string & uuid , const vec3 & posi);
         void removeBody(const std::string & uuid);
         void releaseBody(bodyItem*);
@@ -131,6 +167,7 @@ class body:public terrainDispather{
             bool walkInSky,jumpInSky;
             irr::scene::IAnimatedMesh * mesh;
             std::string aniCallback;
+            float walkVelocity;
         };
         std::map<int,bodyConf*> bodyConfig;
 
@@ -148,6 +185,39 @@ class body:public terrainDispather{
 
     public:
         static void setPositionByTransform(irr::scene::ISceneNode * n , const btTransform & t);
+        virtual void setInteractiveNode(bodyItem * b , const std::string & method)=0;
+        virtual void loop();
+        bodyItem * seekBody(const std::string &);
+        bodyItem * seekMyBody(const std::string &);
+        bodyItem * mainControlBody;
+
+    public:
+        //commond
+        typedef enum{
+            CMD_SET_LOOKAT,
+            CMD_SET_POSITION,   //直接设置位置，慎用
+            CMD_SET_ROTATION,
+            CMD_JUMP,
+            CMD_STATUS_SET,
+            CMD_STATUS_ADD,     //添加掩码
+            CMD_STATUS_REMOVE,  //删除掩码
+            CMD_INTERACTIVE,
+            CMD_WEARING_ADD,
+            CMD_WEARING_REMOVE,
+            CMD_WEARING_CLEAR
+        }bodyCmd_t;
+        struct commond{
+            bodyCmd_t   cmd;      //指令
+            int32_t     data_int;
+            std::string data_str;
+            vec3        data_vec;
+            commond();
+            commond(const commond &);
+        };
+        void pushCommond(const commond &);
+    private:
+        void doCommond(const commond &);
+        std::queue<commond> cmdQueue;
 
 };
 
