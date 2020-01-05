@@ -41,8 +41,8 @@ namespace smoothly{
                 BODY_TERRAIN,
                 BODY_TERRAIN_ITEM,
                 BODY_BUILDING,
-                BODY_SUBSTANCE,
-                BODY_CHARACTER
+                BODY_BODY,
+                BODY_BULLET
             };
             struct bodyInfo{
                 void * ptr;

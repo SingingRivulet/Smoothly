@@ -192,6 +192,11 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->m_character.world = dynamicsWorld;
     p->m_character.addIntoWorld();
     p->m_character.setRotation(r);
+    p->m_character.setUserPointer(&(p->info));
+
+    p->info.ptr  = p;
+    p->info.type = BODY_BODY;
+
     p->lookAt = l;
 
     p->lastLookAt   = l;
@@ -206,6 +211,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->status_mask = sta_mask;
     p->config = c;
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
+    p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     p->parent = this;
 
     //设置回调函数
@@ -247,7 +254,7 @@ void body::removeWearing(bodyItem * n, int wearing){
     auto it = n->wearing.find(wearing);
     if(it!=n->wearing.end())
         return;
-    it->second->addAnimator(scene->createDeleteAnimator(1));
+    it->second->remove();
     n->wearing.erase(it);
 }
 void body::addWearingNode(bodyItem * n, int wearing){
@@ -418,7 +425,7 @@ const body::bodyStatus & body::bodyStatus::operator=(int32_t m){
 
 void body::releaseBody(bodyItem * b){
     b->m_character.removeFromWorld();
-    b->node->addAnimator(scene->createDeleteAnimator(1));
+    b->node->remove();
     if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的
         removeCharacterChunk(b->uuid);
     }

@@ -158,6 +158,13 @@ class connection{
                                         break;
                                     }
                                 break;
+                                case 'S':
+                                    switch(data->data[3]){
+                                        case 'A':
+                                            ctl_fire(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -247,6 +254,15 @@ class connection{
             RakNet::RakString p=pwd.c_str();
             bs.Write(u);
             bs.Write(p);
+            sendMessage(&bs);
+        }
+        inline void cmd_fire(const std::string & uuid,int id,float fx,float fy,float fz,float dx,float dy,float dz){
+            makeHeader('S','A');
+            RakNet::RakString u=uuid.c_str();
+            bs.Write(u);
+            bs.Write((int32_t)id);
+            bs.WriteVector(fx ,fy ,fz);
+            bs.WriteVector(dx ,dy ,dz);
             sendMessage(&bs);
         }
     private:
@@ -398,6 +414,16 @@ class connection{
             data->Read(u);
             msg_setMainControl(u.C_String());
         }
+        inline void ctl_fire(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t id;
+            float fX,fY,fZ,dX,dY,dZ;
+            data->Read(u);
+            data->Read(id);
+            data->ReadVector(fX ,fY ,fZ);
+            data->ReadVector(dX ,dY ,dZ);
+            msg_fire(u.C_String(),id,fX,fY,fZ,dX,dY,dZ);
+        }
     public:
         virtual void msg_addRemovedItem(int x,int y,int,int)=0;
         virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)=0;
@@ -414,6 +440,7 @@ class connection{
         virtual void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float)=0;
         virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)=0;
         virtual void msg_setMainControl(const char *)=0;
+        virtual void msg_fire(const char *,int,float,float,float,float,float,float)=0;
 };
 ///////////////////////
 }//////client

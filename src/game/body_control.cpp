@@ -48,33 +48,109 @@ void body::bodyItem::setLookAt(const vec3 & l){
     m_character.setDir(l);
     lookAt = l;
 }
+
+void body::bodyItem::interactive_c(const std::string & s){
+    interactive(s.c_str());
+}
+void body::bodyItem::wearing_add_c(int d){
+    parent->addWearing(this , d);
+    parent->cmd_wearing_add(uuid , d);
+}
+void body::bodyItem::wearing_remove_c(int d){
+    parent->removeWearing(this , d);
+    parent->cmd_wearing_remove(uuid , d);
+}
+void body::bodyItem::wearing_clear_c(){
+    for(auto it:wearing)
+        parent->cmd_wearing_remove(uuid,it.first);
+    parent->setWearing(this , std::set<int>());
+}
+void body::bodyItem::HP_inc_c(int d){
+    hp = d;
+    parent->cmd_HPInc(uuid , d);
+}
+
 void body::doCommond(const commond & c){
+    bodyItem * p;
+    if(c.uuid.empty()){//没有uuid，使用main control
+        p = mainControlBody;
+    }else{
+        p = seekMyBody(c.uuid);
+    }
+    if(p==NULL)
+        return;
+
     switch (c.cmd) {
+
     case CMD_SET_LOOKAT:
+        p->setLookAt(c.data_vec);
         break;
+
     case CMD_SET_POSITION:
+        p->m_character.setPosition(c.data_vec);
         break;
+
     case CMD_SET_ROTATION:
+        p->m_character.setRotation(c.data_vec);
         break;
+
     case CMD_JUMP:
+        p->m_character.jump(btVector3(c.data_vec.X , c.data_vec.Y , c.data_vec.Z));
         break;
+
     case CMD_STATUS_SET:
+        p->status_mask   = c.data_int;
+        p->status        = c.data_int;
+        cmd_setStatus(p->uuid , p->status_mask);
         break;
+
     case CMD_STATUS_ADD:
+        p->status_mask   = p->status.toMask();
+        p->status_mask  |= c.data_int;
+        p->status        = p->status_mask;
+        cmd_setStatus(p->uuid , p->status_mask);
         break;
+
     case CMD_STATUS_REMOVE:
+        p->status_mask   = p->status.toMask();
+        p->status_mask  ^= c.data_int;
+        p->status        = p->status_mask;
+        cmd_setStatus(p->uuid , p->status_mask);
         break;
+
     case CMD_INTERACTIVE:
+        p->interactive_c(c.data_str);
         break;
+
     case CMD_WEARING_ADD:
+        p->wearing_add_c(c.data_int);
         break;
+
     case CMD_WEARING_REMOVE:
+        p->wearing_remove_c(c.data_int);
         break;
+
     case CMD_WEARING_CLEAR:
+        p->wearing_clear_c();
         break;
+
     default:
         break;
     }
+}
+void body::pushCommond(const commond & c){
+    cmdQueue_locker.lock();
+    cmdQueue.push(c);
+    cmdQueue_locker.unlock();
+}
+void body::doCommonds(){
+    cmdQueue_locker.lock();
+    while(!cmdQueue.empty()){
+        auto c = cmdQueue.front();
+        doCommond(c);
+        cmdQueue.pop();
+    }
+    cmdQueue_locker.unlock();
 }
 
 }

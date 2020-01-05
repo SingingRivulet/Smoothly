@@ -37,7 +37,9 @@ HEADERS += \
     ../utils/cJSON.h \
     ../utils/uuid.h \
     body.h \
-    interactive.h
+    interactive.h \
+    bone.h \
+    fire.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -54,4 +56,10 @@ SOURCES += \
     body_config.cpp \
     interactive.cpp \
     body_control.cpp \
-    body_loop.cpp
+    body_loop.cpp \
+    ../bone.cpp \
+    fire.cpp \
+    fire_config.cpp \
+    fire_bullet.cpp \
+    fire_collision.cpp \
+    fire_attack.cpp

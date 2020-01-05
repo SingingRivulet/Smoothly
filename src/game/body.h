@@ -1,8 +1,10 @@
 #ifndef SMOOTHLY_BODY
 #define SMOOTHLY_BODY
 #include "terrainDispather.h"
+#include "bone.h"
 #include <unordered_map>
 #include <stdlib.h>
+#include <mutex>
 namespace smoothly{
 
 class body:public terrainDispather{
@@ -124,6 +126,7 @@ class body:public terrainDispather{
                 body                               * parent;
                 bodyConf                           * config;
                 std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
+                bodyInfo                             info;
             protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
@@ -146,7 +149,7 @@ class body:public terrainDispather{
                 void HP_inc_c(int d);//设置body血量
         };
 
-    private:
+    protected:
         lua_State * L;//
         std::unordered_map<std::string,bodyItem*> bodies;
         std::unordered_map<std::string,bodyItem*> myBodies;
@@ -207,6 +210,7 @@ class body:public terrainDispather{
             CMD_WEARING_CLEAR
         }bodyCmd_t;
         struct commond{
+            std::string uuid;
             bodyCmd_t   cmd;      //指令
             int32_t     data_int;
             std::string data_str;
@@ -217,7 +221,9 @@ class body:public terrainDispather{
         void pushCommond(const commond &);
     private:
         void doCommond(const commond &);
+        std::mutex cmdQueue_locker;
         std::queue<commond> cmdQueue;
+        void doCommonds();
 
 };
 

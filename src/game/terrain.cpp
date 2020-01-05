@@ -60,6 +60,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     selector->drop();
     
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     res->node->addShadowVolumeSceneNode();
     
     if(showing.find(ipair(x,y))==showing.end())

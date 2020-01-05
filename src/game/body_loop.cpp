@@ -23,6 +23,7 @@ void body::loop(){
         bodyItem * b = it.second;
         b->updateFromWorld();
     }
+    doCommonds();
 }
 
 }

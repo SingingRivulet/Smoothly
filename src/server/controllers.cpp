@@ -52,6 +52,13 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'S':
+            switch(a){
+                case 'A':
+                    ctl_fire(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -139,6 +146,20 @@ void controllers::ctl_getBody(const std::string & ,const RakNet::SystemAddress &
     RakNet::RakString u;
     data->Read(u);
     sendBodyToAddr(addr , u.C_String());
+}
+
+void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){
+    RakNet::RakString u;
+    int32_t id;
+    vec3 f,d;
+    data->Read(u);
+    data->Read(id);
+    data->ReadVector(f.X ,f.Y ,f.Z);
+    data->ReadVector(d.X ,d.Y ,d.Z);
+
+    std::string ob = u.C_String();
+    if(getOwner(ob)==uuid && !uuid.empty())//验证权限
+        shoot(ob , id , f , d);
 }
 /////////////////
 }//////server

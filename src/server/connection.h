@@ -1,6 +1,6 @@
 #ifndef SMOOTHLY_SERVER_CONNECTION
 #define SMOOTHLY_SERVER_CONNECTION
-#include "body.h"
+#include "bullet.h"
 #include <raknet/RakPeerInterface.h>
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/BitStream.h>
@@ -11,7 +11,7 @@
 namespace smoothly{
 namespace server{
 
-class connection:public body{
+class connection:public bullet{
     public:
         void start(unsigned short port,int maxcl);
         void release();

@@ -43,6 +43,8 @@ class handlers:public admin{
         
         virtual void boardcast_addRemovedItem(int x,int y,int id,int index);
         
+        virtual void boardcast_shoot(const std::string & user,int id,const vec3 & from,const vec3 & dir);
+
         void boardcast(int x,int y,RakNet::BitStream * data);
         
 };

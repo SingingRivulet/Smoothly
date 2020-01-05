@@ -125,6 +125,8 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
         it->second->scale
     );
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    res->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     res->node->addShadowVolumeSceneNode();
     
     res->node->updateAbsolutePosition();//更新矩阵

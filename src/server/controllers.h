@@ -21,6 +21,8 @@ class controllers:public handlers{
         void ctl_interactive(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         void ctl_HPInc(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         void ctl_getBody(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
+
+        void ctl_fire(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         
 };
 /////////////////

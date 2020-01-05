@@ -160,6 +160,16 @@ void handlers::boardcast_addRemovedItem(int x,int y,int id,int index){
     boardcast(x,y,&bs);
 }
 
+void handlers::boardcast_shoot(const std::string & user,int id,const vec3 & f,const vec3 & d){
+    makeHeader('S','A');
+    RakNet::RakString u=user.c_str();
+    bs.Write(u);
+    bs.Write((int32_t)id);
+    bs.WriteVector(f.X ,f.Y ,f.Z);
+    bs.WriteVector(d.X ,d.Y ,d.Z);
+    boardcast(f.X/32 , f.Z/32 , &bs);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     std::set<std::string> o;
     getUsers(x,y,o);
