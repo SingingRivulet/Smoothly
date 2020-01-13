@@ -134,6 +134,14 @@ void body::doCommond(const commond & c){
         p->wearing_clear_c();
         break;
 
+    case CMD_FIRE_BEGIN:
+        p->firing = true;
+        break;
+
+    case CMD_FIRE_END:
+        p->firing = false;
+        break;
+
     default:
         break;
     }

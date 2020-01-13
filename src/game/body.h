@@ -127,6 +127,14 @@ class body:public terrainDispather{
                 bodyConf                           * config;
                 std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
                 bodyInfo                             info;
+
+                bool firing;
+                int firingWearingId;
+                int fireId;
+                unsigned int lastFireTime;
+                unsigned int fireDelta;
+
+                void doFire();
             protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
@@ -189,6 +197,7 @@ class body:public terrainDispather{
     public:
         static void setPositionByTransform(irr::scene::ISceneNode * n , const btTransform & t);
         virtual void setInteractiveNode(bodyItem * b , const std::string & method)=0;
+        virtual void fireTo(const std::string & uuid , int id , const vec3 & from , const vec3 & dir)=0;
         virtual void loop();
         bodyItem * seekBody(const std::string &);
         bodyItem * seekMyBody(const std::string &);
@@ -207,7 +216,9 @@ class body:public terrainDispather{
             CMD_INTERACTIVE,
             CMD_WEARING_ADD,
             CMD_WEARING_REMOVE,
-            CMD_WEARING_CLEAR
+            CMD_WEARING_CLEAR,
+            CMD_FIRE_BEGIN,
+            CMD_FIRE_END
         }bodyCmd_t;
         struct commond{
             std::string uuid;

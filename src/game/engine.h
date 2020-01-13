@@ -20,8 +20,8 @@ namespace smoothly{
             
             engine();
             ~engine();
-            void sceneLoop();
-            void worldLoop();
+            virtual void sceneLoop();
+            virtual void worldLoop();
             void deltaTimeUpdate();
             
             inline int getDeltaTime(){

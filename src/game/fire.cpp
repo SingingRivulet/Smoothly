@@ -3,7 +3,27 @@
 namespace smoothly{
 
 fire::fire(){
+    openConfig();
+    L = luaL_newstate();
+    luaL_openlibs(L);
+    luaL_dofile(L, "../script/fire.lua");
+}
 
+fire::~fire(){
+    for(auto b:bullets){
+        b->node->removeAll();
+        b->node->remove();
+        dynamicsWorld->removeRigidBody(b->rigidBody);
+        delete b->rigidBody;
+        delete b->bodyState;
+        bullets.erase(b);
+        delete b;
+    }
+    for(auto it:emitters){
+        delete it;
+    }
+    lua_close(L);
+    closeConfig();
 }
 
 void fire::fireTo(const std::string & uuid , int id , const vec3 & from , const vec3 & dir){
@@ -39,7 +59,9 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
         em->config  = conf;
         em->leave   = conf->streamParticleNum;
         em->uuid    = uuid;
-        emitters.push_back(em);
+        em->lastProcess = timer->getRealTime();
+        em->attack  = attack;
+        emitters.insert(em);
     }else
     if(conf->type==FIRE_CHOP || conf->type==FIRE_RADIO){
 
@@ -58,13 +80,17 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                 public:
                     fire * parent;
                     fireConfig * attconf;
-                    virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult & convexResult,bool normalInWorldSpace){
-                        //parent->attackBody(attconf , convexResult.m_hitCollisionObject);
+                    std::string uuid;
+                    virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult & convexResult,bool){
+                        auto ptr = (bodyInfo*)convexResult.m_hitCollisionObject->getUserPointer();
+                        parent->attackBody(uuid , attconf , ptr);
+                        return convexResult.m_hitFraction;
                     }
             };
             closeCombCallback callback;
-            callback.parent=this;
-            callback.attconf=conf;
+            callback.parent     = this;
+            callback.attconf    = conf;
+            callback.uuid       = uuid;
             //使用convexSweepTest实现
             dynamicsWorld->convexSweepTest(
                         conf->castShape,
@@ -131,7 +157,8 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             tdir=targ-from;
         }
         if(attack){
-            //attackBody(it->second , rayCallback.m_collisionObject);
+            auto ptr = (bodyInfo*)rayCallback.m_collisionObject->getUserPointer();
+            attackBody(uuid , conf , ptr);
         }
 
         //创建十字交叉的两个矩形，包上粒子来作为激光

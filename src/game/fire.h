@@ -4,10 +4,21 @@
 namespace smoothly{
 
 class fire:public body{
+    /*
+     * 先执行完攻击动作，然后worldLoop
+     */
     public:
         fire();
-        void fireTo(const std::string & uuid , int id , const vec3 & from , const vec3 & dir);
+        ~fire();
+        void fireTo(const std::string & uuid , int id , const vec3 & from , const vec3 & dir)override;
+
     private:
+        void openConfig();
+        void closeConfig();
+
+    private:
+
+        lua_State * L;
         virtual void msg_fire(const char *,int,float,float,float,float,float,float);
         void fireTo_act(const std::string & uuid , int id , const vec3 & from , const vec3 & dir,bool attack = false);
 
@@ -28,6 +39,7 @@ class fire:public body{
         }Particle_type;
 
         struct fireConfig{
+            int id;
 
             fire_type   type;
             float       range;          //范围(砍，激光，辐射)
@@ -95,16 +107,40 @@ class fire:public body{
             bool                          attack;
             std::string                   owner;
             fireConfig                  * config;
+            unsigned int                  expire;
+            void update();
         };
         struct emitter{
             fireConfig *    config;
             int             leave;
             std::string     uuid;
+            int             lastProcess;
+            bool            attack;
         };
-        std::list<emitter*> emitters;
-        std::list<bullet*>  bullets;
+        std::set<emitter*> emitters;
+        std::set<bullet*>  bullets;
+        std::set<bullet*>  bulletRemove;
 
         void shoot(const std::string & uuid , fireConfig * , const vec3 & from , const vec3 & dir,bool attack = false);
+
+        void attackBody(const std::string & uuid , fireConfig * conf , bodyInfo * body , float force = 1);
+
+        int  attackBody(const std::string & uuid , fireConfig * conf , bodyItem * , float force = 1);
+        bool attackTerrainItem(const std::string & uuid , fireConfig * conf , mapId * , float force = 1);
+
+        void bulletAttackBody(bullet * b , const btCollisionObject * body);
+        void releaseBullet(bullet * b);
+
+        bool processEmitter(emitter * em);
+        void releaseEmitter(emitter * em);
+
+        void processBullets();
+        void processBulletRemove();
+
+        void onCollision(bodyInfo * A,bodyInfo * B,const btManifoldPoint & point);
+        virtual void onCollision(btPersistentManifold *contact)override;
+    public:
+        void worldLoop()override;
 };
 
 }

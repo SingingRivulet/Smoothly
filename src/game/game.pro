@@ -39,7 +39,10 @@ HEADERS += \
     body.h \
     interactive.h \
     bone.h \
-    fire.h
+    fire.h \
+    control.h \
+    weapon.h \
+    game.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -62,4 +65,7 @@ SOURCES += \
     fire_config.cpp \
     fire_bullet.cpp \
     fire_collision.cpp \
-    fire_attack.cpp
+    fire_attack.cpp \
+    control.cpp \
+    weapon.cpp \
+    game.cpp

@@ -89,8 +89,22 @@ void body::bodyItem::doAnimation(int speed, int start, int end, bool loop){
     node->setFrameLoop(start,end);
 }
 
+void body::bodyItem::doFire(){
+    auto ntm = parent->timer->getRealTime();
+    if(fireDelta>0 && ntm>fireDelta+lastFireTime){
+        auto wnode = wearing.find(firingWearingId);
+        if(wnode!=wearing.end()){
+            parent->fireTo(uuid,id,wnode->second->getPosition(),lookAt);
+        }
+        lastFireTime = ntm;
+    }
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
+    firing          = false;
+    firingWearingId = 0;
+    fireDelta       = 0;
 }
 
 void body::bodyAmCallback::OnAnimationEnd(irr::scene::IAnimatedMeshSceneNode *){

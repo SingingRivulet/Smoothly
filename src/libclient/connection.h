@@ -55,11 +55,12 @@ class mapItem{
 };
 ///////////////////////
 class connection{
+    RakNet::RakPeerInterface * connection;
     public:
-        RakNet::RakPeerInterface * connection;
         std::string myUUID;
 
         inline void connect(const char * addr,unsigned short port){
+            connection=RakNet::RakPeerInterface::GetInstance();
             connection->Connect(addr,port,0,0);
             RakSleep(30);//sleep 30微秒后才能正常发送，原因未知
         }

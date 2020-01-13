@@ -2,6 +2,33 @@
 
 namespace smoothly{
 
+void fire::bullet::update(){
+    btTransform t;
+    bodyState->getWorldTransform(t);
+    setPositionByTransform(node , t);
+}
+void fire::bulletAttackBody(bullet * b , const btCollisionObject * body){
+    auto ptr = (bodyInfo*)body->getUserPointer();
+    attackBody(b->owner , b->config , ptr);
+    if(b->config->breakWhenHit){
+        releaseBullet(b);
+    }
+}
+void fire::processBulletRemove(){
+    for(auto b:bulletRemove){
+        b->node->removeAll();
+        b->node->remove();
+        dynamicsWorld->removeRigidBody(b->rigidBody);
+        delete b->rigidBody;
+        delete b->bodyState;
+        bullets.erase(b);
+        delete b;
+    }
+    bulletRemove.clear();
+}
+void fire::releaseBullet(bullet * b){
+    bulletRemove.insert(b);
+}
 void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, const vec3 &dir, bool attack){
     auto b          = new bullet;
     b->config       = conf;
@@ -10,6 +37,8 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     b->parent       = this;
     b->attack       = attack;
     b->owner        = uuid;
+
+    b->expire       = timer->getRealTime() + conf->lifeTime;
 
     //create scene node
     b->node         = scene->addEmptySceneNode();
@@ -77,6 +106,78 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     b->rigidBody->setUserPointer(&(b->info));
 
     dynamicsWorld->addRigidBody(b->rigidBody);
+
+    bullets.insert(b);
+}
+
+bool fire::processEmitter(emitter *em){
+    auto ntm = timer->getRealTime();
+    if(em->leave<=0){
+        return true;
+    }
+
+    auto dt         = ntm - em->lastProcess;
+    int sendNum     = (dt * em->config->streamParticleVelocity)/1000.0f;;
+
+    bool release    = false;
+    if(sendNum>=em->leave){
+        sendNum     = em->leave;
+        release     = true;
+    }
+
+    if(sendNum>0){
+        auto p = seekBody(em->uuid);
+        if(p==NULL){
+
+        }else{
+            auto pos = p->node->getPosition();
+            auto dir = p->lookAt;
+            for(int i=0;i<sendNum;++i){
+                shoot(em->uuid , em->config , pos , dir , em->attack);
+            }
+        }
+        em->leave  -= sendNum;//没显示出射流不影响计数
+        em->lastProcess = ntm;
+    }
+
+    return release;
+
+}
+
+void fire::releaseEmitter(emitter *em){
+    emitters.erase(em);
+    delete em;
+}
+
+void fire::processBullets(){
+    auto tm = timer->getRealTime();
+    std::list<bullet*> brm;
+    for(auto it:bullets){//找出过期的
+        if(it->expire>tm)
+            brm.push_back(it);
+    }
+    for(auto it:brm){//删除过期的
+        releaseBullet(it);
+    }
+    brm.clear();
+    for(auto it:bullets){//更新节点
+        it->update();
+    }
+    //执行发射器
+    std::list<emitter*> erm;
+    for(auto it:emitters){
+        if(processEmitter(it))
+            erm.push_back(it);
+    }
+    for(auto it:erm){
+        releaseEmitter(it);
+    }
+    processBulletRemove();
+}
+void fire::worldLoop(){
+    body::loop();
+    engine::worldLoop();
+    this->processBullets();
 }
 
 }
