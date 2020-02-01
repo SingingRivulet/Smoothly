@@ -13,19 +13,19 @@ class body:public terrainDispather{
         ~body();
     private:
         //覆盖网络处理
-        virtual void msg_wearing_add(const char*,int d);
-        virtual void msg_wearing_set(const char*,const std::set<int> &);
-        virtual void msg_wearing_remove(const char*,int d);
-        virtual void msg_HPInc(const char*,int d);
-        virtual void msg_setStatus(const char*,int d);
-        virtual void msg_setLookAt(const char*,float,float,float);
-        virtual void msg_setPosition(const char*,float,float,float);
-        virtual void msg_setRotation(const char*,float,float,float);
-        virtual void msg_interactive(const char*,const char*);
-        virtual void msg_removeBody(const char*);
-        virtual void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float);
-        virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &);
-        virtual void msg_setMainControl(const char *);//设置第一人称的body
+        virtual void msg_wearing_add(const char*,int d)override;
+        virtual void msg_wearing_set(const char*,const std::set<int> &)override;
+        virtual void msg_wearing_remove(const char*,int d)override;
+        virtual void msg_HPInc(const char*,int d)override;
+        virtual void msg_setStatus(const char*,int d)override;
+        virtual void msg_setLookAt(const char*,float,float,float)override;
+        virtual void msg_setPosition(const char*,float,float,float)override;
+        virtual void msg_setRotation(const char*,float,float,float)override;
+        virtual void msg_interactive(const char*,const char*)override;
+        virtual void msg_removeBody(const char*)override;
+        virtual void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float)override;
+        virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)override;
+        virtual void msg_setMainControl(const char *)override;//设置第一人称的body
 
     public:
         typedef enum:int32_t{//身体姿势掩码
@@ -111,6 +111,19 @@ class body:public terrainDispather{
                 void OnAnimationEnd(irr::scene::IAnimatedMeshSceneNode *);
                 bodyItem * parent;
         };
+        struct wearingBullet{
+            int id,deltaTime;
+            inline wearingBullet(){}
+            inline wearingBullet(int i , int d){
+                id          =   i;
+                deltaTime   =   d;
+            }
+            inline wearingBullet(const wearingBullet & w){
+                id          =   w.id;
+                deltaTime   =   w.deltaTime;
+            }
+        };
+        std::map<int,wearingBullet> wearingToBullet;
 
     public:
         class bodyItem{

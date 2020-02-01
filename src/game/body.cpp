@@ -94,7 +94,7 @@ void body::bodyItem::doFire(){
     if(fireDelta>0 && ntm>fireDelta+lastFireTime){
         auto wnode = wearing.find(firingWearingId);
         if(wnode!=wearing.end()){
-            parent->fireTo(uuid,id,wnode->second->getPosition(),lookAt);
+            parent->fireTo(uuid,fireId,wnode->second->getPosition(),lookAt);
         }
         lastFireTime = ntm;
     }
@@ -202,6 +202,16 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
 
     bodyConf * c = it->second;
 
+    int cx = posi.X/32;
+    int cy = posi.Z/32;
+    if(owner==myUUID && (!myUUID.empty())){//是自己拥有的
+        setCharacterChunk(uuid,cx,cy);
+    }else{
+        if(!chunkLoaded(cx,cy)){//在chunk外，删除物体
+            return;
+        }
+    }
+
     bodyItem * p = new bodyItem(c->width , c->height , btVector3(posi.X,posi.Y,posi.Z) , c->walkInSky , c->jumpInSky);
     p->m_character.world = dynamicsWorld;
     p->m_character.addIntoWorld();
@@ -239,7 +249,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->updateStatus();
 
     bodies[uuid] = p;
-    if(owner==myUUID)
+    if(owner==myUUID && (!myUUID.empty()))
         myBodies[uuid] = p;
 
     if(uuid==mainControl){
@@ -263,6 +273,12 @@ void body::addWearing(bodyItem * n, int wearing){
     if(n->wearing.find(wearing)!=n->wearing.end())
         return;
     addWearingNode(n , wearing);
+    auto it = wearingToBullet.find(wearing);
+    if(it!=wearingToBullet.end()){
+        n->firingWearingId  = wearing;
+        n->fireId           = it->second.id;
+        n->fireDelta        = it->second.deltaTime;
+    }
 }
 void body::removeWearing(bodyItem * n, int wearing){
     auto it = n->wearing.find(wearing);
@@ -270,6 +286,12 @@ void body::removeWearing(bodyItem * n, int wearing){
         return;
     it->second->remove();
     n->wearing.erase(it);
+    auto nit = wearingToBullet.find(wearing);
+    if(nit!=wearingToBullet.end()){
+        n->firingWearingId  = 0;
+        n->fireId           = 0;
+        n->fireDelta        = 0;
+    }
 }
 void body::addWearingNode(bodyItem * n, int wearing){
     auto it = wearingConfig.find(wearing);
@@ -463,6 +485,17 @@ body::bodyItem * body::seekMyBody(const std::string & u){
         return NULL;
     else
         return it->second;
+}
+
+body::commond::commond():uuid(),data_str(),data_vec(){
+}
+
+body::commond::commond(const body::commond & t){
+    uuid        = t.uuid;
+    cmd         = t.cmd;
+    data_int    = t.data_int;
+    data_str    = t.data_str;
+    data_vec    = t.data_vec;
 }
 
 }

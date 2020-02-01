@@ -1,9 +1,9 @@
 #ifndef SMOOTHLY_FIRE
 #define SMOOTHLY_FIRE
-#include "body.h"
+#include "interactive.h"
 namespace smoothly{
 
-class fire:public body{
+class fire:public interactive{
     /*
      * 先执行完攻击动作，然后worldLoop
      */
@@ -49,6 +49,9 @@ class fire:public body{
 
             int         streamParticleNum;
             float       streamParticleVelocity;
+
+            float       mass;
+            btVector3   inertia;
 
             btConvexShape * castShape;  //碰撞体
             shapeGroup      shape;      //子弹形状

@@ -27,6 +27,16 @@ engine::engine(){
     );
     overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    camera=scene->addCameraSceneNodeFPS();
+    scene->addSkyBoxSceneNode(
+            driver->getTexture("../../res/skybox/top.jpg"),
+            driver->getTexture("../../res/skybox/bottom.jpg"),
+            driver->getTexture("../../res/skybox/left.jpg"),
+            driver->getTexture("../../res/skybox/right.jpg"),
+            driver->getTexture("../../res/skybox/front.jpg"),
+            driver->getTexture("../../res/skybox/back.jpg")
+        );
+    device->getCursorControl()->setVisible(false);
 }
 engine::~engine(){
     device->drop();

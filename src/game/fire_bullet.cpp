@@ -2,6 +2,16 @@
 
 namespace smoothly{
 
+fire::bullet::bullet():owner(){
+    rigidBody   = NULL;
+    bodyState   = NULL;
+    parent      = NULL;
+    node        = NULL;
+    attack      = false;
+    config      = NULL;
+    expire      = 0;
+}
+
 void fire::bullet::update(){
     btTransform t;
     bodyState->getWorldTransform(t);
@@ -104,6 +114,7 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     b->bodyState    = setMotionState(b->node->getAbsoluteTransformation().pointer());//创建状态
     b->rigidBody    = createBody(conf->shape.compound,b->bodyState);//创建物体
     b->rigidBody->setUserPointer(&(b->info));
+    b->rigidBody->setMassProps(conf->mass,conf->inertia);
 
     dynamicsWorld->addRigidBody(b->rigidBody);
 

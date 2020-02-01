@@ -1,4 +1,9 @@
-QT -= gui
+TRANSLATIONS = lang/lang_English.ts \
+               lang/lang_Chinses.ts
+
+QT       += core gui
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -41,8 +46,8 @@ HEADERS += \
     bone.h \
     fire.h \
     control.h \
-    weapon.h \
-    game.h
+    game.h \
+    ui/login.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -67,5 +72,9 @@ SOURCES += \
     fire_collision.cpp \
     fire_attack.cpp \
     control.cpp \
-    weapon.cpp \
-    game.cpp
+    game.cpp \
+    ui/login.cpp \
+    main.cpp
+
+FORMS += \
+    ui/login.ui

@@ -1,3 +1,8 @@
 [
-    {"id":10,"hp":1}
+    {
+        "id":10,
+        "description":"banana bread里面扒出来的模型",
+        "hp":100,
+        "mesh":"../../res/model/player/snoutx10k/snoutx10k.b3d"
+    }
 ]

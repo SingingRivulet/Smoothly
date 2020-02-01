@@ -54,6 +54,26 @@ body::body(){
     }else{
         printf(L_RED "[error]" NONE "fail to load json\n" );
     }
+    FILE * fp = fopen("../config/wearing_bullet.txt" , "r");
+    printf(L_GREEN "[status]" NONE "get 'wearing_bullet'\n" );
+    if(fp){
+        char buf[128];
+        while(!feof(fp)){
+            bzero(buf,sizeof(buf));
+            fgets(buf,sizeof(buf),fp);
+            if(strlen(buf)>0){
+                int firingWearingId;
+                int fireId;
+                int fireDelta;
+                if(sscanf(buf,"%d=%d,%d" , &firingWearingId , &fireId , &fireDelta)>=3){
+                    wearingToBullet[firingWearingId] = fireId;
+                }
+            }
+        }
+        fclose(fp);
+    }else{
+        printf(L_RED "[error]" NONE "fail to load 'wearing_bullet'\n" );
+    }
 }
 body::~body(){
     for(auto it:config){
@@ -221,7 +241,14 @@ void body::wearing_add(const std::string & uuid , int d){
         snprintf(key,sizeof(key),"bChar:%s:%d",uuid.c_str(),d);
         snprintf(val,sizeof(val),"%d",d);
         db->Put(leveldb::WriteOptions(), key, val);
-        
+
+        auto it = wearingToBullet.find(d);
+        if(it!=wearingToBullet.end()){
+            snprintf(key,sizeof(key),"sType:%s", uuid.c_str());
+            snprintf(val,sizeof(val),"%d",it->second);
+            db->Put(leveldb::WriteOptions(), key , std::string(val));
+        }
+
         boardcast_wearing_add(uuid , p.x , p.y , d);
         
     }catch(...){
@@ -236,6 +263,12 @@ void body::wearing_remove(const std::string & uuid , int d){
         snprintf(key,sizeof(key),"bChar:%s:%d",uuid.c_str(),d);
         db->Delete(leveldb::WriteOptions(), key);
         
+        auto it = wearingToBullet.find(d);
+        if(it!=wearingToBullet.end()){
+            snprintf(key,sizeof(key),"sType:%s", uuid.c_str());
+            db->Delete(leveldb::WriteOptions(), key);
+        }
+
         boardcast_wearing_remove(uuid , p.x , p.y , d);
     }catch(...){
         logError();

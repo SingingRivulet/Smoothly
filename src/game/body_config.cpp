@@ -81,6 +81,25 @@ void body::loadBodyConfig(){
     }else{
         printf("[error]fail to load json\n" );
     }
+    FILE * fp = fopen("../config/wearing_bullet.txt" , "r");
+    if(fp){
+        char buf[128];
+        while(!feof(fp)){
+            bzero(buf,sizeof(buf));
+            fgets(buf,sizeof(buf),fp);
+            if(strlen(buf)>0){
+                int firingWearingId;
+                int fireId;
+                int fireDelta;
+                if(sscanf(buf,"%d=%d,%d" , &firingWearingId , &fireId , &fireDelta)>=3){
+                    wearingToBullet[firingWearingId] = wearingBullet(fireId , fireDelta);
+                }
+            }
+        }
+        fclose(fp);
+    }else{
+        printf("[error]fail to load 'wearing_bullet'\n" );
+    }
 }
 void body::loadWearingConfig(){
     printf("[status]get wearing config\n" );
@@ -116,6 +135,9 @@ void body::loadWearingConfig(){
                                         if(item->type==cJSON_String){
                                             if(strcmp(item->string,"attach")==0){
                                                 ptr->attach = item->valuestring;
+                                            }else
+                                            if(strcmp(item->string,"texture")==0){
+
                                             }
                                         }
                                         item = item->next;
@@ -144,7 +166,7 @@ void body::loadWearingConfig(){
 
 void body::releaseBodyConfig(){
     for(auto it:bodyConfig){
-        it.second->mesh->drop();
+        //it.second->mesh->drop();
         delete it.second;
     }
     bodyConfig.clear();
@@ -152,7 +174,7 @@ void body::releaseBodyConfig(){
 
 void body::releaseWearingConfig(){
     for(auto it:wearingConfig){
-        it.second->mesh->drop();
+        //it.second->mesh->drop();
         delete it.second;
     }
     wearingConfig.clear();

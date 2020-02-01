@@ -1,0 +1,13 @@
+[
+    {
+        "id":1001,
+        "name":"普通子弹",
+        "type":"shoot",
+        "haveBullet":1,
+        "bulletTexture":"../../res/particle/particlegreen.jpg",
+        "castShape":"sphere",
+        "castShapeRad":0.3,
+        "lifetime":1,
+        "mass":1
+    }
+]

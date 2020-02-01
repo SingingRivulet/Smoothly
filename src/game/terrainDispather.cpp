@@ -23,4 +23,8 @@ void terrainDispather::vDs::removeChunk(int x , int y){
     parent->hideChunk(x,y);
 }
 
+bool terrainDispather::chunkLoaded(int x,int y){
+    return b.chunkLoaded(x,y);
+}
+
 }

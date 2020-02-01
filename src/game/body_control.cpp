@@ -53,6 +53,12 @@ void body::bodyItem::interactive_c(const std::string & s){
     interactive(s.c_str());
 }
 void body::bodyItem::wearing_add_c(int d){
+    auto it = parent->wearingToBullet.find(d);
+    if(it!=parent->wearingToBullet.end()){
+        if(firingWearingId!=0){
+            wearing_remove_c(firingWearingId);
+        }
+    }
     parent->addWearing(this , d);
     parent->cmd_wearing_add(uuid , d);
 }

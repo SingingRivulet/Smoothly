@@ -19,6 +19,8 @@ namespace smoothly{
                 b.process();
                 v.process();
             }
+            bool chunkLoaded(int x,int y)override;
+
             std::string mainControl;
         private:
             struct bDs:public world::terrain::bodyDispather{

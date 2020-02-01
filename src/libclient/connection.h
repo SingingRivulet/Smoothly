@@ -425,6 +425,7 @@ class connection{
             data->ReadVector(dX ,dY ,dZ);
             msg_fire(u.C_String(),id,fX,fY,fZ,dX,dY,dZ);
         }
+
     public:
         virtual void msg_addRemovedItem(int x,int y,int,int)=0;
         virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)=0;

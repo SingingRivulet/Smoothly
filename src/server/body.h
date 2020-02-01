@@ -98,6 +98,7 @@ class body:public removeTable{
         struct bconf{
             int hp;
         };
+        std::map<int,int>    wearingToBullet;
         std::map<int,bconf*> config;
 };
 

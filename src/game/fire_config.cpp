@@ -98,17 +98,19 @@ fire::fireConfig::fireConfig(){
     this->streamParticleNum         = 256;
     this->streamParticleVelocity    = 4;
     this->type                      = FIRE_SHOOT;
+    this->mass                      = 1;
+    this->inertia.setValue(1,1,1);
     //this->shape
 }
 void fire::releaseConfig(fireConfig * c){
     if(c->castShape)
         delete c->castShape;
-    if(c->particleConfig.texture)
-        c->particleConfig.texture->drop();
-    if(c->bulletConf.mesh)
-        c->bulletConf.mesh->drop();
-    if(c->bulletConf.texture)
-        c->bulletConf.texture->drop();
+    //if(c->particleConfig.texture)
+    //    c->particleConfig.texture->drop();
+    //if(c->bulletConf.mesh)
+    //    c->bulletConf.mesh->drop();
+    //if(c->bulletConf.texture)
+    //    c->bulletConf.texture->drop();
     delete c;
 }
 
@@ -155,6 +157,10 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"particleMaxStartColor")==0){
                                         p->particleConfig.maxStartColor=json2color(json);
+                                    }else
+                                    if(strcmp(line->string,"inertia")==0){
+                                        auto v = json2vec(json);
+                                        p->inertia.setValue(v.X , v.Y , v.Z);
                                     }
                                 }else
                                 if(line->type==cJSON_String){
@@ -210,6 +216,23 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"particleTexture")==0){
                                         p->particleConfig.texture=driver->getTexture(line->valuestring);
+                                    }else
+                                    if(strcmp(line->string,"type")==0){
+                                        if(strcmp(line->valuestring,"stream")==0){
+                                            p->type = FIRE_STREAM;
+                                        }else
+                                        if(strcmp(line->valuestring,"shoot")==0){
+                                            p->type = FIRE_SHOOT;
+                                        }else
+                                        if(strcmp(line->valuestring,"chop")==0){
+                                            p->type = FIRE_CHOP;
+                                        }else
+                                        if(strcmp(line->valuestring,"radio")==0){
+                                            p->type = FIRE_RADIO;
+                                        }else
+                                        if(strcmp(line->valuestring,"laser")==0){
+                                            p->type = FIRE_LASER;
+                                        }
                                     }
                                 }else
                                 if(line->type==cJSON_Number){
@@ -263,6 +286,9 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"haveParticleLight")==0){
                                         p->particleConfig.light=line->valueint;
+                                    }else
+                                    if(strcmp(line->string,"mass")==0){
+                                        p->mass=line->valueint;
                                     }
                                 }
                                 line=line->next;

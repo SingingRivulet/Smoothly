@@ -121,11 +121,20 @@ class bodyDispather:public dispatherQueue{
             cSet.clear();
             rSet.clear();
         }
+        inline bool chunkLoaded(int x,int y){
+            ipair p(x,y);
+            auto it = chunks.find(p);
+            if(it == chunks.end()){
+                return false;
+            }else{
+                return (it->second > 0);
+            }
+        }
     private:
         std::map<std::string,ipair> watchPoint;
         std::map<ipair,int> chunks;
         
-        std::list<ipair> cList,rList;
+        std::vector<ipair> cList,rList;
         std::set<ipair> cSet,rSet;
         inline void listOutput(){
             for(auto it:rList){
@@ -160,6 +169,7 @@ class bodyDispather:public dispatherQueue{
             }
         }
         inline void pushRound(int x,int y,const std::string & name,int dt){
+            createChunk(x , y);//先创建脚下的，不然会掉下去
             for(int i=1;i<range;++i){
                 {//a
                     int a=-i+1;
@@ -210,7 +220,7 @@ class viewDispather:public dispatherQueue{
         ipair position;
         bool first;
         std::set<ipair> openedChunk,removingChunk;
-        std::list<ipair> opening;
+        std::vector<ipair> opening;
         inline void clearPosi(){
             opening.clear();
         }

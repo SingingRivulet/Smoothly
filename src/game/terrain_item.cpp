@@ -169,7 +169,7 @@ void terrain_item::loadConfig(){
     config.clear();
     //读取文件
     char* text;
-    FILE *pf = fopen("config/terrainItem.json","r");
+    FILE *pf = fopen("../config/terrainItem.json","r");
     if(pf==NULL){
         printf("[error]terrain_item:load config fail\n");
         return;
@@ -211,7 +211,7 @@ void terrain_item::loadJSON(cJSON * json){
     }else
         return;
     
-    auto path = cJSON_GetObjectItem(json,"path");
+    auto path = cJSON_GetObjectItem(json,"mesh");
     
     irr::scene::IMesh * mesh;
     if(path && path->type==cJSON_String){
@@ -256,7 +256,7 @@ void terrain_item::loadJSON(cJSON * json){
 }
 void terrain_item::releaseConfig(){
     for(auto it:config){
-        it.second->mesh->drop();
+        //it.second->mesh->drop();
         delete it.second;
     }
     config.clear();

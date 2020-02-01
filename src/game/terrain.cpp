@@ -122,10 +122,6 @@ void terrain::releaseChunk(int x,int y){
         chunks.erase(it);
     }
 }
-bool terrain::chunkLoaded(int x,int y){
-    auto it = chunks.find(ipair(x,y));
-    return it!=chunks.end();
-}
 bool terrain::chunkShowing(int x,int y){
     auto it = showing.find(ipair(x,y));
     return it!=showing.end();

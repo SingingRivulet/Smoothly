@@ -61,10 +61,11 @@ void body::msg_setLookAt(const char* uuid,float x,float y,float z){
 }
 
 void body::msg_setPosition(const char* uuid,float x,float y,float z){
-    returnInMine;
-    findBody(uuid){
-        it->second->m_character.setPosition(vec3(x,y,z));
-    }
+    //returnInMine;
+    //findBody(uuid){
+    //    it->second->m_character.setPosition(vec3(x,y,z));
+    //}
+    setBodyPosition(uuid,vec3(x,y,z));
 }
 
 void body::msg_setRotation(const char* uuid,float x,float y,float z){
