@@ -109,6 +109,7 @@ class bodyDispather:public dispatherQueue{
                     
                 }else{
                     pushRound(it->second.x , it->second.y , name , -1);
+                    createChunk(x , y);//先创建脚下的，不然会掉下去
                     pushRound(x,y,name,1);
                     watchPoint[name] = p;
                 }
@@ -169,7 +170,6 @@ class bodyDispather:public dispatherQueue{
             }
         }
         inline void pushRound(int x,int y,const std::string & name,int dt){
-            createChunk(x , y);//先创建脚下的，不然会掉下去
             for(int i=1;i<range;++i){
                 {//a
                     int a=-i+1;

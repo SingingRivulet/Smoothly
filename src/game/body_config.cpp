@@ -57,6 +57,12 @@ void body::loadBodyConfig(){
                                         if(item->type==cJSON_String){
                                             if(strcmp(item->string,"aniCallback")==0){
                                                 ptr->aniCallback = item->valuestring;
+                                            }else
+                                            if(strcmp(item->string,"script")==0){
+                                                luaL_dofile(L, item->valuestring);
+                                            }else
+                                            if(strcmp(item->string,"texture")==0){
+                                                ptr->texture = driver->getTexture(item->string);
                                             }
                                         }
                                         item = item->next;
@@ -137,7 +143,7 @@ void body::loadWearingConfig(){
                                                 ptr->attach = item->valuestring;
                                             }else
                                             if(strcmp(item->string,"texture")==0){
-
+                                                ptr->texture= driver->getTexture(item->valuestring);
                                             }
                                         }
                                         item = item->next;

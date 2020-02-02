@@ -183,7 +183,7 @@ class body:public terrainDispather{
         void addWearing(bodyItem *, int wearing);
         void removeWearing(bodyItem *, int wearing);
 
-        void addWearingNode(bodyItem *, int wearing);
+        bool addWearingNode(bodyItem *, int wearing);
 
     private:
         struct bodyConf{
@@ -192,12 +192,26 @@ class body:public terrainDispather{
             irr::scene::IAnimatedMesh * mesh;
             std::string aniCallback;
             float walkVelocity;
+            irr::video::ITexture * texture;
+            inline bodyConf(){
+                mesh    = NULL;
+                texture = NULL;
+                aniCallback.clear();
+                walkInSky = false;
+                jumpInSky = false;
+            }
         };
         std::map<int,bodyConf*> bodyConfig;
 
         struct wearingConf{
             std::string attach;
             irr::scene::IAnimatedMesh * mesh;
+            irr::video::ITexture * texture;
+            inline wearingConf(){
+                mesh    =NULL;
+                texture =NULL;
+                attach.clear();
+            }
         };
         std::map<int,wearingConf*> wearingConfig;
 

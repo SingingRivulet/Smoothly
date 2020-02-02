@@ -7,12 +7,13 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <functional>
 namespace smoothly{
 namespace server{
 
 class map:public datas{
     public:
-        void updateNode(const std::string & uuid,int x,int y,std::set<ipair> & nwTable);
+        void updateNode(const std::string & uuid,int x,int y,std::function<void (int,int)> ncallback);
         void addNode(const std::string & uuid,const std::string & owner,int x,int y);
         void removeNode(const std::string & uuid);
         void getNode(int x,int y,std::set<std::string> & o);

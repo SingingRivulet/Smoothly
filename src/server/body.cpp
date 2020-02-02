@@ -326,8 +326,6 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     int cx = v.X/32;
     int cy = v.Z/32;
     
-    std::set<ipair> nwTable;
-    
     try{
         auto p = getCharPosition(uuid);//发送到之前的chunk，便于范围边缘玩家收到删除
         boardcast_setPosition(uuid , p.x , p.y , v);
@@ -337,10 +335,9 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     
     try{
         auto ow = getOwner(uuid);
-        updateNode(uuid,cx,cy,nwTable);
-        for(auto it:nwTable){
-            sendChunk(it,ow);
-        }
+        updateNode(uuid,cx,cy,[&](int i,int j){
+            sendChunk(ipair(i,j),ow);
+        });
     }catch(...){
         logError();
     }

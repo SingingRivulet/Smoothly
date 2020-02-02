@@ -237,6 +237,10 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    if(c->texture){
+        p->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        p->node->setMaterialTexture( 0 , c->texture);
+    }
     p->parent = this;
 
     //设置回调函数
@@ -272,7 +276,8 @@ void body::setWearing(bodyItem * n, const std::set<int> & wearing){
 void body::addWearing(bodyItem * n, int wearing){
     if(n->wearing.find(wearing)!=n->wearing.end())
         return;
-    addWearingNode(n , wearing);
+    if(!addWearingNode(n , wearing))
+        return;
     auto it = wearingToBullet.find(wearing);
     if(it!=wearingToBullet.end()){
         n->firingWearingId  = wearing;
@@ -293,15 +298,23 @@ void body::removeWearing(bodyItem * n, int wearing){
         n->fireDelta        = 0;
     }
 }
-void body::addWearingNode(bodyItem * n, int wearing){
+bool body::addWearingNode(bodyItem * n, int wearing){
     auto it = wearingConfig.find(wearing);
     if(it==wearingConfig.end())
-        return;
+        return false;
     if(it->second->attach.empty())
-        return;
+        return false;
     auto pn = n->node->getJointNode(it->second->attach.c_str());
+    if(pn==NULL){
+        return false;
+    }
     auto wn = scene->addAnimatedMeshSceneNode(it->second->mesh , pn);
+    if(it->second->texture){
+        wn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        wn->setMaterialTexture( 0 , it->second->texture);
+    }
     n->wearing[wearing] = wn;
+    return true;
 }
 body::body(){
     mainControlBody = NULL;

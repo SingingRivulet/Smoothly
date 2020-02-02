@@ -2,11 +2,42 @@
 namespace smoothly{
 namespace server{
 ////////////////
-void map::updateNode(const std::string & uuid,int x,int y,std::set<ipair> & nwTable){
+void map::updateNode(const std::string & uuid, int x, int y, std::function<void (int,int)> ncallback){
     try{
         auto op = getNodePosi(uuid);
         if(op.x==x && op.y==y)
             return;
+        leveldb::WriteBatch batch;
+
+        ipair aMin(op.x-visualField , op.y-visualField),
+              aMax(op.x+visualField , op.y+visualField),
+              //原矩形的四个顶点
+              bMin(x   -visualField , y   -visualField),
+              bMax(x   +visualField , y   +visualField);
+              //新矩形的四个顶点
+
+        #define pointInA(ix,iy) (ix>aMin.x && ix<aMax.x && iy>aMin.y && iy<aMax.y)
+        #define pointInB(ix,iy) (ix>bMin.x && ix<bMax.x && iy>bMin.y && iy<bMax.y)
+
+        for(int i=aMin.x;i<=aMax.x;++i){
+            for(int j=aMin.y;j<=aMax.y;++j){
+                if(!pointInB(i,j)){
+                    batch.Delete(getNodePrefix(i,j)+uuid);
+                }
+            }
+        }
+        for(int i=bMin.x;i<=bMax.x;++i){
+            for(int j=bMin.y;j<=bMax.y;++j){
+                if(!pointInA(i,j)){
+                    batch.Put(getNodePrefix(i,j)+uuid , uuid);
+                    ncallback(i,j);
+                }
+            }
+        }
+        #undef pointInA
+        #undef pointInB
+
+        /*
         std::set<ipair> rmTable,tmpTable;
         buildVisualFieldArray(op.x , op.y , rmTable);
         buildVisualFieldArray(   x ,    y , nwTable);
@@ -17,7 +48,6 @@ void map::updateNode(const std::string & uuid,int x,int y,std::set<ipair> & nwTa
                 nwTable.erase(it);
             }
         }
-        leveldb::WriteBatch batch;
         for(auto it:rmTable){
             batch.Delete(getNodePrefix(it.x,it.y)+uuid);
         }
@@ -28,7 +58,7 @@ void map::updateNode(const std::string & uuid,int x,int y,std::set<ipair> & nwTa
         snprintf(buf ,sizeof(buf) ,"map_p_%s",uuid.c_str());
         snprintf(buf2,sizeof(buf2),"%d %d",x,y);
         batch.Put(buf,buf2);
-    
+        */
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
         logError();
