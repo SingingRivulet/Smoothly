@@ -2,11 +2,17 @@
     {
         "id":1001,
         "name":"火箭筒",
-        "mesh":"../../res/model/gun/rocket/rocket.obj"
+        "mesh":"../../res/model/gun/rocket/rocket.obj",
+        "attach":[
+            [10,"Hand.R"]
+        ]
     },
     {
         "id":1002,
         "name":"手枪",
-        "mesh":"../../res/model/gun/pistol/pistol.obj"
+        "mesh":"../../res/model/gun/pistol/pistol.obj",
+        "attach":[
+            [10,"Hand.R"]
+        ]
     }
 ]

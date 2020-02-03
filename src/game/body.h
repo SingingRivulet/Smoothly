@@ -204,7 +204,7 @@ class body:public terrainDispather{
         std::map<int,bodyConf*> bodyConfig;
 
         struct wearingConf{
-            std::string attach;
+            std::map<int,std::string> attach;
             irr::scene::IAnimatedMesh * mesh;
             irr::video::ITexture * texture;
             inline wearingConf(){

@@ -304,7 +304,14 @@ bool body::addWearingNode(bodyItem * n, int wearing){
         return false;
     if(it->second->attach.empty())
         return false;
-    auto pn = n->node->getJointNode(it->second->attach.c_str());
+
+    auto attachit = it->second->attach.find(n->id);
+    if(attachit==it->second->attach.end())
+        return false;
+
+    auto attach = attachit->second;
+
+    auto pn = n->node->getJointNode(attach.c_str());
     if(pn==NULL){
         return false;
     }

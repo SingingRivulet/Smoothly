@@ -139,11 +139,23 @@ void body::loadWearingConfig(){
                                     auto item = c->child;
                                     while(item){
                                         if(item->type==cJSON_String){
-                                            if(strcmp(item->string,"attach")==0){
-                                                ptr->attach = item->valuestring;
-                                            }else
                                             if(strcmp(item->string,"texture")==0){
                                                 ptr->texture= driver->getTexture(item->valuestring);
+                                            }
+                                        }else
+                                        if(item->type==cJSON_Array){
+                                            if(strcmp(item->string,"attach")==0){
+                                                cJSON * line = item->child;
+                                                while(line){
+                                                    if(line->type==cJSON_Array){
+                                                        auto k = cJSON_GetArrayItem(line,0);
+                                                        auto v = cJSON_GetArrayItem(line,1);
+                                                        if(k && v && k->type==cJSON_Number && v->type==cJSON_String){
+                                                            ptr->attach[k->valueint] = v->valuestring;
+                                                        }
+                                                    }
+                                                    line = line->next;
+                                                }
                                             }
                                         }
                                         item = item->next;
