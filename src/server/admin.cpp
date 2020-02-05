@@ -1,4 +1,5 @@
 #include "admin.h"
+#include <QString>
 namespace smoothly{
 namespace server{
 
@@ -12,8 +13,11 @@ admin::admin(){
         while(!feof(fp)){
             bzero(buf,sizeof(buf));
             fgets(buf,sizeof(buf),fp);
-            if(strlen(buf)>1)
-                keys.insert(buf);
+            if(strlen(buf)>1){
+                QString s=buf;
+                s = s.trimmed();
+                keys.insert(s.toStdString());
+            }
         }
         int num = keys.size();
         printf(L_BLUE "[success]" NONE "load %d keys\n" , num);
@@ -25,6 +29,7 @@ admin::admin(){
 }
 
 void admin::adminMessage(RakNet::BitStream * data, const RakNet::SystemAddress & addr){
+    printf(L_BLUE "[admin]" NONE "access admin\n");
     RakNet::RakString key,activity;
     data->Read(key);
     if(!checkKey(key.C_String())){

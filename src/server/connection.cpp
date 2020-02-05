@@ -135,13 +135,14 @@ void connection::recv(){
             pPacket;
             con->DeallocatePacket( pPacket ),
             pPacket = con->Receive()
-        )
+        ){
             onRecvMessage(pPacket,pPacket->systemAddress);
+        }
     }
 }
 void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
     char addrStr[64];
-    address.ToString(true,addrStr);
+    address.ToString(true,addrStr,':');
     switch(data->data[0]){
         case MESSAGE_GAME:
             if(data->data[1]=='+'){
@@ -176,13 +177,13 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
         case ID_NEW_INCOMING_CONNECTION:
             //登录后才有listener
             //setUserPosition(irr::core::vector3df(0,0,0),address);
-            printf("[%s client]connect\n",addrStr);
+            printf(YELLOW "[client %s]" NONE "connect\n",addrStr);
         break;
         case ID_DISCONNECTION_NOTIFICATION:
             logout(address);
             //delListener(address);
             //listener已经被删除
-            printf("[%s client]disconnect\n",addrStr);
+            printf(YELLOW "[client %s]" NONE "disconnect\n",addrStr);
         break;
     }
 }

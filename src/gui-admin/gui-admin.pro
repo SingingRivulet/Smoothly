@@ -25,10 +25,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    manager.cpp \
+    setpwd.cpp \
+    setmaincontrol.cpp \
+    addcharacter.cpp \
+    removecharacter.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    manager.h \
+    setpwd.h \
+    setmaincontrol.h \
+    addcharacter.h \
+    removecharacter.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    manager.ui \
+    setpwd.ui \
+    setmaincontrol.ui \
+    addcharacter.ui \
+    removecharacter.ui
+
+LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl
