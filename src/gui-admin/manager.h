@@ -13,6 +13,8 @@
 #include "setmaincontrol.h"
 #include "addcharacter.h"
 #include "removecharacter.h"
+#include "setposition.h"
+#include "setdata.h"
 
 namespace Ui {
 class manager;
@@ -39,6 +41,12 @@ private slots:
     void on_result_textChanged();
 
     void recvHandle();
+
+    void on_commandLinkButton_setPosition_clicked();
+
+    void on_pushButton_db_get_clicked();
+
+    void on_pushButton_db_put_clicked();
 
 private:
     Ui::manager *ui;

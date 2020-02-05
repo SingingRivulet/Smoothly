@@ -6,6 +6,7 @@ addCharacter::addCharacter(QWidget *parent) :
     ui(new Ui::addCharacter)
 {
     ui->setupUi(this);
+    setWindowTitle("添加角色控制器");
 }
 
 addCharacter::~addCharacter()

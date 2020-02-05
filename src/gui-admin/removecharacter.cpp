@@ -6,6 +6,7 @@ removeCharacter::removeCharacter(QWidget *parent) :
     ui(new Ui::removeCharacter)
 {
     ui->setupUi(this);
+    setWindowTitle("删除角色控制器");
 }
 
 removeCharacter::~removeCharacter()

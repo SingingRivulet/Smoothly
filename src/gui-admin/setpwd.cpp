@@ -6,6 +6,7 @@ setPwd::setPwd(QWidget *parent) :
     ui(new Ui::setPwd)
 {
     ui->setupUi(this);
+    setWindowTitle("设置用户密码");
 }
 
 setPwd::~setPwd()

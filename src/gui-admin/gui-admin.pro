@@ -30,7 +30,9 @@ SOURCES += \
     setpwd.cpp \
     setmaincontrol.cpp \
     addcharacter.cpp \
-    removecharacter.cpp
+    removecharacter.cpp \
+    setdata.cpp \
+    setposition.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +40,9 @@ HEADERS += \
     setpwd.h \
     setmaincontrol.h \
     addcharacter.h \
-    removecharacter.h
+    removecharacter.h \
+    setdata.h \
+    setposition.h
 
 FORMS += \
         mainwindow.ui \
@@ -46,6 +50,8 @@ FORMS += \
     setpwd.ui \
     setmaincontrol.ui \
     addcharacter.ui \
-    removecharacter.ui
+    removecharacter.ui \
+    setdata.ui \
+    setposition.ui
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl

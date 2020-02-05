@@ -6,6 +6,7 @@ setMainControl::setMainControl(QWidget *parent) :
     ui(new Ui::setMainControl)
 {
     ui->setupUi(this);
+    setWindowTitle("设置第一人称控制");
 }
 
 setMainControl::~setMainControl()

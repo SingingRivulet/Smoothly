@@ -6,6 +6,7 @@ manager::manager(QWidget *parent) :
     ui(new Ui::manager)
 {
     ui->setupUi(this);
+    setWindowTitle("管理");
     connection = NULL;
 }
 
@@ -113,6 +114,51 @@ void manager::on_commandLinkButton_removeCharacter_clicked()
     printStatus("[执行]removeCharacter");
 }
 
+void manager::on_commandLinkButton_setPosition_clicked()
+{
+    if(connection==NULL)
+        return;
+    setPosition s(this);
+    s.doActivity = false;
+    s.exec();
+    if(!s.doActivity)
+        return;
+
+    makeHeader("setPosition");
+    bs.Write(s.uuid);
+    bs.WriteVector(s.x , s.y , s.z);
+    connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+    printStatus("[执行]setPosition");
+}
+
+void manager::on_pushButton_db_get_clicked()
+{
+    if(connection==NULL)
+        return;
+    auto s = ui->lineEdit_db_key->text();
+    if(!s.isEmpty()){
+        makeHeader("getData");
+        bs.Write(RakNet::RakString(s.toStdString().c_str()));
+        connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+    }
+}
+
+void manager::on_pushButton_db_put_clicked()
+{
+    if(connection==NULL)
+        return;
+    setData s(this);
+    s.doActivity = false;
+    s.exec();
+    if(!s.doActivity)
+        return;
+    makeHeader("setData");
+    bs.Write(RakNet::RakString(s.key.c_str()));
+    bs.Write(RakNet::RakString(s.val.c_str()));
+    connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+    printStatus("[执行]插入数据库");
+}
+
 void manager::recvMessage()
 {
     if(!connection)
@@ -161,6 +207,12 @@ void manager::onRecvMessage(RakNet::Packet *data)
                             printStatus("[addCharacter]添加失败");
                         else
                             printStatus(QString("[addCharacter]")+r);
+                    }else
+                    if(heads=="dbRes"){
+                        RakNet::RakString k,v;
+                        bs.Read(k);
+                        bs.Read(v);
+                        printStatus(QString("[数据库]")+k+" = "+v);
                     }
 
                 break;

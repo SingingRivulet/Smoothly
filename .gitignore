@@ -17,5 +17,6 @@ client
 *.user
 *.user.*
 *.qm
+*.autosave
 
 build-*-*-*

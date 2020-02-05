@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("登录");
     QRegExp rx = QRegExp("[0-9]{0,5}");
     QRegExpValidator *validator = new QRegExpValidator(rx);
     ui->lineEdit_port->setValidator(validator);
