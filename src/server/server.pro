@@ -53,7 +53,8 @@ HEADERS += \
     admin.h \
     ../utils/uuid.h \
     ../utils/cJSON.h \
-    ../utils/uuid.h
+    ../utils/uuid.h \
+    heartbeat.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

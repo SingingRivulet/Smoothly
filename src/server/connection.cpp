@@ -2,7 +2,10 @@
 namespace smoothly{
 namespace server{
 /////////////////
-void connection::start(unsigned short port,int maxcl){
+connection::connection(){
+    lastAutoKickTime = 0;
+}
+void connection::start(unsigned short port, int maxcl, int vf){
     con=RakNet::RakPeerInterface::GetInstance();
     if(con==NULL){
         printf(L_RED "[error]" NONE "RakNet::RakPeerInterface::GetInstance() Error!\n");
@@ -12,6 +15,11 @@ void connection::start(unsigned short port,int maxcl){
     RakNet::SocketDescriptor desc(port, 0);
     con->Startup( maxcl, &desc, 1 );
     con->SetMaximumIncomingConnections( maxcl );
+
+    printf(L_GREEN"[status]" NONE "visualField = " L_CYAN "%d" NONE "\n" , vf);
+    printf(L_GREEN"[status]" NONE "maxConnect = " L_CYAN "%d" NONE "\n" , maxcl);
+
+    visualField = vf;
 }
 void connection::release(){
     if(con){
@@ -138,6 +146,17 @@ void connection::recv(){
         ){
             onRecvMessage(pPacket,pPacket->systemAddress);
         }
+        int ntm = time(0);
+        if(ntm-lastAutoKickTime>1){
+            lastAutoKickTime = ntm;
+            hb.removeExpire([&](const RakNet::SystemAddress & addr){
+                char addrStr[64];
+                addr.ToString(true,addrStr,':');
+                printf(YELLOW "[timeout %s]" NONE "\n",addrStr);
+                logout(addr);
+                con->CloseConnection(addr,true,0);
+            });
+        }
     }
 }
 void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
@@ -145,6 +164,10 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
     address.ToString(true,addrStr,':');
     switch(data->data[0]){
         case MESSAGE_GAME:
+            hb.markNode(address);
+            if(data->length<2){
+                break;
+            }
             if(data->data[1]=='+'){
                 RakNet::BitStream bs(data->data,data->length,false);
                 bs.IgnoreBytes(2);
@@ -178,8 +201,10 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
             //登录后才有listener
             //setUserPosition(irr::core::vector3df(0,0,0),address);
             printf(YELLOW "[client %s]" NONE "connect\n",addrStr);
+            hb.markNode(address);
         break;
         case ID_DISCONNECTION_NOTIFICATION:
+            hb.eraseNode(address);
             logout(address);
             //delListener(address);
             //listener已经被删除

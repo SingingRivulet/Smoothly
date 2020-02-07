@@ -10,6 +10,8 @@
 #include <string>
 #include <map>
 #include <set>
+#include <time.h>
+
 namespace smoothly{
 namespace client{
 ///////////////////////
@@ -54,10 +56,14 @@ class mapItem{
         }
 };
 ///////////////////////
-class connection{
+class connectionBase{
     RakNet::RakPeerInterface * connection;
     public:
         std::string myUUID;
+
+        connectionBase(){
+            lastHeartbeat = 0;
+        }
 
         inline void connect(const char * addr,unsigned short port){
             connection=RakNet::RakPeerInterface::GetInstance();
@@ -95,6 +101,16 @@ class connection{
                 else
                     break;
             }
+
+            auto ntm = time(0);
+            if(ntm - lastHeartbeat>1){
+                lastHeartbeat = ntm;
+                RakNet::BitStream bs;//心跳包
+                bs.Write((RakNet::MessageID)(ID_USER_PACKET_ENUM+1));
+                bs.Write((RakNet::MessageID)'~');
+                connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+            }
+
         }
         inline void onRecvMessage(RakNet::Packet * data){
             switch(data->data[0]){
@@ -427,6 +443,7 @@ class connection{
             data->ReadVector(dX ,dY ,dZ);
             msg_fire(u.C_String(),id,fX,fY,fZ,dX,dY,dZ);
         }
+        time_t lastHeartbeat;
 
     public:
         virtual void msg_addRemovedItem(int x,int y,int,int)=0;

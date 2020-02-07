@@ -7,7 +7,7 @@ namespace smoothly{
 namespace world{
 namespace terrain{
 
-class terrainGen:public terrain,public client::connection,public terrain_item{
+class terrainGen:public terrain,public client::connectionBase,public terrain_item{
     
 };
 

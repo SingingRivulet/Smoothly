@@ -114,7 +114,7 @@ void body::removeBody(const std::string & uuid){
         snprintf(buf,sizeof(buf),"mBody%d,%d:%s" , ox , oy , uuid.c_str());
         batch.Delete(buf);
     }catch(...){
-        logError();
+        logCharError();
     }
     batch.Delete(std::string("mBodyp:")+uuid);
     
@@ -158,7 +158,7 @@ void body::wearing_add(const std::string & user,const std::string & uuid , int d
             return;
         wearing_add(uuid,d);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::wearing_remove(const std::string & user,const std::string & uuid , int d){
@@ -168,7 +168,7 @@ void body::wearing_remove(const std::string & user,const std::string & uuid , in
             return;
         wearing_remove(uuid,d);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::wearing_get(const std::string & user,const std::string & uuid , std::set<int> & o){
@@ -178,7 +178,7 @@ void body::wearing_get(const std::string & user,const std::string & uuid , std::
             return;
         wearing_get(uuid,o);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setLookAt  (const std::string & user,const std::string & uuid , const vec3 & v){
@@ -188,7 +188,7 @@ void body::setLookAt  (const std::string & user,const std::string & uuid , const
             return;
         setLookAt(uuid,v);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setStatus  (const std::string & user,const std::string & uuid , int s){
@@ -198,7 +198,7 @@ void body::setStatus  (const std::string & user,const std::string & uuid , int s
             return;
         setStatus(uuid,s);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setPosition(const std::string & user,const std::string & uuid , const vec3 & v){
@@ -208,7 +208,7 @@ void body::setPosition(const std::string & user,const std::string & uuid , const
             return;
         setPosition(uuid,v);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setRotation(const std::string & user,const std::string & uuid , const vec3 & v){
@@ -218,7 +218,7 @@ void body::setRotation(const std::string & user,const std::string & uuid , const
             return;
         setRotation(uuid,v);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::interactive(const std::string & user,const std::string & uuid , const std::string & s){
@@ -228,7 +228,7 @@ void body::interactive(const std::string & user,const std::string & uuid , const
             return;
         interactive(uuid,s);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::wearing_add(const std::string & uuid , int d){
@@ -252,7 +252,7 @@ void body::wearing_add(const std::string & uuid , int d){
         boardcast_wearing_add(uuid , p.x , p.y , d);
         
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::wearing_remove(const std::string & uuid , int d){
@@ -271,7 +271,7 @@ void body::wearing_remove(const std::string & uuid , int d){
 
         boardcast_wearing_remove(uuid , p.x , p.y , d);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::wearing_get(const std::string & uuid , std::set<int> & o){
@@ -313,7 +313,7 @@ void body::setLookAt(const std::string & uuid , const vec3 & v){
         boardcast_setLookAt(uuid , p.x , p.y , v);
         
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setPosition(const std::string & uuid , const vec3 & v){
@@ -330,7 +330,7 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
         auto p = getCharPosition(uuid);//发送到之前的chunk，便于范围边缘玩家收到删除
         boardcast_setPosition(uuid , p.x , p.y , v);
     }catch(...){
-        logError();
+        logCharError();
     }
     
     try{
@@ -339,7 +339,7 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
             sendChunk(ipair(i,j),ow);
         });
     }catch(...){
-        logError();
+        logCharError();
     }
     
 }
@@ -372,7 +372,7 @@ void body::setRotation(const std::string & uuid , const vec3 & v){
         boardcast_setRotation(uuid , p.x , p.y , v);
         
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::setStatus(const std::string & uuid , int s){
@@ -389,7 +389,7 @@ void body::setStatus(const std::string & uuid , int s){
         boardcast_setStatus(uuid , p.x , p.y , s);
         
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::interactive(const std::string & uuid , const std::string & s){
@@ -399,7 +399,7 @@ void body::interactive(const std::string & uuid , const std::string & s){
         boardcast_interactive(uuid , p.x , p.y , s);
         
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::HPInc(const std::string & uuid,int delta){
@@ -420,14 +420,18 @@ void body::HPInc(const std::string & uuid,int delta){
             removeCharacter(uuid);
         }
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 
 std::string body::addCharacter(const std::string & owner,int id,const vec3 & posi){
     auto it = config.find(id);
-    if(it==config.end())
+    if(it==config.end()){
+        characterLogger->error("addCharacter:owner={} id={}" , owner , id);
         return std::string();
+    }else{
+        characterLogger->info("addCharacter:owner={} id={}" , owner , id);
+    }
     std::string uuid;
     getUUID(uuid);
     addCharacter(uuid,owner,id,it->second->hp,posi);
@@ -517,9 +521,11 @@ void body::removeCharacter(const std::string & uuid){
         batch.Delete(key);
     
         db->Write(leveldb::WriteOptions(), &batch);
+
+        characterLogger->info("removeCharacter:{}" , uuid);
     
     }catch(...){
-        logError();
+        characterLogger->error("removeCharacter:{}" , uuid);
     }
 }
 vec3 body::getPosition(const std::string & uuid){
@@ -618,7 +624,7 @@ void body::sendToUser(const std::string & uuid,const std::string & to){
         wearing_get(uuid,wearing);
         send_body(to,uuid,id,hp,status,owner,position,rotation,lookAt,wearing);
     }catch(...){
-        logError();
+        logCharError();
     }
 }
 void body::getBody(

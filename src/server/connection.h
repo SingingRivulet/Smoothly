@@ -8,12 +8,13 @@
 #include <raknet/RakSleep.h>
 #include <map>
 #include <unordered_map>
+#include "heartbeat.h"
 namespace smoothly{
 namespace server{
 
 class connection:public bullet{
     public:
-        void start(unsigned short port,int maxcl);
+        virtual void start(unsigned short port,int maxcl,int vf);
         void release();
         
         void login(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & pwd);
@@ -69,12 +70,16 @@ class connection:public bullet{
         
         void sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid);
         
+        connection();
+
     private:
         RakNet::RakPeerInterface * con;
         std::map<RakNet::SystemAddress,std::string> addrs;
         std::unordered_map<std::string,RakNet::SystemAddress> uuids;
         void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
         void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
+        heartbeat<RakNet::SystemAddress> hb;
+        int lastAutoKickTime;
 };
 
 }//////server

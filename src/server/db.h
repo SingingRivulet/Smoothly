@@ -7,6 +7,7 @@
 #include "fontcolor.h"
 
 #define logError() logger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
+#define logCharError() characterLogger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
 
 namespace smoothly{
 namespace server{
@@ -17,6 +18,7 @@ class datas{
             mkdir("log",0777);
             printf(L_GREEN "[status]" NONE"open log file\n" );
             logger = spdlog::rotating_logger_mt("server", "log/server.log", 1024 * 1024 * 5, 3);
+            characterLogger = spdlog::rotating_logger_mt("character", "log/character.log", 1024 * 1024 * 5, 3);
             leveldb::Options options;
             options.create_if_missing = true;
             leveldb::DB::Open(options, "./data", &db);
@@ -27,6 +29,7 @@ class datas{
         }
         leveldb::DB * db;
         std::shared_ptr<spdlog::logger> logger;
+        std::shared_ptr<spdlog::logger> characterLogger;
 };
 
 inline bool isPrefix(const std::string & pfx , const std::string & str){

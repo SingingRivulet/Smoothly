@@ -26,7 +26,7 @@ void manager::connectServer(const char *host, unsigned short port, const std::st
 
     recvTimer = new QTimer(this);
     connect(recvTimer, &QTimer::timeout, this, &manager::recvHandle);
-    recvTimer->start(1000);
+    recvTimer->start(200);
 }
 
 manager::~manager()
@@ -89,7 +89,7 @@ void manager::on_commandLinkButton_addCharacter_clicked()
         return;
     makeHeader("addCharacter");
 
-    bs.Write(s.user);
+    bs.Write(RakNet::RakString(s.user.c_str()));
     bs.Write(s.id);
     bs.WriteVector(s.x , s.y , s.z);
 
@@ -109,7 +109,7 @@ void manager::on_commandLinkButton_removeCharacter_clicked()
         return;
 
     makeHeader("removeCharacter");
-    bs.Write(s.uuid);
+    bs.Write(RakNet::RakString(s.uuid.c_str()));
     connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
     printStatus("[执行]removeCharacter");
 }
@@ -125,7 +125,7 @@ void manager::on_commandLinkButton_setPosition_clicked()
         return;
 
     makeHeader("setPosition");
-    bs.Write(s.uuid);
+    bs.Write(RakNet::RakString(s.uuid.c_str()));
     bs.WriteVector(s.x , s.y , s.z);
     connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
     printStatus("[执行]setPosition");
@@ -178,6 +178,10 @@ void manager::recvMessage()
         else
             break;
     }
+    RakNet::BitStream bs;//心跳包
+    bs.Write((RakNet::MessageID)(ID_USER_PACKET_ENUM+1));
+    bs.Write((RakNet::MessageID)'~');
+    connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
 }
 
 void manager::onRecvMessage(RakNet::Packet *data)
