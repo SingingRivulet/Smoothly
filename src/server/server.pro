@@ -54,7 +54,8 @@ HEADERS += \
     ../utils/uuid.h \
     ../utils/cJSON.h \
     ../utils/uuid.h \
-    heartbeat.h
+    heartbeat.h \
+    dbvt2d.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

@@ -159,6 +159,18 @@ void manager::on_pushButton_db_put_clicked()
     printStatus("[执行]插入数据库");
 }
 
+void manager::on_pushButton_getNearUser_clicked()
+{
+    if(connection==NULL)
+        return;
+    int32_t x = ui->spinBox_chunk_x->value();
+    int32_t y = ui->spinBox_chunk_y->value();
+    makeHeader("getNearUsers");
+    bs.Write(x);
+    bs.Write(y);
+    connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+}
+
 void manager::recvMessage()
 {
     if(!connection)
@@ -217,6 +229,14 @@ void manager::onRecvMessage(RakNet::Packet *data)
                         bs.Read(k);
                         bs.Read(v);
                         printStatus(QString("[数据库]")+k+" = "+v);
+                    }else
+                    if(heads=="nearUsers"){
+                        int32_t x,y;
+                        RakNet::RakString u;
+                        bs.Read(x);
+                        bs.Read(y);
+                        bs.Read(u);
+                        printStatus(QString("[")+"("+QString::number(x)+","+QString::number(y)+")"+"附近用户]"+u);
                     }
 
                 break;

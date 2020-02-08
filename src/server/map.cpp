@@ -37,36 +37,13 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
         #undef pointInA
         #undef pointInB
 
-        /*
-        std::set<ipair> rmTable,tmpTable;
-        buildVisualFieldArray(op.x , op.y , rmTable);
-        buildVisualFieldArray(   x ,    y , nwTable);
-        tmpTable=nwTable;
-        for(auto it:tmpTable){
-            if(rmTable.find(it)!=rmTable.end()){
-                rmTable.erase(it);
-                nwTable.erase(it);
-            }
-        }
-        for(auto it:rmTable){
-            batch.Delete(getNodePrefix(it.x,it.y)+uuid);
-        }
-        for(auto it:nwTable){
-            batch.Put(getNodePrefix(it.x,it.y)+uuid , uuid);
-        }
-        char buf[128],buf2[128];
-        snprintf(buf ,sizeof(buf) ,"map_p_%s",uuid.c_str());
-        snprintf(buf2,sizeof(buf2),"%d %d",x,y);
-        batch.Put(buf,buf2);
-        */
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
         logError();
     }
 }
 void map::addNode(const std::string & uuid,const std::string & owner,int x,int y){
-    std::set<ipair> nwTable;
-    buildVisualFieldArray(x , y , nwTable);
+
     leveldb::WriteBatch batch;
     
     char buf[128],buf2[128];
@@ -80,19 +57,18 @@ void map::addNode(const std::string & uuid,const std::string & owner,int x,int y
     snprintf(buf ,sizeof(buf) ,"map_p_%s",uuid.c_str());
     snprintf(buf2,sizeof(buf2),"%d %d",x,y);
     batch.Put(buf,buf2);
-    
-    for(auto it:nwTable){
-        batch.Put(getNodePrefix(it.x,it.y)+uuid , uuid);
-    }
+
+    buildVisualFieldArray(x , y , [&](int tx,int ty){
+        batch.Put(getNodePrefix(tx,ty)+uuid , uuid);
+    });
+
     db->Write(leveldb::WriteOptions(), &batch);
 }
 void map::removeNode(const std::string & uuid){
     try{
         auto op = getNodePosi(uuid);
         auto owner = getNodeOwner(uuid);
-        
-        std::set<ipair> nwTable;
-        buildVisualFieldArray(op.x , op.y , nwTable);
+
         leveldb::WriteBatch batch;
     
         char buf[128];//拥有者
@@ -106,10 +82,11 @@ void map::removeNode(const std::string & uuid){
             snprintf(buf,sizeof(buf),"map_u_%s_%s",owner.c_str(),uuid.c_str());
             batch.Delete(buf);
         }
-    
-        for(auto it:nwTable){
-            batch.Delete(getNodePrefix(it.x,it.y)+uuid);
-        }
+
+        buildVisualFieldArray(op.x , op.y , [&](int tx,int ty){
+            batch.Delete(getNodePrefix(tx,ty)+uuid);
+        });
+
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
         logError();
@@ -135,7 +112,7 @@ void map::getUsers(int x,int y,std::set<std::string> & o){
     leveldb::Iterator * it = db->NewIterator(leveldb::ReadOptions());
     
     for(it->Seek(prefix); it->Valid(); it->Next()) {
-        
+
         auto k = it->key().ToString();
         auto v = it->value().ToString();
         
@@ -221,15 +198,12 @@ void map::getUserNodes(const std::string & owner,std::set<ipair> & o){
     }
     delete it;
 }
-void map::buildVisualFieldArray(int x,int y,std::set<ipair> & o){
-    o.clear();
-    int i = x - visualField;
-    int j = y - visualField;
+void map::buildVisualFieldArray(int x, int y, std::function<void(int, int)> ncallback){
     int xm= x + visualField;
     int ym= y + visualField;
-    for(;i<=xm;++i){
-        for(;j<=ym;++j){
-            o.insert(ipair(i,j));
+    for(int i = x - visualField;i<=xm;++i){
+        for(int j = y - visualField;j<=ym;++j){
+            ncallback(i,j);
         }
     }
 }

@@ -93,6 +93,24 @@ static void setPwd(admin * self, RakNet::BitStream *data, const RakNet::SystemAd
     sendOK(uuid,"setPwd");
 }
 
+static void getNearUsers(admin * self, RakNet::BitStream *data, const RakNet::SystemAddress & addr){
+    int32_t x,y;
+    data->Read(x);
+    data->Read(y);
+    std::set<std::string> o;
+    self->getUsers(x,y,o);
+    for(auto it:o){
+        {
+            makeAdminHeader();
+            bs.Write(RakNet::RakString("nearUsers"));
+            bs.Write(x);
+            bs.Write(y);
+            bs.Write(RakNet::RakString(it.c_str()));
+            self->sendMessage(&bs,addr);
+        }
+    }
+}
+
 ////////////////////////////////////////////////////
 
 void admin::adminMap_init(){
@@ -108,6 +126,7 @@ void admin::adminMap_init(){
         adminMap["addCharacter"]    = smoothly::server::addCharacter;
         adminMap["removeCharacter"] = smoothly::server::removeCharacter;
         adminMap["setPwd"]          = smoothly::server::setPwd;
+        adminMap["getNearUsers"]    = smoothly::server::getNearUsers;
 
     }
     inited = true;

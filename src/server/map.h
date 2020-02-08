@@ -25,7 +25,7 @@ class map:public datas{
         int visualField;
     private:
         static std::string getNodePrefix(int x,int y);
-        void buildVisualFieldArray(int x,int y,std::set<ipair> & o);
+        void buildVisualFieldArray(int x,int y,std::function<void (int,int)> ncallback);
         ipair getNodePosi(const std::string & uuid);
 };
 

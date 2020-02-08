@@ -48,6 +48,8 @@ private slots:
 
     void on_pushButton_db_put_clicked();
 
+    void on_pushButton_getNearUser_clicked();
+
 private:
     Ui::manager *ui;
     RakNet::RakPeerInterface * connection;
