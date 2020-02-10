@@ -20,7 +20,7 @@ class map:public datas{
         void getUsers(int x,int y,std::set<std::string> & o);
         
         std::string getNodeOwner(const std::string & uuid);
-        void getUserNodes(const std::string & owner , std::set<ipair> & o);
+        void getUserNodes(const std::string & owner , std::set<ipair> & o, std::function<void(const std::string &, int, int)> bcallback);
         
         int visualField;
     private:

@@ -171,6 +171,27 @@ void manager::on_pushButton_getNearUser_clicked()
     connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
 }
 
+void manager::on_commandLinkButton_vlogin_clicked()
+{
+    if(connection==NULL)
+        return;
+    vlogin s(this);
+    s.doActivity = false;
+    s.exec();
+    if(!s.doActivity)
+        return;
+
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)(ID_USER_PACKET_ENUM+1));
+    bs.Write((RakNet::MessageID)'+');
+    bs.Write(RakNet::RakString(s.user.c_str()));
+    bs.Write(RakNet::RakString(s.pwd.c_str()));
+
+    connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+
+    printStatus("[执行]模拟登录");
+}
+
 void manager::recvMessage()
 {
     if(!connection)
@@ -202,6 +223,7 @@ void manager::onRecvMessage(RakNet::Packet *data)
         case (ID_USER_PACKET_ENUM+1):
             switch(data->data[1]){
                 case 'a':
+                {
                     if(data->length<4){
                         break;
                     }
@@ -238,8 +260,231 @@ void manager::onRecvMessage(RakNet::Packet *data)
                         bs.Read(u);
                         printStatus(QString("[")+"("+QString::number(x)+","+QString::number(y)+")"+"附近用户]"+u);
                     }
-
+                }
                 break;
+                case '.':
+                    {
+                        if(data->length<4){
+                            break;
+                        }
+                        RakNet::BitStream bs(data->data,data->length,false);
+                        bs.IgnoreBytes(4);
+
+                        switch(data->data[2]){
+                            case 'R':
+                                switch(data->data[3]){
+                                    case '+':
+                                        {
+                                            int32_t x,y,id,index;
+                                            bs.Read(x);
+                                            bs.Read(y);
+                                            bs.Read(id);
+                                            bs.Read(index);
+                                            printStatus(QString("[登录响应:addRemovedItem](")+
+                                                        QString::number(x)+","+
+                                                        QString::number(y)+","+
+                                                        QString::number(id)+","+
+                                                        QString::number(index)+")");
+                                        }
+                                        break;
+                                    case '=':
+                                        {
+                                            int32_t x,y,len;
+                                            bs.Read(x);
+                                            bs.Read(y);
+                                            bs.Read(len);
+                                            printStatus(QString("[登录响应:setRemovedItem](")+
+                                                        QString::number(x)+","+
+                                                        QString::number(y)+") 数量:"+
+                                                        QString::number(len));
+                                        }
+                                        break;
+                                }
+                                break;
+                            case 'B':
+                                switch(data->data[3]){
+                                    case 'A':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t d;
+                                            bs.Read(u);
+                                            bs.Read(d);
+                                            printStatus(QString("[登录响应:wearing_add]")+u.C_String()+" => "+QString::number(d));
+                                        }
+                                        break;
+                                    case 'R':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t d;
+                                            bs.Read(u);
+                                            bs.Read(d);
+                                            printStatus(QString("[登录响应:wearing_remove]")+u.C_String()+" => "+QString::number(d));
+                                        }
+                                        break;
+                                    case 'G':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t len;
+                                            bs.Read(u);
+                                            bs.Read(len);
+                                            printStatus(QString("[登录响应:wearing_set]")+u.C_String()+" 数量:"+QString::number(len));
+                                        }
+                                        break;
+                                    case 'H':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t d;
+                                            bs.Read(u);
+                                            bs.Read(d);
+                                            printStatus(QString("[登录响应:HPInc]")+u.C_String()+" => "+QString::number(d));
+                                        }
+                                        break;
+                                    case 'S':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t d;
+                                            bs.Read(u);
+                                            bs.Read(d);
+                                            printStatus(QString("[登录响应:setStatus]")+u.C_String()+" => "+QString::number(d));
+                                        }
+                                        break;
+                                    case 'l':
+                                        {
+                                            float x,y,z;
+                                            RakNet::RakString u;
+                                            bs.Read(u);
+                                            bs.ReadVector(x,y,z);
+                                            printStatus(QString("[登录响应:setLookAt]")+
+                                                        u.C_String()+" => ("+
+                                                        QString::number(x)+","+
+                                                        QString::number(y)+","+
+                                                        QString::number(z)+")");
+                                        }
+                                        break;
+                                    case 'p':
+                                        {
+                                            float x,y,z;
+                                            RakNet::RakString u;
+                                            bs.Read(u);
+                                            bs.ReadVector(x,y,z);
+                                            printStatus(QString("[登录响应:setPosition]")+
+                                                        u.C_String()+" => ("+
+                                                        QString::number(x)+","+
+                                                        QString::number(y)+","+
+                                                        QString::number(z)+")");
+                                        }
+                                        break;
+                                    case 'r':
+                                        {
+                                            float x,y,z;
+                                            RakNet::RakString u;
+                                            bs.Read(u);
+                                            bs.ReadVector(x,y,z);
+                                            printStatus(QString("[登录响应:setRotation]")+
+                                                        u.C_String()+" => ("+
+                                                        QString::number(x)+","+
+                                                        QString::number(y)+","+
+                                                        QString::number(z)+")");
+                                        }
+                                        break;
+                                    case 'i':
+                                        {
+                                            RakNet::RakString u,s;
+                                            bs.Read(u);
+                                            bs.Read(s);
+                                            printStatus(QString("[登录响应:interactive]")+u.C_String()+" => "+s.C_String());
+                                        }
+                                        break;
+                                    case '-':
+                                        {
+                                            RakNet::RakString u;
+                                            bs.Read(u);
+                                            printStatus(QString("[登录响应:removeBody]")+u.C_String());
+                                        }
+                                        break;
+                                    case '+':
+                                        {
+                                            RakNet::RakString u,owner;
+                                            int32_t id,hp,status;
+                                            float px,py,pz,
+                                                    rx,ry,rz,
+                                                    lx,ly,lz;
+                                            bs.Read(u);
+                                            bs.Read(id);
+                                            bs.Read(hp);
+                                            bs.Read(status);
+                                            bs.Read(owner);
+                                            bs.ReadVector(px,py,pz);
+                                            bs.ReadVector(rx,ry,rz);
+                                            bs.ReadVector(lx,ly,lz);
+                                            printStatus(QString("[登录响应:createBody]")+
+                                                        "\n uuid:"+u.C_String()+
+                                                        "\n owner:"+owner.C_String()+
+                                                        "\n id:"+QString::number(id)+
+                                                        "\n hp:"+QString::number(hp)+
+                                                        "\n status:"+QString::number(status)+
+                                                        "\n position:("+QString::number(px)+","+QString::number(py)+","+QString::number(pz)+")"+
+                                                        "\n rotation:("+QString::number(rx)+","+QString::number(ry)+","+QString::number(rz)+")"+
+                                                        "\n lookAt:("+QString::number(lx)+","+QString::number(ly)+","+QString::number(lz)+")");
+                                        }
+                                        break;
+                                    case '=':
+                                        {
+                                            RakNet::RakString u,owner;
+                                            int32_t id,hp,status,len;
+                                            float px,py,pz,
+                                                    rx,ry,rz,
+                                                    lx,ly,lz;
+                                            bs.Read(u);
+                                            bs.Read(id);
+                                            bs.Read(hp);
+                                            bs.Read(status);
+                                            bs.Read(owner);
+                                            bs.ReadVector(px,py,pz);
+                                            bs.ReadVector(rx,ry,rz);
+                                            bs.ReadVector(lx,ly,lz);
+                                            bs.Read(len);
+                                            printStatus(QString("[登录响应:setBody]")+
+                                                        "\n uuid:"+u.C_String()+
+                                                        "\n owner:"+owner.C_String()+
+                                                        "\n id:"+QString::number(id)+
+                                                        "\n hp:"+QString::number(hp)+
+                                                        "\n status:"+QString::number(status)+
+                                                        "\n position:("+QString::number(px)+","+QString::number(py)+","+QString::number(pz)+")"+
+                                                        "\n rotation:("+QString::number(rx)+","+QString::number(ry)+","+QString::number(rz)+")"+
+                                                        "\n lookAt:("+QString::number(lx)+","+QString::number(ly)+","+QString::number(lz)+")"+
+                                                        "\n wearing数量:"+QString::number(len));
+                                        }
+                                        break;
+                                    case '/':
+                                        {
+                                            RakNet::RakString u;
+                                            bs.Read(u);
+                                            printStatus(QString("[登录响应:setMainControl]")+u.C_String());
+                                        }
+                                        break;
+                                }
+                                break;
+                            case 'S':
+                                switch(data->data[3]){
+                                    case 'A':
+                                        {
+                                            RakNet::RakString u;
+                                            int32_t id;
+                                            float fX,fY,fZ,dX,dY,dZ;
+                                            bs.Read(u);
+                                            bs.Read(id);
+                                            bs.ReadVector(fX ,fY ,fZ);
+                                            bs.ReadVector(dX ,dY ,dZ);
+                                        }
+                                        //ctl_fire(&bs);
+                                        break;
+                                }
+                                break;
+                        }
+                    }
+                break;
+
             }
         break;
     }

@@ -14,58 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QCommandLinkButton" name="commandLinkButton_setPwd">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>177</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>设置用户密码</string>
-    </property>
-   </widget>
-   <widget class="QCommandLinkButton" name="commandLinkButton_setMainControl">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>177</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>设置第一人称控制</string>
-    </property>
-   </widget>
-   <widget class="QCommandLinkButton" name="commandLinkButton_addCharacter">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>177</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>添加角色控制器</string>
-    </property>
-   </widget>
-   <widget class="QCommandLinkButton" name="commandLinkButton_removeCharacter">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>100</y>
-      <width>177</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>删除角色控制器</string>
-    </property>
-   </widget>
    <widget class="QTextBrowser" name="result">
     <property name="geometry">
      <rect>
@@ -75,18 +23,8 @@
       <height>121</height>
      </rect>
     </property>
-   </widget>
-   <widget class="QCommandLinkButton" name="commandLinkButton_setPosition">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>130</y>
-      <width>177</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>设置角色控制器位置</string>
+    <property name="cursor" stdset="0">
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_db_put">
@@ -97,6 +35,9 @@
       <width>51</width>
       <height>25</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
     <property name="text">
      <string>写入</string>
@@ -111,31 +52,11 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
     <property name="text">
      <string>查询</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_db_key">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>440</y>
-      <width>142</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>440</y>
-      <width>81</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>数据库操作</string>
     </property>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
@@ -147,11 +68,17 @@
       <height>98</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QLabel" name="label_2">
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="text">
           <string>区块坐标</string>
          </property>
@@ -159,6 +86,9 @@
        </item>
        <item>
         <widget class="QSpinBox" name="spinBox_chunk_x">
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="minimum">
           <number>-100000</number>
          </property>
@@ -169,6 +99,9 @@
        </item>
        <item>
         <widget class="QSpinBox" name="spinBox_chunk_y">
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="minimum">
           <number>-100000</number>
          </property>
@@ -183,6 +116,9 @@
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
         <widget class="QPushButton" name="pushButton_getNearOnline">
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="text">
           <string>查询附近在线</string>
          </property>
@@ -190,12 +126,139 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_getNearUser">
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="text">
           <string>查询附近玩家</string>
          </property>
         </widget>
        </item>
       </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>344</width>
+      <height>230</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_setPwd">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>设置用户密码</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCommandLinkButton" name="commandLinkButton_vlogin">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>模拟登录</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_removeCharacter">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>删除角色控制器</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_setPosition">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>设置角色控制器位置</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_setMainControl">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>设置第一人称控制</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_addCharacter">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>添加角色控制器</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>管理</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_4">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>模拟用户</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="formLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>440</y>
+      <width>221</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>数据库操作</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineEdit_db_key">
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

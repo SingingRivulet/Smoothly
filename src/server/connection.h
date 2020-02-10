@@ -1,6 +1,10 @@
 #ifndef SMOOTHLY_SERVER_CONNECTION
 #define SMOOTHLY_SERVER_CONNECTION
+
 #include "bullet.h"
+#include "heartbeat.h"
+#include "dbvt2d.h"
+
 #include <raknet/RakPeerInterface.h>
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/BitStream.h>
@@ -8,7 +12,6 @@
 #include <raknet/RakSleep.h>
 #include <map>
 #include <unordered_map>
-#include "heartbeat.h"
 namespace smoothly{
 namespace server{
 
@@ -73,11 +76,39 @@ class connection:public bullet{
         connection();
 
     private:
+        void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
+        void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
+
+        struct userSet;
+        struct charBB{
+            std::string owner;
+            userSet * userp;
+            std::string uuid;
+            RakNet::SystemAddress address;
+            dbvt2d::AABB * box;
+            int x,y;
+            long long timeStep;
+        };
+        struct userSet{
+            std::set<charBB*> owned;
+            long long timeStep;
+        };
+        std::map<std::string,charBB*>  charBBs;
+        std::map<std::string,userSet*> charOwners;
+        dbvt2d viewDBVT;
+        long long dbvtTimeStep;
+        void addToDBVT(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & owner,int x,int y);
+        void updateChunkDBVT(const std::string & uuid,const std::string & owner,int x, int y)override;
+        charBB * updateDBVT(const std::string & uuid,const std::string & owner,int x, int y,bool create = true);
+        void removeDBVT(const std::string & uuid);
+        void removeUserBox(const std::string & owner);
+        userSet *seekUserSet(const std::string & owner);
+        void fetchByDBVT(int x,int y,std::function<void (charBB*)> callback);
+        void fetchUserByDBVT(int x,int y,std::function<void (const std::string & owner)> callback);
+
         RakNet::RakPeerInterface * con;
         std::map<RakNet::SystemAddress,std::string> addrs;
         std::unordered_map<std::string,RakNet::SystemAddress> uuids;
-        void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
-        void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
         heartbeat<RakNet::SystemAddress> hb;
         int lastAutoKickTime;
 };

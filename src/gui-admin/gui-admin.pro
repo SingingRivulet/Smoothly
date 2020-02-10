@@ -32,7 +32,8 @@ SOURCES += \
     addcharacter.cpp \
     removecharacter.cpp \
     setdata.cpp \
-    setposition.cpp
+    setposition.cpp \
+    vlogin.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     addcharacter.h \
     removecharacter.h \
     setdata.h \
-    setposition.h
+    setposition.h \
+    vlogin.h
 
 FORMS += \
         mainwindow.ui \
@@ -52,6 +54,7 @@ FORMS += \
     addcharacter.ui \
     removecharacter.ui \
     setdata.ui \
-    setposition.ui
+    setposition.ui \
+    vlogin.ui
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl

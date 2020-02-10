@@ -163,7 +163,7 @@ std::string map::getNodeOwner(const std::string & uuid){
     db->Get(leveldb::ReadOptions(), buf , &value);
     return value;
 }
-void map::getUserNodes(const std::string & owner,std::set<ipair> & o){
+void map::getUserNodes(const std::string & owner,std::set<ipair> & o,std::function<void (const std::string & uuid,int x,int y)> bcallback){
     o.clear();
     char buf[128];
     snprintf(buf,sizeof(buf),"map_u_%s",owner.c_str());
@@ -181,12 +181,11 @@ void map::getUserNodes(const std::string & owner,std::set<ipair> & o){
         {
             try{
                 auto posi = getNodePosi(v);
-                int i = posi.x - visualField;
-                int j = posi.y - visualField;
+                bcallback(v,posi.x,posi.y);
                 int xm= posi.x + visualField;
                 int ym= posi.y + visualField;
-                for(;i<=xm;++i){
-                    for(;j<=ym;++j){
+                for(int i = posi.x - visualField;i<=xm;++i){
+                    for(int j = posi.y - visualField;j<=ym;++j){
                         o.insert(ipair(i,j));
                     }
                 }

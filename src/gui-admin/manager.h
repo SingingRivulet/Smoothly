@@ -15,6 +15,7 @@
 #include "removecharacter.h"
 #include "setposition.h"
 #include "setdata.h"
+#include "vlogin.h"
 
 namespace Ui {
 class manager;
@@ -49,6 +50,8 @@ private slots:
     void on_pushButton_db_put_clicked();
 
     void on_pushButton_getNearUser_clicked();
+
+    void on_commandLinkButton_vlogin_clicked();
 
 private:
     Ui::manager *ui;

@@ -335,6 +335,7 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     
     try{
         auto ow = getOwner(uuid);
+        updateChunkDBVT(uuid,ow,cx,cy);
         updateNode(uuid,cx,cy,[&](int i,int j){
             sendChunk(ipair(i,j),ow);
         });
@@ -353,7 +354,7 @@ void body::sendChunk(const ipair & p , const std::string & to){
 }
 void body::sendMapToUser(const std::string & to){
     std::set<ipair> m;
-    getUserNodes(to,m);
+    getUserNodes(to,m,[&](const std::string &,int,int){});
     for(auto it:m){
         sendChunk(it,to);
     }

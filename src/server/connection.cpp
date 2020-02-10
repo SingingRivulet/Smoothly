@@ -4,6 +4,7 @@ namespace server{
 /////////////////
 connection::connection(){
     lastAutoKickTime = 0;
+    dbvtTimeStep = 0;
 }
 void connection::start(unsigned short port, int maxcl, int vf){
     con=RakNet::RakPeerInterface::GetInstance();
@@ -82,7 +83,9 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     //sendMapToUser(uuid);
     //直接发address效率更高
     std::set<ipair> m;
-    getUserNodes(uuid,m);//发送用户的节点
+    getUserNodes(uuid,m,[&](const std::string & bodyuuid,int x,int y){
+        addToDBVT(addr,bodyuuid,uuid,x,y);
+    });//发送用户的节点
     for(auto p:m){
         std::set<std::string> em;
         getNode(p.x , p.y , em);
@@ -122,15 +125,17 @@ void connection::logout(const RakNet::SystemAddress & addr){
     auto it = addrs.find(addr);
     if(it!=addrs.end()){
         uuids.erase(it->second);
+        removeUserBox(it->second);
     }
-    addrs.erase(addr);
+    addrs.erase(it);
 }
 void connection::logout(const std::string & uuid){
     auto it = uuids.find(uuid);
     if(it!=uuids.end()){
         addrs.erase(it->second);
     }
-    uuids.erase(uuid);
+    uuids.erase(it);
+    removeUserBox(uuid);
 }
 void connection::setPwd(const std::string & uuid,const std::string & pwd){
     db->Put(leveldb::WriteOptions(), std::string("uPw:")+uuid , pwd);
@@ -211,6 +216,113 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
             printf(YELLOW "[client %s]" NONE "disconnect\n",addrStr);
         break;
     }
+}
+
+void connection::addToDBVT(const RakNet::SystemAddress &addr, const std::string &uuid, const std::string &owner, int x, int y){
+    charBB * p = updateDBVT(uuid,owner,x,y);
+    p->address = addr;
+}
+
+void connection::updateChunkDBVT(const std::string & uuid, const std::string & owner, int x, int y){
+    updateDBVT(uuid,owner,x,y,false);
+}
+
+void connection::removeDBVT(const std::string &uuid){
+    auto it = charBBs.find(uuid);
+    charBB * bb;
+    if(it!=charBBs.end()){
+        bb = it->second;
+        charBBs.erase(it);
+        auto cit = charOwners.find(bb->owner);
+        if(cit!=charOwners.end()){
+            userSet * c = cit->second;
+            c->owned.erase(bb);
+            if(c->owned.empty()){//空了，删掉索引
+                delete c;
+                charOwners.erase(cit);
+            }
+        }
+        bb->box->autodrop();
+        delete bb;
+    }
+}
+
+void connection::removeUserBox(const std::string &owner){
+    auto it = charOwners.find(owner);
+    if(it!=charOwners.end()){
+        userSet * us = it->second;
+        for(auto bb:us->owned){
+            charBBs.erase(bb->uuid);
+            bb->box->autodrop();
+        }
+        delete us;
+        charOwners.erase(it);
+    }
+}
+
+connection::userSet * connection::seekUserSet(const std::string &owner){
+    auto cit = charOwners.find(owner);
+    if(cit!=charOwners.end()){
+        userSet * c = cit->second;
+        return c;
+    }else{
+        auto c = new userSet;
+        c->timeStep = dbvtTimeStep;
+        charOwners[owner]=c;
+        return c;
+    }
+}
+
+void connection::fetchByDBVT(int x, int y, std::function<void (connection::charBB *)> callback){
+    viewDBVT.fetchByPoint(dbvt2d::vec(x,y) , [](dbvt2d::AABB * box , void * s){
+        auto callback = (std::function<void (connection::charBB *)>*)s;
+        if(box->data){
+            (*callback)((charBB*)box->data);
+        }
+    },&callback);
+}
+
+void connection::fetchUserByDBVT(int x, int y, std::function<void (const std::string &)> callback){
+    ++dbvtTimeStep;
+    fetchByDBVT(x,y,[&](connection::charBB * bb){
+        if(bb->userp->timeStep==dbvtTimeStep)
+            return;
+        bb->userp->timeStep=dbvtTimeStep;
+        callback(bb->owner);
+    });
+}
+
+connection::charBB *connection::updateDBVT(const std::string &uuid, const std::string &owner, int x, int y, bool create){
+    auto it = charBBs.find(uuid);
+    charBB * bb;
+    if(it==charBBs.end()){//创建
+        if(!create)
+            return NULL;
+        bb = new charBB;
+        bb->owner = owner;
+        bb->uuid = uuid;
+        bb->x=x;
+        bb->y=y;
+        bb->timeStep = 0;
+        dbvt2d::vec f(x-visualField,y-visualField);
+        dbvt2d::vec t(x+visualField,y+visualField);
+        bb->box=viewDBVT.add(f,t,bb);
+        charBBs[uuid]=bb;
+        auto p = seekUserSet(owner);
+        bb->userp = p;
+        p->owned.insert(bb);
+    }else{
+        bb = it->second;
+        if(bb->x!=x || bb->y!=y){
+            bb->x=x;
+            bb->y=y;
+            bb->box->autodrop();
+            dbvt2d::vec f(x-visualField,y-visualField);
+            dbvt2d::vec t(x+visualField,y+visualField);
+            bb->box=viewDBVT.add(f,t,bb);
+        }
+    }
+    return bb;
 }
 void connection::send_body(const std::string & to,
     const std::string & uuid,

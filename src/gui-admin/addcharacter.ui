@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>151</height>
+    <width>321</width>
+    <height>153</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,112 +29,78 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_owner">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>10</y>
-     <width>221</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="doubleSpinBox_x">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>80</y>
-     <width>69</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="minimum">
-    <double>-100000.000000000000000</double>
-   </property>
-   <property name="maximum">
-    <double>100000.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="doubleSpinBox_y">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>80</y>
-     <width>69</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="minimum">
-    <double>-100000.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>0.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QDoubleSpinBox" name="doubleSpinBox_z">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>80</y>
-     <width>69</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="minimum">
-    <double>-100000.000000000000000</double>
-   </property>
-   <property name="value">
-    <double>0.000000000000000</double>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="spinBox_id">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>40</y>
-     <width>48</width>
-     <height>26</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QWidget" name="formLayoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>51</width>
-     <height>17</height>
+     <width>301</width>
+     <height>93</height>
     </rect>
    </property>
-   <property name="text">
-    <string>拥有者</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>51</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>角色id</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>80</y>
-     <width>31</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>位置</string>
-   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>拥有者</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>角色id</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>位置</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="lineEdit_owner"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QSpinBox" name="spinBox_id"/>
+    </item>
+    <item row="2" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_x">
+        <property name="minimum">
+         <double>-100000.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_y">
+        <property name="minimum">
+         <double>-100000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_z">
+        <property name="minimum">
+         <double>-100000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>
