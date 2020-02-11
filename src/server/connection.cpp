@@ -73,6 +73,8 @@ void connection::getUUIDByAddr(const RakNet::SystemAddress & addr,std::string & 
 }
 
 void connection::login(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & pwd){
+    if(addrs.find(addr)!=addrs.end())//登录过
+        return;
     std::string value;
     db->Get(leveldb::ReadOptions(), std::string("uPw:")+uuid , &value);
     if(value.empty())
@@ -126,16 +128,16 @@ void connection::logout(const RakNet::SystemAddress & addr){
     if(it!=addrs.end()){
         uuids.erase(it->second);
         removeUserBox(it->second);
+        addrs.erase(it);
     }
-    addrs.erase(it);
 }
 void connection::logout(const std::string & uuid){
     auto it = uuids.find(uuid);
     if(it!=uuids.end()){
         addrs.erase(it->second);
+        uuids.erase(it);
+        removeUserBox(uuid);
     }
-    uuids.erase(it);
-    removeUserBox(uuid);
 }
 void connection::setPwd(const std::string & uuid,const std::string & pwd){
     db->Put(leveldb::WriteOptions(), std::string("uPw:")+uuid , pwd);
@@ -225,6 +227,10 @@ void connection::addToDBVT(const RakNet::SystemAddress &addr, const std::string 
 
 void connection::updateChunkDBVT(const std::string & uuid, const std::string & owner, int x, int y){
     updateDBVT(uuid,owner,x,y,false);
+}
+
+void connection::removeFromDBVT(const std::string & uuid){
+    removeDBVT(uuid);
 }
 
 void connection::removeDBVT(const std::string &uuid){

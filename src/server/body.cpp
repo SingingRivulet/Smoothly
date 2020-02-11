@@ -523,6 +523,8 @@ void body::removeCharacter(const std::string & uuid){
     
         db->Write(leveldb::WriteOptions(), &batch);
 
+        removeFromDBVT(uuid);
+
         characterLogger->info("removeCharacter:{}" , uuid);
     
     }catch(...){

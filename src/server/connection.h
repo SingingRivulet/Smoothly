@@ -97,8 +97,9 @@ class connection:public bullet{
         std::map<std::string,userSet*> charOwners;
         dbvt2d viewDBVT;
         long long dbvtTimeStep;
-        void addToDBVT(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & owner,int x,int y);
         void updateChunkDBVT(const std::string & uuid,const std::string & owner,int x, int y)override;
+        void removeFromDBVT(const std::string & uuid)override;
+        void addToDBVT(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & owner,int x,int y);
         charBB * updateDBVT(const std::string & uuid,const std::string & owner,int x, int y,bool create = true);
         void removeDBVT(const std::string & uuid);
         void removeUserBox(const std::string & owner);

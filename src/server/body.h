@@ -86,6 +86,7 @@ class body:public removeTable{
             const vec3 & p,const vec3 & r,const vec3 & l)=0;
         
         virtual void updateChunkDBVT(const std::string & uuid,const std::string & owner,int x, int y)=0;
+        virtual void removeFromDBVT(const std::string & uuid)=0;
 
         virtual void send_body(const std::string & to,
             const std::string & uuid,
