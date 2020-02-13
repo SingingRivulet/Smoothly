@@ -1,7 +1,6 @@
 #include "dbvt2d.h"
 #include "mempool.h"
 namespace smoothly {
-namespace server {
 
 typedef mempool<dbvt2d::AABB> apool;
 
@@ -233,6 +232,4 @@ dbvt2d::~dbvt2d(){
     if(root)
         root->drop();
 }
-
-}//server
 }//smoothly

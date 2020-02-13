@@ -2,8 +2,11 @@
 namespace smoothly{
 
 terrainDispather::terrainDispather(){
-    b.parent = this;
-    v.parent = this;
+    b.parent     = this;
+    v.parent     = this;
+    b.range      = 2;
+    v.range      = 2;
+    setCharNum   = 0;
 }
 terrainDispather::~terrainDispather(){
     

@@ -130,10 +130,8 @@ void map::getUsers(int x,int y,std::set<std::string> & o){
     delete it;
     
 }
-void map::getNode(int x,int y,std::set<std::string> & o){
-    
-    o.clear();
-    
+void map::getNode(int x,int y,std::function<void (const std::string &)> callback){
+
     std::string prefix = getNodePrefix(x,y);
     
     leveldb::Iterator * it = db->NewIterator(leveldb::ReadOptions());
@@ -146,7 +144,7 @@ void map::getNode(int x,int y,std::set<std::string> & o){
         if(!isPrefix(prefix,k))
             break;//前缀不匹配，说明搜索完了
         
-        o.insert(v);
+        callback(v);
     }
     delete it;
     

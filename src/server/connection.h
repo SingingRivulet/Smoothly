@@ -3,7 +3,7 @@
 
 #include "bullet.h"
 #include "heartbeat.h"
-#include "dbvt2d.h"
+#include "../utils/dbvt2d.h"
 
 #include <raknet/RakPeerInterface.h>
 #include <raknet/MessageIdentifiers.h>
@@ -12,6 +12,7 @@
 #include <raknet/RakSleep.h>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 namespace smoothly{
 namespace server{
 
@@ -28,6 +29,10 @@ class connection:public bullet{
         void getAddrByUUID(const std::string & uuid,RakNet::SystemAddress & addr);//没找到的话，直接throw掉
         void getUUIDByAddr(const RakNet::SystemAddress & addr,std::string & uuid);//没找到的话，直接throw掉
         
+        inline void setTimeout(int t){
+            hb.timeout=t;
+        }
+
         inline void sendMessage(RakNet::BitStream * data,const RakNet::SystemAddress & address){
             if(con)
                 con->Send( data, HIGH_PRIORITY, RELIABLE_ORDERED, 0, address, false );
@@ -93,8 +98,8 @@ class connection:public bullet{
             std::set<charBB*> owned;
             long long timeStep;
         };
-        std::map<std::string,charBB*>  charBBs;
-        std::map<std::string,userSet*> charOwners;
+        std::unordered_map<std::string,charBB*>  charBBs;
+        std::unordered_map<std::string,userSet*> charOwners;
         dbvt2d viewDBVT;
         long long dbvtTimeStep;
         void updateChunkDBVT(const std::string & uuid,const std::string & owner,int x, int y)override;
@@ -104,9 +109,10 @@ class connection:public bullet{
         void removeDBVT(const std::string & uuid);
         void removeUserBox(const std::string & owner);
         userSet *seekUserSet(const std::string & owner);
+    public:
         void fetchByDBVT(int x,int y,std::function<void (charBB*)> callback);
-        void fetchUserByDBVT(int x,int y,std::function<void (const std::string & owner)> callback);
-
+        void fetchUserByDBVT(int x,int y,std::function<void (const std::string & owner,const RakNet::SystemAddress &addr)> callback);
+    private:
         RakNet::RakPeerInterface * con;
         std::map<RakNet::SystemAddress,std::string> addrs;
         std::unordered_map<std::string,RakNet::SystemAddress> uuids;

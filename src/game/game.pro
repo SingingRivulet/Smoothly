@@ -47,7 +47,8 @@ HEADERS += \
     fire.h \
     control.h \
     game.h \
-    ui/login.h
+    ui/login.h \
+    dbvtdispather.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -74,7 +75,12 @@ SOURCES += \
     control.cpp \
     game.cpp \
     ui/login.cpp \
-    main.cpp
+    main.cpp \
+    dbvtdispather.cpp
 
 FORMS += \
     ui/login.ui
+
+DISTFILES += \
+    ../shader/terrain.ps.glsl \
+    ../shader/terrain.vs.glsl

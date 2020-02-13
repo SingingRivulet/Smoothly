@@ -171,17 +171,9 @@ void handlers::boardcast_shoot(const std::string & user,int id,const vec3 & f,co
 }
 
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
-    std::set<std::string> o;
-    getUsers(x,y,o);
-    for(auto it:o){
-        try{
-            RakNet::SystemAddress addr;
-            getAddrByUUID(it,addr);
-            sendMessage(data,addr);
-        }catch(...){
-            logError();
-        }
-    }
+    fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
+        sendMessage(data,addr);
+    });
 }
 /////////////////
 }//////server

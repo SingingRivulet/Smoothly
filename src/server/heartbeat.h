@@ -15,6 +15,7 @@ class heartbeat{
         heartbeat(){
             begin = NULL;
             end   = NULL;
+            timeout = 10;
         }
         ~heartbeat(){
             auto n = begin;
@@ -72,8 +73,10 @@ class heartbeat{
             }
         }
     public:
+        int timeout;
         inline void removeExpire(std::function<void(const T&)> callback){
-
+            if(timeout<=0)
+                return;
             #define rmNode \
                 callback(n->name); \
                 nodes.erase(n->name); \
@@ -82,7 +85,7 @@ class heartbeat{
             auto n = end;
             time_t t = time(0);
             while(n){
-                if(t - n->ltime > 10){
+                if(t - n->ltime > timeout){
                     auto tmp = n->last;
                     if(n->next){
                         if(n->last){

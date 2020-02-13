@@ -30,7 +30,7 @@ SOURCES += main.cpp \
     admin.cpp \
     admin_handler.cpp \
     ../utils/cJSON.c \
-    dbvt2d.cpp
+    ../utils/dbvt2d.cpp
 
 SUBDIRS += \
     server.pro
@@ -56,8 +56,8 @@ HEADERS += \
     ../utils/cJSON.h \
     ../utils/uuid.h \
     heartbeat.h \
-    dbvt2d.h \
-    mempool.h
+    ../utils/dbvt2d.h \
+    ../utils/mempool.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

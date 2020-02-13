@@ -16,7 +16,7 @@ class map:public datas{
         void updateNode(const std::string & uuid,int x,int y,std::function<void (int,int)> ncallback);
         void addNode(const std::string & uuid,const std::string & owner,int x,int y);
         void removeNode(const std::string & uuid);
-        void getNode(int x,int y,std::set<std::string> & o);
+        void getNode(int x,int y,std::function<void (const std::string &)> callback);
         void getUsers(int x,int y,std::set<std::string> & o);
         
         std::string getNodeOwner(const std::string & uuid);

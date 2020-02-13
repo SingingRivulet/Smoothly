@@ -1,5 +1,5 @@
-#ifndef SMOOTHLY_SERVER_DBVT2D
-#define SMOOTHLY_SERVER_DBVT2D
+#ifndef SMOOTHLY_DBVT2D
+#define SMOOTHLY_DBVT2D
 
 #include <math.h>
 #include <cmath>
@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 namespace smoothly {
-namespace server {
 
 class dbvt2d{
     public:
@@ -218,7 +217,6 @@ class dbvt2d{
         void * pool;
 };
 
-}
 }
 
 #endif // SMOOTHLY_SERVER_DBVT2D

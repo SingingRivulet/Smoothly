@@ -8,6 +8,7 @@ namespace smoothly{
             terrainDispather();
             ~terrainDispather();
             inline void setCharacterChunk(const std::string & name , int x,int y){
+                ++setCharNum;
                 b.setPosition(name,x,y);
                 if(name==mainControl)
                     v.setPosition(x,y);
@@ -16,6 +17,10 @@ namespace smoothly{
                 b.removePosition(name);
             }
             inline void process(){
+                if(setCharNum!=0){
+                    setCharNum = 0;
+                    b.setPositionEnd();
+                }
                 b.process();
                 v.process();
             }
@@ -23,6 +28,7 @@ namespace smoothly{
 
             std::string mainControl;
         private:
+            int setCharNum;
             struct bDs:public world::terrain::bodyDispather{
                 terrainDispather * parent;
                 virtual void createChunk(int x , int y);

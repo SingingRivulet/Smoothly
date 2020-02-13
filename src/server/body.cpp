@@ -345,11 +345,9 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     
 }
 void body::sendChunk(const ipair & p , const std::string & to){
-    std::set<std::string> m;
-    getNode(p.x , p.y , m);
-    for(auto it:m){
-        sendToUser(it,to);
-    }
+    getNode(p.x , p.y , [&](const std::string & u){
+        sendToUser(u,to);
+    });
     sendRemoveTable(p,to);
 }
 void body::sendMapToUser(const std::string & to){

@@ -5,13 +5,13 @@ using namespace irr;
 using namespace irr::scene;
 scene::IMesh * terrain::createTerrainMesh(
     video::ITexture* texture,
-    float ** heightmap, 
+    float ** heightmap,
     u32 hx,u32 hy,
     const core::dimension2d<f32>& stretchSize,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
     bool debugBorders
 ){
-    if (!texture || !heightmap)
+    if (!heightmap)
 		return 0;
 
 	// debug border
@@ -93,7 +93,7 @@ scene::IMesh * terrain::createTerrainMesh(
 				buffer->Vertices[buffer->Indices[i+2]].Normal = normal;
 			}
 
-			if (buffer->Vertices.size())
+            if (buffer->Vertices.size() && texture)
 			{
 				
 				buffer->Material.setTexture(0, texture);

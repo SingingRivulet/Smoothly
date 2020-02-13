@@ -23,7 +23,7 @@ namespace smoothly{
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(
                 irr::video::ITexture* texture,
-                float ** heightmap, 
+                float ** heightmap,
                 irr::u32 hx,irr::u32 hy,
                 const irr::core::dimension2d<irr::f32>& stretchSize,
                 const irr::core::dimension2d<irr::u32>& maxVtxBlockSize, //网眼大小。官方文档没写
@@ -53,6 +53,8 @@ namespace smoothly{
             void freeChunk(chunk * );
             
             std::set<ipair> showing;
+
+            irr::s32 shader;
     };
 }
 #endif

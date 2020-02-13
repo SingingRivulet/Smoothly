@@ -102,6 +102,7 @@ class bodyDispather:public dispatherQueue{
             if(it==watchPoint.end()){
                 //添加物体
                 watchPoint[name] = p;
+                createChunk(x , y);//先创建脚下的，不然会掉下去
                 pushRound(x,y,name,1);
             }else{
                 //更新物体
@@ -170,6 +171,7 @@ class bodyDispather:public dispatherQueue{
             }
         }
         inline void pushRound(int x,int y,const std::string & name,int dt){
+            incPosi(x,y,name,dt);
             for(int i=1;i<range;++i){
                 {//a
                     int a=-i+1;
@@ -245,6 +247,7 @@ class viewDispather:public dispatherQueue{
             opening.clear();
         }
         inline void pushRoundIntoList(int x,int y){
+            pushPosi(x,y);
             for(int i=1;i<range;++i){
                 {//a
                     int a=-i+1;

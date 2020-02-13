@@ -207,9 +207,9 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     if(owner==myUUID && (!myUUID.empty())){//是自己拥有的
         setCharacterChunk(uuid,cx,cy);
     }else{
-        if(!chunkLoaded(cx,cy)){//在chunk外，删除物体
-            return;
-        }
+        //if(!chunkLoaded(cx,cy)){//在chunk外，删除物体
+        //    return;
+        //}
     }
 
     bodyItem * p = new bodyItem(c->width , c->height , btVector3(posi.X,posi.Y,posi.Z) , c->walkInSky , c->jumpInSky);

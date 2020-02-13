@@ -88,16 +88,12 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     getUserNodes(uuid,m,[&](const std::string & bodyuuid,int x,int y){
         addToDBVT(addr,bodyuuid,uuid,x,y);
     });//发送用户的节点
+
+    std::unordered_set<std::string> buuids;
     for(auto p:m){
-        std::set<std::string> em;
-        getNode(p.x , p.y , em);
-        for(auto it:em){//先发送body
-            sendBodyToAddr(addr,it);
-        }
-        //发rmt
-        std::list<std::pair<int,int> > rmt;
-        getRemovedItem(p.x,p.y, rmt);
-        sendAddr_removeTable(addr,p.x,p.y, rmt);
+        getNode(p.x , p.y , [&buuids](const std::string & u){
+            buuids.insert(u);
+        });
     }
     //发送main control
     try{
@@ -105,6 +101,15 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
         sendAddr_mainControl(addr,s);
     }catch(...){
         logError();
+    }
+    for(auto it:buuids){//先发送body
+        sendBodyToAddr(addr,it);
+    }
+    for(auto p:m){
+        //发rmt
+        std::list<std::pair<int,int> > rmt;
+        getRemovedItem(p.x,p.y, rmt);
+        sendAddr_removeTable(addr,p.x,p.y, rmt);
     }
 }
 void connection::sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid){
@@ -288,13 +293,13 @@ void connection::fetchByDBVT(int x, int y, std::function<void (connection::charB
     },&callback);
 }
 
-void connection::fetchUserByDBVT(int x, int y, std::function<void (const std::string &)> callback){
+void connection::fetchUserByDBVT(int x, int y, std::function<void (const std::string &,const RakNet::SystemAddress &)> callback){
     ++dbvtTimeStep;
     fetchByDBVT(x,y,[&](connection::charBB * bb){
         if(bb->userp->timeStep==dbvtTimeStep)
             return;
         bb->userp->timeStep=dbvtTimeStep;
-        callback(bb->owner);
+        callback(bb->owner,bb->address);
     });
 }
 

@@ -13,6 +13,7 @@ std::atomic<bool> running;
 unsigned short CONF_port = 39065;
 int CONF_maxconnect = 256;
 int CONF_visualField = 2;
+int CONF_timeout = 10;
 
 void loadConfig(){
     printf(L_GREEN "[status]" NONE "get server config\n" );
@@ -40,6 +41,10 @@ void loadConfig(){
                 if(strcmp(c->string,"visualfield")==0){
                     if(c->type==cJSON_Number)
                         CONF_visualField = c->valueint;
+                }else
+                if(strcmp(c->string,"timeout")==0){
+                    if(c->type==cJSON_Number)
+                        CONF_timeout = c->valueint;
                 }
                 c=c->next;
             }
@@ -67,6 +72,7 @@ int main(){
     smoothly::server::server S;
     printf(L_GREEN"[status]" NONE "open connect\n" );
     S.start(CONF_port,CONF_maxconnect,CONF_visualField);
+    S.setTimeout(CONF_timeout);
     while(running){
         S.recv();
         RakSleep(30);

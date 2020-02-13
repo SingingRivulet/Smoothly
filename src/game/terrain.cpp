@@ -6,11 +6,29 @@ terrain::terrain(){
     mapBuf=new float*[33];
     for(auto i=0;i<33;i++)
         mapBuf[i]=new float[33];
+    altitudeK=0.08;
+    hillK=100;
+    temperatureK=0.3;
+    humidityK=0.3;
+    altitudeArg=20000;
+    hillArg=500;
+    temperatureArg=2000;
+    humidityArg=2000;
+
+    temperatureMax=2000;
+    humidityMax=2000;
+
+    temperatureMin=0;
+    humidityMin=0;
+
+    shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                "../shader/terrain.ps.glsl", "main", irr::video::EPST_PS_1_1);
 }
 terrain::~terrain(){
     for(auto it:chunks)
         freeChunk(it.second);
-    
+
     for(auto i=0;i<33;i++)
         delete [] mapBuf[i];
     delete [] mapBuf;
@@ -61,6 +79,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)shader);
     res->node->addShadowVolumeSceneNode();
     
     if(showing.find(ipair(x,y))==showing.end())
@@ -69,6 +88,9 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->node->updateAbsolutePosition();
     res->bodyState =setMotionState(res->node->getAbsoluteTransformation().pointer());
     
+    res->bodyMesh  =createBtMesh(mesh);
+    res->bodyShape =createShape(res->bodyMesh);
+
     res->rigidBody =createBody(res->bodyShape,res->bodyState);
     res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     res->rigidBody->setFriction(0.7);
@@ -99,7 +121,7 @@ void terrain::freeChunk(terrain::chunk * p){
 
 void terrain::createChunk(int x,int y){
     findChunk(x,y){
-        
+
     }else{
         chunks[ipair(x,y)] = genChunk(x,y);
     }
