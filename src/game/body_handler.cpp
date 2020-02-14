@@ -2,7 +2,7 @@
 
 //自己拥有的body不接受来自服务器的消息
 #define returnInMine \
-    if(!myUUID.empty() && myUUID==uuid) \
+    if(!myUUID.empty() && myUUID==it->second->owner) \
         return;
 
 #define findBody(x) \
@@ -12,36 +12,36 @@
 namespace smoothly{
 
 void body::msg_wearing_add(const char* uuid,int d){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         addWearing(it->second , d);
     }
 }
 
 void body::msg_wearing_set(const char* uuid,const std::set<int> & t){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         setWearing(it->second , t);
     }
 }
 
 void body::msg_wearing_remove(const char* uuid,int d){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         removeWearing(it->second , d);
     }
 }
 
 void body::msg_HPInc(const char* uuid,int d){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         it->second->hp = d;
     }
 }
 
 void body::msg_setStatus(const char* uuid,int d){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         if(it->second->status_mask!=d){
             it->second->status=d;
             it->second->status_mask=d;
@@ -54,30 +54,29 @@ void body::msg_setStatus(const char* uuid,int d){
 }
 
 void body::msg_setLookAt(const char* uuid,float x,float y,float z){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         it->second->lookAt.set(x,y,z);
     }
 }
 
 void body::msg_setPosition(const char* uuid,float x,float y,float z){
-    //returnInMine;
-    //findBody(uuid){
-    //    it->second->m_character.setPosition(vec3(x,y,z));
-    //}
-    setBodyPosition(uuid,vec3(x,y,z));
+    findBody(uuid){
+        returnInMine;
+        setBodyPosition(uuid,vec3(x,y,z));
+    }
 }
 
 void body::msg_setRotation(const char* uuid,float x,float y,float z){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         it->second->m_character.setRotation(vec3(x,y,z));
     }
 }
 
 void body::msg_interactive(const char* uuid,const char * s){
-    returnInMine;
     findBody(uuid){
+        returnInMine;
         it->second->interactive(s);
     }
 }

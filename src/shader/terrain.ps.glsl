@@ -128,7 +128,11 @@ float turbulence (in vec2 st) {
 }
 
 void main(){
-    float noise                 = snoise(pointPosition)*5.0+0.5;
+    float n1                    = snoise(pointPosition*10.0);
+    float n2                    = snoise(pointPosition*20.0);
+    float n3                    = snoise(pointPosition*40.0);
+    float n4                    = snoise(pointPosition*80.0);
+    float noise                 = (n1+n2+n3+n4)*2.0+0.5;
     //float texture_delta_fissure = turbulence(pointPosition.xz*0.1);
     vec3  texture_grass         = vec3(0.1,0.9,0.1)*noise;
     vec3  texture_sand          = vec3(0.9,0.7,0.4)*noise;

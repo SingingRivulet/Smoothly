@@ -61,6 +61,7 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
     return max;
 }
 terrain::chunk * terrain::genChunk(int x,int y){
+    printf("[genChunk](%d,%d)\n",x,y);
     auto res = new chunk;
     genTerrain(mapBuf , x , y , 33);
     auto mesh=this->createTerrainMesh(

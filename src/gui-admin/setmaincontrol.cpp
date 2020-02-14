@@ -7,6 +7,10 @@ setMainControl::setMainControl(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("设置第一人称控制");
+
+    QRegExp rx = QRegExp("[0-9a-z\\-]*");
+    QRegExpValidator *validator = new QRegExpValidator(rx);
+    ui->lineEdit_uuid->setValidator(validator);
 }
 
 setMainControl::~setMainControl()

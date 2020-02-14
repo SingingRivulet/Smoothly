@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include <chrono>
+#include <functional>
 namespace smoothly{
 namespace world{
 namespace terrain{
@@ -208,11 +209,44 @@ class viewDispather:public dispatherQueue{
     public:
         int range;
         inline void setPosition(int x,int y){
-            if(first || (position.x != x || position.y != y)){
+            if(first){
+                ipair bMin(x   -range , y   -range),
+                      bMax(x   +range , y   +range);
+                for(int i=bMin.x;i<=bMax.x;++i){
+                    for(int j=bMin.y;j<=bMax.y;++j){
+                        createChunk_q(i , j);
+                    }
+                }
+            }else
+            if(position.x != x || position.y != y){
                 position.x = x;
                 position.y = y;
                 first = false;
-                updateList();
+
+                ipair aMin(position.x-range , position.y-range),
+                      aMax(position.x+range , position.y+range),
+                      //原矩形的四个顶点
+                      bMin(x   -range , y   -range),
+                      bMax(x   +range , y   +range);
+                      //新矩形的四个顶点
+
+                #define pointInA(ix,iy) (ix>aMin.x && ix<aMax.x && iy>aMin.y && iy<aMax.y)
+                #define pointInB(ix,iy) (ix>bMin.x && ix<bMax.x && iy>bMin.y && iy<bMax.y)
+
+                getGenChunk(position.x,position.y,[&](int px,int py){
+                    if(!pointInB(px,py)){
+                        removeChunk_q(px , py);
+                    }
+                });
+                getGenChunk(x,y,[&](int px,int py){
+                    if(!pointInA(px,py)){
+                        createChunk_q(px , py);
+                    }
+                });
+
+                #undef pointInA
+                #undef pointInB
+
             }
         }
         inline viewDispather(){
@@ -221,61 +255,37 @@ class viewDispather:public dispatherQueue{
     private:
         ipair position;
         bool first;
-        std::set<ipair> openedChunk,removingChunk;
-        std::vector<ipair> opening;
-        inline void clearPosi(){
-            opening.clear();
-        }
-        inline void pushPosi(int x,int y){
-            ipair p(x,y);
-            if(openedChunk.find(p)==openedChunk.end()){
-                opening.push_back(p);
-                openedChunk.insert(p);
-            }
-            removingChunk.erase(p);
-        }
-        inline void updateList(){
-            clearPosi();
-            removingChunk=openedChunk;
-            pushRoundIntoList(position.x , position.y);
-            for(auto it:removingChunk){
-                removeChunk_q(it.x , it.y);
-            }
-            for(auto it:opening){
-                createChunk_q(it.x , it.y);
-            }
-            opening.clear();
-        }
-        inline void pushRoundIntoList(int x,int y){
-            pushPosi(x,y);
+
+        inline void getGenChunk(int x,int y,std::function<void (int x,int y)> callback){
+            callback(x,y);
             for(int i=1;i<range;++i){
                 {//a
                     int a=-i+1;
                     int A=i;
                     int ax=-i;
                     for(int j=a;j<=A;j++)
-                        pushPosi(ax+x,j+y);
+                        callback(ax+x,j+y);
                 }
                 {//b
                     int b=-i+1;
                     int B=i;
                     int by=i;
                     for(int j=b;j<=B;j++)
-                        pushPosi(j+x,by+y);
+                        callback(j+x,by+y);
                 }
                 {//c
                     int c=i-1;
                     int C=-i;
                     int cx=i;
                     for(int j=c;j>=C;j--)
-                        pushPosi(cx+x,j+y);
+                        callback(cx+x,j+y);
                 }
                 {//d
                     int d=i-1;
                     int D=-i;
                     int dy=-i;
                     for(int j=d;j>=D;j--)
-                        pushPosi(j+x,dy+y);
+                        callback(j+x,dy+y);
                 }
             }
         }

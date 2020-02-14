@@ -27,13 +27,13 @@ void body::bodyItem::walk(int forward,int leftOrRight/*-1 left,1 right*/,float s
         delta-=direct2d;
     }
 
-    if(leftOrRight==1){
+    if(leftOrRight==-1){
         p2d=direct2d;
         rotate2d(p2d, 3.1415926535897/2);
         p2d.normalize();
         delta+=p2d;
     }else
-    if(leftOrRight==-1){
+    if(leftOrRight==1){
         p2d=direct2d;
         rotate2d(p2d, -3.1415926535897/2);
         p2d.normalize();
@@ -101,7 +101,12 @@ void body::doCommond(const commond & c){
         break;
 
     case CMD_JUMP:
-        p->m_character.jump(btVector3(c.data_vec.X , c.data_vec.Y , c.data_vec.Z));
+        {
+            auto v = c.data_vec;
+            v.normalize();
+            v*=p->config->jump;
+            p->m_character.jump(btVector3(v.X , v.Y , v.Z));
+        }
         break;
 
     case CMD_STATUS_SET:

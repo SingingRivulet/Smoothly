@@ -7,6 +7,10 @@ setPosition::setPosition(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("设置角色控制器位置");
+
+    QRegExp rx = QRegExp("[0-9a-z\\-]*");
+    QRegExpValidator *validator = new QRegExpValidator(rx);
+    ui->lineEdit_uuid->setValidator(validator);
 }
 
 setPosition::~setPosition()

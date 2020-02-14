@@ -41,6 +41,7 @@ class terrain_item{
         lua_State * L;
     public:
         void getGenList(int x,int y,int tem,int hu,float h, std::list<genProb> & pl){
+            printf("[getGenList]%d,%d\n",x,y);
             lua_settop(L,0);
             lua_getglobal(L, "main");
             if(!lua_isfunction(L,-1)){

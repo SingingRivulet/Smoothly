@@ -77,7 +77,7 @@ void body::bodyItem::updateFromWorld(){
 
     //如果是视角物体，更新摄像机
     if(uuid==parent->mainControl){
-        parent->camera->setPosition(irrPos);
+        parent->camera->setPosition(irrPos+vec3(0,config->deltaY,0));
     }
 }
 
@@ -406,12 +406,16 @@ void body::bodyStatus::loadMask(int32_t m){
         walk_forward = 1;
     }else if (m & BM_WALK_B) {
         walk_forward = -1;
+    }else{
+        walk_forward = 0;
     }
 
     if(m & BM_WALK_L){
         walk_leftOrRight = -1;
     }else if (m & BM_WALK_R) {
         walk_leftOrRight = 1;
+    }else{
+        walk_leftOrRight = 0;
     }
 
     if(m & BM_ACT_SHOT_L)

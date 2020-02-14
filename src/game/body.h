@@ -187,18 +187,23 @@ class body:public terrainDispather{
 
     private:
         struct bodyConf{
-            float width,height;
+            float width,height,deltaY,jump;
             bool walkInSky,jumpInSky;
             irr::scene::IAnimatedMesh * mesh;
             std::string aniCallback;
             float walkVelocity;
             irr::video::ITexture * texture;
             inline bodyConf(){
-                mesh    = NULL;
-                texture = NULL;
+                mesh         = NULL;
+                texture      = NULL;
                 aniCallback.clear();
-                walkInSky = false;
-                jumpInSky = false;
+                walkInSky    = false;
+                jumpInSky    = false;
+                width        = 1;
+                height       = 1;
+                deltaY       = 1;
+                walkVelocity = 0.003;
+                jump         = 10;
             }
         };
         std::map<int,bodyConf*> bodyConfig;

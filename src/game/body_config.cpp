@@ -39,10 +39,10 @@ void body::loadBodyConfig(){
                                     while(item){
                                         if(item->type==cJSON_Number){
                                             if(strcmp(item->string,"width")==0){
-                                                ptr->width = item->valueint;
+                                                ptr->width = item->valuedouble;
                                             }else
                                             if(strcmp(item->string,"height")==0){
-                                                ptr->height = item->valueint;
+                                                ptr->height = item->valuedouble;
                                             }else
                                             if(strcmp(item->string,"walkInSky")==0){
                                                 ptr->walkInSky = (item->valueint!=0);
@@ -51,7 +51,13 @@ void body::loadBodyConfig(){
                                                 ptr->jumpInSky = (item->valueint!=0);
                                             }else
                                             if(strcmp(item->string,"walkVelocity")==0){
-                                                ptr->walkVelocity = (item->valuedouble!=0);
+                                                ptr->walkVelocity = (item->valueint!=0);
+                                            }else
+                                            if(strcmp(item->string,"deltaY")==0){
+                                                ptr->deltaY = item->valuedouble;
+                                            }else
+                                            if(strcmp(item->string,"jump")==0){
+                                                ptr->jump = item->valuedouble;
                                             }
                                         }else
                                         if(item->type==cJSON_String){

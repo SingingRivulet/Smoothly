@@ -16,6 +16,7 @@ bool game::gameLoop(){
     recv();
     process();
     processControl();
+    deltaTimeUpdate();
     worldLoop();
     sceneLoop();
     return true;

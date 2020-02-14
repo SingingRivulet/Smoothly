@@ -7,6 +7,9 @@ removeCharacter::removeCharacter(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("删除角色控制器");
+    QRegExp rx = QRegExp("[0-9a-z\\-]*");
+    QRegExpValidator *validator = new QRegExpValidator(rx);
+    ui->lineEdit_uuid->setValidator(validator);
 }
 
 removeCharacter::~removeCharacter()
