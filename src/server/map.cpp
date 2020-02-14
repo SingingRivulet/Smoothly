@@ -37,6 +37,10 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
         #undef pointInA
         #undef pointInB
 
+        char buf[64];
+        snprintf(buf,sizeof(buf),"%d %d",x,y);
+        batch.Put(std::string("map_p_")+uuid , std::string(buf));
+
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
         logError();

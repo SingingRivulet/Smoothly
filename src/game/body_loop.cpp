@@ -6,6 +6,12 @@ void body::loop(){
         bodyItem * b = it.second;
         b->walk(b->status.walk_forward , b->status.walk_leftOrRight,b->config->walkVelocity);
         b->updateFromWorld();
+        auto p = b->node->getPosition();
+        if((p.X+p.Z)>32*4){
+            b->node->setVisible(false);
+        }else{
+            b->node->setVisible(true);
+        }
     }
     for(auto it:myBodies){
         bodyItem * b = it.second;

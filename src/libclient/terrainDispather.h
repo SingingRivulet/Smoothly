@@ -173,7 +173,7 @@ class bodyDispather:public dispatherQueue{
         }
         inline void pushRound(int x,int y,const std::string & name,int dt){
             incPosi(x,y,name,dt);
-            for(int i=1;i<range;++i){
+            for(int i=1;i<=range;++i){
                 {//a
                     int a=-i+1;
                     int A=i;
