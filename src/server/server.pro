@@ -57,7 +57,8 @@ HEADERS += \
     ../utils/uuid.h \
     heartbeat.h \
     ../utils/dbvt2d.h \
-    ../utils/mempool.h
+    ../utils/mempool.h \
+    cache.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

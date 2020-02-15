@@ -4,7 +4,7 @@ namespace server{
 ////////////////
 void map::updateNode(const std::string & uuid, int x, int y, std::function<void (int,int)> ncallback){
     try{
-        auto op = getNodePosi(uuid);
+        ipair & op = cache_nodePosi[uuid];
         if(op.x==x && op.y==y)
             return;
         leveldb::WriteBatch batch;
@@ -16,8 +16,8 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
               bMax(x   +visualField , y   +visualField);
               //新矩形的四个顶点
 
-        #define pointInA(ix,iy) (ix>aMin.x && ix<aMax.x && iy>aMin.y && iy<aMax.y)
-        #define pointInB(ix,iy) (ix>bMin.x && ix<bMax.x && iy>bMin.y && iy<bMax.y)
+        #define pointInA(ix,iy) (ix>=aMin.x && ix<=aMax.x && iy>=aMin.y && iy<=aMax.y)
+        #define pointInB(ix,iy) (ix>=bMin.x && ix<=bMax.x && iy>=bMin.y && iy<=bMax.y)
 
         for(int i=aMin.x;i<=aMax.x;++i){
             for(int j=aMin.y;j<=aMax.y;++j){
@@ -37,9 +37,7 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
         #undef pointInA
         #undef pointInB
 
-        char buf[64];
-        snprintf(buf,sizeof(buf),"%d %d",x,y);
-        batch.Put(std::string("map_p_")+uuid , std::string(buf));
+        op = ipair(x,y);
 
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){
@@ -70,8 +68,8 @@ void map::addNode(const std::string & uuid,const std::string & owner,int x,int y
 }
 void map::removeNode(const std::string & uuid){
     try{
-        auto op = getNodePosi(uuid);
         auto owner = getNodeOwner(uuid);
+        auto op = cache_nodePosi[uuid];
 
         leveldb::WriteBatch batch;
     
@@ -96,17 +94,7 @@ void map::removeNode(const std::string & uuid){
         logError();
     }
 }
-ipair map::getNodePosi(const std::string & uuid){
-    std::string value;
-    db->Get(leveldb::ReadOptions(), std::string("map_p_")+uuid , &value);
-    if(value.empty())
-        throw std::out_of_range("getNodePosi");
-    else{
-        int x,y;
-        sscanf(value.c_str(),"%d %d",&x,&y);
-        return ipair(x,y);
-    }
-}
+
 void map::getUsers(int x,int y,std::set<std::string> & o){
     
     o.clear();
@@ -182,7 +170,7 @@ void map::getUserNodes(const std::string & owner,std::set<ipair> & o,std::functi
         
         {
             try{
-                auto posi = getNodePosi(v);
+                auto posi = cache_nodePosi[v];
                 bcallback(v,posi.x,posi.y);
                 int xm= posi.x + visualField;
                 int ym= posi.y + visualField;
@@ -199,6 +187,7 @@ void map::getUserNodes(const std::string & owner,std::set<ipair> & o,std::functi
     }
     delete it;
 }
+
 void map::buildVisualFieldArray(int x, int y, std::function<void(int, int)> ncallback){
     int xm= x + visualField;
     int ym= y + visualField;
@@ -208,6 +197,34 @@ void map::buildVisualFieldArray(int x, int y, std::function<void(int, int)> ncal
         }
     }
 }
+
+void map::loop(){
+    cache_nodePosi.removeExpire();
+}
+
+void map::release()
+{
+    cache_nodePosi.clear();
+}
+
+void map::cache_nodePosi_t::onExpire(const std::string & uuid , ipair & v){
+    char buf[64];
+    snprintf(buf,sizeof(buf),"%d %d" , v.x , v.y);
+    parent->db->Put(leveldb::WriteOptions(), std::string("map_p_")+uuid , std::string(buf));
+}
+
+void map::cache_nodePosi_t::onLoad(const std::string & uuid, ipair & v){
+    std::string value;
+    parent->db->Get(leveldb::ReadOptions(), std::string("map_p_")+uuid , &value);
+    if(value.empty())
+        v=ipair(0,0);
+    else{
+        int x,y;
+        sscanf(value.c_str(),"%d %d",&x,&y);
+        v=ipair(x,y);
+    }
+}
+
 ////////////////
 }//////server
 }//////smoothly

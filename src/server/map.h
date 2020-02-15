@@ -8,6 +8,9 @@
 #include <list>
 #include <iostream>
 #include <functional>
+
+#include "cache.h"
+
 namespace smoothly{
 namespace server{
 
@@ -23,10 +26,21 @@ class map:public datas{
         void getUserNodes(const std::string & owner , std::set<ipair> & o, std::function<void(const std::string &, int, int)> bcallback);
         
         int visualField;
+        virtual void loop();
+        virtual void release();
+
+        inline map(){
+            cache_nodePosi.parent = this;
+        }
     private:
         static std::string getNodePrefix(int x,int y);
         void buildVisualFieldArray(int x,int y,std::function<void (int,int)> ncallback);
-        ipair getNodePosi(const std::string & uuid);
+        class cache_nodePosi_t:public cache<ipair>{
+                void onExpire(const std::string &,ipair & )override;
+                void onLoad(const std::string &,ipair & )override;
+            public:
+                map * parent;
+        }cache_nodePosi;
 };
 
 }//////server

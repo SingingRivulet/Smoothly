@@ -19,7 +19,7 @@ namespace server{
 class connection:public bullet{
     public:
         virtual void start(unsigned short port,int maxcl,int vf);
-        void release();
+        void release()override;
         
         void login(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & pwd);
         void logout(const RakNet::SystemAddress & addr);

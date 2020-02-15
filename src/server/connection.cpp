@@ -23,6 +23,7 @@ void connection::start(unsigned short port, int maxcl, int vf){
     visualField = vf;
 }
 void connection::release(){
+    bullet::release();
     if(con){
         RakNet::RakPeerInterface::DestroyInstance(con);
     }
@@ -169,6 +170,7 @@ void connection::recv(){
                 con->CloseConnection(addr,true,0);
             });
         }
+        loop();
     }
 }
 void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){

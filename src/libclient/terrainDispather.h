@@ -230,8 +230,8 @@ class viewDispather:public dispatherQueue{
                       bMax(x   +range , y   +range);
                       //新矩形的四个顶点
 
-                #define pointInA(ix,iy) (ix>aMin.x && ix<aMax.x && iy>aMin.y && iy<aMax.y)
-                #define pointInB(ix,iy) (ix>bMin.x && ix<bMax.x && iy>bMin.y && iy<bMax.y)
+                #define pointInA(ix,iy) (ix>=aMin.x && ix<=aMax.x && iy>=aMin.y && iy<=aMax.y)
+                #define pointInB(ix,iy) (ix>=bMin.x && ix<=bMax.x && iy>=bMin.y && iy<=bMax.y)
 
                 getGenChunk(position.x,position.y,[&](int px,int py){
                     if(!pointInB(px,py)){
