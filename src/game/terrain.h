@@ -19,6 +19,7 @@ namespace smoothly{
             virtual void releaseChunk(int x,int y);
             virtual bool chunkShowing(int x,int y);
             virtual bool chunkLoaded(int x,int y)=0;
+            bool chunkCreated(int x,int y);
         private:
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(

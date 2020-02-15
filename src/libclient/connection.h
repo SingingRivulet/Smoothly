@@ -124,6 +124,13 @@ class connectionBase{
                             bs.IgnoreBytes(4);
                             
                             switch(data->data[2]){
+                                case '=':
+                                    switch(data->data[3]){
+                                        case 'r':
+                                            ctl_setVisualRange(&bs);
+                                        break;
+                                    }
+                                break;
                                 case 'R':
                                     switch(data->data[3]){
                                         case '+':
@@ -286,6 +293,11 @@ class connectionBase{
         }
     private:
         //controllers
+        inline void ctl_setVisualRange(RakNet::BitStream * data){
+            int32_t r;
+            data->Read(r);
+            msg_setVisualRange(r);
+        }
         inline void ctl_addRemovedItem(RakNet::BitStream * data){
             int32_t x,y,id,index;
             data->Read(x);
@@ -446,6 +458,7 @@ class connectionBase{
         time_t lastHeartbeat;
 
     public:
+        virtual void msg_setVisualRange(int v)=0;
         virtual void msg_addRemovedItem(int x,int y,int,int)=0;
         virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)=0;
         virtual void msg_wearing_add(const char*,int d)=0;

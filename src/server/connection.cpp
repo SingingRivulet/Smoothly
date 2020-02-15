@@ -76,6 +76,8 @@ void connection::getUUIDByAddr(const RakNet::SystemAddress & addr,std::string & 
 void connection::login(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & pwd){
     if(addrs.find(addr)!=addrs.end())//登录过
         return;
+    if(uuids.find(uuid)!=uuids.end())//登录过
+        return;
     std::string value;
     db->Get(leveldb::ReadOptions(), std::string("uPw:")+uuid , &value);
     if(value.empty())
@@ -83,6 +85,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     if(value!=pwd)
         return;
     linkUUID(uuid,addr);
+    sendAddr_visualrange(addr);
     //sendMapToUser(uuid);
     //直接发address效率更高
     std::set<ipair> m;
@@ -172,6 +175,16 @@ void connection::recv(){
         }
         loop();
     }
+}
+
+void connection::sendAddr_visualrange(const RakNet::SystemAddress & addr){
+    RakNet::BitStream bs;
+    bs.Write((RakNet::MessageID)MESSAGE_GAME);
+    bs.Write((RakNet::MessageID)'.');
+    bs.Write((RakNet::MessageID)'=');
+    bs.Write((RakNet::MessageID)'r');
+    bs.Write((int32_t)visualField);
+    sendMessage(&bs,addr);
 }
 void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
     char addrStr[64];

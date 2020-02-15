@@ -60,6 +60,8 @@ class connection:public bullet{
         
         virtual void sendAddr_mainControl(const RakNet::SystemAddress & addr,const std::string & uuid)=0;
 
+        void sendAddr_visualrange(const RakNet::SystemAddress & addr);
+
         virtual void sendAddr_body(const RakNet::SystemAddress & addr,
             const std::string & uuid,
             int id,int hp,int status,const std::string & owner,

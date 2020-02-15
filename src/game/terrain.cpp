@@ -150,4 +150,9 @@ bool terrain::chunkShowing(int x,int y){
     return it!=showing.end();
 }
 
+bool terrain::chunkCreated(int x, int y){
+    auto it = chunks.find(ipair(x,y));
+    return it!=chunks.end();
+}
+
 }

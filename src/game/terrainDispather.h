@@ -27,6 +27,8 @@ namespace smoothly{
             bool chunkLoaded(int x,int y)override;
 
             std::string mainControl;
+
+            void setVisualRange(int v);
         private:
             int setCharNum;
             struct bDs:public world::terrain::bodyDispather{

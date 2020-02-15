@@ -8,6 +8,8 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
         if(op.x==x && op.y==y)
             return;
         leveldb::WriteBatch batch;
+        batch.Delete(getNodePrefix(op.x , op.y)+uuid);
+        batch.Put(   getNodePrefix(x    , y   )+uuid , uuid);
 
         ipair aMin(op.x-visualField , op.y-visualField),
               aMax(op.x+visualField , op.y+visualField),
@@ -19,17 +21,19 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
         #define pointInA(ix,iy) (ix>=aMin.x && ix<=aMax.x && iy>=aMin.y && iy<=aMax.y)
         #define pointInB(ix,iy) (ix>=bMin.x && ix<=bMax.x && iy>=bMin.y && iy<=bMax.y)
 
+        /*
         for(int i=aMin.x;i<=aMax.x;++i){
             for(int j=aMin.y;j<=aMax.y;++j){
                 if(!pointInB(i,j)){
-                    batch.Delete(getNodePrefix(i,j)+uuid);
+
                 }
             }
         }
+        */
         for(int i=bMin.x;i<=bMax.x;++i){
             for(int j=bMin.y;j<=bMax.y;++j){
                 if(!pointInA(i,j)){
-                    batch.Put(getNodePrefix(i,j)+uuid , uuid);
+
                     ncallback(i,j);
                 }
             }
@@ -60,9 +64,7 @@ void map::addNode(const std::string & uuid,const std::string & owner,int x,int y
     snprintf(buf2,sizeof(buf2),"%d %d",x,y);
     batch.Put(buf,buf2);
 
-    buildVisualFieldArray(x , y , [&](int tx,int ty){
-        batch.Put(getNodePrefix(tx,ty)+uuid , uuid);
-    });
+    batch.Put(getNodePrefix(x,y)+uuid , uuid);
 
     db->Write(leveldb::WriteOptions(), &batch);
 }
@@ -85,9 +87,7 @@ void map::removeNode(const std::string & uuid){
             batch.Delete(buf);
         }
 
-        buildVisualFieldArray(op.x , op.y , [&](int tx,int ty){
-            batch.Delete(getNodePrefix(tx,ty)+uuid);
-        });
+        batch.Delete(getNodePrefix(op.x , op.y)+uuid);
 
         db->Write(leveldb::WriteOptions(), &batch);
     }catch(...){

@@ -45,4 +45,5 @@ class map:public datas{
 
 }//////server
 }//////smoothly
+
 #endif

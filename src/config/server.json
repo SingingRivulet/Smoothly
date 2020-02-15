@@ -1,5 +1,5 @@
 {
     "port":39065,
     "maxconnect":4096,
-    "visualfield":2
+    "visualfield":4
 }

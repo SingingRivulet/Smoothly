@@ -252,6 +252,12 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->updateFromWorld();
     p->updateStatus();
 
+    if(chunkCreated(cx,cy)){
+        p->uncreatedChunk = false;
+    }else{
+        p->uncreatedChunk = true;
+    }
+
     bodies[uuid] = p;
     if(owner==myUUID && (!myUUID.empty()))
         myBodies[uuid] = p;
@@ -336,6 +342,10 @@ body::~body(){
     lua_close(L);
     releaseBodyConfig();
     releaseWearingConfig();
+}
+
+void body::msg_setVisualRange(int v){
+    setVisualRange(v);
 }
 
 void body::setPositionByTransform(irr::scene::ISceneNode * node, const btTransform & transform){

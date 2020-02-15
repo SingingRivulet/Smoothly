@@ -30,4 +30,9 @@ bool terrainDispather::chunkLoaded(int x,int y){
     return b.chunkLoaded(x,y);
 }
 
+void terrainDispather::setVisualRange(int r){
+    b.range      = r;
+    v.range      = r;
+}
+
 }

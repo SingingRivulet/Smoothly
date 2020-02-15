@@ -4,9 +4,24 @@ namespace smoothly{
 void body::loop(){
     for(auto it:bodies){
         bodyItem * b = it.second;
+        if(b->uncreatedChunk){
+            int cx = b->lastPosition.X/32;
+            int cy = b->lastPosition.Z/32;
+            if(chunkCreated(cx,cy)){
+                b->uncreatedChunk = false;
+            }else{
+                b->m_character.setPosition(b->lastPosition);
+                continue;
+            }
+        }
         b->walk(b->status.walk_forward , b->status.walk_leftOrRight,b->config->walkVelocity);
         b->updateFromWorld();
         auto p = b->node->getPosition();
+        auto h = getRealHight(p.X,p.Z);
+        if(p.Y<h){
+            p.Y = (b->config->height+b->config->width)*0.5+h;//防止掉出地图
+            b->m_character.setPosition(p);
+        }
         if((p.X+p.Z)>32*4){
             b->node->setVisible(false);
         }else{
