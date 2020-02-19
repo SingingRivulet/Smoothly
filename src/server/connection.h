@@ -4,6 +4,7 @@
 #include "bullet.h"
 #include "heartbeat.h"
 #include "../utils/dbvt2d.h"
+#include "buildinggraph.h"
 
 #include <raknet/RakPeerInterface.h>
 #include <raknet/MessageIdentifiers.h>
@@ -86,6 +87,8 @@ class connection:public bullet{
         void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
         void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
 
+        buildingGraph building;
+
         struct userSet;
         struct charBB{
             std::string owner;
@@ -111,6 +114,7 @@ class connection:public bullet{
         void removeDBVT(const std::string & uuid);
         void removeUserBox(const std::string & owner);
         userSet *seekUserSet(const std::string & owner);
+        void releaseDBVT();
     public:
         void fetchByDBVT(int x,int y,std::function<void (charBB*)> callback);
         void fetchUserByDBVT(int x,int y,std::function<void (const std::string & owner,const RakNet::SystemAddress &addr)> callback);

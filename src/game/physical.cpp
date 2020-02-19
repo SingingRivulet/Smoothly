@@ -381,7 +381,7 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     
     controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
     
-    controller->setGravity(btVector3(0, -5, 0));
+    //controller->setGravity(btVector3(0, -5, 0));
     
     firstUpdate=true;
 }

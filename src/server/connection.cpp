@@ -2,7 +2,7 @@
 namespace smoothly{
 namespace server{
 /////////////////
-connection::connection(){
+connection::connection():building("building.db"){
     lastAutoKickTime = 0;
     dbvtTimeStep = 0;
 }
@@ -297,6 +297,18 @@ connection::userSet * connection::seekUserSet(const std::string &owner){
         charOwners[owner]=c;
         return c;
     }
+}
+
+void connection::releaseDBVT(){
+    for(auto it:charBBs){
+        it.second->box->autodrop();
+        delete it.second;
+    }
+    for(auto it:charOwners){
+        delete it.second;
+    }
+    charBBs.clear();
+    charOwners.clear();
 }
 
 void connection::fetchByDBVT(int x, int y, std::function<void (connection::charBB *)> callback){

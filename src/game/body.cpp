@@ -253,8 +253,10 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->updateStatus();
 
     if(chunkCreated(cx,cy)){
+        p->m_character.setGravity(gravity);
         p->uncreatedChunk = false;
     }else{
+        p->m_character.setGravity(btVector3(0,0,0));
         p->uncreatedChunk = true;
     }
 
@@ -329,7 +331,7 @@ bool body::addWearingNode(bodyItem * n, int wearing){
     n->wearing[wearing] = wn;
     return true;
 }
-body::body(){
+body::body():gravity(0,-5,0){
     mainControlBody = NULL;
     loadBodyConfig();
     loadWearingConfig();

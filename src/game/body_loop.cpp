@@ -8,9 +8,10 @@ void body::loop(){
             int cx = b->lastPosition.X/32;
             int cy = b->lastPosition.Z/32;
             if(chunkCreated(cx,cy)){
+                b->m_character.setGravity(gravity);
                 b->uncreatedChunk = false;
             }else{
-                b->m_character.setPosition(b->lastPosition);
+                //b->m_character.setPosition(b->lastPosition);
                 continue;
             }
         }

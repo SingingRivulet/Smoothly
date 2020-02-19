@@ -29,16 +29,9 @@ SOURCES += main.cpp \
     server.cpp \
     admin.cpp \
     admin_handler.cpp \
+    buildinggraph.cpp \
     ../utils/cJSON.c \
     ../utils/dbvt2d.cpp
-
-SUBDIRS += \
-    server.pro
-
-DISTFILES += \
-    server \
-    server.pro.user \
-    Makefile
 
 HEADERS += \
     body.h \
@@ -58,8 +51,11 @@ HEADERS += \
     heartbeat.h \
     ../utils/dbvt2d.h \
     ../utils/mempool.h \
-    cache.h
+    cache.h \
+    buildinggraph.h \
+    ../utils/ipair.h \
+    ../utils/cyqueue.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 
-LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl
+LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -lsqlite3 -llua -ldl

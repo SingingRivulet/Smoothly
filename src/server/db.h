@@ -4,7 +4,9 @@
 #include <leveldb/write_batch.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <sys/stat.h>
+
 #include "fontcolor.h"
+#include "../utils/ipair.h"
 
 #define logError() logger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
 #define logCharError() characterLogger->error("{}:{} {}",__FILE__,__LINE__,__FUNCTION__)
@@ -68,41 +70,6 @@ struct vec3{
         X=i.X;Y=i.Y;Z=i.Z;
         return *this;
     }
-};
-
-class ipair{
-    public:
-        int32_t x,y;
-        inline bool operator==(const ipair & i)const{
-            return (x==i.x) && (y==i.y);
-        }
-        inline bool operator<(const ipair & i)const{
-            if(x<i.x)
-                return true;
-            else
-            if(x==i.x){
-                if(y<i.y)
-                    return true;
-            }
-            return false;
-        }
-        inline ipair & operator=(const ipair & i){
-            x=i.x;
-            y=i.y;
-            return *this;
-        }
-        inline ipair(const ipair & i){
-            x=i.x;
-            y=i.y;
-        }
-        inline ipair(const int & ix , const int & iy){
-            x=ix;
-            y=iy;
-        }
-        inline ipair(){
-            x=0;
-            y=0;
-        }
 };
 
 }//////server

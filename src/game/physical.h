@@ -180,6 +180,10 @@ namespace smoothly{
                     virtual btVector3 getAngularVelocity();
                     virtual btVector3 getLinearVelocity();
                     virtual void loop(float t);
+
+                    inline void setGravity(const btVector3 & v){
+                        controller->setGravity(v);
+                    }
             };
             
             class rigidBody:public bodyBase{

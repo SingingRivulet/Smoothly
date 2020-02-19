@@ -126,6 +126,8 @@ class body:public terrainDispather{
         };
         std::map<int,wearingBullet> wearingToBullet;
 
+        btVector3 gravity;
+
     public:
         class bodyItem{
             friend class body;
