@@ -3,8 +3,8 @@
 namespace smoothly{
 
 void body::setBodyPosition(const std::string & uuid , const vec3 & posi){
-    int cx = posi.X/32;
-    int cy = posi.Z/32;
+    int cx = floor(posi.X/32);
+    int cy = floor(posi.Z/32);
 
     auto it=bodies.find(uuid);
     if(it!=bodies.end()){
@@ -202,8 +202,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
 
     bodyConf * c = it->second;
 
-    int cx = posi.X/32;
-    int cy = posi.Z/32;
+    int cx = floor(posi.X/32);
+    int cy = floor(posi.Z/32);
     if(owner==myUUID && (!myUUID.empty())){//是自己拥有的
         setCharacterChunk(uuid,cx,cy);
     }else{

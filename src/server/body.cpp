@@ -323,8 +323,8 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
     db->Put(leveldb::WriteOptions(), key, val);
     
-    int cx = v.X/32;
-    int cy = v.Z/32;
+    int cx = floor(v.X/32);
+    int cy = floor(v.Z/32);
     
     try{
         auto p = getCharPosition(uuid);//发送到之前的chunk，便于范围边缘玩家收到删除
@@ -438,7 +438,7 @@ std::string body::addCharacter(const std::string & owner,int id,const vec3 & pos
 }
 
 void body::addCharacter(const std::string & uuid,const std::string & owner,int id,int hp,const vec3 & posi){
-    addNode(uuid , owner , posi.X/32 , posi.Z/32);
+    addNode(uuid , owner , floor(posi.X/32) , floor(posi.Z/32));
     
     char key[256];
     char val[512];
@@ -470,7 +470,7 @@ void body::addCharacter(const std::string & uuid,const std::string & owner,int i
     
     db->Write(leveldb::WriteOptions(), &batch);
     
-    boardcast_createBody(uuid , posi.X/32 , posi.Z/32 , id,hp,0,owner,posi,vec3(0,0,0),vec3(0,0,1));
+    boardcast_createBody(uuid , floor(posi.X/32) , floor(posi.Z/32) , id,hp,0,owner,posi,vec3(0,0,0),vec3(0,0,1));
 }
 void body::removeCharacter(const std::string & uuid){
     try{
@@ -653,7 +653,7 @@ void body::getBody(
 }
 ipair body::getCharPosition(const std::string & uuid){
     auto r = getPosition(uuid);
-    return ipair(r.X/32 , r.Z/32);
+    return ipair(floor(r.X/32) , floor(r.Z/32));
 }
 std::string body::getMainControl(const std::string & user){
     char key[256];

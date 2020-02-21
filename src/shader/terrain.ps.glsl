@@ -2,6 +2,10 @@ varying vec3 pointPosition;//坐标
 varying float temp;//温度
 varying float humi;//湿度
 
+varying vec3 normal;
+varying vec3 lightDir;
+
+
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 
@@ -20,7 +24,7 @@ float snoise(vec3 v){
     vec3 i2 = max( g.xyz, l.zxy );
 
     //  x0 = x0 - 0. + 0.0 * C
-    vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+    vec3 x1 = x0 - i1 + C.xxx;
     vec3 x2 = x0 - i2 + 2.0 * C.xxx;
     vec3 x3 = x0 - 1. + 3.0 * C.xxx;
 
@@ -126,7 +130,6 @@ float turbulence (in vec2 st) {
     }
     return value;
 }
-
 void main(){
     float n1                    = snoise(pointPosition*10.0);
     float n2                    = snoise(pointPosition*20.0);
@@ -137,14 +140,32 @@ void main(){
     vec3  texture_grass         = vec3(0.1,0.9,0.1)*noise;
     vec3  texture_sand          = vec3(0.9,0.7,0.4)*noise;
     vec3  texture_snow          = vec3(0.9,0.9,0.9)*noise;
+    vec4  diffuseColor;
     if(temp>0.5){
         if(humi>0.5){
-            gl_FragColor = vec4(texture_grass.x , texture_grass.y , texture_grass.z , 1.0);
+            diffuseColor = vec4(texture_grass,1.0);
         }else{
-            gl_FragColor = vec4(texture_sand.x , texture_sand.y , texture_sand.z , 1.0);
+            diffuseColor = vec4(texture_sand,1.0);
         }
     }else{
-        gl_FragColor = vec4(texture_snow.x , texture_snow.y , texture_snow.z , 1.0);
+        diffuseColor = vec4(texture_snow,1.0);
     }
+
+    vec4 diffuse;
+    float NdotL;
+
+    vec3 rnormal = normal;
+    rnormal+=vec3(n1 , snoise(pointPosition+vec3(0.0,100.0,0.0)), snoise(pointPosition+vec3(0.0,400.0,100.0)))*4.0;
+    rnormal+=vec3(n2 , snoise(pointPosition*10.0+vec3(0.0,100.0,0.0)), snoise(pointPosition*10.0+vec3(0.0,400.0,100.0)))*4.0;
+    rnormal+=vec3(n3 , snoise(pointPosition*20.0+vec3(0.0,100.0,0.0)), snoise(pointPosition*20.0+vec3(0.0,400.0,100.0)))*4.0;
+    rnormal=normalize(rnormal);
+
+    NdotL = max(dot(rnormal, lightDir), 0.0);
+    diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+    vec4 lcolor =  NdotL * diffuse;
+
+    vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
+
+    gl_FragColor = scolor;
 
 }

@@ -2,6 +2,9 @@ varying vec3 pointPosition;//坐标
 varying float temp;//温度
 varying float humi;//湿度
 
+varying vec3 normal;
+varying vec3 lightDir;
+
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
@@ -75,8 +78,11 @@ float cnoise(vec3 P){
 }
 
 void main(){
-        gl_Position = ftransform();//设置坐标
-        pointPosition = gl_Vertex.xyz; //把坐标点传给像素
-        humi          = cnoise(vec3(pointPosition.x*0.01,pointPosition.y*0.02,pointPosition.z*0.01))*10.0;
-        temp          = (256.0-pointPosition.y)/256.0;
+    gl_Position = ftransform();//设置坐标
+    pointPosition = gl_Vertex.xyz; //把坐标点传给像素
+    humi          = cnoise(vec3(pointPosition.x*0.01,pointPosition.y*0.02,pointPosition.z*0.01))*10.0;
+    temp          = (256.0-pointPosition.y)/256.0;
+
+    normal = normalize(gl_NormalMatrix * gl_Normal);
+    lightDir = normalize(vec3(gl_LightSource[0].position));
 }

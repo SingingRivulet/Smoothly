@@ -167,7 +167,7 @@ void handlers::boardcast_shoot(const std::string & user,int id,const vec3 & f,co
     bs.Write((int32_t)id);
     bs.WriteVector(f.X ,f.Y ,f.Z);
     bs.WriteVector(d.X ,d.Y ,d.Z);
-    boardcast(f.X/32 , f.Z/32 , &bs);
+    boardcast(floor(f.X/32) , floor(f.Z/32) , &bs);
 }
 
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){

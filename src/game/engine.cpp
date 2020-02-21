@@ -37,6 +37,9 @@ engine::engine(){
             driver->getTexture("../../res/skybox/back.jpg")
         );
     device->getCursorControl()->setVisible(false);
+
+    auto light = scene->addLightSceneNode();
+    light->setPosition(irr::core::vector3df(0,500,0));
 }
 engine::~engine(){
     device->drop();
