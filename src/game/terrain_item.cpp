@@ -120,7 +120,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     res->node=scene->addMeshSceneNode(
         it->second->mesh,NULL,
         -1,
-        irr::core::vector3df(x,getRealHight(x,y),y),
+        irr::core::vector3df(x,getRealHight(x,y)+it->second->deltaHeight,y),
         irr::core::vector3df(0,r,0),
         it->second->scale
     );
@@ -130,6 +130,10 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     res->node->addShadowVolumeSceneNode();
     
     res->node->updateAbsolutePosition();//更新矩阵
+
+    if(it->second->useShader){
+        res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)it->second->shader);
+    }
     
     if(it->second->haveBody){
         res->bodyState=setMotionState(res->node->getAbsoluteTransformation().pointer());//创建状态
@@ -226,6 +230,7 @@ void terrain_item::loadJSON(cJSON * json){
     c->haveBody     = false;
     c->deltaHeight  = 0;
     c->scale.set(1,1,1);
+    c->useShader    = false;
     
     auto body = cJSON_GetObjectItem(json,"body");
     if(body && body->type==cJSON_String){
@@ -250,6 +255,18 @@ void terrain_item::loadJSON(cJSON * json){
         auto sz = cJSON_GetObjectItem(scale , "z");
         if(sz && sz->type==cJSON_Number)c->scale.Z = sz->valuedouble;
         
+    }
+
+    auto shader = cJSON_GetObjectItem(json,"shader");
+    if(shader && shader->type==cJSON_Object){
+        auto vs = cJSON_GetObjectItem(shader,"vs");
+        auto ps = cJSON_GetObjectItem(shader,"ps");
+        if(vs && ps && vs->type==cJSON_String && ps->type==cJSON_String){
+            c->useShader = true;
+            c->shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                        vs->valuestring, "main", irr::video::EVST_VS_1_1,
+                        ps->valuestring, "main", irr::video::EPST_PS_1_1);
+        }
     }
     
     config[id->valueint] = c;

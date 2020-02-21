@@ -1,7 +1,12 @@
 [
     {
-        "mesh":"",
-        "body":"",
-        "deltaHeight":1
+        "id":1001,
+        "mesh":"../../res/model/terrain/grass/grass.obj",
+        "deltaHeight":0,
+        "scale":{"x":1,"y":1.5,"z":1},
+        "shader":{
+            "vs":"../../res/model/terrain/grass/grass.vs.glsl",
+            "ps":"../../res/model/terrain/grass/grass.ps.glsl"
+        }
     }
 ]

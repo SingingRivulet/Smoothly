@@ -31,7 +31,7 @@ class terrain_item{
         terrain_item(){
             L = luaL_newstate();
             luaL_openlibs(L);
-            if (luaL_loadfile(L, "script/terrainItem.lua") || lua_pcall(L, 0, 0, 0))
+            if (luaL_loadfile(L, "../script/terrainItem.lua") || lua_pcall(L, 0, 0, 0))
                 printf("[error]terrainItem:%s\n" , lua_tostring(L, -1));
         }
         ~terrain_item(){

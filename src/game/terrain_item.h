@@ -60,6 +60,8 @@ namespace smoothly{
                 irr::scene::IMesh *  mesh;
                 float                deltaHeight;
                 irr::core::vector3df scale;
+                irr::s32             shader;
+                bool                 useShader;
             };
             std::map<int,conf*> config;
             
