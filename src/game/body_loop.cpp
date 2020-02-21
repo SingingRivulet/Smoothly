@@ -4,6 +4,13 @@ namespace smoothly{
 void body::loop(){
     for(auto it:bodies){
         bodyItem * b = it.second;
+        auto p = b->node->getPosition();
+        auto cp=camera->getPosition();
+        if(((p.X-cp.X)+(p.Z-cp.Z))>32*4){
+            b->node->setVisible(false);
+        }else{
+            b->node->setVisible(true);
+        }
         if(b->uncreatedChunk){
             int cx = floor(b->lastPosition.X/32);
             int cy = floor(b->lastPosition.Z/32);
@@ -17,7 +24,6 @@ void body::loop(){
         }
         b->walk(b->status.walk_forward , b->status.walk_leftOrRight,b->config->walkVelocity);
         b->updateFromWorld();
-        auto p = b->node->getPosition();
         auto h = getRealHight(p.X,p.Z);
         if(p.Y<h){
             if(b->lastPosition.Y>=h){
@@ -26,11 +32,6 @@ void body::loop(){
                 p.Y = (b->config->height+b->config->width)*0.5+h;//防止掉出地图
             }
             b->m_character.setPosition(p);
-        }
-        if((p.X+p.Z)>32*4){
-            b->node->setVisible(false);
-        }else{
-            b->node->setVisible(true);
         }
     }
     for(auto it:myBodies){
