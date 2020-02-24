@@ -90,6 +90,7 @@ void map::removeNode(const std::string & uuid){
         batch.Delete(getNodePrefix(op.x , op.y)+uuid);
 
         db->Write(leveldb::WriteOptions(), &batch);
+        cache_nodePosi.erase(uuid);
     }catch(...){
         logError();
     }

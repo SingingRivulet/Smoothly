@@ -170,6 +170,13 @@ void handlers::boardcast_shoot(const std::string & user,int id,const vec3 & f,co
     boardcast(floor(f.X/32) , floor(f.Z/32) , &bs);
 }
 
+void handlers::boardcast_buildingRemove(const std::string & uuid, int x, int y){
+    makeHeader('T','-');
+    RakNet::RakString u=uuid.c_str();
+    bs.Write(u);
+    boardcast(x,y,&bs);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

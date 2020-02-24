@@ -59,6 +59,12 @@ class buildingGraph{
 
         std::mutex solvingMtx;      //求解前先上锁
 
+        //通知外部求解完成
+        std::mutex bfs_getResult_mtx;
+        std::condition_variable bfs_getResult_cv;
+        void bfs_getResult_wait();
+        void bfs_getResult_wake();
+
         //外部通知主求解线程开始求解
         std::mutex bfs_solve_mtx;
         std::condition_variable bfs_solve_cv;
@@ -137,11 +143,13 @@ class buildingGraph{
         sqlite3_stmt    *   stmt_insert_connect;//插入连接
         sqlite3_stmt    *   stmt_delete_node;   //删除节点
         sqlite3_stmt    *   stmt_delete_connect;//删除连接
+        sqlite3_stmt    *   stmt_delete_all_connect;//删除所有连接
         sqlite3_stmt    *   stmt_setFloor;      //设置接地
         void db_insert_node(const std::string & uuid);
         void db_insert_connection(const std::string & from , const std::string & to);
         void db_delete_node(const std::string & uuid);
         void db_delete_connection(const std::string & from , const std::string & to);
+        void db_delete_all_connection(const std::string & from);
         void db_setFloor(const std::string & uuid , bool f);
         inline void db_begin(){
             sqlite3_exec(db,"begin;",0,0,0);
@@ -156,6 +164,7 @@ class buildingGraph{
                     ADD_CONN,
                     DEL_NODE,
                     DEL_CONN,
+                    DEL_ALL_CONN,
                     SET_FLOOR
                 };
                 method_t method;
@@ -220,6 +229,10 @@ class buildingGraph{
                 removeResult_mtx.lock();
             }
             removeResult_mtx.unlock();
+        }
+
+        inline void waitForResult(){
+            bfs_getResult_wait();
         }
 };
 

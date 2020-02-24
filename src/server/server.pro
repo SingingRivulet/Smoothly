@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     admin_handler.cpp \
     buildinggraph.cpp \
     ../utils/cJSON.c \
-    ../utils/dbvt2d.cpp
+    ../utils/dbvt2d.cpp \
+    building.cpp
 
 HEADERS += \
     body.h \
@@ -54,7 +55,8 @@ HEADERS += \
     cache.h \
     buildinggraph.h \
     ../utils/ipair.h \
-    ../utils/cyqueue.h
+    ../utils/cyqueue.h \
+    building.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

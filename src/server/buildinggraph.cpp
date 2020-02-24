@@ -46,6 +46,18 @@ buildingGraph::node *buildingGraph::createNode()
     return n;
 }
 
+void buildingGraph::bfs_getResult_wait()
+{
+    std::unique_lock<std::mutex> lck(bfs_getResult_mtx);
+    bfs_getResult_cv.wait(lck);
+}
+
+void buildingGraph::bfs_getResult_wake()
+{
+    std::unique_lock<std::mutex> lck(bfs_getResult_mtx);
+    bfs_getResult_cv.notify_all();
+}
+
 void buildingGraph::bfs_solve_wait()
 {
     std::unique_lock<std::mutex> lck(bfs_solve_mtx);
@@ -153,6 +165,7 @@ void buildingGraph::solve_mainThread()
         removeResult_mtx.unlock();
         bfs_waitForRemove.clear();
         bfs_waitForRemove_mutex.unlock();
+        bfs_getResult_wake();
 
     }else{
         waitForRemove_mtx.unlock();
@@ -323,6 +336,14 @@ void buildingGraph::db_delete_connection(const std::string & from, const std::st
     sqlite3_step(stmt_delete_connect);
 }
 
+void buildingGraph::db_delete_all_connection(const std::string & from)
+{
+    sqlite3_reset(stmt_delete_all_connect);
+    sqlite3_bind_text(stmt_delete_all_connect, 1, from.c_str(), from.size(), SQLITE_STATIC);
+    sqlite3_bind_text(stmt_delete_all_connect, 2, from.c_str(), from.size(), SQLITE_STATIC);
+    sqlite3_step(stmt_delete_all_connect);
+}
+
 void buildingGraph::db_setFloor(const std::string & uuid, bool f)
 {
     sqlite3_reset(stmt_setFloor);
@@ -344,6 +365,8 @@ void buildingGraph::db_doCmd(const buildingGraph::db_cmd & cmd)
         db_delete_node(cmd.str1);
     }else if(cmd.method==db_cmd::SET_FLOOR){
         db_setFloor(cmd.str1,cmd.setfloor);
+    }else if(cmd.method==db_cmd::DEL_ALL_CONN){
+        db_delete_all_connection(cmd.str1);
     }
     db_commit();
 }
@@ -408,18 +431,19 @@ buildingGraph::buildingGraph(const std::string & dbpath, int threadNum, int limi
     }
     //启动数据库
     if(sqlite3_open(dbpath.c_str(), &db)){
-        printf(L_RED "[error]" NONE "Can't open database: %s\n", sqlite3_errmsg(db));
+        printf(L_RED "[error]" NONE "buildingSolver:Can't open database: %s\n", sqlite3_errmsg(db));
     }else{
-        printf(L_GREEN "[status]" NONE "Opened database successfully\n");
+        printf(L_GREEN "[status]" NONE "buildingSolver:Opened database successfully\n");
 
         if(instal){
-            printf(L_GREEN "[status]" NONE "instal database\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:instal database\n");
             //安装
             sqlite3_exec(db,"create table node([uuid] char(64),[onfloor] int default 0)",0,0,0);
             sqlite3_exec(db,"create table connection([node_from] char(64),[node_to] char(64))",0,0,0);
             //创建索引
             sqlite3_exec(db,"create unique index node_unique on node ([uuid])",0,0,0);
             sqlite3_exec(db,"create unique index connection_index on connection ([node_from],[node_to])",0,0,0);
+            sqlite3_exec(db,"create unique index connection_index_to on connection ([node_to])",0,0,0);
         }else{
             //读取
         }
@@ -427,37 +451,45 @@ buildingGraph::buildingGraph(const std::string & dbpath, int threadNum, int limi
         //编译sql语句
         const static char sql_insert_node[] = "insert into node (uuid)values(?)";
         if(sqlite3_prepare_v2(db,sql_insert_node,strlen(sql_insert_node),&stmt_insert_node,0)==SQLITE_OK){
-            printf(L_GREEN "[status]" NONE "compile sql:1 success\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:1 success\n");
         }else{
-            printf(L_RED "[error]" NONE "compile sql:1 fail\n");
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:1 fail\n");
         }
 
         const static char sql_insert_connect[] = "insert into connection values(?,?)";
         if(sqlite3_prepare_v2(db,sql_insert_connect,strlen(sql_insert_connect),&stmt_insert_connect,0)==SQLITE_OK){
-            printf(L_GREEN "[status]" NONE "compile sql:2 success\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:2 success\n");
         }else{
-            printf(L_RED "[error]" NONE "compile sql:2 fail\n");
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:2 fail\n");
         }
 
         const static char sql_delete_node[] = "delete from node indexed by node_unique where uuid=?";
         if(sqlite3_prepare_v2(db,sql_delete_node,strlen(sql_delete_node),&stmt_delete_node,0)==SQLITE_OK){
-            printf(L_GREEN "[status]" NONE "compile sql:3 success\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:3 success\n");
         }else{
-            printf(L_RED "[error]" NONE "compile sql:3 fail\n");
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:3 fail\n");
         }
 
         const static char sql_delete_connect[] = "delete from connection indexed by connection_index where node_from=? and node_to=?";
         if(sqlite3_prepare_v2(db,sql_delete_connect,strlen(sql_delete_connect),&stmt_delete_connect,0)==SQLITE_OK){
-            printf(L_GREEN "[status]" NONE "compile sql:4 success\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:4 success\n");
         }else{
-            printf(L_RED "[error]" NONE "compile sql:4 fail\n");
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:4 fail\n");
+        }
+
+        const static char sql_delete_all_connect[] = "delete from connection indexed by connection_index where node_from=?;"
+                                                     "delete from connection indexed by connection_index_to where node_to=?";
+        if(sqlite3_prepare_v2(db,sql_delete_all_connect,strlen(sql_delete_all_connect),&stmt_delete_all_connect,0)==SQLITE_OK){
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:5 success\n");
+        }else{
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:5 fail\n");
         }
 
         const static char sql_setFloor[] = "update node indexed by node_unique set onfloor=? where uuid=?";
         if(sqlite3_prepare_v2(db,sql_setFloor,strlen(sql_setFloor),&stmt_setFloor,0)==SQLITE_OK){
-            printf(L_GREEN "[status]" NONE "compile sql:5 success\n");
+            printf(L_GREEN "[status]" NONE "buildingSolver:compile sql:6 success\n");
         }else{
-            printf(L_RED "[error]" NONE "compile sql:5 fail\n");
+            printf(L_RED "[error]" NONE "buildingSolver:compile sql:6 fail\n");
         }
 
         //载入数据
@@ -481,7 +513,7 @@ buildingGraph::buildingGraph(const std::string & dbpath, int threadNum, int limi
                 this,
                 &zErrMsg
                 ) != SQLITE_OK ){
-            printf(L_RED "[error]" NONE "SQL error: %s\n", zErrMsg);
+            printf(L_RED "[error]" NONE "buildingSolver:SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
         }
         //connection表
@@ -498,32 +530,52 @@ buildingGraph::buildingGraph(const std::string & dbpath, int threadNum, int limi
                 this,
                 &zErrMsg
                 ) != SQLITE_OK ){
-            printf(L_RED "[error]" NONE "SQL error: %s\n", zErrMsg);
+            printf(L_RED "[error]" NONE "buildingSolver:SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
         }
     }
 
     //创建线程
     std::thread mt([](buildingGraph * self){
+        printf(L_GREEN "[status]" NONE "buildingSolver:create solving thread\n");
         self->mainThread();
     },this);
     mt.detach();
     std::thread sv([](buildingGraph * self){
+        printf(L_GREEN "[status]" NONE "buildingSolver:create database manager thread\n");
         self->db_flush();
     },this);
     sv.detach();
     for(int i=0;i<threadNum;++i){
         ++running_thread;
         std::thread st([](buildingGraph * self,int id){
+            printf(L_GREEN "[status]" NONE "buildingSolver:create subthread:%d\n",id);
             self->subThread(id);
         },this,i);
         st.detach();
     }
 
+    //test
+    //std::list<std::string> buffer;
+    //requestAdd("a",buffer);
+    //buffer.push_back("a");
+    //requestSetFloor("a",true);
+    //requestAdd("b",buffer);
+    //requestRemove("a");
+    //waitForResult();
+    //printf("solve building finished\n");
+    //getRemoved([&](const std::string & u){
+    //    printf("removed:%s\n",u.c_str());
+    //    return true;
+    //});
 }
 
 buildingGraph::~buildingGraph()
 {
+    for(auto it:nodes){
+        nodePool.del(it.second);
+    }
+    nodes.clear();
     running = false;
     bfs_begin_wake();
     bfs_solve_wake();
@@ -545,6 +597,7 @@ buildingGraph::~buildingGraph()
         sqlite3_finalize(stmt_insert_connect);
         sqlite3_finalize(stmt_delete_node);
         sqlite3_finalize(stmt_delete_connect);
+        sqlite3_finalize(stmt_delete_all_connect);
         sqlite3_finalize(stmt_setFloor);
         sqlite3_close(db);
     }
@@ -566,6 +619,8 @@ void buildingGraph::node::disconnect_all()
 
 void buildingGraph::node::remove()
 {
+    parent->db_write(db_cmd(db_cmd::DEL_NODE , uuid,""));
+    parent->db_write(db_cmd(db_cmd::DEL_ALL_CONN , uuid,""));
     disconnect_all();
     parent->nodes.erase(uuid);
     parent->nodePool.del(this);

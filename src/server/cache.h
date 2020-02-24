@@ -78,6 +78,16 @@ class cache{
             auto p = markNode(i);
             return p->value;
         }
+        void erase(const T & o){
+            node * n;
+            auto it = nodes.find(o);
+            if(it!=nodes.end()){
+                n = it->second;
+                removeNode(n);
+                delete n;
+                nodes.erase(it);
+            }
+        }
         void clear(){
             auto n = begin;
             while(n){
@@ -137,10 +147,12 @@ class cache{
             node * n;
             auto it = nodes.find(o);
             if(it==nodes.end()){
+                V tmp;
+                onLoad(o,tmp);//可通过throw退出
                 n = new node;
                 n->name = o;
                 addNode(n);
-                onLoad(n->name,n->value);
+                n->value=tmp;
                 nodes[o] = n;
             }else{
                 n = it->second;
@@ -151,16 +163,6 @@ class cache{
             }
             n->ltime = time(0);
             return n;
-        }
-        inline void eraseNode(T o){
-            node * n;
-            auto it = nodes.find(o);
-            if(it!=nodes.end()){
-                n = it->second;
-                removeNode(n);
-                delete n;
-                nodes.erase(it);
-            }
         }
 };
 

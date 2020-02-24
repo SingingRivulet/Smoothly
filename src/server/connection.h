@@ -1,10 +1,9 @@
 #ifndef SMOOTHLY_SERVER_CONNECTION
 #define SMOOTHLY_SERVER_CONNECTION
 
-#include "bullet.h"
+#include "building.h"
 #include "heartbeat.h"
 #include "../utils/dbvt2d.h"
-#include "buildinggraph.h"
 
 #include <raknet/RakPeerInterface.h>
 #include <raknet/MessageIdentifiers.h>
@@ -17,7 +16,7 @@
 namespace smoothly{
 namespace server{
 
-class connection:public bullet{
+class connection:public building{
     public:
         virtual void start(unsigned short port,int maxcl,int vf);
         void release()override;
@@ -86,8 +85,6 @@ class connection:public bullet{
     private:
         void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
         void onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address);
-
-        buildingGraph building;
 
         struct userSet;
         struct charBB{

@@ -2,7 +2,7 @@
 namespace smoothly{
 namespace server{
 ////////////////
-void bullet::shoot(const std::string & user,int id,const vec3 & from,const vec3 & dir){
+void bullet::shoot(const std::string & user,int /*id*/,const vec3 & from,const vec3 & dir){
     char key[256];
     std::string value;
     snprintf(key,sizeof(key),"sType:%s", user.c_str());
