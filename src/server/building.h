@@ -9,7 +9,7 @@ namespace server{
 
 class building:public bullet{
     public:
-        building();
+        building(int thnum);
         ~building();
         void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id);
         void removeBuilding(const std::string & uuid);
@@ -19,6 +19,7 @@ class building:public bullet{
         void loop();
 
         virtual void boardcast_buildingRemove(const std::string & uuid , int x,int y)=0;
+        virtual void boardcast_buildingAdd(const std::string & uuid ,int id,const vec3 & p , const vec3 & r, int x,int y)=0;
 
     private:
 

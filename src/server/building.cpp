@@ -6,7 +6,7 @@
 namespace smoothly{
 namespace server{
 
-building::building():buildingSolver("building.db")
+building::building(int thnum):buildingSolver("building.db",thnum)
 {
     cache_building_hp.parent        = this;
     cache_building_transform.parent = this;
@@ -103,6 +103,8 @@ void building::createBuilding(const vec3 & position, const vec3 & rotation, cons
     db->Write(leveldb::WriteOptions(), &batch);
 
     buildingSolver.requestAdd(uuid,conn);
+
+    boardcast_buildingAdd(uuid , id , position , rotation ,cx,cy);
 }
 
 void building::removeBuilding(const std::string & uuid)

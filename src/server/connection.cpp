@@ -2,7 +2,7 @@
 namespace smoothly{
 namespace server{
 /////////////////
-connection::connection(){
+connection::connection(int thnum):building(thnum){
     lastAutoKickTime = 0;
     dbvtTimeStep = 0;
 }

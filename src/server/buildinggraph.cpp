@@ -535,25 +535,34 @@ buildingGraph::buildingGraph(const std::string & dbpath, int threadNum, int limi
         }
     }
 
+    std::atomic<int> started(2);
     //创建线程
-    std::thread mt([](buildingGraph * self){
+    std::thread mt([&](buildingGraph * self){
         printf(L_GREEN "[status]" NONE "buildingSolver:create solving thread\n");
+        --started;
         self->mainThread();
     },this);
     mt.detach();
-    std::thread sv([](buildingGraph * self){
+    std::thread sv([&](buildingGraph * self){
         printf(L_GREEN "[status]" NONE "buildingSolver:create database manager thread\n");
+        --started;
         self->db_flush();
     },this);
     sv.detach();
     for(int i=0;i<threadNum;++i){
         ++running_thread;
-        std::thread st([](buildingGraph * self,int id){
+        ++started;
+        std::thread st([&](buildingGraph * self,int id){
             printf(L_GREEN "[status]" NONE "buildingSolver:create subthread:%d\n",id);
+            --started;
             self->subThread(id);
         },this,i);
         st.detach();
     }
+    while (started>0) {
+        RakSleep(30);
+    }
+
 
     //test
     //std::list<std::string> buffer;

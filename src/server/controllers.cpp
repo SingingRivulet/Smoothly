@@ -1,7 +1,13 @@
 #include "controllers.h"
+#include <unordered_set>
+
 namespace smoothly{
 namespace server{
 /////////////////
+
+controllers::controllers(int thnum):handlers(thnum){
+
+}
 
 void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress & addr,char c,char a,RakNet::BitStream * data){
     switch(c){
@@ -56,6 +62,16 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
             switch(a){
                 case 'A':
                     ctl_fire(uuid,addr,data);
+                break;
+            }
+        break;
+        case 'T':
+            switch (a) {
+                case '+':
+                    ctl_addBuilding(uuid,addr,data);
+                break;
+                case '-':
+                    ctl_damageBuilding(uuid,addr,data);
                 break;
             }
         break;
@@ -160,6 +176,38 @@ void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress 
     std::string ob = u.C_String();
     if(getOwner(ob)==uuid && !uuid.empty())//验证权限
         shoot(ob , id , f , d);
+}
+
+void controllers::ctl_addBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    vec3 p,r;
+    int32_t id;
+    data->Read(id);
+    data->ReadVector(p.X ,p.Y ,p.Z);
+    data->ReadVector(r.X ,r.Y ,r.Z);
+    RakNet::RakString u;
+    std::unordered_set<std::string> s;
+    for(int i=0;i<8;i++){
+        if(!data->Read(u))
+            break;
+        if(u.IsEmpty())
+            break;
+        if(u.GetLength()>64)
+            break;
+        s.insert(u.C_String());
+    }
+    std::list<std::string> l;
+    for(auto it:s){
+        l.push_back(it);
+    }
+    createBuilding(p,r,l,id);
+}
+
+void controllers::ctl_damageBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    RakNet::RakString u;
+    int32_t dmg;
+    data->Read(u);
+    data->Read(dmg);
+    damageBuilding(u.C_String() , dmg);
 }
 /////////////////
 }//////server

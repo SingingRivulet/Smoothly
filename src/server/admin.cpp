@@ -3,7 +3,7 @@
 namespace smoothly{
 namespace server{
 
-admin::admin(){
+admin::admin(int thnum):connection(thnum){
     adminMap_init();
     printf(L_GREEN "[status]" NONE "get admin keys\n" );
     auto fp = fopen("../config/adminkey.txt" , "r");

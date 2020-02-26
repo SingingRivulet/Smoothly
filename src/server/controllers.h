@@ -1,11 +1,15 @@
 #ifndef SMOOTHLY_SERVER_CTLS
 #define SMOOTHLY_SERVER_CTLS
+
 #include "handlers.h"
+
 namespace smoothly{
 namespace server{
 /////////////////
 class controllers:public handlers{
     public:
+        controllers(int thnum);
+
         virtual void onMessage(const std::string & uuid,const RakNet::SystemAddress &,char c,char a,RakNet::BitStream * data);
         
         //controllers
@@ -23,6 +27,9 @@ class controllers:public handlers{
         void ctl_getBody(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
 
         void ctl_fire(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
+
+        void ctl_addBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
+        void ctl_damageBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         
 };
 /////////////////

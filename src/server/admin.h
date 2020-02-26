@@ -8,7 +8,7 @@ namespace server{
 
 class admin:public connection{
     public:
-        admin();
+        admin(int thnum);
         virtual void adminMessage(RakNet::BitStream * data,const RakNet::SystemAddress &);
     private:
         std::unordered_set<std::string> keys;//调用admin的key

@@ -14,6 +14,7 @@ unsigned short CONF_port = 39065;
 int CONF_maxconnect = 256;
 int CONF_visualField = 2;
 int CONF_timeout = 10;
+int CONF_BuildingThreads = 4;
 
 void loadConfig(){
     printf(L_GREEN "[status]" NONE "get server config\n" );
@@ -45,6 +46,10 @@ void loadConfig(){
                 if(strcmp(c->string,"timeout")==0){
                     if(c->type==cJSON_Number)
                         CONF_timeout = c->valueint;
+                }else
+                if(strcmp(c->string,"buildingThreads")==0){
+                    if(c->type==cJSON_Number)
+                        CONF_BuildingThreads = c->valueint;
                 }
                 c=c->next;
             }
@@ -69,14 +74,16 @@ int main(){
     });
     running=true;
     printf(L_GREEN "[status]" NONE "init database\n" );
-    smoothly::server::server S;
+    smoothly::server::server S(CONF_BuildingThreads);
     printf(L_GREEN"[status]" NONE "open connect\n" );
     S.start(CONF_port,CONF_maxconnect,CONF_visualField);
     S.setTimeout(CONF_timeout);
+    printf(L_GREEN"[status]" NONE "server startup success\n" );
     while(running){
         S.recv();
         RakSleep(30);
     }
+    printf(L_GREEN"[status]" NONE "shutdown\n" );
     printf(L_GREEN "[status]" NONE "release database\n" );
     S.release();
     return 0;

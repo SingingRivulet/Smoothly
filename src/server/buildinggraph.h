@@ -16,6 +16,7 @@
 
 #include <string.h>
 
+#include <raknet/RakSleep.h>
 #include <sqlite3.h>
 
 #include "../utils/mempool.h"

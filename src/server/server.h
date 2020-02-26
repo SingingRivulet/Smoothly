@@ -5,7 +5,8 @@ namespace smoothly{
 namespace server{
 
 class server:public controllers{
-    
+    public:
+        server(int thnum);
 };
 
 }//////server

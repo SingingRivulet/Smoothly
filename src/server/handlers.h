@@ -13,6 +13,7 @@ namespace server{
 
 class handlers:public admin{
     public:
+        handlers(int thnum);
         void boardcast_wearing_add(const std::string & uuid,int x,int y,int d)override;
         void boardcast_wearing_remove(const std::string & uuid,int x,int y,int d)override;
         void boardcast_hp(const std::string & uuid,int x,int y,int hp)override;
@@ -46,6 +47,7 @@ class handlers:public admin{
         void boardcast_shoot(const std::string & user,int id,const vec3 & from,const vec3 & dir)override;
 
         void boardcast_buildingRemove(const std::string & uuid , int x,int y)override;
+        void boardcast_buildingAdd(const std::string & uuid ,int id,const vec3 & p , const vec3 & r, int x,int y);
 
         void boardcast(int x,int y,RakNet::BitStream * data);
         

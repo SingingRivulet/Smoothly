@@ -3,6 +3,10 @@ namespace smoothly{
 namespace server{
 /////////////////
 
+handlers::handlers(int thnum):admin(thnum){
+
+}
+
 void handlers::boardcast_wearing_add(const std::string & uuid,int x,int y,int d){
     makeHeader('B','A');
     RakNet::RakString u=uuid.c_str();
@@ -174,6 +178,16 @@ void handlers::boardcast_buildingRemove(const std::string & uuid, int x, int y){
     makeHeader('T','-');
     RakNet::RakString u=uuid.c_str();
     bs.Write(u);
+    boardcast(x,y,&bs);
+}
+
+void handlers::boardcast_buildingAdd(const std::string & uuid, int id, const vec3 & p, const vec3 & r, int x, int y){
+    makeHeader('T','+');
+    RakNet::RakString u=uuid.c_str();
+    bs.Write(u);
+    bs.Write((int32_t)id);
+    bs.WriteVector(p.X ,p.Y ,p.Z);
+    bs.WriteVector(r.X ,r.Y ,r.Z);
     boardcast(x,y,&bs);
 }
 

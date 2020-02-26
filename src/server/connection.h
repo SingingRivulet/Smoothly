@@ -80,7 +80,7 @@ class connection:public building{
         
         void sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid);
         
-        connection();
+        connection(int thnum);
 
     private:
         void linkUUID(const std::string & uuid,const RakNet::SystemAddress & addr);
