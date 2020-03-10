@@ -48,7 +48,9 @@ HEADERS += \
     control.h \
     game.h \
     ui/login.h \
-    dbvtdispather.h
+    dbvtdispather.h \
+    building.h \
+    ../utils/dbvt3d.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -76,7 +78,9 @@ SOURCES += \
     game.cpp \
     ui/login.cpp \
     main.cpp \
-    dbvtdispather.cpp
+    dbvtdispather.cpp \
+    building.cpp \
+    ../utils/dbvt3d.cpp
 
 FORMS += \
     ui/login.ui

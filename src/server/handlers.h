@@ -48,6 +48,7 @@ class handlers:public admin{
 
         void boardcast_buildingRemove(const std::string & uuid , int x,int y)override;
         void boardcast_buildingAdd(const std::string & uuid ,int id,const vec3 & p , const vec3 & r, int x,int y);
+        void sendBuildingChunk(int32_t x, int32_t y,const RakNet::SystemAddress & addr);
 
         void boardcast(int x,int y,RakNet::BitStream * data);
         

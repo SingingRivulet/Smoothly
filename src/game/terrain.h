@@ -2,13 +2,9 @@
 #define SMOOTHLY_TERRAIN
 #include <map>
 #include <set>
-#include "engine.h"
-#include "../libclient/terrain.h"
-#include "../libclient/terrainDispather.h"
+#include "building.h"
 namespace smoothly{
-    typedef smoothly::world::terrain::ipair ipair;
-    typedef irr::core::vector3df vec3;
-    class terrain:public engine{
+    class terrain:public building{
         public:
             terrain();
             ~terrain();
@@ -20,6 +16,11 @@ namespace smoothly{
             virtual bool chunkShowing(int x,int y);
             virtual bool chunkLoaded(int x,int y)=0;
             bool chunkCreated(int x,int y);
+            bool selectByRay(//射线拾取
+                    const irr::core::line3d<irr::f32>& ray,
+                    irr::core::vector3df& outCollisionPoint,
+                    irr::core::triangle3df& outTriangle,
+                    irr::scene::ISceneNode*& outNode);
         private:
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(
@@ -56,6 +57,27 @@ namespace smoothly{
             std::set<ipair> showing;
 
             irr::s32 shader;
+
+            inline bool selectPointInChunk(//在chunk内进行拾取
+                    int x,int y,
+                    const irr::core::line3d<irr::f32>& ray,
+                    irr::core::vector3df& outCollisionPoint,
+                    irr::core::triangle3df& outTriangle,
+                    irr::scene::ISceneNode*& outNode
+                    ){
+                auto it=chunks.find(ipair(x,y));
+                if(it==chunks.end()){
+                    return false;
+                }else{
+                    return scene->getSceneCollisionManager()->getCollisionPoint(
+                                                    ray,
+                                                    it->second->node->getTriangleSelector(),
+                                                    outCollisionPoint,
+                                                    outTriangle,
+                                                    outNode
+                                                    );
+                }
+            }
     };
 }
 #endif

@@ -62,6 +62,9 @@ class building:public bullet{
 
         struct conf{
                 int hp;
+                inline conf(){
+                    hp=1;
+                }
         };
         std::map<int,conf*> config;
 };

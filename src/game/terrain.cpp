@@ -125,6 +125,7 @@ void terrain::createChunk(int x,int y){
 
     }else{
         chunks[ipair(x,y)] = genChunk(x,y);
+        buildingChunkFetch(x,y);
     }
 }
 void terrain::showChunk(int x,int y){
@@ -152,7 +153,69 @@ bool terrain::chunkShowing(int x,int y){
 
 bool terrain::chunkCreated(int x, int y){
     auto it = chunks.find(ipair(x,y));
-    return it!=chunks.end();
+    return it!=chunks.end() && buildingChunkCreated(x,y);
+}
+
+bool terrain::selectByRay(const irr::core::line3d<irr::f32> &ray, irr::core::vector3df &outCollisionPoint, irr::core::triangle3df &outTriangle, irr::scene::ISceneNode *&outNode){
+    int cx = floor(ray.start.X/32);
+    int cy = floor(ray.start.Z/32);//得到区块
+    float ipx = ray.start.X-cx*32;
+    float ipy = ray.start.Z-cy*32;//得到区块delta
+    if(selectPointInChunk(cx,cy,ray,outCollisionPoint,outTriangle,outNode))
+        return true;
+    if(ipx>16){
+        if(ipy>16){
+            //(cx+1,cy+1)
+            if(selectPointInChunk(cx+1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx+1,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }else{
+            //(cx+1,cy-1)
+            if(selectPointInChunk(cx+1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx+1,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }
+    }else{
+        if(ipy>16){
+            //(cx-1,cy+1)
+            if(selectPointInChunk(cx-1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx-1,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy+1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }else{
+            //(cx-1,cy-1)
+            if(selectPointInChunk(cx-1,cy,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx-1,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+            if(selectPointInChunk(cx  ,cy-1,ray,outCollisionPoint,outTriangle,outNode))
+                return true;
+            else
+                return false;
+        }
+    }
 }
 
 }

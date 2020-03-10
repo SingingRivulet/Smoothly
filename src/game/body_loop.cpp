@@ -19,6 +19,7 @@ void body::loop(){
                 b->uncreatedChunk = false;
             }else{
                 //b->m_character.setPosition(b->lastPosition);
+                b->updateFromWorld();
                 continue;
             }
         }

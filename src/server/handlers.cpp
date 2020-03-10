@@ -191,6 +191,22 @@ void handlers::boardcast_buildingAdd(const std::string & uuid, int id, const vec
     boardcast(x,y,&bs);
 }
 
+void handlers::sendBuildingChunk(int32_t x, int32_t y, const RakNet::SystemAddress & addr){
+    getBuildingChunk(x,y,[&](const std::string & uuid, const vec3 & p, const vec3 & r,int id){
+        makeHeader('T','+');
+        RakNet::RakString u=uuid.c_str();
+        bs.Write(u);
+        bs.Write((int32_t)id);
+        bs.WriteVector(p.X ,p.Y ,p.Z);
+        bs.WriteVector(r.X ,r.Y ,r.Z);
+        sendMessage(&bs,addr);
+    });
+    makeHeader('T','~');
+    bs.Write(x);
+    bs.Write(y);
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

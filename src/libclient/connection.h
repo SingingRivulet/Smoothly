@@ -191,6 +191,19 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'T':
+                                    switch (data->data[3]) {
+                                        case '+':
+                                            ctl_addBuilding(&bs);
+                                        break;
+                                        case '-':
+                                            ctl_removeBuilding(&bs);
+                                        break;
+                                        case '~':
+                                            ctl_startChunk(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -289,6 +302,26 @@ class connectionBase{
             bs.Write((int32_t)id);
             bs.WriteVector(fx ,fy ,fz);
             bs.WriteVector(dx ,dy ,dz);
+            sendMessage(&bs);
+        }
+        inline void cmd_addBuilding(int id,float px,float py,float pz,float rx,float ry,float rz){
+            makeHeader('T','+');
+            bs.Write((int32_t)id);
+            bs.WriteVector(px ,py ,pz);
+            bs.WriteVector(rx ,ry ,rz);
+            sendMessage(&bs);
+        }
+        inline void cmd_damageBuilding(const std::string & uuid,int dh){
+            makeHeader('T','-');
+            RakNet::RakString u=uuid.c_str();
+            bs.Write(u);
+            bs.Write((int32_t)dh);
+            sendMessage(&bs);
+        }
+        inline void cmd_getBuilding(int32_t x , int32_t y){
+            makeHeader('T','G');
+            bs.Write(x);
+            bs.Write(y);
             sendMessage(&bs);
         }
     private:
@@ -455,6 +488,29 @@ class connectionBase{
             data->ReadVector(dX ,dY ,dZ);
             msg_fire(u.C_String(),id,fX,fY,fZ,dX,dY,dZ);
         }
+        inline void ctl_addBuilding(RakNet::BitStream * data){
+            RakNet::RakString u;
+            int32_t id;
+            float px,py,pz,
+                  rx,ry,rz;
+            data->Read(u);
+            data->Read(id);
+            data->ReadVector(px ,py ,pz);
+            data->ReadVector(rx ,ry ,rz);
+            msg_addBuilding(u.C_String(),id,px,py,pz,rx,ry,rz);
+        }
+        inline void ctl_removeBuilding(RakNet::BitStream * data){
+            RakNet::RakString u;
+            data->Read(u);
+            msg_removeBuilding(u.C_String());
+        }
+        inline void ctl_startChunk(RakNet::BitStream * data){
+            int32_t x,y;
+            data->Read(x);
+            data->Read(y);
+            msg_startChunk(x,y);
+        }
+
         time_t lastHeartbeat;
 
     public:
@@ -475,6 +531,9 @@ class connectionBase{
         virtual void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)=0;
         virtual void msg_setMainControl(const char *)=0;
         virtual void msg_fire(const char *,int,float,float,float,float,float,float)=0;
+        virtual void msg_addBuilding(const char *,int,float,float,float,float,float,float)=0;
+        virtual void msg_removeBuilding(const char *)=0;
+        virtual void msg_startChunk(int,int)=0;
 };
 ///////////////////////
 }//////client

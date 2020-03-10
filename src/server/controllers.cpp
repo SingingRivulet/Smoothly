@@ -73,6 +73,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case '-':
                     ctl_damageBuilding(uuid,addr,data);
                 break;
+                case 'G':
+                    ctl_getBuilding(uuid,addr,data);
+                break;
             }
         break;
     }
@@ -208,6 +211,13 @@ void controllers::ctl_damageBuilding(const std::string & /*uuid*/, const RakNet:
     data->Read(u);
     data->Read(dmg);
     damageBuilding(u.C_String() , dmg);
+}
+
+void controllers::ctl_getBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t x,y;
+    data->Read(x);
+    data->Read(y);
+    sendBuildingChunk(x,y,addr);
 }
 /////////////////
 }//////server
