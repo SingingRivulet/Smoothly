@@ -2,6 +2,7 @@
 #define SMOOTHLY_BUILDING
 #include <unordered_map>
 #include <set>
+#include <functional>
 
 #include "engine.h"
 #include "../libclient/terrain.h"
@@ -75,6 +76,21 @@ class building:public engine{
 
         void loadConfig();
         void releaseConfig();
+
+        inline void fetchByRay(const vec3 & from , const vec3 & to , std::function<void(const vec3 &,bodyInfo*)> callback){
+            btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
+            btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom,bto);
+            dynamicsWorld->rayTest(bfrom, bto, rayCallback);//使用bullet的rayTest接口
+            if (rayCallback.hasHit()){
+                vec3 targ(rayCallback.m_hitPointWorld.getX(),
+                          rayCallback.m_hitPointWorld.getY(),
+                          rayCallback.m_hitPointWorld.getZ());
+
+                auto o = rayCallback.m_collisionObject;
+                auto i = (bodyInfo*)o->getUserPointer();
+                callback(targ , i);
+            }
+        }
 };
 
 }//smoothly
