@@ -2,16 +2,6 @@
 
 namespace smoothly{
 
-inline void rotate2d(irr::core::vector2df & v,double a){
-    auto cosa=cos(a);
-    auto sina=sin(a);
-    auto x=v.X*cosa - v.Y*sina;
-    auto y=v.X*sina + v.Y*cosa;
-    v.X=x;
-    v.Y=y;
-    //v.normalize();
-}
-
 void body::bodyItem::walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed){
 
     irr::core::vector2df delta(0,0);

@@ -11,6 +11,7 @@
 #include <map>
 #include <set>
 #include <time.h>
+#include <functional>
 
 namespace smoothly{
 namespace client{
@@ -304,11 +305,12 @@ class connectionBase{
             bs.WriteVector(dx ,dy ,dz);
             sendMessage(&bs);
         }
-        inline void cmd_addBuilding(int id,float px,float py,float pz,float rx,float ry,float rz){
+        inline void cmd_addBuilding(int id,float px,float py,float pz,float rx,float ry,float rz,std::function<void(RakNet::BitStream*)> callback){
             makeHeader('T','+');
             bs.Write((int32_t)id);
             bs.WriteVector(px ,py ,pz);
             bs.WriteVector(rx ,ry ,rz);
+            callback(&bs);
             sendMessage(&bs);
         }
         inline void cmd_damageBuilding(const std::string & uuid,int dh){

@@ -2,6 +2,7 @@
 namespace smoothly{
 
 void body::loop(){
+    terrainDispather::loop();
     for(auto it:bodies){
         bodyItem * b = it.second;
         auto p = b->node->getPosition();

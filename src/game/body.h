@@ -234,7 +234,7 @@ class body:public terrainDispather{
         static void setPositionByTransform(irr::scene::ISceneNode * n , const btTransform & t);
         virtual void setInteractiveNode(bodyItem * b , const std::string & method)=0;
         virtual void fireTo(const std::string & uuid , int id , const vec3 & from , const vec3 & dir)=0;
-        virtual void loop();
+        virtual void loop()override;
         bodyItem * seekBody(const std::string &);
         bodyItem * seekMyBody(const std::string &);
         bodyItem * mainControlBody;

@@ -103,6 +103,9 @@ void building::createBuilding(const vec3 & position, const vec3 & rotation, cons
     db->Write(leveldb::WriteOptions(), &batch);
 
     buildingSolver.requestAdd(uuid,conn);
+    if(conn.empty()){
+        buildingSolver.requestSetFloor(uuid,true);
+    }
 
     boardcast_buildingAdd(uuid , id , position , rotation ,cx,cy);
 }

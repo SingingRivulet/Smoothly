@@ -1,8 +1,10 @@
 ﻿#ifndef SMOOTHLY_BUILDING
 #define SMOOTHLY_BUILDING
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <functional>
+#include <math.h>
 
 #include "engine.h"
 #include "../libclient/terrain.h"
@@ -25,11 +27,14 @@ class building:public engine{
         void buildingAdd(const vec3 & p,const vec3 & r,int id,const std::string & uuid);
         void buildingChunkRelease(int x, int y);
 
+        virtual void loop();
+
         void msg_addBuilding(const char * uuid, int id, float px, float py, float pz, float rx, float ry, float rz)override;
         void msg_removeBuilding(const char * uuid)override;
         void msg_startChunk(int x, int y)override;
 
     private:
+        lua_State * L;
         struct buildingBody;
         struct buildingChunk{
             bool started;
@@ -39,13 +44,16 @@ class building:public engine{
                 started = false;
             }
         };
+        struct conf;
         struct buildingBody{
             std::string uuid;
             buildingChunk * inchunk;
             irr::scene::IAnimatedMeshSceneNode * node;
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
+            conf             * config;
             bodyInfo info;
+            dbvt3d::AABB     * bb;
         };
         std::map<ipair,buildingChunk*> buildingChunks;
         std::unordered_map<std::string,buildingBody*> bodies;
@@ -58,6 +66,7 @@ class building:public engine{
         buildingChunk * seekChunk(int x,int y);
 
         struct conf{
+            int                     id;
 
             irr::s32                shader;
             bool                    haveShader;
@@ -66,10 +75,29 @@ class building:public engine{
 
             shapeGroup              bodyShape;
             bool                    haveBody;
+
+            struct{
+                float deltaHei;
+                float deltaHor;
+            }autoAttach;
+            bool useAutoAttach;
+
+            bool                          canBuildOn;
+            irr::core::aabbox3d<irr::f32> fetchBB;//放置建筑时用于拾取周围建筑的包围盒
+
+            int                           attachHandler;
+            bool                          useAttachHandler;
+
             conf(){
-                haveBody = false;
-                haveShader = false;
+                haveBody             = false;
+                haveShader           = false;
                 mesh = NULL;
+                useAutoAttach        = false;
+                canBuildOn           = false;
+                useAttachHandler     = false;
+                attachHandler        = 0;
+                autoAttach.deltaHei  = 0;
+                autoAttach.deltaHor  = 1;
             }
         };
         std::map<int,conf*> config;
@@ -77,20 +105,27 @@ class building:public engine{
         void loadConfig();
         void releaseConfig();
 
-        inline void fetchByRay(const vec3 & from , const vec3 & to , std::function<void(const vec3 &,bodyInfo*)> callback){
-            btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
-            btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom,bto);
-            dynamicsWorld->rayTest(bfrom, bto, rayCallback);//使用bullet的rayTest接口
-            if (rayCallback.hasHit()){
-                vec3 targ(rayCallback.m_hitPointWorld.getX(),
-                          rayCallback.m_hitPointWorld.getY(),
-                          rayCallback.m_hitPointWorld.getZ());
+        void fetchByRay(
+                const vec3 & from ,
+                const vec3 & to ,
+                std::function<void(const vec3 &,bodyInfo*)> callback ,
+                std::function<bool(physical::bodyInfo *)> filter=[](physical::bodyInfo * b){
+            //默认忽略角色控制器
+            return b->type!=BODY_BODY;
+        });
+        dbvt3d dbvt;
 
-                auto o = rayCallback.m_collisionObject;
-                auto i = (bodyInfo*)o->getUserPointer();
-                callback(targ , i);
-            }
-        }
+    public:
+        void buildingStart();           //开始建筑模式
+        void buildingUpdate();          //更新预览建筑
+        void buildingApply();           //应用被预览的建筑
+        void buildingEnd();             //建筑模式结束
+    private:
+        irr::scene::ISceneNode  * buildingPrev;
+        conf                    * buildingPrevConf;
+        int                       buildingPrevId;
+        bool                      buildingAllowBuild;
+        buildingBody            * buildingTarget;
 };
 
 }//smoothly
