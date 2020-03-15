@@ -3,7 +3,7 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <spdlog/sinks/rotating_file_sink.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 #include "fontcolor.h"
 #include "../utils/ipair.h"

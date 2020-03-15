@@ -397,8 +397,8 @@ void building::buildingUpdate(){
                     //自动吸附
                     irr::core::vector2df p1,p2,p3,p4;
 
-                    irr::core::vector3df rt(0,tb->node->getRotation().Y,0);
-                    irr::core::vector3df dir=rt.rotationToDirection();
+                    vec3 rt(0,tb->node->getRotation().Y,0);
+                    vec3 dir=rt.rotationToDirection();
 
                     p1.set(dir.X,dir.Z);
                     p2=-p1;
@@ -413,7 +413,7 @@ void building::buildingUpdate(){
                     p3.normalize();p3*=dhor;
                     p4.normalize();p4*=dhor;
 
-                    irr::core::vector3df rp[4];
+                    vec3 rp[4];
 
                     auto dhei = buildingPrevConf->autoAttach.deltaHei;
                     vec3 trg = tb->node->getPosition();

@@ -15,10 +15,11 @@ namespace smoothly{
             virtual void releaseChunk(int x,int y);
             virtual bool chunkShowing(int x,int y);
             virtual bool chunkLoaded(int x,int y)=0;
+            void loop()override;
             bool chunkCreated(int x,int y);
             bool selectByRay(//射线拾取
                     const irr::core::line3d<irr::f32>& ray,
-                    irr::core::vector3df& outCollisionPoint,
+                    vec3& outCollisionPoint,
                     irr::core::triangle3df& outTriangle,
                     irr::scene::ISceneNode*& outNode);
         private:
@@ -56,12 +57,15 @@ namespace smoothly{
             
             std::set<ipair> showing;
 
-            irr::s32 shader;
+            irr::s32 shaderv1;
+            irr::s32 shaderv2;
+            irr::s32 shaderv3;
+            irr::s32 shaderv4;
 
             inline bool selectPointInChunk(//在chunk内进行拾取
                     int x,int y,
                     const irr::core::line3d<irr::f32>& ray,
-                    irr::core::vector3df& outCollisionPoint,
+                    vec3& outCollisionPoint,
                     irr::core::triangle3df& outTriangle,
                     irr::scene::ISceneNode*& outNode
                     ){
@@ -77,6 +81,36 @@ namespace smoothly{
                                                     outNode
                                                     );
                 }
+            }
+            inline irr::s32 getShader(int x,int y){
+                int len = abs(x-cm_cx) + abs(y-cm_cy);
+                if(len<3)
+                    return shaderv1;
+                else
+                if(len<6)
+                    return shaderv2;
+                else
+                if(len<12)
+                    return shaderv3;
+                else
+                    return shaderv4;
+            }
+            bool first;
+            int cm_cx,cm_cy;
+            inline bool updateCamChunk(){
+                if(camera==NULL)
+                    return false;
+                auto p = camera->getPosition();
+                int cx = floor(p.X/32);
+                int cy = floor(p.Z/32);
+                if(cx!=cm_cx || cy!=cm_cy){
+                    cm_cx = cx;
+                    cm_cy = cy;
+                    return true;
+                }
+                auto res = first;
+                first = false;
+                return res;
             }
     };
 }

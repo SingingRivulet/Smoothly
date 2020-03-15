@@ -150,7 +150,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             //攻击到物体
             //被攻击的物体是m_collisionObject
             //激光终点是m_hitPointWorld
-            irr::core::vector3df targ(
+            vec3 targ(
                             rayCallback.m_hitPointWorld.getX(),
                             rayCallback.m_hitPointWorld.getY(),
                             rayCallback.m_hitPointWorld.getZ());
@@ -165,7 +165,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
         {
             auto node   = scene->addEmptySceneNode();//创建主节点
             auto length = tdir.getLength();
-            irr::core::vector3df center(0,0,length/2);
+            vec3 center(0,0,length/2);
 
             auto geo  = scene->getGeometryCreator();//几何体绘制工具
 
@@ -175,8 +175,8 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             auto n1 = scene->addMeshSceneNode(
                         mesh,node,-1,
                         center,
-                        irr::core::vector3df(0,0,0),//水平方向
-                        irr::core::vector3df(conf->radius,conf->radius,length));
+                        vec3(0,0,0),//水平方向
+                        vec3(conf->radius,conf->radius,length));
             n1->setMaterialFlag(irr::video::EMF_LIGHTING, false );//不受光照
             if(conf->bulletConf.texture)
                 n1->setMaterialTexture( 0 , conf->bulletConf.texture);//纹理
@@ -185,8 +185,8 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             auto n2 = scene->addMeshSceneNode(
                         mesh,node,-1,
                         center,
-                        irr::core::vector3df(0,0,90),//垂直方向
-                        irr::core::vector3df(conf->radius,conf->radius,length));
+                        vec3(0,0,90),//垂直方向
+                        vec3(conf->radius,conf->radius,length));
 
             n2->setMaterialFlag(irr::video::EMF_LIGHTING, false );//不受光照
             if(conf->bulletConf.texture)

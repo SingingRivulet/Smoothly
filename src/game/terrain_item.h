@@ -59,7 +59,7 @@ namespace smoothly{
                 shapeGroup           shape;
                 irr::scene::IMesh *  mesh;
                 float                deltaHeight;
-                irr::core::vector3df scale;
+                vec3 scale;
                 irr::s32             shader;
                 bool                 useShader;
             };

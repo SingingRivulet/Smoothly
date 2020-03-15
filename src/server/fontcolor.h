@@ -1,6 +1,8 @@
 #ifndef FONTCOLOR_H
 #define FONTCOLOR_H
 
+#ifdef linux
+
 #define NONE                 "\e[0m"
 #define BLACK                "\e[0;30m"
 #define L_BLACK              "\e[1;30m"
@@ -26,5 +28,35 @@
 #define HIDE                 "\e[8m"
 #define CLEAR                "\e[2J"
 #define CLRLINE              "\r\e[K" //or "\e[1K\r"
+
+#else
+
+#define NONE
+#define BLACK
+#define L_BLACK
+#define RED
+#define L_RED
+#define GREEN
+#define L_GREEN
+#define BROWN
+#define YELLOW
+#define BLUE
+#define L_BLUE
+#define PURPLE
+#define L_PURPLE
+#define CYAN
+#define L_CYAN
+#define GRAY
+#define WHITE
+
+#define BOLD
+#define UNDERLINE
+#define BLINK
+#define REVERSE
+#define HIDE
+#define CLEAR
+#define CLRLINE
+
+#endif
 
 #endif // FONTCOLOR_H

@@ -120,8 +120,8 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     res->node=scene->addMeshSceneNode(
         it->second->mesh,NULL,
         -1,
-        irr::core::vector3df(x,getRealHight(x,y)+it->second->deltaHeight,y),
-        irr::core::vector3df(0,r,0),
+        vec3(x,getRealHight(x,y)+it->second->deltaHeight,y),
+        vec3(0,r,0),
         it->second->scale
     );
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );

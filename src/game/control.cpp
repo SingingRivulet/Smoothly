@@ -13,7 +13,7 @@ void control::processControl(){
         auto cameraPosition      = mainControlBody->node->getPosition();
         camera->setPosition(cameraPosition);
         line.start               = cameraPosition;
-        irr::core::vector3df dir = camera->getTarget()-line.start;
+        vec3 dir = camera->getTarget()-line.start;
         line.end                 = line.start+dir.normalize()*32.0f;
         commond cmd;
         cmd.cmd = CMD_SET_LOOKAT;

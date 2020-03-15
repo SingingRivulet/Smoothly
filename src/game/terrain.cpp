@@ -21,9 +21,20 @@ terrain::terrain(){
     temperatureMin=0;
     humidityMin=0;
 
-    shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+    shaderv1 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/terrain.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/terrain_lod1.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    shaderv2 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                "../shader/terrain_lod2.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    shaderv3 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                "../shader/terrain_lod3.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    shaderv4 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                "../shader/terrain_lod4.ps.glsl", "main", irr::video::EPST_PS_1_1);
+
+    first = true;
 }
 terrain::~terrain(){
     for(auto it:chunks)
@@ -72,7 +83,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
         true
     );
     res->node=scene->addMeshSceneNode(mesh,0,-1);
-    res->node->setPosition(irr::core::vector3df(x*32.0f , 0 , y*32.0f));
+    res->node->setPosition(vec3(x*32.0f , 0 , y*32.0f));
     
     auto selector=scene->createOctreeTriangleSelector(mesh,res->node);   //创建选择器
     res->node->setTriangleSelector(selector);
@@ -80,7 +91,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)shader);
+    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y));
     res->node->addShadowVolumeSceneNode();
     
     if(showing.find(ipair(x,y))==showing.end())
@@ -151,12 +162,21 @@ bool terrain::chunkShowing(int x,int y){
     return it!=showing.end();
 }
 
+void terrain::loop(){
+    if(updateCamChunk()){
+        for(auto it:chunks){
+            if(it.second->node->isVisible())
+                it.second->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(it.first.x,it.first.y));
+        }
+    }
+}
+
 bool terrain::chunkCreated(int x, int y){
     auto it = chunks.find(ipair(x,y));
     return it!=chunks.end() && buildingChunkCreated(x,y);
 }
 
-bool terrain::selectByRay(const irr::core::line3d<irr::f32> &ray, irr::core::vector3df &outCollisionPoint, irr::core::triangle3df &outTriangle, irr::scene::ISceneNode *&outNode){
+bool terrain::selectByRay(const irr::core::line3d<irr::f32> &ray, vec3 &outCollisionPoint, irr::core::triangle3df &outTriangle, irr::scene::ISceneNode *&outNode){
     int cx = floor(ray.start.X/32);
     int cy = floor(ray.start.Z/32);//得到区块
     float ipx = ray.start.X-cx*32;

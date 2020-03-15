@@ -86,5 +86,8 @@ FORMS += \
     ui/login.ui
 
 DISTFILES += \
-    ../shader/terrain.ps.glsl \
-    ../shader/terrain.vs.glsl
+    ../shader/terrain.vs.glsl \
+    ../shader/terrain_lod1.ps.glsl \
+    ../shader/terrain_lod2.ps.glsl \
+    ../shader/terrain_lod3.ps.glsl \
+    ../shader/terrain_lod4.ps.glsl

@@ -40,8 +40,8 @@ void body::bodyItem::updateFromWorld(){
     //从world复制到scene
     btVector3 btPos;
     btVector3 btRot;
-    irr::core::vector3df irrPos;
-    irr::core::vector3df irrRot;
+    vec3 irrPos;
+    vec3 irrRot;
 
     btPos = transform.getOrigin();
     irrPos.set(btPos.x(), btPos.y(), btPos.z());
@@ -353,8 +353,8 @@ void body::msg_setVisualRange(int v){
 void body::setPositionByTransform(irr::scene::ISceneNode * node, const btTransform & transform){
     btVector3 btPos;
     btVector3 btRot;
-    irr::core::vector3df irrPos;
-    irr::core::vector3df irrRot;
+    vec3 irrPos;
+    vec3 irrRot;
 
     btPos = transform.getOrigin();
     irrPos.set(btPos.x(), btPos.y(), btPos.z());

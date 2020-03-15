@@ -5,7 +5,7 @@ namespace smoothly{
 void body::bodyItem::walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed){
 
     irr::core::vector2df delta(0,0);
-    irr::core::vector3df direct=lookAt;
+    vec3 direct=lookAt;
     irr::core::vector2df direct2d(direct.X , direct.Z);
     irr::core::vector2df p2d;
     direct2d.normalize();
