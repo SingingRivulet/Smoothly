@@ -19,17 +19,19 @@ namespace smoothly{
             virtual void msg_addRemovedItem(int x,int y,int,int);
             virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &);
             virtual void releaseChunk(int x,int y);
-            virtual void showChunk(int x,int y);
-            virtual void hideChunk(int x,int y);
         private:
             struct chunk;
             struct item{
-                irr::scene::IMeshSceneNode  * node;
+                irr::scene::IMeshSceneNode  * node[4];
                 mapId id;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
                 bodyInfo info;
                 chunk * parent;
+                inline item(){
+                    for(int i = 0;i<4;++i)
+                        node[i] = NULL;
+                }
             };
             struct chunk{
                 int x,y;
@@ -43,22 +45,12 @@ namespace smoothly{
             void removeTerrainItem(chunk * ,int index,int id);
             item * makeTerrainItem(int,int,float,float,float);
 
-            inline void setChunkVis(int x,int y,bool md){
-                auto it = chunks.find(ipair(x,y));
-                if(it!=chunks.end()){
-                    for(auto im:it->second->children){
-                        irr::scene::IMeshSceneNode  * n = im.second->node;
-                        if(n)
-                            n->setVisible(md);
-                    }
-                }
-            }
             virtual void updateLOD(int x,int y,int lv)override;
         private:
             struct conf{
                 bool                 haveBody;
                 shapeGroup           shape;
-                irr::scene::IMesh *  mesh;
+                irr::scene::IMesh *  mesh[4];
                 float                deltaHeight;
                 vec3 scale;
                 irr::s32             shader;

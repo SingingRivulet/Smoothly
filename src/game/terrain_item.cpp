@@ -51,14 +51,6 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
     }
 }
 
-void terrain_item::showChunk(int x,int y){
-    terrain::showChunk(x,y);
-    setChunkVis(x,y,true);
-}
-void terrain_item::hideChunk(int x,int y){
-    terrain::hideChunk(x,y);
-    setChunkVis(x,y,false);
-}
 void terrain_item::releaseChunk(int x,int y){
     terrain::releaseChunk(x,y);
     auto it = chunks.find(ipair(x,y));
@@ -115,27 +107,37 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     res->id.y=y;
     res->id.id.id=id;
     res->id.id.index=index;
-    
-    res->node=scene->addMeshSceneNode(
-        it->second->mesh,NULL,
-        -1,
-        vec3(x,getRealHight(x,y)+it->second->deltaHeight,y),
-        vec3(0,r,0),
-        it->second->scale
-    );
-    res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    res->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-    res->node->addShadowVolumeSceneNode();
-    
-    res->node->updateAbsolutePosition();//更新矩阵
 
-    if(it->second->useShader){
-        res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)it->second->shader);
+    int ml=3;
+    for(int i = 0;i<4;++i){
+        if(it->second->mesh[i]==NULL){
+            ml=i-1;
+            if(ml<0)
+                ml=0;
+            break;
+        }
+        res->node[i]=scene->addMeshSceneNode(
+                    it->second->mesh[i],NULL,
+                    -1,
+                    vec3(x,getRealHight(x,y)+it->second->deltaHeight,y),
+                    vec3(0,r,0),
+                    it->second->scale
+                    );
+        res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+        res->node[i]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        res->node[i]->addShadowVolumeSceneNode();
+
+        res->node[i]->updateAbsolutePosition();//更新矩阵
+
+        if(it->second->useShader){
+            res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)it->second->shader);
+        }
     }
-    
+    res->node[ml]->setVisible(true);//显示最低lod级别
+
     if(it->second->haveBody){
-        res->bodyState=setMotionState(res->node->getAbsoluteTransformation().pointer());//创建状态
+        res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());//创建状态
         res->rigidBody=createBody(it->second->shape.compound,res->bodyState);//创建物体
         res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);//设置碰撞模式
         
@@ -157,11 +159,27 @@ void terrain_item::updateLOD(int x, int y, int lv){
     findChunk(x,y){
         if(lv==0){
             for(auto c:it->second->children){
-                c.second->node->setVisible(false);
+                item * im = c.second;
+                for(int i=0;i<4;++i){
+                    if(im->node[i])
+                        im->node[i]->setVisible(false);
+                }
             }
         }else{
             for(auto c:it->second->children){
-                c.second->node->setVisible(true);
+                item * im = c.second;
+                for(int i=0;i<4;++i){
+                    if(im->node[i])
+                        im->node[i]->setVisible(false);
+                }
+                for(int i=lv-1;i>=0;--i){
+                    //反向遍历lod列表
+                    if(im->node[i]){
+                        //找到可用的最大lod
+                        im->node[i]->setVisible(true);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -173,7 +191,11 @@ void terrain_item::releaseTerrainItem(item * p){
     }
     if(p->bodyState)
         delete p->bodyState;
-    p->node->remove();
+    for(int i = 0;i<4;++i){
+        if(p->node[i]){
+            p->node[i]->remove();
+        }
+    }
     delete p;
 }
 terrain_item::terrain_item(){
@@ -240,11 +262,14 @@ void terrain_item::loadJSON(cJSON * json){
         return;
     
     auto c          = new conf;
-    c->mesh         = mesh;
     c->haveBody     = false;
     c->deltaHeight  = 0;
     c->scale.set(1,1,1);
     c->useShader    = false;
+    for(int i = 0;i<4;++i)
+        c->mesh[i] = NULL;
+
+    c->mesh[0] = mesh;
     
     auto body = cJSON_GetObjectItem(json,"body");
     if(body && body->type==cJSON_String){

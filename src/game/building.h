@@ -56,6 +56,10 @@ class building:public engine{
             conf             * config;
             bodyInfo info;
             dbvt3d::AABB     * bb;
+            inline buildingBody(){
+                for(int i = 0;i<4;++i)
+                    node[i] = NULL;
+            }
         };
         std::map<ipair,buildingChunk*> buildingChunks;
         std::unordered_map<std::string,buildingBody*> bodies;
