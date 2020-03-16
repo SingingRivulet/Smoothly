@@ -1,6 +1,6 @@
 {
     "port":39065,
     "maxconnect":4096,
-    "visualfield":4,
+    "visualfield":8,
     "buildingThreads":4
 }

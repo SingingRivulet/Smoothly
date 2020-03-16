@@ -38,6 +38,7 @@ engine::engine(){
         );
     device->getCursorControl()->setVisible(false);
 
+    scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     auto light = scene->addLightSceneNode();
     light->setPosition(irr::core::vector3df(0,500,0));
 }
@@ -96,7 +97,8 @@ void engine::deltaTimeUpdate(){
         return;
     }
     float tt=((float)timer->getTime())/1000.0f;
-    deltaTime=tt-lastTime;
+    deltaTime = tt-lastTime;
+    lastTime  = tt;
 }
 
 }

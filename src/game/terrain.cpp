@@ -21,15 +21,19 @@ terrain::terrain(){
     temperatureMin=0;
     humidityMin=0;
 
+    printf("[terrain]load shaderv1\n");
     shaderv1 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/terrain_lod1.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    printf("[terrain]load shaderv2\n");
     shaderv2 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/terrain_lod2.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    printf("[terrain]load shaderv3\n");
     shaderv3 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/terrain_lod3.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    printf("[terrain]load shaderv4\n");
     shaderv4 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/terrain_lod4.ps.glsl", "main", irr::video::EPST_PS_1_1);

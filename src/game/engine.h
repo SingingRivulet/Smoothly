@@ -37,14 +37,14 @@ namespace smoothly{
             virtual void worldLoop();
             void deltaTimeUpdate();
             
-            inline int getDeltaTime(){
+            inline float getDeltaTime(){
                 return deltaTime;
             }
             
             virtual void onCollision(btPersistentManifold * contactManifold)=0;
             
         private:
-            int deltaTime,lastTime;
+            float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
     };
 }

@@ -331,7 +331,7 @@ bool body::addWearingNode(bodyItem * n, int wearing){
     n->wearing[wearing] = wn;
     return true;
 }
-body::body():gravity(0,-5,0){
+body::body():gravity(0,-10,0){
     mainControlBody = NULL;
     loadBodyConfig();
     loadWearingConfig();

@@ -54,7 +54,7 @@ class dispatherQueue{
             while(1){
                 auto end = std::chrono::system_clock::now();
                 
-                if((std::chrono::duration<double,std::milli>(end - start).count())>80)
+                if((std::chrono::duration<double,std::milli>(end - start).count())>30)
                     break;
                 
                 if(datas.empty())
