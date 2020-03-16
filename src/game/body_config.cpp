@@ -51,7 +51,7 @@ void body::loadBodyConfig(){
                                                 ptr->jumpInSky = (item->valueint!=0);
                                             }else
                                             if(strcmp(item->string,"walkVelocity")==0){
-                                                ptr->walkVelocity = (item->valueint!=0);
+                                                ptr->walkVelocity = item->valuedouble;
                                             }else
                                             if(strcmp(item->string,"deltaY")==0){
                                                 ptr->deltaY = item->valuedouble;

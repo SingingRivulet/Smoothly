@@ -53,6 +53,7 @@ namespace smoothly{
                     }
                 }
             }
+            virtual void updateLOD(int x,int y,int lv)override;
         private:
             struct conf{
                 bool                 haveBody;

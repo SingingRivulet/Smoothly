@@ -7,10 +7,11 @@ void body::loop(){
         bodyItem * b = it.second;
         auto p = b->node->getPosition();
         auto cp=camera->getPosition();
-        if(((p.X-cp.X)+(p.Z-cp.Z))>32*4){
-            b->node->setVisible(false);
-        }else{
+        int l = std::max(abs(p.X-cp.X),abs(p.Z-cp.Z));
+        if(l<getVisualRange()){
             b->node->setVisible(true);
+        }else{
+            b->node->setVisible(false);
         }
         if(b->uncreatedChunk){
             int cx = floor(b->lastPosition.X/32);

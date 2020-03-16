@@ -82,6 +82,30 @@ void building::msg_startChunk(int x, int y){
     buildingChunkStart(x,y);
 }
 
+void building::updateLOD(int x, int y, int lv){
+    auto it = buildingChunks.find(ipair(x,y));
+    if(it==buildingChunks.end())
+        return;
+    buildingChunk * c = it->second;
+    for(auto it2:c->bodies){
+        //更新lod
+        for(int i=0;i<4;++i){
+            if(it2->node[i])//重置lod
+                it2->node[i]->setVisible(false);
+        }
+        if(lv==0)
+            continue;
+        for(int i=lv-1;i>=0;--i){
+            //反向遍历lod列表
+            if(it2->node[i]){
+                //找到可用的最大lod
+                it2->node[i]->setVisible(true);
+                break;
+            }
+        }
+    }
+}
+
 void building::buildingAdd(const vec3 &p, const vec3 &r, int id, const std::string &uuid){
     auto it = bodies.find(uuid);
     if(it!=bodies.end())//已经存在
@@ -106,7 +130,11 @@ void building::releaseBuilding(building::buildingBody * p){
     }
     if(p->bodyState)
         delete p->bodyState;
-    p->node->remove();
+    for(int i = 0;i<4;++i){
+        if(p->node[i]){
+            p->node[i]->remove();
+        }
+    }
     if(p->bb){
         p->bb->autodrop();
     }
@@ -122,25 +150,37 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
 
     res->config = c;
 
-    //创建节点
-    res->node = scene->addAnimatedMeshSceneNode(c->mesh,0,-1,p,r);
-    res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    res->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-    res->node->addShadowVolumeSceneNode();
-    if(c->haveShader){
-        res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
+    int ml=3;
+    for(int i = 0;i<4;++i){
+        if(c->mesh[i]==NULL){
+            ml=i-1;
+            if(ml<0)
+                ml=0;
+            break;
+        }
+        //创建节点
+        res->node[i] = scene->addAnimatedMeshSceneNode(c->mesh[i],0,-1,p,r);
+        res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+        res->node[i]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        res->node[i]->addShadowVolumeSceneNode();
+        if(c->haveShader){
+            res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
+        }
+        res->node[i]->setVisible(false);
+        res->node[i]->updateAbsolutePosition();//更新矩阵
     }
-    res->node->updateAbsolutePosition();//更新矩阵
+    res->node[ml]->setVisible(true);//显示最低lod级别
 
     res->uuid = uuid;
 
     res->info.ptr = res;
     res->info.type = BODY_BUILDING;
 
+    //0级lod一定存在的
     //创建物体
     if(c->haveBody){
-        res->bodyState=setMotionState(res->node->getAbsoluteTransformation().pointer());//创建状态
+        res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());//创建状态
         res->rigidBody=createBody(c->bodyShape.compound,res->bodyState);//创建物体
         res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);//设置碰撞模式
         res->rigidBody->setUserPointer(&(res->info));
@@ -152,7 +192,7 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
 
     if(c->canBuildOn){
         irr::core::aabbox3d<irr::f32> box=c->fetchBB;
-        res->node->getAbsoluteTransformation().transformBoxEx(box);
+        res->node[0]->getAbsoluteTransformation().transformBoxEx(box);
         res->bb = dbvt.add(box.MinEdge , box.MaxEdge , res);
     }else{
         res->bb = NULL;
@@ -202,7 +242,7 @@ void building::loadConfig(){
                                     auto ptr  = new conf;
                                     ptr->id   = id;
                                     config[id]= ptr;
-                                    ptr->mesh = mesh;
+                                    ptr->mesh[0] = mesh;
                                     auto item = c->child;
 
                                     while (item) {
@@ -357,7 +397,7 @@ void building::buildingStart(){
     buildingPrevConf    = cit->second;
     buildingAllowBuild  = false;
     buildingTarget      = NULL;
-    buildingPrev = scene->addAnimatedMeshSceneNode(buildingPrevConf->mesh);
+    buildingPrev = scene->addAnimatedMeshSceneNode(buildingPrevConf->mesh[0]);
     buildingPrev->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     buildingPrev->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     buildingPrev->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
@@ -397,7 +437,7 @@ void building::buildingUpdate(){
                     //自动吸附
                     irr::core::vector2df p1,p2,p3,p4;
 
-                    vec3 rt(0,tb->node->getRotation().Y,0);
+                    vec3 rt(0,tb->node[0]->getRotation().Y,0);
                     vec3 dir=rt.rotationToDirection();
 
                     p1.set(dir.X,dir.Z);
@@ -416,7 +456,7 @@ void building::buildingUpdate(){
                     vec3 rp[4];
 
                     auto dhei = buildingPrevConf->autoAttach.deltaHei;
-                    vec3 trg = tb->node->getPosition();
+                    vec3 trg = tb->node[0]->getPosition();
                     rp[0].set(p1.X+trg.X , trg.Y+dhei , p1.Y+trg.Z);//计算出四个吸附点位置
                     rp[1].set(p2.X+trg.X , trg.Y+dhei , p2.Y+trg.Z);
                     rp[2].set(p3.X+trg.X , trg.Y+dhei , p3.Y+trg.Z);
@@ -457,7 +497,7 @@ void building::buildingUpdate(){
                             lua_rawseti(L, -2, 1);
 
                             lua_newtable(L);//目标物体位置
-                            auto trg = tb->node->getPosition();
+                            auto trg = tb->node[0]->getPosition();
                             lua_pushnumber(L,trg.X);
                             lua_rawseti(L, -2, 1);
                             lua_pushnumber(L,trg.Y);
@@ -468,7 +508,7 @@ void building::buildingUpdate(){
                             lua_rawseti(L, -2, 2);
 
                             lua_newtable(L);//目标物体旋转
-                            auto trgRot = tb->node->getRotation();
+                            auto trgRot = tb->node[0]->getRotation();
                             lua_pushnumber(L,trgRot.X);
                             lua_rawseti(L, -2, 1);
                             lua_pushnumber(L,trgRot.Y);

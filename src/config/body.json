@@ -3,6 +3,9 @@
         "id":10,
         "description":"banana bread里面扒出来的模型",
         "hp":100,
-        "mesh":"../../res/model/player/snoutx10k/snoutx10k.b3d"
+        "mesh":"../../res/model/player/snoutx10k/snoutx10k.b3d",
+        "walkVelocity":0.009,
+        "jumpInSky":1,
+        "walkInSky":1
     }
 ]

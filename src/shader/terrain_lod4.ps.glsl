@@ -131,7 +131,7 @@ float turbulence (in vec2 st) {
     return value;
 }
 void main(){
-    float noise                 = 2.0+0.5;
+    float noise                 = 0.5;
     //float texture_delta_fissure = turbulence(pointPosition.xz*0.1);
     vec3  texture_grass         = vec3(0.1,0.9,0.1)*noise;
     vec3  texture_sand          = vec3(0.9,0.7,0.4)*noise;
@@ -150,8 +150,7 @@ void main(){
     vec4 diffuse;
     float NdotL;
 
-    vec3 rnormal = normal;
-    rnormal=normalize(rnormal);
+    vec3 rnormal=normalize(normal);
 
     NdotL = max(dot(rnormal, lightDir), 0.0);
     diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;

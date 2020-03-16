@@ -10,8 +10,6 @@ namespace smoothly{
             inline void setCharacterChunk(const std::string & name , int x,int y){
                 ++setCharNum;
                 b.setPosition(name,x,y);
-                if(name==mainControl)
-                    v.setPosition(x,y);
             }
             inline void removeCharacterChunk(const std::string & name){
                 b.removePosition(name);
@@ -22,13 +20,14 @@ namespace smoothly{
                     b.setPositionEnd();
                 }
                 b.process();
-                v.process();
             }
             bool chunkLoaded(int x,int y)override;
 
             std::string mainControl;
 
             void setVisualRange(int v);
+            int visualRange;
+            int getVisualRange()override;
         private:
             int setCharNum;
             struct bDs:public world::terrain::bodyDispather{
@@ -36,11 +35,6 @@ namespace smoothly{
                 virtual void createChunk(int x , int y);
                 virtual void removeChunk(int x , int y);
             }b;
-            struct vDs:public world::terrain::viewDispather{
-                terrainDispather * parent;
-                virtual void createChunk(int x , int y);
-                virtual void removeChunk(int x , int y);
-            }v;
     };
 }
 #endif

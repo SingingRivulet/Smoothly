@@ -33,6 +33,8 @@ class building:public engine{
         void msg_removeBuilding(const char * uuid)override;
         void msg_startChunk(int x, int y)override;
 
+        virtual void updateLOD(int x,int y,int lv);
+
     private:
         lua_State * L;
         struct buildingBody;
@@ -48,7 +50,7 @@ class building:public engine{
         struct buildingBody{
             std::string uuid;
             buildingChunk * inchunk;
-            irr::scene::IAnimatedMeshSceneNode * node;
+            irr::scene::IAnimatedMeshSceneNode * node[4];
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
             conf             * config;
@@ -71,7 +73,7 @@ class building:public engine{
             irr::s32                shader;
             bool                    haveShader;
 
-            irr::scene::IAnimatedMesh *   mesh;
+            irr::scene::IAnimatedMesh *   mesh[4];
 
             shapeGroup              bodyShape;
             bool                    haveBody;
@@ -91,7 +93,8 @@ class building:public engine{
             conf(){
                 haveBody             = false;
                 haveShader           = false;
-                mesh = NULL;
+                for(int i = 0;i<4;++i)
+                    mesh[i] = NULL;
                 useAutoAttach        = false;
                 canBuildOn           = false;
                 useAttachHandler     = false;

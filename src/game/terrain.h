@@ -22,6 +22,9 @@ namespace smoothly{
                     vec3& outCollisionPoint,
                     irr::core::triangle3df& outTriangle,
                     irr::scene::ISceneNode*& outNode);
+            int cm_cx,cm_cy;
+            int getLodLevel(int x,int y);
+            virtual int getVisualRange()=0;
         private:
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(
@@ -54,8 +57,6 @@ namespace smoothly{
             std::map<ipair,chunk*> chunks;
             chunk * genChunk(int x,int y);
             void freeChunk(chunk * );
-            
-            std::set<ipair> showing;
 
             irr::s32 shaderv1;
             irr::s32 shaderv2;
@@ -82,21 +83,25 @@ namespace smoothly{
                                                     );
                 }
             }
-            inline irr::s32 getShader(int x,int y){
-                int len = abs(x-cm_cx) + abs(y-cm_cy);
-                if(len<3)
+            inline irr::s32 getShader(int x,int y,int & lv){
+                int len = std::max(abs(x-cm_cx) , abs(y-cm_cy));
+                if(len<2){
+                    lv = 1;
                     return shaderv1;
-                else
-                if(len<6)
+                }else
+                if(len<4){
+                    lv = 2;
                     return shaderv2;
-                else
-                if(len<12)
+                }else
+                if(len<8){
+                    lv = 3;
                     return shaderv3;
-                else
+                }else{
+                    lv = 4;
                     return shaderv4;
+                }
             }
             bool first;
-            int cm_cx,cm_cy;
             inline bool updateCamChunk(){
                 if(camera==NULL)
                     return false;
@@ -112,6 +117,7 @@ namespace smoothly{
                 first = false;
                 return res;
             }
+            int lastUCT;
     };
 }
 #endif

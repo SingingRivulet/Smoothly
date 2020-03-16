@@ -35,6 +35,7 @@ terrain::terrain(){
                 "../shader/terrain_lod4.ps.glsl", "main", irr::video::EPST_PS_1_1);
 
     first = true;
+    lastUCT = 0;
 }
 terrain::~terrain(){
     for(auto it:chunks)
@@ -91,11 +92,16 @@ terrain::chunk * terrain::genChunk(int x,int y){
     
     res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y));
+    int lv;
+    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y,lv));
     res->node->addShadowVolumeSceneNode();
     
-    if(showing.find(ipair(x,y))==showing.end())
+    int l = std::max(abs(x-cm_cx),abs(y-cm_cy));
+    if(l<=getVisualRange()){
+        res->node->setVisible(true);
+    }else{
         res->node->setVisible(false);
+    }
     
     res->node->updateAbsolutePosition();
     res->bodyState =setMotionState(res->node->getAbsoluteTransformation().pointer());
@@ -143,13 +149,11 @@ void terrain::showChunk(int x,int y){
     findChunk(x,y){
         it->second->show();
     }
-    showing.insert(ipair(x,y));
 }
 void terrain::hideChunk(int x,int y){
     findChunk(x,y){
         it->second->hide();
     }
-    showing.erase(ipair(x,y));
 }
 void terrain::releaseChunk(int x,int y){
     findChunk(x,y){
@@ -158,15 +162,30 @@ void terrain::releaseChunk(int x,int y){
     }
 }
 bool terrain::chunkShowing(int x,int y){
-    auto it = showing.find(ipair(x,y));
-    return it!=showing.end();
+    auto it = chunks.find(ipair(x,y));
+    if(it!=chunks.end()){
+        return it->second->node->isVisible();
+    }else
+        return false;
 }
 
 void terrain::loop(){
-    if(updateCamChunk()){
+    //每2秒强制进行一次lod更新
+    int tm = time(0);
+    if(updateCamChunk() || abs(lastUCT-tm)>2){
+        lastUCT = tm;
         for(auto it:chunks){
-            if(it.second->node->isVisible())
-                it.second->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(it.first.x,it.first.y));
+            ipair ch = it.first;
+            int l = std::max(abs(ch.x-cm_cx),abs(ch.y-cm_cy));
+            if(l<=getVisualRange()){
+                int lv;
+                it.second->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(ch.x,ch.y,lv));
+                updateLOD(ch.x,ch.y,lv);
+                it.second->node->setVisible(true);
+            }else{
+                updateLOD(ch.x,ch.y,0);
+                it.second->node->setVisible(false);
+            }
         }
     }
 }
@@ -235,6 +254,23 @@ bool terrain::selectByRay(const irr::core::line3d<irr::f32> &ray, vec3 &outColli
             else
                 return false;
         }
+    }
+}
+
+int terrain::getLodLevel(int x, int y){
+    int len = std::max(abs(x-cm_cx) , abs(y-cm_cy));
+    if(len>getVisualRange())
+        return 0;
+    if(len<2){
+        return 1;
+    }else
+    if(len<4){
+        return 2;
+    }else
+    if(len<8){
+        return 3;
+    }else{
+        return 4;
     }
 }
 

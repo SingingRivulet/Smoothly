@@ -19,7 +19,6 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
         ptr->y = y;
         chunks[ipair(x,y)]=ptr;
     }
-    
     std::list<genProb> pl;//物体->概率
     world::terrain::predictableRand randg;
     
@@ -151,6 +150,21 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     }
     
     return res;
+}
+
+void terrain_item::updateLOD(int x, int y, int lv){
+    terrain::updateLOD(x,y,lv);
+    findChunk(x,y){
+        if(lv==0){
+            for(auto c:it->second->children){
+                c.second->node->setVisible(false);
+            }
+        }else{
+            for(auto c:it->second->children){
+                c.second->node->setVisible(true);
+            }
+        }
+    }
 }
 void terrain_item::releaseTerrainItem(item * p){
     if(p->rigidBody){
