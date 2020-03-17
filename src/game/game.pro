@@ -50,7 +50,8 @@ HEADERS += \
     ui/login.h \
     dbvtdispather.h \
     building.h \
-    ../utils/dbvt3d.h
+    ../utils/dbvt3d.h \
+    RealisticWater.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -80,7 +81,8 @@ SOURCES += \
     main.cpp \
     dbvtdispather.cpp \
     building.cpp \
-    ../utils/dbvt3d.cpp
+    ../utils/dbvt3d.cpp \
+    RealisticWater.cpp
 
 FORMS += \
     ui/login.ui
@@ -90,4 +92,6 @@ DISTFILES += \
     ../shader/terrain_lod1.ps.glsl \
     ../shader/terrain_lod2.ps.glsl \
     ../shader/terrain_lod3.ps.glsl \
-    ../shader/terrain_lod4.ps.glsl
+    ../shader/terrain_lod4.ps.glsl \
+    ../shader/Water.vs.glsl \
+    ../shader/Water.ps.glsl

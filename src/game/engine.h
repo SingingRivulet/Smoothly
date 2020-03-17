@@ -2,6 +2,7 @@
 #define SMOOTHLY_ENGINE
 #include "physical.h"
 #include "../libclient/terrainGen.h"
+#include "RealisticWater.h"
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
         auto cosa=cos(a);
@@ -43,9 +44,13 @@ namespace smoothly{
             
             virtual void onCollision(btPersistentManifold * contactManifold)=0;
             
+            float waterLevel;
+
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
+            RealisticWaterSceneNode * water;
+            int lastFPS;
     };
 }
 #endif

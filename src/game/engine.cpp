@@ -4,6 +4,8 @@ engine::engine(){
     deltaTimeUpdateFirst = true;
     deltaTime=0;
     lastTime=0;
+    waterLevel=32;
+    lastFPS=0;
     device = irr::createDevice(
         irr::video::EDT_OPENGL,
         irr::core::dimension2d<irr::u32>(1024,768)
@@ -41,6 +43,9 @@ engine::engine(){
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     auto light = scene->addLightSceneNode();
     light->setPosition(irr::core::vector3df(0,500,0));
+
+    water = new RealisticWaterSceneNode(scene, 1024, 1024, "../../");
+    scene->getRootSceneNode()->addChild(water);
 }
 engine::~engine(){
     device->drop();
@@ -53,10 +58,21 @@ engine::~engine(){
 void engine::sceneLoop(){
     if(!driver)
         return;
+    auto cm  = camera->getPosition();
+    water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     scene->drawAll();
     gui->drawAll();
     driver->endScene();
+    int fps = driver->getFPS();
+    if (lastFPS != fps){
+        irr::core::stringw str = L"Smoothly [";
+        str += driver->getName();
+        str += "] FPS:";
+        str += fps;
+        device->setWindowCaption(str.c_str());
+        lastFPS = fps;
+    }
 }
 void engine::worldLoop(){
     if(dynamicsWorld && deltaTime!=0.0f){
