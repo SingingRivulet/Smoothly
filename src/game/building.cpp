@@ -243,6 +243,29 @@ void building::loadConfig(){
                                     ptr->id   = id;
                                     config[id]= ptr;
                                     ptr->mesh[0] = mesh;
+
+                                    auto meshv2_j = cJSON_GetObjectItem(c,"meshv2");
+                                    if(meshv2_j && meshv2_j->type==cJSON_String){
+                                        auto meshv2 = scene->getMesh(meshv2_j->valuestring);
+                                        if(meshv2){
+                                            ptr->mesh[1] = meshv2;
+                                            auto meshv3_j = cJSON_GetObjectItem(c,"meshv3");
+                                            if(meshv3_j && meshv3_j->type==cJSON_String){
+                                                auto meshv3 = scene->getMesh(meshv3_j->valuestring);
+                                                if(meshv3){
+                                                    ptr->mesh[2] = meshv3;
+                                                    auto meshv4_j = cJSON_GetObjectItem(c,"meshv4");
+                                                    if(meshv4_j && meshv4_j->type==cJSON_String){
+                                                        auto meshv4 = scene->getMesh(meshv4_j->valuestring);
+                                                        if(meshv4){
+                                                            ptr->mesh[3] = meshv4;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     auto item = c->child;
 
                                     while (item) {

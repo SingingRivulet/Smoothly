@@ -3,6 +3,7 @@ varying float temp;//温度
 varying float humi;//湿度
 
 varying vec3 normal;
+varying vec3 onormal;
 varying vec3 lightDir;
 
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
@@ -83,6 +84,7 @@ void main(){
     humi          = cnoise(vec3(pointPosition.x*0.01,pointPosition.y*0.02,pointPosition.z*0.01))*10.0;
     temp          = (256.0-pointPosition.y)/256.0;
 
-    normal = normalize(gl_NormalMatrix * gl_Normal);
+    normal  = normalize(gl_NormalMatrix * gl_Normal);
+    onormal = normalize(gl_Normal);
     lightDir = normalize(vec3(gl_LightSource[0].position));
 }

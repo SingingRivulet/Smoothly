@@ -96,7 +96,9 @@ class terrain{
             return generator.get(x/altitudeArg , y/altitudeArg , 1024)*altitudeK;
         }
         inline float getHillHight(float x , float y){//山高
-            return generator.get(x/hillArg , y/hillArg , 2048)*hillK +
+            return generator.get(x/(hillArg*4) , y/(hillArg*4) , 512)*(hillK*4) +
+                   generator.get(x/(hillArg*2) , y/(hillArg*2) , 1024)*(hillK*2) +
+                   generator.get(x/hillArg , y/hillArg , 2048)*hillK +
                    generator.get(x/(hillArg/2) , y/(hillArg/2) , 4096)*(hillK/2)+
                    generator.get(x/(hillArg/4) , y/(hillArg/4) , 8192)*(hillK/4);
         }

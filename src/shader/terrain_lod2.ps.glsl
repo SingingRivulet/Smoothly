@@ -3,6 +3,7 @@ varying float temp;//温度
 varying float humi;//湿度
 
 varying vec3 normal;
+varying vec3 onormal;
 varying vec3 lightDir;
 
 
@@ -137,10 +138,11 @@ void main(){
     //float texture_delta_fissure = turbulence(pointPosition.xz*0.1);
     vec3  texture_grass         = vec3(0.1,0.9,0.1)*noise;
     vec3  texture_sand          = vec3(0.9,0.7,0.4)*noise;
-    vec3  texture_snow          = vec3(0.9,0.9,0.9)*noise;
+    vec3  texture_snow          = vec3(1.2,1.2,1.2)*noise;
     vec4  diffuseColor;
-    if(temp>0.5){
-        if(humi>0.5){
+    float theta                 = snoise(pointPosition);
+    if(temp>theta*2.0+0.5){
+        if(onormal.y>theta*2.0+0.9){
             diffuseColor = vec4(texture_grass,1.0);
         }else{
             diffuseColor = vec4(texture_sand,1.0);

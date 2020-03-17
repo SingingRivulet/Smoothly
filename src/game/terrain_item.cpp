@@ -270,6 +270,28 @@ void terrain_item::loadJSON(cJSON * json){
         c->mesh[i] = NULL;
 
     c->mesh[0] = mesh;
+
+    auto meshv2_j = cJSON_GetObjectItem(json,"meshv2");
+    if(meshv2_j && meshv2_j->type==cJSON_String){
+        auto meshv2 = scene->getMesh(meshv2_j->valuestring);
+        if(meshv2){
+            c->mesh[1] = meshv2;
+            auto meshv3_j = cJSON_GetObjectItem(json,"meshv3");
+            if(meshv3_j && meshv3_j->type==cJSON_String){
+                auto meshv3 = scene->getMesh(meshv3_j->valuestring);
+                if(meshv3){
+                    c->mesh[2] = meshv3;
+                    auto meshv4_j = cJSON_GetObjectItem(json,"meshv4");
+                    if(meshv4_j && meshv4_j->type==cJSON_String){
+                        auto meshv4 = scene->getMesh(meshv4_j->valuestring);
+                        if(meshv4){
+                            c->mesh[3] = meshv4;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     auto body = cJSON_GetObjectItem(json,"body");
     if(body && body->type==cJSON_String){
