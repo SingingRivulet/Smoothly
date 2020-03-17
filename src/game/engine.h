@@ -46,11 +46,14 @@ namespace smoothly{
             
             float waterLevel;
 
+            float width,height;
+
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
             RealisticWaterSceneNode * water;
             int lastFPS;
+            irr::s32 waterShader;
     };
 }
 #endif

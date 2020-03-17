@@ -1,14 +1,16 @@
 #include "engine.h"
 namespace smoothly{
 engine::engine(){
-    deltaTimeUpdateFirst = true;
-    deltaTime=0;
-    lastTime=0;
-    waterLevel=32;
-    lastFPS=0;
+    deltaTimeUpdateFirst    = true;
+    deltaTime               = 0;
+    lastTime                = 0;
+    waterLevel              = 32;
+    lastFPS                 = 0;
+    width                   = 1024;
+    height                  = 768;
     device = irr::createDevice(
         irr::video::EDT_OPENGL,
-        irr::core::dimension2d<irr::u32>(1024,768)
+        irr::core::dimension2d<irr::u32>(width,height)
     );
     driver = device->getVideoDriver();
     scene  = device->getSceneManager();
@@ -43,9 +45,41 @@ engine::engine(){
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     auto light = scene->addLightSceneNode();
     light->setPosition(irr::core::vector3df(0,500,0));
-
-    water = new RealisticWaterSceneNode(scene, 1024, 1024, "../../");
+/*
+    driver->setFog(video::SColor(255, 255, 255, 255 ),    //雾颜色（忽略Alpha位）
+                   video::EFT_FOG_LINEAR,                 //雾的类型
+                   128.0f,                                //雾起始距离
+                   1000.0f,                               //雾结束距离
+                   0.1f,                                  //雾的浓度
+                   true,                                  //true代表像素（片断）雾，false代表顶点雾
+                   true);
+*/
+    water = new RealisticWaterSceneNode(scene, 2048, 2048, "../../");
+    water->setMaterialFlag(irr::video::EMF_FOG_ENABLE, true );
     scene->getRootSceneNode()->addChild(water);
+    auto g = scene->getGeometryCreator();
+    auto m = g->createPlaneMesh(irr::core::dimension2df(2048,2048));
+    waterShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/deepwater.vs.glsl","main", irr::video::EVST_VS_1_1,
+                "../shader/deepwater.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-1024,1024),irr::core::vector3df(-90,0,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+
+    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(1024,-1024,0),irr::core::vector3df(-90,90,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+
+    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(-1024,-1024,0),irr::core::vector3df(-90,-90,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+
+    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    irr::video::ITexture* pTexture = driver->getTexture("../../res/waterTop.png");
+    f->setMaterialTexture(0, pTexture);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    m->drop();
 }
 engine::~engine(){
     device->drop();
@@ -60,9 +94,15 @@ void engine::sceneLoop(){
         return;
     auto cm  = camera->getPosition();
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
+    water->setRotation(irr::core::vector3df(0,camera->getRotation().Y,0));
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     scene->drawAll();
     gui->drawAll();
+
+    if(cm.Y<waterLevel){//水下效果
+        driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
+    }
+
     driver->endScene();
     int fps = driver->getFPS();
     if (lastFPS != fps){
