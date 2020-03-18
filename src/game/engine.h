@@ -53,7 +53,6 @@ namespace smoothly{
             bool deltaTimeUpdateFirst;
             RealisticWaterSceneNode * water;
             int lastFPS;
-            irr::s32 waterShader;
     };
 }
 #endif

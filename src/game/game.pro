@@ -95,5 +95,5 @@ DISTFILES += \
     ../shader/terrain_lod4.ps.glsl \
     ../shader/Water.vs.glsl \
     ../shader/Water.ps.glsl \
-    ../shader/deepwater.ps.glsl \
-    ../shader/deepwater.vs.glsl
+    ../shader/cloud.ps.glsl \
+    ../shader/cloud.vs.glsl

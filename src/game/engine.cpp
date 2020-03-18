@@ -32,7 +32,10 @@ engine::engine(){
     overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->dynamicsWorld->setGravity(btVector3(0, -10, 0));
     camera=scene->addCameraSceneNodeFPS();
-    scene->addSkyBoxSceneNode(
+    auto cloud = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
+                "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    auto sky = scene->addSkyBoxSceneNode(
             driver->getTexture("../../res/skybox/top.jpg"),
             driver->getTexture("../../res/skybox/bottom.jpg"),
             driver->getTexture("../../res/skybox/left.jpg"),
@@ -40,6 +43,7 @@ engine::engine(){
             driver->getTexture("../../res/skybox/front.jpg"),
             driver->getTexture("../../res/skybox/back.jpg")
         );
+    sky->setMaterialType((irr::video::E_MATERIAL_TYPE)cloud);
     device->getCursorControl()->setVisible(false);
 
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
@@ -59,20 +63,21 @@ engine::engine(){
     scene->getRootSceneNode()->addChild(water);
     auto g = scene->getGeometryCreator();
     auto m = g->createPlaneMesh(irr::core::dimension2df(2048,2048));
-    waterShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
-                "../shader/deepwater.vs.glsl","main", irr::video::EVST_VS_1_1,
-                "../shader/deepwater.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    auto dw = driver->getTexture("../../res/deepwater.png");
     auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-1024,1024),irr::core::vector3df(-90,0,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+    f->setMaterialTexture(0, dw);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(1024,-1024,0),irr::core::vector3df(-90,90,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+    f->setMaterialTexture(0, dw);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(-1024,-1024,0),irr::core::vector3df(-90,-90,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-    f->setMaterialType((irr::video::E_MATERIAL_TYPE)waterShader);
+    f->setMaterialTexture(0, dw);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
