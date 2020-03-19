@@ -95,13 +95,20 @@ float noise(vec3 p){
 }
 float fbm(vec3 x) {
         float v = 0.0;
-        float a = 0.5;
-        vec3 shift = vec3(100);
-        for (int i = 0; i < 4; ++i) {
-                v += a * noise(x);
-                x = x * 2.0 + shift;
-                a *= 0.5;
-        }
+        //float a = 0.5;
+        //vec3 shift = vec3(100);
+        //for (int i = 0; i < 8; ++i) {
+        //        v += a * noise(x);
+        //        x = x * 2.0 + shift;
+        //        a *= 0.5;
+        //}
+        v+=noise(x*2.0)/2.0;
+        v+=noise(x*4.0)/4.0;
+        v+=noise(x*8.0)/8.0;
+        v+=noise(x*16.0)/16.0;
+        v+=noise(x*32.0)/32.0;
+        v+=noise(x*64.0)/64.0;
+        //v+=noise(x*128.0)/128.0;
         return v;
 }
 float cloudFilter(float x){
@@ -138,7 +145,7 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
     for(int i=0;i<step;++i){
         float c = haveCloud(nvec);
         if(c>0.5){
-            float f = exp((nvec.y-40000.0)/40000.0);
+            float f = exp((nvec.y-40000.0)/60000.0);
             vec3 col =  vec3(f,f,f);
             vec3 dt = res - col;
             res = res - dt/2.0;
@@ -149,5 +156,5 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
 }
 void main(){
     vec3 ncmdir = normalize(pointPosition-camera);
-    gl_FragColor = vec4(rayMarch(camera , ncmdir , 32 , 400.0).xyz*0.6,1.0);
+    gl_FragColor = vec4(rayMarch(camera , ncmdir , 128 , 300.0).xyz*0.5,1.0);
 }

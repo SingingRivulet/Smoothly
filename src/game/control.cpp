@@ -141,6 +141,9 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     }
                     */
                 break;
+                case irr::KEY_ESCAPE:
+                    parent->running = false;
+                break;
                 default:
                 break;
             }

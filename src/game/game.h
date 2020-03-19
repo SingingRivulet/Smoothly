@@ -10,7 +10,7 @@ class game:public control{
         bool gameLoop();
         inline bool ok(){
             //printf("[debug]check status\n");
-            return (device->run() && driver && dynamicsWorld);
+            return (device->run() && driver && dynamicsWorld && running);
         }
 };
 

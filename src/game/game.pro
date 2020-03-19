@@ -96,4 +96,6 @@ DISTFILES += \
     ../shader/Water.vs.glsl \
     ../shader/Water.ps.glsl \
     ../shader/cloud.ps.glsl \
-    ../shader/cloud.vs.glsl
+    ../shader/cloud.vs.glsl \
+    ../shader/sky.ps.glsl \
+    ../shader/sky.vs.glsl

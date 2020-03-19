@@ -2,15 +2,25 @@
 namespace smoothly{
 engine::engine(){
     deltaTimeUpdateFirst    = true;
+    running                 = true;
     deltaTime               = 0;
     lastTime                = 0;
     waterLevel              = 32;
     lastFPS                 = 0;
     width                   = 1024;
     height                  = 768;
+    //初始化天空计时器
+#define initSkyTimer(v)\
+    for(int i=0;i<8;i++)\
+        v[i]=0;
+    initSkyTimer(lastRenderSkyTop);
+    initSkyTimer(lastRenderSkyFront);
+    initSkyTimer(lastRenderSkyBack);
+    initSkyTimer(lastRenderSkyLeft);
+    initSkyTimer(lastRenderSkyRight);
     device = irr::createDevice(
-        irr::video::EDT_OPENGL,
-        irr::core::dimension2d<irr::u32>(width,height)
+                irr::video::EDT_OPENGL,
+                irr::core::dimension2d<irr::u32>(width,height)
     );
     driver = device->getVideoDriver();
     scene  = device->getSceneManager();
@@ -32,18 +42,27 @@ engine::engine(){
     overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
     this->dynamicsWorld->setGravity(btVector3(0, -10, 0));
     camera=scene->addCameraSceneNodeFPS();
-    auto cloud = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+    cloudMaterial.MaterialType = (irr::video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
                 "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1);
-    auto sky = scene->addSkyBoxSceneNode(
-            driver->getTexture("../../res/skybox/top.jpg"),
-            driver->getTexture("../../res/skybox/bottom.jpg"),
-            driver->getTexture("../../res/skybox/left.jpg"),
-            driver->getTexture("../../res/skybox/right.jpg"),
-            driver->getTexture("../../res/skybox/front.jpg"),
-            driver->getTexture("../../res/skybox/back.jpg")
+
+    //创建天空的渲染目标
+    cloudTop   = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "cloudTop", video::ECF_A8R8G8B8);
+    cloudLeft  = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "cloudLeft", video::ECF_A8R8G8B8);
+    cloudRight = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "cloudRight", video::ECF_A8R8G8B8);
+    cloudFront = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "cloudFront", video::ECF_A8R8G8B8);
+    cloudBack  = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "cloudBack", video::ECF_A8R8G8B8);
+    auto sky   = scene->addSkyBoxSceneNode(
+            cloudTop,
+            NULL,
+            cloudLeft,
+            cloudRight,
+            cloudFront,
+            cloudBack
         );
-    sky->setMaterialType((irr::video::E_MATERIAL_TYPE)cloud);
+    sky->setMaterialType((irr::video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                             "../shader/sky.vs.glsl","main", irr::video::EVST_VS_1_1,
+                             "../shader/sky.ps.glsl", "main", irr::video::EPST_PS_1_1));
     device->getCursorControl()->setVisible(false);
 
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
@@ -100,6 +119,10 @@ void engine::sceneLoop(){
     auto cm  = camera->getPosition();
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
     water->setRotation(irr::core::vector3df(0,camera->getRotation().Y,0));
+
+    renderSky();
+
+    driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     scene->drawAll();
     gui->drawAll();
@@ -160,6 +183,97 @@ void engine::deltaTimeUpdate(){
     float tt=((float)timer->getTime())/1000.0f;
     deltaTime = tt-lastTime;
     lastTime  = tt;
+}
+
+void engine::renderSky(){
+    int tm = time(0);
+#define processFace(tmr,tex,col) \
+    if(abs(tm-tmr[0])>2){ \
+        driver->setRenderTarget(tex,false,false); \
+        driver->setMaterial(cloudMaterial); \
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,-1,1),\
+                                                      irr::core::vector3df(-1,0,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[0] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[1])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,1,1),\
+                                                      irr::core::vector3df(0,1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[1] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[2])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,1,1),\
+                                                      irr::core::vector3df(1,0,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[2] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[3])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,-1,1),\
+                                                      irr::core::vector3df(0,-1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[3] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[4])>2){ \
+        driver->setRenderTarget(tex,false,false); \
+        driver->setMaterial(cloudMaterial); \
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,0,1),\
+                                                      irr::core::vector3df(-1,1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[4] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[5])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,1,1),\
+                                                      irr::core::vector3df(1,1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[5] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[6])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,0,1),\
+                                                      irr::core::vector3df(1,-1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[6] = tm;\
+        return;\
+    }\
+    if(abs(tm-tmr[7])>2){\
+        driver->setRenderTarget(tex,false,false);\
+        driver->setMaterial(cloudMaterial);\
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,-1,1),\
+                                                      irr::core::vector3df(-1,-1,1),\
+                                                      irr::core::vector3df(0,0,1)),\
+                               col);\
+        tmr[7] = tm;\
+        return;\
+    }
+///////////////////////////////////////////////
+    processFace(lastRenderSkyTop,cloudTop,irr::video::SColor(0,0,255,0));
+    processFace(lastRenderSkyFront,cloudFront,irr::video::SColor(0,255,0,0));
+    processFace(lastRenderSkyBack,cloudBack,irr::video::SColor(0,255,0,255));
+    processFace(lastRenderSkyLeft,cloudLeft,irr::video::SColor(0,0,0,0));
+    processFace(lastRenderSkyRight,cloudRight,irr::video::SColor(0,0,0,255));
 }
 
 }

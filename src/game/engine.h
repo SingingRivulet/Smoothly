@@ -48,11 +48,25 @@ namespace smoothly{
 
             float width,height;
 
+            bool running;
+
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
             RealisticWaterSceneNode * water;
             int lastFPS;
+            irr::video::SMaterial cloudMaterial;
+            irr::video::ITexture * cloudTop;
+            irr::video::ITexture * cloudFront;
+            irr::video::ITexture * cloudBack;
+            irr::video::ITexture * cloudLeft;
+            irr::video::ITexture * cloudRight;
+            void renderSky();
+            int lastRenderSkyTop  [8];
+            int lastRenderSkyFront[8];
+            int lastRenderSkyBack [8];
+            int lastRenderSkyLeft [8];
+            int lastRenderSkyRight[8];
     };
 }
 #endif
