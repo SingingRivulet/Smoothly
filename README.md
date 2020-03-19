@@ -1,6 +1,7 @@
 # Smoothly  
 这是一个第一人称策略型沙盒游戏，使用qt开发，图形基于irrlicht，物理基于bullet，网络基于raknet，数据库基于leveldb。
 玩家以第一人称的视角，并带领多个ai角色，在无限大，随机生成的场景中活动，并允许与其他玩家战斗。  
+![img](img/2020-03-19-12-02-20.png)  
 ## 编译  
 在编译前，请先安装qt,irrlicht,bullet,raknet,leveldb，然后进入src目录，执行`qmake && make`即可  
 ## 使用  
