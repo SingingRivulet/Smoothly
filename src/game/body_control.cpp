@@ -92,10 +92,12 @@ void body::doCommond(const commond & c){
 
     case CMD_JUMP:
         {
-            auto v = c.data_vec;
-            v.normalize();
-            v*=p->config->jump;
-            p->m_character.jump(btVector3(v.X , v.Y , v.Z));
+            if(!p->uncreatedChunk){
+                auto v = c.data_vec;
+                v.normalize();
+                v*=p->config->jump;
+                p->m_character.jump(btVector3(v.X , v.Y , v.Z));
+            }
         }
         break;
 

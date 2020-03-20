@@ -20,7 +20,7 @@ void body::loop(){
                 b->m_character.setGravity(gravity);
                 b->uncreatedChunk = false;
             }else{
-                //b->m_character.setPosition(b->lastPosition);
+                b->m_character.setPosition(b->lastPosition);
                 b->updateFromWorld();
                 continue;
             }

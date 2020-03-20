@@ -88,12 +88,11 @@ class connectionBase{
             if(!connection)
                 return;
     
-            auto start = std::chrono::system_clock::now();
-    
+            clock_t starts,ends;
+            starts=clock();
             while(1){
-                auto end = std::chrono::system_clock::now();
-                
-                if((std::chrono::duration<double,std::milli>(end - start).count())>80)
+                ends = clock();
+                if(ends-starts>80)
                     break;
                 
                 auto pk=connection->Receive();

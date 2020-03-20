@@ -183,6 +183,9 @@ void engine::deltaTimeUpdate(){
 }
 
 void engine::renderSky(){
+    clock_t starts,ends;
+    starts=clock();
+    begin:
     if(sky_pb->process()){
         sky_pb->box->setVisible(true);
         sky_p->box->setVisible(false);
@@ -193,6 +196,9 @@ void engine::renderSky(){
         cloudTime = time(0);//更新时间
         return;
     }
+    ends=clock();
+    if(ends-starts<30)
+        goto begin;
 }
 
 void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){

@@ -47,14 +47,18 @@ class ipair{
 class dispatherQueue{
     private:
         std::queue<std::pair<bool,ipair> > datas;
+        int startTime;
     public:
+        dispatherQueue(){
+            startTime = time(0);
+        }
         void process(){
-            auto start = std::chrono::system_clock::now();
-    
+            clock_t starts,ends;
+            starts=clock();
             while(1){
-                auto end = std::chrono::system_clock::now();
-                
-                if((std::chrono::duration<double,std::milli>(end - start).count())>15)
+                ends = clock();
+                int dst = time(0)-startTime;
+                if((dst>20 && ends-starts>15) || ends-starts>90)
                     break;
                 
                 if(datas.empty())
