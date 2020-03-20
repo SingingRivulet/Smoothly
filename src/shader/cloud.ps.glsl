@@ -121,7 +121,7 @@ const vec3 EarthCenter = vec3(0.0,-6378000.0,0.0);
 //uniform float Time;
 
 // Halton Sequences
-const vec4 HaltonSequence = vec4(0.0,0.0,0.0,0.0);
+const vec4 HaltonSequence = vec4(0.0,1.0,0.0,0.0);
 //uniform vec4 HaltonSequence2;
 //uniform vec4 HaltonSequence3;
 //uniform vec4 HaltonSequence4;
@@ -147,23 +147,23 @@ const float SunIntensity = 0.35;
 
 // 3D Texture - Return the RGBA sample point Perlin - Worley nose
 vec4 SampleLowFrequencyTexture(vec3 point){
-    float r = fbm(point);
-    return vec4(r,r,r,r);
+    float r = fbm(point*0.0001);
+    return vec4(r,r*0.7,r*0.6,1.0);
 }
 // Sample High Frequency Texture 3D RGB
 vec3 SampleHighFrequencyTexture(vec3 point){
-    float r = fbm(point);
-    return vec3(r,r,r);
+    float r = fbm(point*0.0001);
+    return vec3(r,r*0.7,r*0.9);
 }
 // Sample Weather Texture 2D RGB
 vec3 SampleWeatherTexture(vec2 point){
-    float r = fbm(vec3(point.xy,0.0));
-    return vec3(r,r,r);
+    //float r = fbm(vec3(point.xy,0.0));
+    return vec3(1.0,1.0,1.0);
 }
 // Sample Curl noise texture 2D RGB
 vec3 SampleCurlNoiseTexture(vec2 point){
     float r = fbm(vec3(point.xy,0.0));
-    return vec3(r,r,r);
+    return vec3(r*0.6,r,r);
 }
 
 // ** Get ray direction definition
