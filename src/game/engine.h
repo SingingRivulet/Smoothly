@@ -68,7 +68,7 @@ namespace smoothly{
                 irr::video::ITexture * cloudLeft;
                 irr::video::ITexture * cloudRight;
                 irr::scene::ISceneNode * box;
-                void(*callback[40])(skyBox *);
+                void(*callback[80])(skyBox *);
                 int count;
                 bool first;
                 void init(const std::string &name, s32 cloud, s32 sky);

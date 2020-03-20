@@ -221,70 +221,134 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
 
     box->setMaterialType((irr::video::E_MATERIAL_TYPE)sky);
 #define processFace(id,tex,col) \
-    callback[id*8]=[](skyBox * self){\
+    callback[id*16]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true); \
         self->driver->setMaterial(self->cloudMaterial); \
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,-1,1),\
-                                                      irr::core::vector3df(-1,0,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,-1  ,1),\
+                                                            irr::core::vector3df(-1,-0.5,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+1]=[](skyBox * self){\
+    callback[id*16+1]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,1,1),\
-                                                      irr::core::vector3df(0,1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,-0.5,1),\
+                                                            irr::core::vector3df(-1,0   ,1),\
+                                                            irr::core::vector3df(0 ,0,1)),\
                                col);\
     };\
-    callback[id*8+2]=[](skyBox * self){\
+    callback[id*16+2]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,1,1),\
-                                                      irr::core::vector3df(1,0,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,0  ,1),\
+                                                            irr::core::vector3df(-1,0.5,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+3]=[](skyBox * self){\
+    callback[id*16+3]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,-1,1),\
-                                                      irr::core::vector3df(0,-1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,0.5,1),\
+                                                            irr::core::vector3df(-1,1  ,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+4]=[](skyBox * self){ \
+    callback[id*16+4]=[](skyBox * self){ \
         self->driver->setRenderTarget(tex,false,true); \
         self->driver->setMaterial(self->cloudMaterial); \
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,0,1),\
-                                                      irr::core::vector3df(-1,1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1  ,1  ,1),\
+                                                            irr::core::vector3df(-0.5,1  ,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+5]=[](skyBox * self){\
+    callback[id*16+5]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,1,1),\
-                                                      irr::core::vector3df(1,1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-0.5,1,1),\
+                                                            irr::core::vector3df(0   ,1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+6]=[](skyBox * self){\
+    callback[id*16+6]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,0,1),\
-                                                      irr::core::vector3df(1,-1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0  ,1,1),\
+                                                            irr::core::vector3df(0.5,1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
     };\
-    callback[id*8+7]=[](skyBox * self){\
+    callback[id*16+7]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
-        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,-1,1),\
-                                                      irr::core::vector3df(-1,-1,1),\
-                                                      irr::core::vector3df(0,0,1)),\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0.5,1,1),\
+                                                            irr::core::vector3df(1  ,1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
                                col);\
-    }
+    };\
+    callback[id*16+8]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true); \
+        self->driver->setMaterial(self->cloudMaterial); \
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,1  ,1),\
+                                                            irr::core::vector3df(1,0.5,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+9]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,0.5,1),\
+                                                            irr::core::vector3df(1,0  ,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+10]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,0   ,1),\
+                                                            irr::core::vector3df(1,-0.5,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+11]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,-0.5,1),\
+                                                            irr::core::vector3df(1,-1  ,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+12]=[](skyBox * self){ \
+        self->driver->setRenderTarget(tex,false,true); \
+        self->driver->setMaterial(self->cloudMaterial); \
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1  ,-1,1),\
+                                                            irr::core::vector3df(0.5,-1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+13]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0.5,-1,1),\
+                                                            irr::core::vector3df(0,  -1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+14]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0   ,-1,1),\
+                                                            irr::core::vector3df(-0.5,-1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };\
+    callback[id*16+15]=[](skyBox * self){\
+        self->driver->setRenderTarget(tex,false,true);\
+        self->driver->setMaterial(self->cloudMaterial);\
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-0.5,-1,1),\
+                                                            irr::core::vector3df(-1  ,-1,1),\
+                                                            irr::core::vector3df(0,0,1)),\
+                               col);\
+    };
     ///////////////////////////////////////////////
     processFace(0,self->cloudTop,irr::video::SColor(0,0,255,0));
     processFace(1,self->cloudFront,irr::video::SColor(0,255,0,0));
@@ -295,7 +359,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
 }
 
 bool engine::skyBox::process(){
-    if(count>=40){
+    if(count>=80){
         count = 0;
         return true;
     }else{
