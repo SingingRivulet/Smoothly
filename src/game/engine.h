@@ -55,18 +55,27 @@ namespace smoothly{
             bool deltaTimeUpdateFirst;
             RealisticWaterSceneNode * water;
             int lastFPS;
-            irr::video::SMaterial cloudMaterial;
-            irr::video::ITexture * cloudTop;
-            irr::video::ITexture * cloudFront;
-            irr::video::ITexture * cloudBack;
-            irr::video::ITexture * cloudLeft;
-            irr::video::ITexture * cloudRight;
             void renderSky();
-            int lastRenderSkyTop  [8];
-            int lastRenderSkyFront[8];
-            int lastRenderSkyBack [8];
-            int lastRenderSkyLeft [8];
-            int lastRenderSkyRight[8];
+            struct skyBox{
+                irr::IrrlichtDevice       * device;
+                irr::ITimer               * timer;
+                irr::video::IVideoDriver  * driver;
+                irr::scene::ISceneManager * scene;
+                irr::video::SMaterial cloudMaterial;
+                irr::video::ITexture * cloudTop;
+                irr::video::ITexture * cloudFront;
+                irr::video::ITexture * cloudBack;
+                irr::video::ITexture * cloudLeft;
+                irr::video::ITexture * cloudRight;
+                irr::scene::ISceneNode * box;
+                void(*callback[40])(skyBox *);
+                int count;
+                bool first;
+                void init(const std::string &name, s32 cloud, s32 sky);
+                bool process();
+            };
+            skyBox * sky_p , * sky_pb;
+            skyBox sky_1,sky_2;
     };
 }
 #endif
