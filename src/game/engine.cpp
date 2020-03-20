@@ -35,9 +35,12 @@ engine::engine(){
     camera=scene->addCameraSceneNodeFPS();
 
     //初始化天空
+    cloudShaderCallback.parent = this;
+    cloudTime = time(0);
     auto cloudShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                     "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
-                    "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                    "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &cloudShaderCallback);
     auto skyShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/sky.vs.glsl","main", irr::video::EVST_VS_1_1,
                 "../shader/sky.ps.glsl", "main", irr::video::EPST_PS_1_1);
@@ -187,6 +190,8 @@ void engine::renderSky(){
         auto tmp = sky_p;
         sky_p = sky_pb;
         sky_pb = tmp;
+        cloudTime = time(0);//更新时间
+        return;
     }
 }
 
@@ -211,7 +216,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
     box->setMaterialType((irr::video::E_MATERIAL_TYPE)sky);
 #define processFace(id,tex,col) \
     callback[id*8]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false); \
+        self->driver->setRenderTarget(tex,false,true); \
         self->driver->setMaterial(self->cloudMaterial); \
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,-1,1),\
                                                       irr::core::vector3df(-1,0,1),\
@@ -219,7 +224,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+1]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,1,1),\
                                                       irr::core::vector3df(0,1,1),\
@@ -227,7 +232,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+2]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,1,1),\
                                                       irr::core::vector3df(1,0,1),\
@@ -235,7 +240,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+3]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,-1,1),\
                                                       irr::core::vector3df(0,-1,1),\
@@ -243,7 +248,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+4]=[](skyBox * self){ \
-        self->driver->setRenderTarget(tex,false,false); \
+        self->driver->setRenderTarget(tex,false,true); \
         self->driver->setMaterial(self->cloudMaterial); \
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(-1,0,1),\
                                                       irr::core::vector3df(-1,1,1),\
@@ -251,7 +256,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+5]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,1,1),\
                                                       irr::core::vector3df(1,1,1),\
@@ -259,7 +264,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+6]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(1,0,1),\
                                                       irr::core::vector3df(1,-1,1),\
@@ -267,7 +272,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
                                col);\
     };\
     callback[id*8+7]=[](skyBox * self){\
-        self->driver->setRenderTarget(tex,false,false);\
+        self->driver->setRenderTarget(tex,false,true);\
         self->driver->setMaterial(self->cloudMaterial);\
         self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(0,-1,1),\
                                                       irr::core::vector3df(-1,-1,1),\
@@ -280,7 +285,7 @@ void engine::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 sky){
     processFace(2,self->cloudBack,irr::video::SColor(0,255,0,255));
     processFace(3,self->cloudLeft,irr::video::SColor(0,0,0,0));
     processFace(4,self->cloudRight,irr::video::SColor(0,0,0,255));
-    count = 0;
+    count = -1;
 }
 
 bool engine::skyBox::process(){
@@ -288,10 +293,19 @@ bool engine::skyBox::process(){
         count = 0;
         return true;
     }else{
+        if(count<0){
+            //避开第一帧，防止渲染不全
+            ++count;
+            return false;
+        }
         callback[count](this);
         ++count;
         return false;
     }
+}
+
+void engine::CloudShaderCallback::OnSetConstants(irr::video::IMaterialRendererServices *services, irr::s32){
+    services->setVertexShaderConstant("time",&parent->cloudTime,1);
 }
 
 }

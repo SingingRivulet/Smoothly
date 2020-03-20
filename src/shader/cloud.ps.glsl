@@ -1,6 +1,7 @@
 varying vec3 camera;
 varying vec3 pointPosition;//坐标
 varying vec4 screen;
+uniform int  time;
 
 float t = 100.0/60.0;
 
@@ -118,7 +119,7 @@ float haveCloud(vec3 p){
     //float cl = snoise2d(p.xz/100000.0)*2.0;
     //cl = snoise(p/100000.0)*cl*128.0;
 
-    float r = fbm(p.xyz/100000.0);
+    float r = fbm(vec3(p.x+float(time*100),p.y,p.z)/100000.0);
     r*=cloudFilter((p.y-24000.0)*0.000001);
     return r>0.5 ? 1.0:0.0;
 }

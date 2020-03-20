@@ -76,6 +76,12 @@ namespace smoothly{
             };
             skyBox * sky_p , * sky_pb;
             skyBox sky_1,sky_2;
+            class CloudShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
+                public:
+                    engine * parent;
+                    void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+            }cloudShaderCallback;
+            irr::s32 cloudTime;
     };
 }
 #endif
