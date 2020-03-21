@@ -2,15 +2,15 @@ varying vec3 camera;
 varying vec3 pointPosition;//坐标
 varying vec4 screen;
 uniform int  time;
-float raySphereIntersect(vec3 start, vec3 dir , float r){
-    vec3 oc = start;
-    float projoc = dot(dir, oc);
-    float oc2 = dot(oc, oc);
-    float distance2 = oc2 - projoc * projoc;   //计算出的球心到射线的距离
-    float discriminant = r*r - distance2;  //使用勾股定理，计算出另一条边的长度
-    discriminant = sqrt(discriminant);
-    return projoc + discriminant;
-}
+uniform float cloudThre;//云阈值
+uniform float cloudy;   //阴天
+uniform float lightness;//亮度
+uniform vec3  astronomical;//天体向量
+uniform vec3  astrLight;//天体亮度
+uniform float astrAtomScat;//大气层散射
+uniform float astrViewTheta;//天体在视野中夹角
+uniform vec3  astrColor;//天体颜色
+
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
@@ -45,13 +45,14 @@ float fbm(vec3 x) {
         //        x = x * 2.0 + shift;
         //        a *= 0.5;
         //}
-        v+=noise(x*2.0)/2.0;
-        v+=noise(x*4.0)/4.0;
-        v+=noise(x*8.0)/8.0;
-        v+=noise(x*16.0)/16.0;
-        v+=noise(x*32.0)/32.0;
-        v+=noise(x*64.0)/64.0;
-        //v+=noise(x*128.0)/128.0;
+        float tm = float(time)*0.00008;
+        v+=noise(x*2.0+tm)*0.5;
+        v+=noise(x*4.0+tm)*0.25;
+        v+=noise(x*8.0+tm)*0.125;
+        v+=noise(x*16.0+tm)*0.0625;
+        v+=noise(x*32.0+tm)*0.03125;
+        v+=noise(x*64.0+tm)*0.015625;
+        v+=noise(x*128.0+tm)*0.0078125;
         return v;
 }
 float cloudFilter(float x){
@@ -63,12 +64,28 @@ float haveCloud(vec3 p){
 
     float r = fbm(vec3(p.x+float(time*100),p.y,p.z)/100000.0);
     r*=cloudFilter((p.y-24000.0)*0.000001);
-    return r>0.5 ? 1.0:0.0;
+    r*=cloudFilter(length(p.xz)*0.0000006);
+    return r;
 }
 
 //光线步进
 vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
     vec3 res = vec3(0.23,0.41,0.72);
+    vec3 cdy = vec3(0.61,0.61,0.61);
+
+    float ctheta = dot(normalize(astronomical),dir);
+    float astRad = acos(ctheta);
+    float astTheta = 1.0/exp(astRad);//视线与天体夹角
+    if(astRad<astrViewTheta){
+        res = astrColor;
+    }else{
+        res+=astrLight*astTheta*(cloudy+astrAtomScat);
+    }
+
+    vec3 dc  = cdy-res;
+    res+=dc*cloudy;
+    res*=lightness;
+
     if(dir.y<=0.0)//地平线以下
         return res;
     vec3 nvec;//当前所在的坐标
@@ -87,11 +104,11 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
     //开始光线步进
     for(int i=0;i<step;++i){
         float c = haveCloud(nvec);
-        if(c>0.5){
-            float f = exp((nvec.y-40000.0)/60000.0);
-            vec3 col =  vec3(f,f,f);
+        if(c>cloudThre){
+            float f = exp((nvec.y-40000.0)/60000.0)*lightness;
+            vec3 col =  vec3(f,f,f)+astrLight*astTheta*f;
             vec3 dt = res - col;
-            res = res - dt/2.0;
+            res = res - dt/32.0;
         }
         nvec  += deltaStep;
     }

@@ -51,7 +51,8 @@ HEADERS += \
     dbvtdispather.h \
     building.h \
     ../utils/dbvt3d.h \
-    RealisticWater.h
+    RealisticWater.h \
+    cloud.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -82,7 +83,8 @@ SOURCES += \
     dbvtdispather.cpp \
     building.cpp \
     ../utils/dbvt3d.cpp \
-    RealisticWater.cpp
+    RealisticWater.cpp \
+    cloud.cpp
 
 FORMS += \
     ui/login.ui
