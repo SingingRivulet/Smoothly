@@ -78,13 +78,17 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
     float astTheta = 1.0/exp(astRad);//视线与天体夹角
     if(astRad<astrViewTheta){
         res = astrColor;
+
+        vec3 dc  = cdy-res;
+        res+=dc*cloudy;
     }else{
         res+=astrLight*astTheta*(cloudy+astrAtomScat);
+
+        vec3 dc  = cdy-res;
+        res+=dc*cloudy;
+        res*=lightness;
     }
 
-    vec3 dc  = cdy-res;
-    res+=dc*cloudy;
-    res*=lightness;
 
     if(dir.y<=0.0)//地平线以下
         return res;

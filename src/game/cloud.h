@@ -14,10 +14,10 @@ class cloud:public engine{
                              astrColor;   //天体颜色
         float                astrAtomScat,//大气层散射
                              astrTheta;   //天体在视野中夹角
+        void setSnow(float k);
+        void setRain(float k);
     private:
         struct skyBox{
-            irr::IrrlichtDevice       * device;
-            irr::ITimer               * timer;
             irr::video::IVideoDriver  * driver;
             irr::scene::ISceneManager * scene;
             irr::video::SMaterial cloudMaterial;
@@ -30,7 +30,7 @@ class cloud:public engine{
             void(*callback[80])(skyBox *);
             int count;
             bool first;
-            void init(const std::string &name, s32 cloud, s32 sky);
+            void init(const std::string &name, irr::s32 cloud);
             bool process();
         };
         skyBox * sky_p , * sky_pb;
@@ -42,6 +42,7 @@ class cloud:public engine{
         }cloudShaderCallback;
         irr::s32 cloudTime;
         void renderSky()override;
+        irr::scene::IParticleSystemSceneNode *rain,*snow;
 };
 
 }

@@ -4,39 +4,80 @@ namespace smoothly{
 
 cloud::cloud(){
     cloudThre               = 0.5;
-    cloudy                  = 0.5;
+    cloudy                  = 0.7;
     lightness               = 1.2;
     astrAtomScat            = 0.5;
     astronomical.set(1,1,1);
     astrLight.set(0.5,0.5,0.5);
-    astrColor.set(3.0,1.8,1.6);
-    astrTheta               = 0.05;
+    astrColor.set(3.0,2.8,2.6);
+    astrTheta               = 0.025;
     cloudShaderCallback.parent = this;
     cloudTime = time(0);
     auto cloudShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                     "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
                     "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1,
                 &cloudShaderCallback);
-    auto skyShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
-                "../shader/sky.vs.glsl","main", irr::video::EVST_VS_1_1,
-                "../shader/sky.ps.glsl", "main", irr::video::EPST_PS_1_1);
-
-    sky_1.device = device;
     sky_1.driver = driver;
     sky_1.scene  = scene;
-    sky_1.timer  = timer;
-    sky_1.init("sky1",cloudShader,skyShader);
-    sky_2.device = device;
+    sky_1.init("sky1",cloudShader);
     sky_2.driver = driver;
     sky_2.scene  = scene;
-    sky_2.timer  = timer;
-    sky_2.init("sky2",cloudShader,skyShader);
+    sky_2.init("sky2",cloudShader);
     sky_2.box->setVisible(false);
     sky_p  = &sky_1;
     sky_pb = &sky_2;
+
+    snow = scene->addParticleSystemSceneNode(false);
+    snow->setMaterialTexture(0,driver->getTexture("../../res/snow.png"));
+    snow->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+
+    rain = scene->addParticleSystemSceneNode(false);
+    rain->setMaterialTexture(0,driver->getTexture("../../res/rain.png"));
+    rain->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+
+    //setSnow(1);
+    //setRain(1);
+}
+
+void cloud::setSnow(float k){
+    if(k<=0)
+        snow->setEmitter(0);
+    else{
+        auto emt = snow->createBoxEmitter(
+                    core::aabbox3df(-1000, 28,-1000, 1000, 30, 1000),
+                    core::vector3df(0,-0.5,0),
+                    8000*k,8500*k,
+                    video::SColor(128,64,64,255),
+                    video::SColor(128,64,64,255),
+                    2000,2000,45,
+                    core::dimension2df(1,1),
+                    core::dimension2df(5,5));
+        snow->setEmitter(emt);
+        emt->drop();
+    }
+}
+
+void cloud::setRain(float k){
+    if(k<=0)
+        rain->setEmitter(0);
+    else{
+        auto emt = rain->createBoxEmitter(
+                    core::aabbox3df(-1000, 28,-1000, 1000, 30, 1000),
+                    core::vector3df(0,-1,0),
+                    8000*k,8500*k,
+                    video::SColor(128,64,64,255),
+                    video::SColor(128,64,64,255),
+                    2000,2000,0,
+                    core::dimension2df(2,2),
+                    core::dimension2df(2,2));
+        rain->setEmitter(emt);
+        emt->drop();
+    }
 }
 
 void cloud::renderSky(){
+    rain->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
+    snow->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
     clock_t starts,ends;
     starts=clock();
     begin:
@@ -55,7 +96,7 @@ void cloud::renderSky(){
         goto begin;
 }
 
-void cloud::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 /*sky*/){
+void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
     cloudMaterial.MaterialType = (irr::video::E_MATERIAL_TYPE)cloud;
 
     //创建天空的渲染目标
@@ -73,7 +114,6 @@ void cloud::skyBox::init(const std::string & name,irr::s32 cloud,irr::s32 /*sky*
             cloudBack
         );
 
-    //box->setMaterialType((irr::video::E_MATERIAL_TYPE)sky);
 #define processFace(id,tex,col) \
     callback[id*16]=[](skyBox * self){\
         self->driver->setRenderTarget(tex,false,true); \

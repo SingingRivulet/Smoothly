@@ -5,7 +5,7 @@ engine::engine(){
     running                 = true;
     deltaTime               = 0;
     lastTime                = 0;
-    waterLevel              = 32;
+    waterLevel              = 0;
     lastFPS                 = 0;
     width                   = 1024;
     height                  = 768;
