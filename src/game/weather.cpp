@@ -88,6 +88,13 @@ void weather::updateWeather(int tm){
             sastrColor       = interpolation(c->time,c->astrColor,next->time,next->astrColor,ntm);
             sglow            = interpolation(c->time,c->glow,next->time,next->glow,ntm);
             break;
+        }else if(c->time == ntm){
+            slightness       = c->lightness;
+            sastrAtomScat    = c->astrAtomScat;
+            sastrLight       = c->astrLight;
+            sastrColor       = c->astrColor;
+            sglow            = c->glow;
+            break;
         }
         ++c;
     }
@@ -104,6 +111,13 @@ void weather::updateWeather(int tm){
             castrColor       = interpolation(c->time,c->astrColor,next->time,next->astrColor,ntm);
             cglow            = interpolation(c->time,c->glow,next->time,next->glow,ntm);
             break;
+        }else if(c->time == ntm){
+            clightness       = c->lightness;
+            castrAtomScat    = c->astrAtomScat;
+            castrLight       = c->astrLight;
+            castrColor       = c->astrColor;
+            cglow            = c->glow;
+            break;
         }
         ++c;
     }
@@ -114,8 +128,8 @@ void weather::updateWeather(int tm){
     astrColor    =   interpolation(0.0f,sastrColor     , 1.0f,castrColor,cloudy);
     glow         =   interpolation(0.0f,sglow          , 1.0f,cglow,cloudy);
 
-    if(cloudy>0.8){
-        setRain((1-cloudy)*5);
+    if(cloudy>0.7){
+        setRain((1-cloudy)*3);
     }else{
         setRain(0);
     }
