@@ -4,7 +4,7 @@ namespace smoothly{
 
 cloud::cloud(){
     cloudThre               = 0.5;
-    cloudy                  = 0.7;
+    cloudy                  = 0.5;
     lightness               = 1.2;
     astrAtomScat            = 0.5;
     astronomical.set(1,1,1);
@@ -34,6 +34,11 @@ cloud::cloud(){
     rain = scene->addParticleSystemSceneNode(false);
     rain->setMaterialTexture(0,driver->getTexture("../../res/rain.png"));
     rain->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+
+
+    scene->setAmbientLight(irr::video::SColor(255,80,80,80));
+    light = scene->addLightSceneNode();
+    light->setPosition(irr::core::vector3df(0,500,0));
 
     //setSnow(1);
     //setRain(1);
@@ -78,6 +83,16 @@ void cloud::setRain(float k){
 void cloud::renderSky(){
     rain->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
     snow->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
+    {
+        auto ldir = astronomical;
+        ldir.normalize();
+        ldir*=4096;
+        ldir+=camera->getPosition();
+        light->setPosition(ldir);
+        video::SLight lconf;
+        lconf.DiffuseColor.set(glow.X,glow.Y,glow.Z);
+        light->setLightData(lconf);
+    }
     clock_t starts,ends;
     starts=clock();
     begin:
@@ -89,6 +104,7 @@ void cloud::renderSky(){
         sky_p = sky_pb;
         sky_pb = tmp;
         cloudTime = time(0);//更新时间
+        updateWeather(cloudTime);
         return;
     }
     ends=clock();

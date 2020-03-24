@@ -11,11 +11,14 @@ class cloud:public engine{
                  lightness; // 亮度
         irr::core::vector3df astronomical,//发光天体位置
                              astrLight,   //亮度
-                             astrColor;   //天体颜色
+                             astrColor,   //天体颜色
+                             glow;
         float                astrAtomScat,//大气层散射
                              astrTheta;   //天体在视野中夹角
         void setSnow(float k);
         void setRain(float k);
+        void renderSky()override;
+        virtual void updateWeather(int)=0;
     private:
         struct skyBox{
             irr::video::IVideoDriver  * driver;
@@ -41,8 +44,8 @@ class cloud:public engine{
                 void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
         }cloudShaderCallback;
         irr::s32 cloudTime;
-        void renderSky()override;
         irr::scene::IParticleSystemSceneNode *rain,*snow;
+        irr::scene::ILightSceneNode * light;
 };
 
 }

@@ -6,7 +6,7 @@
 #include <functional>
 #include <math.h>
 
-#include "cloud.h"
+#include "weather.h"
 #include "../libclient/terrain.h"
 #include "../libclient/terrainDispather.h"
 #include "../utils/cJSON.h"
@@ -17,7 +17,7 @@ namespace smoothly{
 typedef irr::core::vector3df vec3;
 typedef smoothly::world::terrain::ipair ipair;
 
-class building:public cloud{
+class building:public weather{
     public:
         building();
         ~building();

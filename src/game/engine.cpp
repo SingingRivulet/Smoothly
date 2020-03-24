@@ -37,9 +37,6 @@ engine::engine(){
     //隐藏鼠标
     device->getCursorControl()->setVisible(false);
 
-    scene->setAmbientLight(irr::video::SColor(255,80,80,80));
-    auto light = scene->addLightSceneNode();
-    light->setPosition(irr::core::vector3df(0,500,0));
 /*
     driver->setFog(video::SColor(255, 255, 255, 255 ),    //雾颜色（忽略Alpha位）
                    video::EFT_FOG_LINEAR,                 //雾的类型
