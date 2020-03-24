@@ -110,7 +110,7 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
         float c = haveCloud(nvec);
         if(c>cloudThre){
             float f = exp((nvec.y-40000.0)/60000.0)*lightness;
-            vec3 col =  vec3(f,f,f)+astrLight*astTheta*f;
+            vec3 col =  vec3(f,f,f)+astrLight*astTheta*f*0.5;
             vec3 dt = res - col;
             res = res - dt/32.0;
         }

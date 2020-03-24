@@ -30,11 +30,12 @@ cloud::cloud(){
     snow = scene->addParticleSystemSceneNode(false);
     snow->setMaterialTexture(0,driver->getTexture("../../res/snow.png"));
     snow->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    snow->setMaterialFlag(irr::video::EMF_LIGHTING, true );
 
     rain = scene->addParticleSystemSceneNode(false);
     rain->setMaterialTexture(0,driver->getTexture("../../res/rain.png"));
     rain->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-
+    rain->setMaterialFlag(irr::video::EMF_LIGHTING, true );
 
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     light = scene->addLightSceneNode();
