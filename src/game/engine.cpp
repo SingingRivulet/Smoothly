@@ -57,6 +57,11 @@ engine::engine(){
     f->setMaterialTexture(0, dw);
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
+    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-1024,-1024),irr::core::vector3df(-90,180,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialTexture(0, dw);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(1024,-1024,0),irr::core::vector3df(-90,90,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     f->setMaterialTexture(0, dw);
@@ -65,6 +70,12 @@ engine::engine(){
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(-1024,-1024,0),irr::core::vector3df(-90,-90,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     f->setMaterialTexture(0, dw);
+    f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+
+    //水底
+    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-2048,0),irr::core::vector3df(0,0,0));
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialTexture(0, driver->getTexture("../../res/waterBottom.png"));
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
     f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
@@ -88,6 +99,7 @@ void engine::sceneLoop(){
     auto cm  = camera->getPosition();
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
     water->setRotation(irr::core::vector3df(0,camera->getRotation().Y,0));
+    water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
 
     renderSky();
 

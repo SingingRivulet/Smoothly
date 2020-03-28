@@ -92,5 +92,6 @@ void main()
 	vec4 finalColor = ColorBlendFactor * WaterColor + (1.0 - ColorBlendFactor) * combinedColor;
 	
         gl_FragColor = mix(gl_Fog.color, finalColor, fogFactor );
+        gl_FragColor.a = 0.5;
 }
 

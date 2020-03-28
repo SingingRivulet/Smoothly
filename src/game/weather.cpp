@@ -24,10 +24,10 @@ static const skyConfig sunnySky[]={//晴天
     {540    ,   1.2     ,   0.8     ,   irr::core::vector3df(6.1,4.1,2.1)  ,   irr::core::vector3df(6.1,6.1,6.1),irr::core::vector3df(1.0,1.0,1.0)},//晚霞开始
     {580    ,   0.4     ,   0.8     ,   irr::core::vector3df(6.1,4.1,2.1)  ,   irr::core::vector3df(6.1,4.1,2.1),irr::core::vector3df(1.0,1.0,1.0)},//晚霞
     {599    ,   0.2     ,   0.8     ,   irr::core::vector3df(6.1,4.1,2.1)  ,   irr::core::vector3df(6.1,4.1,2.1),irr::core::vector3df(1.0,1.0,1.0)},
-    {600    ,   0.1     ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//月出
-    {612    ,   0.01    ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//晚霞结束
-    {1170   ,   0.001   ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//日出预备
-    {1215   ,   0.01    ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)}
+    {600    ,   0.1     ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//月出
+    {612    ,   0.01    ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//晚霞结束
+    {1170   ,   0.001   ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//日出预备
+    {1215   ,   0.01    ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)}
 };
 
 static const skyConfig cloudySky[]={//阴天
@@ -39,10 +39,10 @@ static const skyConfig cloudySky[]={//阴天
     {540    ,   0.8     ,   0.4     ,   irr::core::vector3df(0.2,0.2,0.2)  ,   irr::core::vector3df(1.0,1.0,1.0),irr::core::vector3df(0.8,0.8,0.8)},//晚霞开始
     {580    ,   0.6     ,   0.4     ,   irr::core::vector3df(0.2,0.2,0.2)  ,   irr::core::vector3df(1.0,1.0,1.0),irr::core::vector3df(0.8,0.8,0.8)},//晚霞
     {599    ,   0.6     ,   0.4     ,   irr::core::vector3df(0.4,0.4,0.4)  ,   irr::core::vector3df(1.0,1.0,1.0),irr::core::vector3df(0.8,0.8,0.8)},
-    {600    ,   0.1     ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//月出
-    {612    ,   0.01    ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//晚霞结束
-    {1170   ,   0.001   ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//日出预备
-    {1215   ,   0.01    ,   0.1     ,   irr::core::vector3df(1.0,1.0,1.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)}
+    {600    ,   0.1     ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//月出
+    {612    ,   0.01    ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//晚霞结束
+    {1170   ,   0.001   ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)},//日出预备
+    {1215   ,   0.01    ,   0.1     ,   irr::core::vector3df(2.0,2.0,2.0)  ,   irr::core::vector3df(4.0,4.0,4.0),irr::core::vector3df(0.01,0.01,0.01)}
 };
 
 static float randf(uint t){

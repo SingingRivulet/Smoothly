@@ -86,7 +86,8 @@ SOURCES += \
     ../utils/dbvt3d.cpp \
     RealisticWater.cpp \
     cloud.cpp \
-    weather.cpp
+    weather.cpp \
+    treegenerator.cpp
 
 FORMS += \
     ui/login.ui
@@ -102,4 +103,6 @@ DISTFILES += \
     ../shader/cloud.ps.glsl \
     ../shader/cloud.vs.glsl \
     ../shader/sky.ps.glsl \
-    ../shader/sky.vs.glsl
+    ../shader/sky.vs.glsl \
+    ../shader/tree.ps.glsl \
+    ../shader/tree.vs.glsl

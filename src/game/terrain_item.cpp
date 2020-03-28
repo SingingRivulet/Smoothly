@@ -31,21 +31,21 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
     
     for(auto it:pl){
         int delta=it.prob*1000;
-        for(int i=0;i<it.num;i++){
+        int num = it.num;
+        for(int i=0;i<num;i++){
             int pr=(randg.rand())%1000;
-            if(pr>delta){
+            if(pr<delta){
                 float mx=(randg.frand()+x)*32;
                 float my=(randg.frand()+y)*32;
                 float mr=randg.frand()*360;
-                if(rmt.find(mapItem(it.id , i))!=rmt.end())
-                    continue;
-                
-                auto im=makeTerrainItem(it.id , i , mx , my , mr);
-                if(im==NULL)
-                    continue;
-                
-                ptr->children[mapItem(it.id , i)]=im;
-                im->parent = ptr;
+                if(rmt.find(mapItem(it.id , i))==rmt.end()){
+                    auto im=makeTerrainItem(it.id , i , mx , my , mr);
+                    if(im==NULL)
+                        continue;
+
+                    ptr->children[mapItem(it.id , i)]=im;
+                    im->parent = ptr;
+                }
             }
         }
     }
@@ -98,6 +98,24 @@ void terrain_item::releaseTerrainItems(int x , int y){
     }
 }
 terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,float y,float r){
+    if(id<0){
+        if(id==-1){
+            auto res = new item;
+            res->id.x=x;
+            res->id.y=y;
+            res->id.id.id=id;
+            res->id.id.index=index;
+            res->node[0]=genTree(x * y + index + id);
+            res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+            res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+            res->node[0]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+            res->node[0]->setPosition(vec3(x,getRealHight(x,y)-4,y));
+            res->node[0]->updateAbsolutePosition();//更新矩阵
+
+            return res;
+        }
+        return NULL;
+    }
     auto it = config.find(id);
     if(it==config.end())
         return NULL;
@@ -116,22 +134,24 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
                 ml=0;
             break;
         }
-        res->node[i]=scene->addMeshSceneNode(
+        auto n = scene->addMeshSceneNode(
                     it->second->mesh[i],NULL,
                     -1,
                     vec3(x,getRealHight(x,y)+it->second->deltaHeight,y),
                     vec3(0,r,0),
                     it->second->scale
                     );
-        res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-        res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-        res->node[i]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-        res->node[i]->addShadowVolumeSceneNode();
+        n->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+        n->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        n->addShadowVolumeSceneNode();
 
-        res->node[i]->updateAbsolutePosition();//更新矩阵
+        n->updateAbsolutePosition();//更新矩阵
+
+        res->node[i]=n;
 
         if(it->second->useShader){
-            res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)it->second->shader);
+            n->setMaterialType((irr::video::E_MATERIAL_TYPE)it->second->shader);
         }
     }
     res->node[ml]->setVisible(true);//显示最低lod级别
@@ -193,6 +213,7 @@ void terrain_item::releaseTerrainItem(item * p){
         delete p->bodyState;
     for(int i = 0;i<4;++i){
         if(p->node[i]){
+            p->node[i]->removeAll();
             p->node[i]->remove();
         }
     }
@@ -200,6 +221,11 @@ void terrain_item::releaseTerrainItem(item * p){
 }
 terrain_item::terrain_item(){
     loadConfig();
+    texture_treeTrunk = driver->getTexture("../../res/tree_trunk.tga");
+    texture_treeGrass = driver->getTexture("../../res/tree_grass.tga");
+    shader_tree = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                            "../shader/tree.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                            "../shader/tree.ps.glsl", "main", irr::video::EPST_PS_1_1);
 }
 terrain_item::~terrain_item(){
     releaseAllChunk();

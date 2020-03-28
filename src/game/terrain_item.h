@@ -22,13 +22,15 @@ namespace smoothly{
         private:
             struct chunk;
             struct item{
-                irr::scene::IMeshSceneNode  * node[4];
+                irr::scene::ISceneNode  * node[4];
                 mapId id;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
                 bodyInfo info;
                 chunk * parent;
                 inline item(){
+                    rigidBody = NULL;
+                    bodyState = NULL;
                     for(int i = 0;i<4;++i)
                         node[i] = NULL;
                 }
@@ -43,7 +45,7 @@ namespace smoothly{
             void releaseTerrainItem(item*);
             void releaseAllChunk();
             void removeTerrainItem(chunk * ,int index,int id);
-            item * makeTerrainItem(int,int,float,float,float);
+            item * makeTerrainItem(int, int, float, float, float);
 
             virtual void updateLOD(int x,int y,int lv)override;
         private:
@@ -61,6 +63,10 @@ namespace smoothly{
             void loadConfig();
             void loadJSON(cJSON * json);
             void releaseConfig();
+            irr::scene::ISceneNode * genTree(int seed);
+
+            irr::video::ITexture * texture_treeTrunk,* texture_treeGrass;
+            irr::u32 shader_tree;
     };
 }
 #endif
