@@ -26,11 +26,15 @@ namespace smoothly{
                 mapId id;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
+                btTriangleMesh   * bodyMesh;
+                btCollisionShape * bodyShape;
                 bodyInfo info;
                 chunk * parent;
                 inline item(){
                     rigidBody = NULL;
                     bodyState = NULL;
+                    bodyMesh  = NULL;
+                    bodyShape = NULL;
                     for(int i = 0;i<4;++i)
                         node[i] = NULL;
                 }
@@ -63,7 +67,7 @@ namespace smoothly{
             void loadConfig();
             void loadJSON(cJSON * json);
             void releaseConfig();
-            irr::scene::ISceneNode * genTree(int seed);
+            irr::scene::ISceneNode * genTree(int seed,btTriangleMesh *& bodyMesh);
 
             irr::video::ITexture * texture_treeTrunk,* texture_treeGrass;
             irr::u32 shader_tree;

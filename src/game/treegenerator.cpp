@@ -279,7 +279,7 @@ class grassBuffer{//树叶buffer
         irr::scene::SMeshBuffer *   buffer;
 };
 
-irr::scene::ISceneNode * terrain_item::genTree(int seed){
+irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMesh){
     meshGenerator m(3);
     grassBuffer   g;
     world::terrain::predictableRand randg;
@@ -346,6 +346,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed){
     trunk->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
     trunk->setMaterialTexture(0,texture_treeTrunk);
     trunk->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    bodyMesh = createBtMesh(trunk_mesh);
     trunk_mesh->drop();
 
     //添加叶子

@@ -105,13 +105,22 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.y=y;
             res->id.id.id=id;
             res->id.id.index=index;
-            res->node[0]=genTree(x * y + index + id);
+            btTriangleMesh * mesh;
+            res->node[0]=genTree(x * y + index + id , mesh);
+            res->bodyMesh = mesh;
+            res->bodyShape = createShape(mesh);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
             res->node[0]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
             res->node[0]->setPosition(vec3(x,getRealHight(x,y)-4,y));
             res->node[0]->updateAbsolutePosition();//更新矩阵
 
+            res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());
+            res->rigidBody =createBody(res->bodyShape,res->bodyState);
+            res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+            res->rigidBody->setFriction(0.7);
+            res->rigidBody->setRestitution(0.1);
+            dynamicsWorld->addRigidBody(res->rigidBody);
             return res;
         }
         return NULL;
@@ -211,6 +220,10 @@ void terrain_item::releaseTerrainItem(item * p){
     }
     if(p->bodyState)
         delete p->bodyState;
+    if(p->bodyShape)
+        delete p->bodyShape;
+    if(p->bodyMesh)
+        delete p->bodyMesh;
     for(int i = 0;i<4;++i){
         if(p->node[i]){
             p->node[i]->removeAll();
