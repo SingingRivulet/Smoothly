@@ -130,6 +130,7 @@ void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
             cloudFront,
             cloudBack
         );
+    box->setMaterialFlag(irr::video::EMF_ANTI_ALIASING,true);
 
 #define processFace(id,tex,col) \
     callback[id*16]=[](skyBox * self){\

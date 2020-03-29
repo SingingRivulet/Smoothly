@@ -87,7 +87,8 @@ SOURCES += \
     RealisticWater.cpp \
     cloud.cpp \
     weather.cpp \
-    treegenerator.cpp
+    meshGenerator/tree.cpp \
+    meshGenerator/grass.cpp
 
 FORMS += \
     ui/login.ui

@@ -5,7 +5,7 @@
         "hp":100,
         "mesh":"../../res/model/player/snoutx10k/snoutx10k.b3d",
         "walkVelocity":0.07,
-        "deltaY":7,
+        "deltaY":1.5,
         "jump":5,
         "jumpInSky":1,
         "walkInSky":1

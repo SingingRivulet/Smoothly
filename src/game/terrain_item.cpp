@@ -1,5 +1,6 @@
 #include "terrain_item.h"
 #include <stdio.h>
+#include <QString>
 namespace smoothly{
 
 #define findChunk(x,y) \
@@ -98,8 +99,11 @@ void terrain_item::releaseTerrainItems(int x , int y){
     }
 }
 terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,float y,float r){
+    float realHeight = getRealHight(x,y);
     if(id<0){
-        if(id==-1){
+        if(id==-1){//树叶
+            if(realHeight<waterLevel)
+                return NULL;
             auto res = new item;
             res->id.x=x;
             res->id.y=y;
@@ -111,8 +115,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->bodyShape = createShape(mesh);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-            res->node[0]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-            res->node[0]->setPosition(vec3(x,getRealHight(x,y)-4,y));
+            res->node[0]->setPosition(vec3(x,realHeight-4,y));
             res->node[0]->updateAbsolutePosition();//更新矩阵
 
             res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());
@@ -121,6 +124,26 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->rigidBody->setFriction(0.7);
             res->rigidBody->setRestitution(0.1);
             dynamicsWorld->addRigidBody(res->rigidBody);
+            return res;
+        }else if(id==-2){//草
+            if(realHeight<waterLevel)
+                return NULL;
+            if(texture_grass.empty())
+                return NULL;
+            auto res = new item;
+            res->id.x=x;
+            res->id.y=y;
+            res->id.id.id=id;
+            res->id.id.index=index;
+            res->node[0]=genGrass(x * y + index + id);
+            res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+            res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+            res->node[0]->setPosition(vec3(x,realHeight,y));
+            res->node[0]->updateAbsolutePosition();//更新矩阵
+            res->node[1]=res->node[0]->clone();
+            res->node[1]->setPosition(vec3(x,realHeight,y));
+            res->node[2]=scene->addEmptySceneNode();
+            res->node[2]->setPosition(vec3(x,realHeight,y));
             return res;
         }
         return NULL;
@@ -146,7 +169,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
         auto n = scene->addMeshSceneNode(
                     it->second->mesh[i],NULL,
                     -1,
-                    vec3(x,getRealHight(x,y)+it->second->deltaHeight,y),
+                    vec3(x,realHeight+it->second->deltaHeight,y),
                     vec3(0,r,0),
                     it->second->scale
                     );
@@ -225,7 +248,7 @@ void terrain_item::releaseTerrainItem(item * p){
     if(p->bodyMesh)
         delete p->bodyMesh;
     for(int i = 0;i<4;++i){
-        if(p->node[i]){
+        if(p->node[i] && (i==0 || p->node[i-1]!=p->node[i])){
             p->node[i]->removeAll();
             p->node[i]->remove();
         }
@@ -234,15 +257,34 @@ void terrain_item::releaseTerrainItem(item * p){
 }
 terrain_item::terrain_item(){
     loadConfig();
+    //树纹理
     texture_treeTrunk = driver->getTexture("../../res/tree_trunk.tga");
-    texture_treeGrass = driver->getTexture("../../res/tree_grass.tga");
+    texture_treeLeaves = driver->getTexture("../../res/tree_leaves.tga");
     shader_tree = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                             "../shader/tree.vs.glsl", "main", irr::video::EVST_VS_1_1,
                             "../shader/tree.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    //草纹理
+    auto fp = fopen("../config/grass.txt","r");
+    if(fp){
+        char buf[512];
+        while(!feof(fp)){
+            bzero(buf,sizeof(buf));
+            fgets(buf,sizeof(buf),fp);
+            if(buf[0]!='\0'){
+                auto str = QString(buf).trimmed().toStdString();
+                auto tex = driver->getTexture(str.c_str());
+                if(tex)
+                    texture_grass.push_back(tex);
+            }
+        }
+    }
+    //草模型
+    genGrassMesh();
 }
 terrain_item::~terrain_item(){
     releaseAllChunk();
     releaseConfig();
+    mesh_grass->drop();
 }
 void terrain_item::loadConfig(){
     config.clear();

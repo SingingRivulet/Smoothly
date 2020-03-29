@@ -7,7 +7,7 @@ void main(){
     color.x*=(lcolor.x+0.2);
     color.y*=(lcolor.y+0.2);
     color.z*=(lcolor.z+0.2);
-    if(color.a<0.2)
+    if(color.a<0.7)
         discard;
     gl_FragColor = color;
 }

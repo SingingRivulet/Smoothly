@@ -1,4 +1,4 @@
-#ifndef SMOOTHLY_TERRAIN_ITEM
+﻿#ifndef SMOOTHLY_TERRAIN_ITEM
 #define SMOOTHLY_TERRAIN_ITEM
 #include "terrain.h"
 #include "../utils/cJSON.h"
@@ -68,9 +68,13 @@ namespace smoothly{
             void loadJSON(cJSON * json);
             void releaseConfig();
             irr::scene::ISceneNode * genTree(int seed,btTriangleMesh *& bodyMesh);
+            irr::scene::ISceneNode * genGrass(int seed);
+            void genGrassMesh();
 
-            irr::video::ITexture * texture_treeTrunk,* texture_treeGrass;
+            irr::video::ITexture * texture_treeTrunk,* texture_treeLeaves;
             irr::u32 shader_tree;
+            std::vector<irr::video::ITexture*> texture_grass;
+            irr::scene::IMesh * mesh_grass;
     };
 }
 #endif

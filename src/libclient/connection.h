@@ -92,7 +92,7 @@ class connectionBase{
             starts=clock();
             while(1){
                 ends = clock();
-                if(ends-starts>80)
+                if(ends-starts>15)
                     break;
                 
                 auto pk=connection->Receive();
