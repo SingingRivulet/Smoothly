@@ -166,6 +166,11 @@ void building::loop()
     });
 }
 
+void building::release(){
+    bullet::release();
+    cache_building_hp.clear();
+}
+
 void building::releaseBuilding(const std::string & uuid)
 {
     try{

@@ -8,7 +8,11 @@
 #include <QFile>
 #include <QByteArray>
 
+namespace smoothly {
+namespace server {
 std::atomic<bool> running;
+}
+}
 
 unsigned short CONF_port = 39065;
 int CONF_maxconnect = 256;
@@ -64,7 +68,7 @@ void loadConfig(){
 int main(){
     loadConfig();
     signal(SIGINT,[](int ){
-        running=false;
+        smoothly::server::running=false;
     });
     signal(SIGPIPE,[](int ){
         
@@ -72,14 +76,14 @@ int main(){
     signal(SIGHUP,[](int ){
         
     });
-    running=true;
+    smoothly::server::running=true;
     printf(L_GREEN "[status]" NONE "init database\n" );
     smoothly::server::server S(CONF_BuildingThreads);
     printf(L_GREEN"[status]" NONE "open connect\n" );
     S.start(CONF_port,CONF_maxconnect,CONF_visualField);
     S.setTimeout(CONF_timeout);
     printf(L_GREEN"[status]" NONE "server startup success\n" );
-    while(running){
+    while(smoothly::server::running){
         S.recv();
         RakSleep(30);
     }

@@ -23,7 +23,7 @@ void connection::start(unsigned short port, int maxcl, int vf){
     visualField = vf;
 }
 void connection::release(){
-    bullet::release();
+    building::release();
     if(con){
         RakNet::RakPeerInterface::DestroyInstance(con);
     }
@@ -186,6 +186,7 @@ void connection::sendAddr_visualrange(const RakNet::SystemAddress & addr){
     bs.Write((int32_t)visualField);
     sendMessage(&bs,addr);
 }
+extern std::atomic<bool> running;
 void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress & address){
     char addrStr[64];
     address.ToString(true,addrStr,':');
@@ -235,6 +236,7 @@ void connection::onRecvMessage(RakNet::Packet * data,const RakNet::SystemAddress
             logout(address);
             //delListener(address);
             //listener已经被删除
+            //running = false;
             printf(YELLOW "[client %s]" NONE "disconnect\n",addrStr);
         break;
     }

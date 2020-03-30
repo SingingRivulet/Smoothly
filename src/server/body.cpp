@@ -8,6 +8,8 @@ namespace server{
 ////////////////
 body::body(){
     cache_bodyPosi.parent = this;
+    cache_lookat.parent   = this;
+    cache_bodyRota.parent = this;
     config.clear();
     printf(L_GREEN "[status]" NONE "get body config\n" );
     QFile file("../config/body.json");
@@ -81,6 +83,22 @@ body::~body(){
         delete it.second;
     }
     config.clear();
+}
+
+void body::release(){
+    removeTable::release();
+
+    cache_bodyPosi.clear();
+    cache_lookat.clear();
+    cache_bodyRota.clear();
+}
+
+void body::loop(){
+    removeTable::loop();
+
+    cache_bodyPosi.removeExpire();
+    cache_lookat.removeExpire();
+    cache_bodyRota.removeExpire();
 }
 void body::updateBody(const std::string & uuid , int x , int y){
     leveldb::WriteBatch batch;
@@ -300,17 +318,30 @@ void body::wearing_get(const std::string & uuid , std::set<int> & o){
     delete it;
     
 }
+void body::setRotation(const std::string & uuid , const vec3 & v){
+    try{
+        vec3 & ov = cache_bodyRota[uuid];
+        if(fabs(ov.X-v.X)>0.01 || fabs(ov.Y!=v.Y)>0.01 || fabs(ov.Z!=v.Z)>0.01){
+            ov = v;
+        }else{
+            return;
+        }
+        auto p = getCharPosition(uuid);
+        boardcast_setRotation(uuid , p.x , p.y , v);
+
+    }catch(...){
+        logCharError();
+    }
+}
 void body::setLookAt(const std::string & uuid , const vec3 & v){
     try{
+        vec3 & ov = cache_lookat[uuid];
+        if(fabs(ov.X-v.X)>0.01 || fabs(ov.Y!=v.Y)>0.01 || fabs(ov.Z!=v.Z)>0.01){
+            ov = v;
+        }else{
+            return;
+        }
         auto p = getCharPosition(uuid);
-        
-        char key[256];
-        char val[512];
-        snprintf(key,sizeof(key),"bCharLA:%s",uuid.c_str());
-        snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
-        
-        db->Put(leveldb::WriteOptions(), key, val);
-        
         boardcast_setLookAt(uuid , p.x , p.y , v);
         
     }catch(...){
@@ -360,23 +391,6 @@ void body::sendMapToUser(const std::string & to){
     getUserNodes(to,m,[&](const std::string &,int,int){});
     for(auto it:m){
         sendChunk(it,to);
-    }
-}
-void body::setRotation(const std::string & uuid , const vec3 & v){
-    try{
-        auto p = getCharPosition(uuid);
-        
-        char key[256];
-        char val[512];
-        snprintf(key,sizeof(key),"bCharRT:%s",uuid.c_str());
-        snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
-        
-        db->Put(leveldb::WriteOptions(), key, val);
-        
-        boardcast_setRotation(uuid , p.x , p.y , v);
-        
-    }catch(...){
-        logCharError();
     }
 }
 void body::setStatus(const std::string & uuid , int s){
@@ -538,30 +552,10 @@ vec3 body::getPosition(const std::string & uuid){
     return cache_bodyPosi[uuid];
 }
 vec3 body::getRotation(const std::string & uuid){
-    char key[256];
-    std::string value;
-    snprintf(key,sizeof(key),"bCharRT:%s", uuid.c_str());
-    db->Get(leveldb::ReadOptions(), key , &value);
-    if(value.empty())
-        throw std::out_of_range("getRotation");
-    else{
-        float x,y,z;
-        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
-        return vec3(x,y,z);
-    }
+    return cache_bodyRota[uuid];
 }
 vec3 body::getLookAt(const std::string & uuid){
-    char key[256];
-    std::string value;
-    snprintf(key,sizeof(key),"bCharLA:%s", uuid.c_str());
-    db->Get(leveldb::ReadOptions(), key , &value);
-    if(value.empty())
-        throw std::out_of_range("getLookAt");
-    else{
-        float x,y,z;
-        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
-        return vec3(x,y,z);
-    }
+    return cache_lookat[uuid];
 }
 int body::getId(const std::string & uuid){
     char key[256];
@@ -679,6 +673,52 @@ void body::cache_bodyPosi_t::onLoad(const std::string & uuid, vec3 & p){
     char key[256];
     std::string value;
     snprintf(key,sizeof(key),"bCharP:%s", uuid.c_str());
+    parent->db->Get(leveldb::ReadOptions(), key , &value);
+    if(value.empty())
+        p=vec3(0,0,0);
+    else{
+        float x,y,z;
+        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
+        p=vec3(x,y,z);
+    }
+}
+
+void body::cache_lookat_t::onExpire(const std::string & uuid, vec3 & v){
+    char key[256];
+    char val[512];
+    snprintf(key,sizeof(key),"bCharLA:%s",uuid.c_str());
+    snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
+
+    parent->db->Put(leveldb::WriteOptions(), key, val);
+}
+
+void body::cache_lookat_t::onLoad(const std::string & uuid, vec3 & p){
+    char key[256];
+    std::string value;
+    snprintf(key,sizeof(key),"bCharLA:%s", uuid.c_str());
+    parent->db->Get(leveldb::ReadOptions(), key , &value);
+    if(value.empty())
+        p=vec3(0,0,0);
+    else{
+        float x,y,z;
+        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
+        p=vec3(x,y,z);
+    }
+}
+
+void body::cache_bodyRota_t::onExpire(const std::string & uuid, vec3 & v){
+    char key[256];
+    char val[512];
+    snprintf(key,sizeof(key),"bCharRT:%s",uuid.c_str());
+    snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
+
+    parent->db->Put(leveldb::WriteOptions(), key, val);
+}
+
+void body::cache_bodyRota_t::onLoad(const std::string & uuid, vec3 & p){
+    char key[256];
+    std::string value;
+    snprintf(key,sizeof(key),"bCharRT:%s", uuid.c_str());
     parent->db->Get(leveldb::ReadOptions(), key , &value);
     if(value.empty())
         p=vec3(0,0,0);

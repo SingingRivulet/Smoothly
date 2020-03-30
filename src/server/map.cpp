@@ -203,8 +203,7 @@ void map::loop(){
     cache_nodePosi.removeExpire();
 }
 
-void map::release()
-{
+void map::release(){
     cache_nodePosi.clear();
 }
 

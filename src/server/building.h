@@ -21,6 +21,7 @@ class building:public bullet{
         virtual void boardcast_buildingRemove(const std::string & uuid , int x,int y)=0;
         virtual void boardcast_buildingAdd(const std::string & uuid ,int id,const vec3 & p , const vec3 & r, int x,int y)=0;
 
+        void release()override;
     private:
 
         void releaseBuilding(const std::string & uuid);//释放数据库和缓存中的建筑物

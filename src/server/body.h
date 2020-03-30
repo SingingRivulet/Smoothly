@@ -97,12 +97,27 @@ class body:public removeTable{
         body();
         ~body();
 
+        void release()override;
+        void loop()override;
+
+        class cache_bodyRota_t:public cache<vec3>{
+                void onExpire(const std::string &,vec3 & )override;
+                void onLoad(const std::string &, vec3 & )override;
+            public:
+                body * parent;
+        }cache_bodyRota;
         class cache_bodyPosi_t:public cache<vec3>{
                 void onExpire(const std::string &,vec3 & )override;
                 void onLoad(const std::string &, vec3 & )override;
             public:
                 body * parent;
         }cache_bodyPosi;
+        class cache_lookat_t:public cache<vec3>{
+                void onExpire(const std::string &,vec3 & )override;
+                void onLoad(const std::string &, vec3 & )override;
+            public:
+                body * parent;
+        }cache_lookat;
     private:
         struct bconf{
             int hp;

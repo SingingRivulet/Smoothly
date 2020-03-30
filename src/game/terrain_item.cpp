@@ -54,6 +54,7 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
 }
 
 void terrain_item::releaseChunk(int x,int y){
+    printf("[releaseChunk](%d,%d)\n",x,y);
     terrain::releaseChunk(x,y);
     auto it = chunks.find(ipair(x,y));
     if(it!=chunks.end()){

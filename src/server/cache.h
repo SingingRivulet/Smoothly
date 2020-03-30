@@ -92,10 +92,12 @@ class cache{
             auto n = begin;
             while(n){
                 auto tmp = n->next;
-                onExpire(tmp->name,tmp->value);
+                onExpire(n->name,n->value);
                 delete n;
                 n = tmp;
             }
+            begin= NULL;
+            end  = NULL;
         }
         int timeout;
         inline void removeExpire(){
