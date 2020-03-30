@@ -11,7 +11,10 @@ engine::engine(){
     height                  = 768;
     device = irr::createDevice(
                 irr::video::EDT_OPENGL,
-                irr::core::dimension2d<irr::u32>(width,height)
+                irr::core::dimension2d<irr::u32>(width,height),
+                16,
+                false,
+                true
     );
     driver = device->getVideoDriver();
     scene  = device->getSceneManager();

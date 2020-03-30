@@ -7,6 +7,7 @@ namespace smoothly{
 namespace server{
 ////////////////
 body::body(){
+    cache_bodyPosi.parent = this;
     config.clear();
     printf(L_GREEN "[status]" NONE "get body config\n" );
     QFile file("../config/body.json");
@@ -317,11 +318,12 @@ void body::setLookAt(const std::string & uuid , const vec3 & v){
     }
 }
 void body::setPosition(const std::string & uuid , const vec3 & v){
-    char key[256];
-    char val[512];
-    snprintf(key,sizeof(key),"bCharP:%s", uuid.c_str());
-    snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
-    db->Put(leveldb::WriteOptions(), key, val);
+    vec3 & ov = cache_bodyPosi[uuid];
+    if(fabs(ov.X-v.X)>0.01 || fabs(ov.Y!=v.Y)>0.01 || fabs(ov.Z!=v.Z)>0.01){
+        ov = v;
+    }else{
+        return;
+    }
     
     int cx = floor(v.X/32);
     int cy = floor(v.Z/32);
@@ -334,11 +336,14 @@ void body::setPosition(const std::string & uuid , const vec3 & v){
     }
     
     try{
-        auto ow = getOwner(uuid);
-        updateChunkDBVT(uuid,ow,cx,cy);
-        updateNode(uuid,cx,cy,[&](int i,int j){
-            sendChunk(ipair(i,j),ow);
-        });
+        ipair & op = cache_nodePosi[uuid];
+        if(op.x!=cx || op.y!=cy){
+            auto ow = getOwner(uuid);
+            updateChunkDBVT(uuid,ow,cx,cy);
+            updateNode(uuid,cx,cy,[&](int i,int j){
+                sendChunk(ipair(i,j),ow);
+            });
+        }
     }catch(...){
         logCharError();
     }
@@ -530,17 +535,7 @@ void body::removeCharacter(const std::string & uuid){
     }
 }
 vec3 body::getPosition(const std::string & uuid){
-    char key[256];
-    std::string value;
-    snprintf(key,sizeof(key),"bCharP:%s", uuid.c_str());
-    db->Get(leveldb::ReadOptions(), key , &value);
-    if(value.empty())
-        throw std::out_of_range("getPosition");
-    else{
-        float x,y,z;
-        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
-        return vec3(x,y,z);
-    }
+    return cache_bodyPosi[uuid];
 }
 vec3 body::getRotation(const std::string & uuid){
     char key[256];
@@ -671,6 +666,29 @@ void body::setMainControl(const std::string & user,const std::string & uuid){
     snprintf(key,sizeof(key),"bM:%s",user.c_str());
     db->Put(leveldb::WriteOptions(), key, uuid);
 }
+
+void body::cache_bodyPosi_t::onExpire(const std::string & uuid, vec3 & v){
+    char key[256];
+    char val[512];
+    snprintf(key,sizeof(key),"bCharP:%s", uuid.c_str());
+    snprintf(val,sizeof(val),"%f %f %f" , v.X , v.Y , v.Z);
+    parent->db->Put(leveldb::WriteOptions(), key, val);
+}
+
+void body::cache_bodyPosi_t::onLoad(const std::string & uuid, vec3 & p){
+    char key[256];
+    std::string value;
+    snprintf(key,sizeof(key),"bCharP:%s", uuid.c_str());
+    parent->db->Get(leveldb::ReadOptions(), key , &value);
+    if(value.empty())
+        p=vec3(0,0,0);
+    else{
+        float x,y,z;
+        sscanf(value.c_str(),"%f %f %f",&x,&y,&z);
+        p=vec3(x,y,z);
+    }
+}
+
 ////////////////
 }//////server
 }//////smoothly

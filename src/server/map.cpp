@@ -30,10 +30,10 @@ void map::updateNode(const std::string & uuid, int x, int y, std::function<void 
             }
         }
         */
-        for(int i=bMin.x;i<=bMax.x;++i){
-            for(int j=bMin.y;j<=bMax.y;++j){
+        int i,j;
+        for(i=bMin.x;i<=bMax.x;++i){
+            for(j=bMin.y;j<=bMax.y;++j){
                 if(!pointInA(i,j)){
-
                     ncallback(i,j);
                 }
             }

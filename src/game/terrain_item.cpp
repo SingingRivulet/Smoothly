@@ -20,6 +20,7 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
         ptr->y = y;
         chunks[ipair(x,y)]=ptr;
     }
+    printf("[setRemoveTable](%d,%d)\n",x,y);
     std::list<genProb> pl;//物体->概率
     world::terrain::predictableRand randg;
     
@@ -176,7 +177,6 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
         n->setMaterialFlag(irr::video::EMF_LIGHTING, true );
         n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
         n->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-        n->addShadowVolumeSceneNode();
 
         n->updateAbsolutePosition();//更新矩阵
 

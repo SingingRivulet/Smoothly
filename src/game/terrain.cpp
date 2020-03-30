@@ -98,7 +98,6 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     int lv;
     res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y,lv));
-    res->node->addShadowVolumeSceneNode();
     
     int l = std::max(abs(x-cm_cx),abs(y-cm_cy));
     if(l<=getVisualRange()){
@@ -106,9 +105,10 @@ terrain::chunk * terrain::genChunk(int x,int y){
     }else{
         res->node->setVisible(false);
     }
-    
+
     res->node->updateAbsolutePosition();
     res->bodyState =setMotionState(res->node->getAbsoluteTransformation().pointer());
+    //res->node->addShadowVolumeSceneNode();
     
     res->bodyMesh  =createBtMesh(mesh);
     res->bodyShape =createShape(res->bodyMesh);

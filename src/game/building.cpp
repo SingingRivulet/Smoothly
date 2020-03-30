@@ -163,7 +163,6 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
         res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
         res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
         res->node[i]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-        res->node[i]->addShadowVolumeSceneNode();
         if(c->haveShader){
             res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
         }

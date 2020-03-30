@@ -35,6 +35,7 @@ class map:public datas{
     private:
         static std::string getNodePrefix(int x,int y);
         void buildVisualFieldArray(int x,int y,std::function<void (int,int)> ncallback);
+    public:
         class cache_nodePosi_t:public cache<ipair>{
                 void onExpire(const std::string &,ipair & )override;
                 void onLoad(const std::string &,ipair & )override;
