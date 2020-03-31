@@ -12,8 +12,9 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
     if(!chunkLoaded(x,y))//chunk未被创建，将不再创建items
         return;
     findChunk(x,y){
-        ptr = it->second;
-        releaseChildren(ptr);
+        return;
+        //ptr = it->second;
+        //releaseChildren(ptr);
     }else{
         ptr = new chunk;
         ptr->x = x;
@@ -53,6 +54,14 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
     }
 }
 
+void terrain_item::pushRemoveTable(int x, int y, const std::set<mapItem> &r){
+    rmt tmp;
+    tmp.x = x;
+    tmp.y = y;
+    tmp.r = r;
+    rmtQueue.push(tmp);
+}
+
 void terrain_item::releaseChunk(int x,int y){
     printf("[releaseChunk](%d,%d)\n",x,y);
     terrain::releaseChunk(x,y);
@@ -61,6 +70,40 @@ void terrain_item::releaseChunk(int x,int y){
         releaseChildren(it->second);
         chunks.erase(it);
         delete it->second;
+    }
+}
+
+void terrain_item::loop(){
+    terrain::loop();
+    clock_t starts,ends;
+    starts=clock();
+    while(!rmtQueue.empty()){
+        auto t = rmtQueue.front();
+        setRemoveTable(t.x,t.y,t.r);
+        rmtQueue.pop();
+        ends = clock();
+        if(ends-starts>5)
+            break;
+    }
+    int left = rmtQueue.size();
+    if(left==0){
+        chunkLeft=0;
+        if(chunkLeft_text){
+            chunkLeft_text->remove();
+            chunkLeft_text=NULL;
+        }
+    }else{
+        if(chunkLeft!=left){
+            chunkLeft=left;
+            if(chunkLeft_text){
+                chunkLeft_text->remove();
+            }
+            wchar_t buf[256];
+            swprintf(buf,256,L"%d terrain item chunks left for generate",left);
+            chunkLeft_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(32,height-90,256,height),false,false);
+            chunkLeft_text->setOverrideColor(irr::video::SColor(255,255,255,255));
+            chunkLeft_text->setOverrideFont(font);
+        }
     }
 }
 void terrain_item::releaseChunk(chunk * ch){
@@ -126,6 +169,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->rigidBody->setFriction(0.7);
             res->rigidBody->setRestitution(0.1);
             dynamicsWorld->addRigidBody(res->rigidBody);
+            res->hideLodLevel=4;
             return res;
         }else if(id==-2){//草
             if(realHeight<waterLevel)
@@ -142,10 +186,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
             res->node[0]->setPosition(vec3(x,realHeight,y));
             res->node[0]->updateAbsolutePosition();//更新矩阵
-            res->node[1]=res->node[0]->clone();
-            res->node[1]->setPosition(vec3(x,realHeight,y));
-            res->node[2]=scene->addEmptySceneNode();
-            res->node[2]->setPosition(vec3(x,realHeight,y));
+            res->hideLodLevel = 3;
             return res;
         }
         return NULL;
@@ -207,6 +248,11 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     return res;
 }
 
+bool terrain_item::chunkCreated(int x, int y){
+    auto it = chunks.find(ipair(x,y));
+    return it!=chunks.end() && terrain::chunkCreated(x,y);
+}
+
 void terrain_item::updateLOD(int x, int y, int lv){
     terrain::updateLOD(x,y,lv);
     findChunk(x,y){
@@ -225,12 +271,14 @@ void terrain_item::updateLOD(int x, int y, int lv){
                     if(im->node[i])
                         im->node[i]->setVisible(false);
                 }
-                for(int i=lv-1;i>=0;--i){
-                    //反向遍历lod列表
-                    if(im->node[i]){
-                        //找到可用的最大lod
-                        im->node[i]->setVisible(true);
-                        break;
+                if(lv<im->hideLodLevel){
+                    for(int i=lv-1;i>=0;--i){
+                        //反向遍历lod列表
+                        if(im->node[i]){
+                            //找到可用的最大lod
+                            im->node[i]->setVisible(true);
+                            break;
+                        }
                     }
                 }
             }
@@ -257,6 +305,8 @@ void terrain_item::releaseTerrainItem(item * p){
     delete p;
 }
 terrain_item::terrain_item(){
+    chunkLeft = 0;
+    chunkLeft_text = NULL;
     loadConfig();
     //树纹理
     texture_treeTrunk = driver->getTexture("../../res/tree_trunk.tga");
@@ -425,7 +475,7 @@ void terrain_item::msg_addRemovedItem(int x,int y,int id,int index){
     removeTerrainItem(x,y,id,index);
 }
 void terrain_item::msg_setRemovedItem(int x,int y,const std::set<mapItem> & rmt){
-    setRemoveTable(x,y,rmt);
+    pushRemoveTable(x,y,rmt);
 }
 
 }

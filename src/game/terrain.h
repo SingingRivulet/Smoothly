@@ -16,7 +16,7 @@ namespace smoothly{
             virtual bool chunkShowing(int x,int y);
             virtual bool chunkLoaded(int x,int y)=0;
             void loop()override;
-            bool chunkCreated(int x,int y);
+            virtual bool chunkCreated(int x,int y);
             bool selectByRay(//射线拾取
                     const irr::core::line3d<irr::f32>& ray,
                     vec3& outCollisionPoint,

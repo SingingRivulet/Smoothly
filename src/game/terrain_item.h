@@ -3,6 +3,7 @@
 #include "terrain.h"
 #include "../utils/cJSON.h"
 #include <map>
+#include <queue>
 namespace smoothly{
     typedef client::mapItem mapItem;
     class terrain_item:public terrain{
@@ -10,6 +11,7 @@ namespace smoothly{
             terrain_item();
             ~terrain_item();
             void setRemoveTable(int x,int y,const std::set<mapItem> & rmt);
+            void pushRemoveTable(int x,int y,const std::set<mapItem> & rmt);
             void removeTerrainItem(int x , int y ,int index,int id);
             void releaseTerrainItems(int x , int y);
             struct mapId{
@@ -19,6 +21,9 @@ namespace smoothly{
             virtual void msg_addRemovedItem(int x,int y,int,int);
             virtual void msg_setRemovedItem(int x,int y,const std::set<mapItem> &);
             virtual void releaseChunk(int x,int y);
+
+            void loop()override;
+            bool chunkCreated(int x,int y)override;
         private:
             struct chunk;
             struct item{
@@ -30,11 +35,13 @@ namespace smoothly{
                 btCollisionShape * bodyShape;
                 bodyInfo info;
                 chunk * parent;
+                int hideLodLevel;
                 inline item(){
                     rigidBody = NULL;
                     bodyState = NULL;
                     bodyMesh  = NULL;
                     bodyShape = NULL;
+                    hideLodLevel = 5;
                     for(int i = 0;i<4;++i)
                         node[i] = NULL;
                 }
@@ -75,6 +82,24 @@ namespace smoothly{
             irr::u32 shader_tree;
             std::vector<irr::video::ITexture*> texture_grass;
             irr::scene::IMesh * mesh_grass;
+
+            struct rmt{
+                int x,y;
+                std::set<mapItem> r;
+                rmt():r(){
+                    x=0;
+                    y=0;
+                }
+                rmt(const rmt & i){
+                    x = i.x;
+                    y = i.y;
+                    r = i.r;
+                }
+            };
+            std::queue<rmt> rmtQueue;
+
+            int chunkLeft;
+            irr::gui::IGUIStaticText * chunkLeft_text;
     };
 }
 #endif

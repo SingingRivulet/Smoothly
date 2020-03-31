@@ -87,6 +87,8 @@ engine::engine(){
     f->setMaterialTexture(0, pTexture);
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     m->drop();
+
+    font = gui->getFont("../res/font/fonthaettenschweiler.bmp");
 }
 engine::~engine(){
     device->drop();
@@ -109,11 +111,10 @@ void engine::sceneLoop(){
     driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     scene->drawAll();
-    gui->drawAll();
-
     if(cm.Y<waterLevel){//水下效果
         driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
     }
+    gui->drawAll();
 
     driver->endScene();
     int fps = driver->getFPS();

@@ -46,10 +46,11 @@ namespace smoothly{
             
             float waterLevel;
 
-            float width,height;
+            int width,height;
 
             bool running;
 
+            irr::gui::IGUIFont * font;
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
