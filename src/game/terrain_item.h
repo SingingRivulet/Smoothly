@@ -48,7 +48,9 @@ namespace smoothly{
             };
             struct chunk{
                 int x,y;
+                chunk *nearx0,*nearx1,*neary0,*neary1;//所有chunk构成一张二维链表，方便查询
                 std::map<mapItem,item*> children;
+                void unlink();
             };
             std::map<ipair,chunk*> chunks;
             void releaseChunk(chunk*);
@@ -60,6 +62,7 @@ namespace smoothly{
 
             virtual void updateLOD(int x,int y,int lv)override;
         private:
+            void linkChunk(chunk * , int x,int y);
             struct conf{
                 bool                 haveBody;
                 shapeGroup           shape;

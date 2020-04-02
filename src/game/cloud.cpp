@@ -7,6 +7,9 @@ cloud::cloud(){
     cloudy                  = 0.5;
     lightness               = 1.2;
     astrAtomScat            = 0.5;
+    cloudy_text   = NULL;
+    daytime_text  = NULL;
+    gametime_text = NULL;
     astronomical.set(1,1,1);
     astrLight.set(0.5,0.5,0.5);
     astrColor.set(3.0,2.8,2.6);
@@ -111,6 +114,29 @@ void cloud::renderSky(){
     ends=clock();
     if(ends-starts<30)
         goto begin;
+
+    if(gametime_text)
+        gametime_text->remove();
+    if(daytime_text)
+        daytime_text->remove();
+    if(cloudy_text)
+        cloudy_text->remove();
+    wchar_t buf[256];
+
+    swprintf(buf,256,L"Game time:%d",cloudTime);
+    gametime_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(0,height-70,200,height),false,false);
+    gametime_text->setOverrideColor(irr::video::SColor(255,255,255,255));
+    gametime_text->setOverrideFont(font);
+
+    swprintf(buf,256,L"clock:%d",cloudTime%1200);
+    daytime_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(200,height-70,300,height),false,false);
+    daytime_text->setOverrideColor(irr::video::SColor(255,255,255,255));
+    daytime_text->setOverrideFont(font);
+
+    swprintf(buf,256,L"weather:%f",cloudy);
+    cloudy_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(300,height-70,400,height),false,false);
+    cloudy_text->setOverrideColor(irr::video::SColor(255,255,255,255));
+    cloudy_text->setOverrideFont(font);
 }
 
 void cloud::skyBox::init(const std::string & name, irr::s32 cloud){

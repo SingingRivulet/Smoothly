@@ -19,6 +19,7 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
         ptr = new chunk;
         ptr->x = x;
         ptr->y = y;
+        linkChunk(ptr,x,y);
         chunks[ipair(x,y)]=ptr;
     }
     printf("[setRemoveTable](%d,%d)\n",x,y);
@@ -67,6 +68,7 @@ void terrain_item::releaseChunk(int x,int y){
     terrain::releaseChunk(x,y);
     auto it = chunks.find(ipair(x,y));
     if(it!=chunks.end()){
+        it->second->unlink();
         releaseChildren(it->second);
         chunks.erase(it);
         delete it->second;
@@ -100,13 +102,14 @@ void terrain_item::loop(){
             }
             wchar_t buf[256];
             swprintf(buf,256,L"%d terrain item chunks left for generate",left);
-            chunkLeft_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(32,height-90,256,height),false,false);
+            chunkLeft_text=gui->addStaticText(buf,irr::core::rect<irr::s32>(0,height-90,256,height),false,false);
             chunkLeft_text->setOverrideColor(irr::video::SColor(255,255,255,255));
             chunkLeft_text->setOverrideFont(font);
         }
     }
 }
 void terrain_item::releaseChunk(chunk * ch){
+    ch->unlink();
     releaseChildren(ch);
     chunks.erase(ipair(ch->x,ch->y));
     delete ch;
@@ -250,7 +253,30 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
 
 bool terrain_item::chunkCreated(int x, int y){
     auto it = chunks.find(ipair(x,y));
-    return it!=chunks.end() && terrain::chunkCreated(x,y);
+    if(it==chunks.end())
+        return false;
+    chunk * c = it->second;
+
+    //检查上下左右
+    if(c->nearx0==NULL)
+        return false;
+    if(c->nearx1==NULL)
+        return false;
+    if(c->neary0==NULL)
+        return false;
+    if(c->neary1==NULL)
+        return false;
+
+    if(c->nearx0->neary0==NULL)
+        return false;
+    if(c->nearx1->neary1==NULL)
+        return false;
+    if(c->neary0->nearx0==NULL)
+        return false;
+    if(c->neary1->nearx1==NULL)
+        return false;
+
+    return terrain::chunkCreated(x,y);
 }
 
 void terrain_item::updateLOD(int x, int y, int lv){
@@ -282,6 +308,41 @@ void terrain_item::updateLOD(int x, int y, int lv){
                     }
                 }
             }
+        }
+    }
+}
+
+void terrain_item::linkChunk(terrain_item::chunk * c, int x, int y){
+    {
+        findChunk(x+1,y){
+            c->nearx1 = it->second;
+            it->second->nearx0 = c;
+        }else{
+            c->nearx1 = NULL;
+        }
+    }
+    {
+        findChunk(x-1,y){
+            c->nearx0 = it->second;
+            it->second->nearx1 = c;
+        }else{
+            c->nearx0 = NULL;
+        }
+    }
+    {
+        findChunk(x,y+1){
+            c->neary1 = it->second;
+            it->second->neary0 = c;
+        }else{
+            c->neary1 = NULL;
+        }
+    }
+    {
+        findChunk(x,y-1){
+            c->neary0 = it->second;
+            it->second->neary1 = c;
+        }else{
+            c->neary0 = NULL;
         }
     }
 }
@@ -476,6 +537,25 @@ void terrain_item::msg_addRemovedItem(int x,int y,int id,int index){
 }
 void terrain_item::msg_setRemovedItem(int x,int y,const std::set<mapItem> & rmt){
     pushRemoveTable(x,y,rmt);
+}
+
+void terrain_item::chunk::unlink(){
+    if(nearx0){
+        nearx0->nearx1 = NULL;
+        nearx0 = NULL;
+    }
+    if(nearx1){
+        nearx1->nearx0 = NULL;
+        nearx1 = NULL;
+    }
+    if(neary0){
+        neary0->neary1 = NULL;
+        neary0 = NULL;
+    }
+    if(neary1){
+        neary1->neary0 = NULL;
+        neary1 = NULL;
+    }
 }
 
 }

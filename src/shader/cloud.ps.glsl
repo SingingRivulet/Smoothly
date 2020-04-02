@@ -45,7 +45,7 @@ float fbm(vec3 x) {
         //        x = x * 2.0 + shift;
         //        a *= 0.5;
         //}
-        float tm = float(time)*0.00008;
+        float tm = mod(float(time),524288.0)*0.00008;
         v+=noise(x*2.0+tm)*0.5;
         v+=noise(x*4.0+tm)*0.25;
         v+=noise(x*8.0+tm)*0.125;
@@ -62,7 +62,7 @@ float haveCloud(vec3 p){
     //float cl = snoise2d(p.xz/100000.0)*2.0;
     //cl = snoise(p/100000.0)*cl*128.0;
 
-    float r = fbm(vec3(p.x+float(time*100),p.y,p.z)/100000.0);
+    float r = fbm(vec3(p.x+mod(float(time),524288.0)*100.0,p.y,p.z)/100000.0);
     r*=cloudFilter((p.y-24000.0)*0.000001);
     r*=cloudFilter(length(p.xz)*0.0000006);
     return r;

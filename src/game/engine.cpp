@@ -88,7 +88,7 @@ engine::engine(){
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     m->drop();
 
-    font = gui->getFont("../res/font/fonthaettenschweiler.bmp");
+    font = gui->getFont("../../res/font/fonthaettenschweiler.bmp");
 }
 engine::~engine(){
     device->drop();

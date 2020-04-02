@@ -46,6 +46,10 @@ class cloud:public engine{
         irr::s32 cloudTime;
         irr::scene::IParticleSystemSceneNode *rain,*snow;
         irr::scene::ILightSceneNode * light;
+
+        irr::gui::IGUIStaticText * cloudy_text;
+        irr::gui::IGUIStaticText * daytime_text;
+        irr::gui::IGUIStaticText * gametime_text;
 };
 
 }
