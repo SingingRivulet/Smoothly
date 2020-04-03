@@ -21,6 +21,8 @@ engine::engine(){
     gui    = device->getGUIEnvironment();
     timer  = device->getTimer();
     device->setWindowCaption(L"Smoothly");
+    driver->setAllowZWriteOnTransparent(true);
+    vendor = driver->getVendorInfo();
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
     scene->setShadowColor(irr::video::SColor(150, 0, 0, 0));
     this->collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -114,13 +116,21 @@ void engine::sceneLoop(){
     if(cm.Y<waterLevel){//水下效果
         driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
     }
+    auto coll = scene->getSceneCollisionManager();
+    for(auto it:myBodies_mark){//在屏幕上标出自己拥有的物体
+        auto p = coll->getScreenCoordinatesFrom3DPosition(it,camera);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+    }
+    myBodies_mark.clear();
     gui->drawAll();
 
     driver->endScene();
     int fps = driver->getFPS();
     if (lastFPS != fps){
         irr::core::stringw str = L"Smoothly [";
-        str += driver->getName();
+        str += vendor+":"+driver->getName();
         str += "] FPS:";
         str += fps;
         device->setWindowCaption(str.c_str());

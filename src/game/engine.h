@@ -3,6 +3,7 @@
 #include "physical.h"
 #include "../libclient/terrainGen.h"
 #include "RealisticWater.h"
+#include <vector>
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
         auto cosa=cos(a);
@@ -25,6 +26,7 @@ namespace smoothly{
             irr::ITimer               * timer;
             irr::video::IVideoDriver * driver;
             irr::scene::ICameraSceneNode * camera;
+            irr::core::stringc          vendor;
             
             btDiscreteDynamicsWorld   * dynamicsWorld;
             btDefaultCollisionConfiguration* collisionConfiguration;
@@ -51,6 +53,8 @@ namespace smoothly{
             bool running;
 
             irr::gui::IGUIFont * font;
+
+            std::vector<irr::core::vector3df> myBodies_mark;
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
