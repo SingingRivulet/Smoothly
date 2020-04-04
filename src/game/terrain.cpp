@@ -174,6 +174,7 @@ bool terrain::chunkShowing(int x,int y){
 }
 
 void terrain::loop(){
+    building::loop();
     //每2秒强制进行一次lod更新
     int tm = time(0);
     if(updateCamChunk() || abs(lastUCT-tm)>2){

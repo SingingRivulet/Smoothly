@@ -36,6 +36,8 @@ class building:public weather{
         virtual void updateLOD(int x,int y,int lv);
 
     private:
+        void addDefaultBuilding();
+
         lua_State * L;
         struct buildingBody;
         struct buildingChunk{
@@ -50,7 +52,7 @@ class building:public weather{
         struct buildingBody{
             std::string uuid;
             buildingChunk * inchunk;
-            irr::scene::IAnimatedMeshSceneNode * node[4];
+            irr::scene::IMeshSceneNode * node[4];
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
             conf             * config;
@@ -77,7 +79,9 @@ class building:public weather{
             irr::s32                shader;
             bool                    haveShader;
 
-            irr::scene::IAnimatedMesh *   mesh[4];
+            irr::scene::IMesh *   mesh[4];
+
+            irr::video::ITexture * texture;
 
             shapeGroup              bodyShape;
             bool                    haveBody;
@@ -105,6 +109,7 @@ class building:public weather{
                 attachHandler        = 0;
                 autoAttach.deltaHei  = 0;
                 autoAttach.deltaHor  = 1;
+                texture              = NULL;
             }
         };
         std::map<int,conf*> config;

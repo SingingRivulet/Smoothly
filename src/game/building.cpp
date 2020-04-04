@@ -6,12 +6,13 @@ namespace smoothly{
 building::building(){
     buildingPrev = NULL;
     buildingPrevConf = NULL;
-    buildingPrevId = 0;
+    buildingPrevId = -1;
     L = luaL_newstate();
     luaL_openlibs(L);
     lua_pushlightuserdata(L,this);
     luaL_dofile(L, "../script/building.lua");
     loadConfig();
+    addDefaultBuilding();
 }
 
 building::~building(){
@@ -106,6 +107,22 @@ void building::updateLOD(int x, int y, int lv){
     }
 }
 
+void building::addDefaultBuilding(){
+    {
+        auto ptr  = new conf;
+        ptr->id   = -1;
+        config[-1]= ptr;
+        ptr->mesh[0] = scene->getGeometryCreator()->createCubeMesh(vec3(10,0.5,10));
+        ptr->texture = driver->getTexture("../../res/tree_trunk.tga");
+        ptr->haveBody = true;
+        ptr->bodyShape.init("+b0 0 0 0 0 0 1 5 0.5 5");
+        ptr->canBuildOn = true;
+        ptr->fetchBB=ptr->mesh[0]->getBoundingBox();
+        ptr->useAutoAttach = true;
+        ptr->autoAttach.deltaHor = 10;
+    }
+}
+
 void building::buildingAdd(const vec3 &p, const vec3 &r, int id, const std::string &uuid){
     auto it = bodies.find(uuid);
     if(it!=bodies.end())//已经存在
@@ -159,12 +176,15 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
             break;
         }
         //创建节点
-        res->node[i] = scene->addAnimatedMeshSceneNode(c->mesh[i],0,-1,p,r);
+        res->node[i] = scene->addMeshSceneNode(c->mesh[i],0,-1,p,r);
         res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
         res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
         res->node[i]->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         if(c->haveShader){
             res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
+        }
+        if(c->texture){
+            res->node[i]->setMaterialTexture(0,c->texture);
         }
         res->node[i]->setVisible(false);
         res->node[i]->updateAbsolutePosition();//更新矩阵
@@ -231,104 +251,106 @@ void building::loadConfig(){
                     auto idnode = cJSON_GetObjectItem(c,"id");
                     if(idnode && idnode->type==cJSON_Number){
                         int id = idnode->valueint;
-                        if(config.find(id)!=config.end()){
-                            printf("[error]can't redefine body %d\n" , id);
-                        }else{
-                            auto mnode = cJSON_GetObjectItem(c,"mesh");
-                            if(mnode && mnode->type==cJSON_String){
-                                auto mesh = scene->getMesh(mnode->valuestring);
-                                if(mesh){
-                                    auto ptr  = new conf;
-                                    ptr->id   = id;
-                                    config[id]= ptr;
-                                    ptr->mesh[0] = mesh;
+                        if(id>0){
+                            if(config.find(id)!=config.end()){
+                                printf("[error]can't redefine body %d\n" , id);
+                            }else{
+                                auto mnode = cJSON_GetObjectItem(c,"mesh");
+                                if(mnode && mnode->type==cJSON_String){
+                                    auto mesh = scene->getMesh(mnode->valuestring);
+                                    if(mesh){
+                                        auto ptr  = new conf;
+                                        ptr->id   = id;
+                                        config[id]= ptr;
+                                        ptr->mesh[0] = mesh;
 
-                                    auto meshv2_j = cJSON_GetObjectItem(c,"meshv2");
-                                    if(meshv2_j && meshv2_j->type==cJSON_String){
-                                        auto meshv2 = scene->getMesh(meshv2_j->valuestring);
-                                        if(meshv2){
-                                            ptr->mesh[1] = meshv2;
-                                            auto meshv3_j = cJSON_GetObjectItem(c,"meshv3");
-                                            if(meshv3_j && meshv3_j->type==cJSON_String){
-                                                auto meshv3 = scene->getMesh(meshv3_j->valuestring);
-                                                if(meshv3){
-                                                    ptr->mesh[2] = meshv3;
-                                                    auto meshv4_j = cJSON_GetObjectItem(c,"meshv4");
-                                                    if(meshv4_j && meshv4_j->type==cJSON_String){
-                                                        auto meshv4 = scene->getMesh(meshv4_j->valuestring);
-                                                        if(meshv4){
-                                                            ptr->mesh[3] = meshv4;
+                                        auto meshv2_j = cJSON_GetObjectItem(c,"meshv2");
+                                        if(meshv2_j && meshv2_j->type==cJSON_String){
+                                            auto meshv2 = scene->getMesh(meshv2_j->valuestring);
+                                            if(meshv2){
+                                                ptr->mesh[1] = meshv2;
+                                                auto meshv3_j = cJSON_GetObjectItem(c,"meshv3");
+                                                if(meshv3_j && meshv3_j->type==cJSON_String){
+                                                    auto meshv3 = scene->getMesh(meshv3_j->valuestring);
+                                                    if(meshv3){
+                                                        ptr->mesh[2] = meshv3;
+                                                        auto meshv4_j = cJSON_GetObjectItem(c,"meshv4");
+                                                        if(meshv4_j && meshv4_j->type==cJSON_String){
+                                                            auto meshv4 = scene->getMesh(meshv4_j->valuestring);
+                                                            if(meshv4){
+                                                                ptr->mesh[3] = meshv4;
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    auto item = c->child;
+                                        auto item = c->child;
 
-                                    while (item) {
-                                        if(item->type==cJSON_String){
-                                            if(strcmp(item->string,"body")==0){
-                                                ptr->haveBody = true;
-                                                ptr->bodyShape.init(item->valuestring);
-                                            }else if(strcmp(item->string,"attachHandler")==0){
-                                                lua_settop(L,0);
-                                                lua_getglobal(L,item->valuestring);//获取函数
-                                                if(lua_isfunction(L,-1)){//检查
-                                                    ptr->attachHandler = luaL_ref(L,LUA_REGISTRYINDEX);
-                                                    ptr->useAttachHandler = true;
+                                        while (item) {
+                                            if(item->type==cJSON_String){
+                                                if(strcmp(item->string,"body")==0){
+                                                    ptr->haveBody = true;
+                                                    ptr->bodyShape.init(item->valuestring);
+                                                }else if(strcmp(item->string,"attachHandler")==0){
+                                                    lua_settop(L,0);
+                                                    lua_getglobal(L,item->valuestring);//获取函数
+                                                    if(lua_isfunction(L,-1)){//检查
+                                                        ptr->attachHandler = luaL_ref(L,LUA_REGISTRYINDEX);
+                                                        ptr->useAttachHandler = true;
+                                                    }
+                                                    lua_settop(L,0);
                                                 }
-                                                lua_settop(L,0);
-                                            }
-                                        }else if(item->type==cJSON_Object) {
-                                            if(strcmp(item->string,"shader")==0){
-                                                auto vs = cJSON_GetObjectItem(item,"vs");
-                                                auto ps = cJSON_GetObjectItem(item,"ps");
-                                                if(vs && ps && vs->type==cJSON_String && ps->type==cJSON_String){
-                                                    ptr->haveShader = true;
-                                                    ptr->shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
-                                                                vs->valuestring, "main", irr::video::EVST_VS_1_1,
-                                                                ps->valuestring, "main", irr::video::EPST_PS_1_1);
-                                                }
-                                            }else if(strcmp(item->string,"fetchBB")==0){
-                                                auto from = cJSON_GetObjectItem(item,"from");
-                                                if(from){
-                                                    auto x = cJSON_GetObjectItem(from,"x");
-                                                    auto y = cJSON_GetObjectItem(from,"y");
-                                                    auto z = cJSON_GetObjectItem(from,"z");
-                                                    if(x && y && z && x->type==cJSON_Number && y->type==cJSON_Number && z->type==cJSON_Number){
-                                                        ptr->fetchBB.MinEdge.set(x->valuedouble,y->valuedouble,z->valuedouble);
+                                            }else if(item->type==cJSON_Object) {
+                                                if(strcmp(item->string,"shader")==0){
+                                                    auto vs = cJSON_GetObjectItem(item,"vs");
+                                                    auto ps = cJSON_GetObjectItem(item,"ps");
+                                                    if(vs && ps && vs->type==cJSON_String && ps->type==cJSON_String){
+                                                        ptr->haveShader = true;
+                                                        ptr->shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                                                    vs->valuestring, "main", irr::video::EVST_VS_1_1,
+                                                                    ps->valuestring, "main", irr::video::EPST_PS_1_1);
+                                                    }
+                                                }else if(strcmp(item->string,"fetchBB")==0){
+                                                    auto from = cJSON_GetObjectItem(item,"from");
+                                                    if(from){
+                                                        auto x = cJSON_GetObjectItem(from,"x");
+                                                        auto y = cJSON_GetObjectItem(from,"y");
+                                                        auto z = cJSON_GetObjectItem(from,"z");
+                                                        if(x && y && z && x->type==cJSON_Number && y->type==cJSON_Number && z->type==cJSON_Number){
+                                                            ptr->fetchBB.MinEdge.set(x->valuedouble,y->valuedouble,z->valuedouble);
+                                                        }
+                                                    }
+                                                    auto to = cJSON_GetObjectItem(item,"to");
+                                                    if(to){
+                                                        auto x = cJSON_GetObjectItem(to,"x");
+                                                        auto y = cJSON_GetObjectItem(to,"y");
+                                                        auto z = cJSON_GetObjectItem(to,"z");
+                                                        if(x && y && z && x->type==cJSON_Number && y->type==cJSON_Number && z->type==cJSON_Number){
+                                                            ptr->fetchBB.MaxEdge.set(x->valuedouble,y->valuedouble,z->valuedouble);
+                                                        }
                                                     }
                                                 }
-                                                auto to = cJSON_GetObjectItem(item,"to");
-                                                if(to){
-                                                    auto x = cJSON_GetObjectItem(to,"x");
-                                                    auto y = cJSON_GetObjectItem(to,"y");
-                                                    auto z = cJSON_GetObjectItem(to,"z");
-                                                    if(x && y && z && x->type==cJSON_Number && y->type==cJSON_Number && z->type==cJSON_Number){
-                                                        ptr->fetchBB.MaxEdge.set(x->valuedouble,y->valuedouble,z->valuedouble);
-                                                    }
+                                            }else if(item->type==cJSON_Number){
+                                                if(strcmp(item->string,"deltaHei")==0){
+                                                    ptr->autoAttach.deltaHei = item->valuedouble;
+                                                }else if(strcmp(item->string,"deltaHor")==0){
+                                                    ptr->useAutoAttach = true;
+                                                    ptr->autoAttach.deltaHor = item->valuedouble;
+                                                }else if(strcmp(item->string,"canBuildOn")==0){
+                                                    ptr->canBuildOn = (item->valueint!=0);
                                                 }
                                             }
-                                        }else if(item->type==cJSON_Number){
-                                            if(strcmp(item->string,"deltaHei")==0){
-                                                ptr->autoAttach.deltaHei = item->valuedouble;
-                                            }else if(strcmp(item->string,"deltaHor")==0){
-                                                ptr->useAutoAttach = true;
-                                                ptr->autoAttach.deltaHor = item->valuedouble;
-                                            }else if(strcmp(item->string,"canBuildOn")==0){
-                                                ptr->canBuildOn = (item->valueint!=0);
-                                            }
+                                            item = item->next;
                                         }
-                                        item = item->next;
-                                    }
 
+                                    }else{
+                                        printf("[error]fail to load mesh\n");
+                                    }
                                 }else{
-                                    printf("[error]fail to load mesh\n");
+                                    printf("[error]mesh have not been defined\n");
                                 }
-                            }else{
-                                printf("[error]mesh have not been defined\n");
                             }
                         }
                     }else{
@@ -395,6 +417,20 @@ struct	RayResult : public btCollisionWorld::RayResultCallback
         m_hitPointWorld.setInterpolate3(m_rayFromWorld,m_rayToWorld,rayResult.m_hitFraction);
         return rayResult.m_hitFraction;
     }
+
+    virtual bool needsCollision(btBroadphaseProxy* proxy0) const
+    {
+        bool collides = (proxy0->m_collisionFilterGroup & m_collisionFilterMask) != 0;
+        collides = collides && (m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+        auto p = (btCollisionObject*)proxy0->m_clientObject;
+        if(p){
+            auto i = (building::bodyInfo*)p->getUserPointer();
+            if(i){
+                collides = collides && (i->type==building::BODY_TERRAIN || i->type==building::BODY_BUILDING);
+            }
+        }
+        return collides;
+    }
 };
 void building::fetchByRay(const vec3 &from, const vec3 &to, std::function<void (const vec3 &, physical::bodyInfo *)> callback, std::function<bool(bodyInfo *)> filter){
     btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
@@ -413,13 +449,15 @@ void building::fetchByRay(const vec3 &from, const vec3 &to, std::function<void (
 }
 
 void building::buildingStart(){
+    if(buildingPrev!=NULL)
+        return;
     auto cit = config.find(buildingPrevId);
     if(cit==config.end())
         return;
     buildingPrevConf    = cit->second;
     buildingAllowBuild  = false;
     buildingTarget      = NULL;
-    buildingPrev = scene->addAnimatedMeshSceneNode(buildingPrevConf->mesh[0]);
+    buildingPrev = scene->addMeshSceneNode(buildingPrevConf->mesh[0]);
     buildingPrev->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     buildingPrev->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     buildingPrev->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
@@ -432,10 +470,11 @@ void building::buildingUpdate(){
     if(buildingPrev==NULL)
         return;
 
-    auto start  = camera->getPosition();
-    auto dir    = camera->getTarget()-start;
+    auto ori    = camera->getPosition();
+    auto dir    = camera->getTarget()-ori;
     dir.normalize();
-    auto end    = start+dir;
+    auto start  = ori;
+    auto end    = ori+dir*20;
 
     vec3 camAng = dir.getHorizontalAngle();//摄像机的旋转角度
     buildingPrev->setPosition(end);
@@ -448,6 +487,11 @@ void building::buildingUpdate(){
         buildingTarget = NULL;
         if(b->type==BODY_TERRAIN){
             buildingAllowBuild = true;
+            auto ang=dir.getHorizontalAngle();
+            ang.Z=0;
+            ang.X=0;
+            buildingPrev->setPosition(p);//更新n的坐标
+            buildingPrev->setRotation(ang);//更新n的旋转欧拉角
             return;
         }else
         if(b->type==BODY_BUILDING){
@@ -641,13 +685,17 @@ void building::buildingApply()
         buildingPrev->remove();
     buildingPrev = NULL;
     buildingPrevConf = NULL;
+    buildingAllowBuild = false;
 }
 
 void building::buildingEnd(){
+    if(buildingAllowBuild)
+        buildingApply();
     if(buildingPrev)
         buildingPrev->remove();
     buildingPrev = NULL;
     buildingPrevConf = NULL;
+    buildingAllowBuild=false;
 }
 
 void building::removeBuilding(building::buildingBody * b){
