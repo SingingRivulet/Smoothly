@@ -38,6 +38,7 @@ namespace smoothly{
             ~engine();
             virtual void sceneLoop();
             virtual void worldLoop();
+            virtual void onDraw();
             void deltaTimeUpdate();
             
             inline float getDeltaTime(){

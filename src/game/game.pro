@@ -88,7 +88,8 @@ SOURCES += \
     cloud.cpp \
     weather.cpp \
     meshGenerator/tree.cpp \
-    meshGenerator/grass.cpp
+    meshGenerator/grass.cpp \
+    building_default.cpp
 
 FORMS += \
     ui/login.ui
@@ -106,4 +107,6 @@ DISTFILES += \
     ../shader/sky.ps.glsl \
     ../shader/sky.vs.glsl \
     ../shader/tree.ps.glsl \
-    ../shader/tree.vs.glsl
+    ../shader/tree.vs.glsl \
+    ../shader/building_default.ps.glsl \
+    ../shader/building_default.vs.glsl

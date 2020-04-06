@@ -6,7 +6,7 @@ namespace smoothly{
 building::building(){
     buildingPrev = NULL;
     buildingPrevConf = NULL;
-    buildingPrevId = -1;
+    buildingPrevId = -4;
     L = luaL_newstate();
     luaL_openlibs(L);
     lua_pushlightuserdata(L,this);
@@ -107,19 +107,40 @@ void building::updateLOD(int x, int y, int lv){
     }
 }
 
-void building::addDefaultBuilding(){
-    {
-        auto ptr  = new conf;
-        ptr->id   = -1;
-        config[-1]= ptr;
-        ptr->mesh[0] = scene->getGeometryCreator()->createCubeMesh(vec3(10,0.5,10));
-        ptr->texture = driver->getTexture("../../res/tree_trunk.tga");
-        ptr->haveBody = true;
-        ptr->bodyShape.init("+b0 0 0 0 0 0 1 5 0.5 5");
-        ptr->canBuildOn = true;
-        ptr->fetchBB=ptr->mesh[0]->getBoundingBox();
-        ptr->useAutoAttach = true;
-        ptr->autoAttach.deltaHor = 10;
+void building::onDraw(){
+    weather::onDraw();
+    if(buildingPrev){
+        int ch = height/2;
+        int cw = width/2;
+        //画准星
+
+        irr::video::SColor col(64,255,255,0);
+        if(buildingAllowBuild){
+            col.set(255,255,0,255);
+        }
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw-10,ch),irr::core::vector2d<irr::s32>(cw-20,ch+3),col);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw-10,ch),irr::core::vector2d<irr::s32>(cw-20,ch-3),col);
+
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw+10,ch),irr::core::vector2d<irr::s32>(cw+20,ch+3),col);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw+10,ch),irr::core::vector2d<irr::s32>(cw+20,ch-3),col);
+
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw,ch+10),irr::core::vector2d<irr::s32>(cw+3,ch+20),col);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw,ch+10),irr::core::vector2d<irr::s32>(cw-3,ch+20),col);
+
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw,ch-10),irr::core::vector2d<irr::s32>(cw+3,ch-20),col);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(cw,ch-10),irr::core::vector2d<irr::s32>(cw-3,ch-20),col);
+
+        if(buildingAllowBuild){
+
+        }else{
+            driver->draw2DLine(irr::core::vector2d<irr::s32>(cw-5,ch-5),irr::core::vector2d<irr::s32>(cw+5,ch+5),irr::video::SColor(255,255,0,0));
+            driver->draw2DLine(irr::core::vector2d<irr::s32>(cw+5,ch-5),irr::core::vector2d<irr::s32>(cw-5,ch+5),irr::video::SColor(255,255,0,0));
+        }
+
+        if(buildingPrevConf->desTexture){
+            driver->draw2DImage(buildingPrevConf->desTexture,
+                                irr::core::vector2d<irr::s32>(cw-64,ch+16));
+        }
     }
 }
 
@@ -461,6 +482,8 @@ void building::buildingStart(){
     buildingPrev->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     buildingPrev->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     buildingPrev->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    if(buildingPrevConf->texture)
+        buildingPrev->setMaterialTexture(0,buildingPrevConf->texture);
     if(buildingPrevConf->haveShader){
         buildingPrev->setMaterialType((irr::video::E_MATERIAL_TYPE)buildingPrevConf->shader);
     }
@@ -519,19 +542,20 @@ void building::buildingUpdate(){
                     p3.normalize();p3*=dhor;
                     p4.normalize();p4*=dhor;
 
-                    vec3 rp[4];
+                    std::vector<vec3> rp;
 
                     auto dhei = buildingPrevConf->autoAttach.deltaHei;
                     vec3 trg = tb->node[0]->getPosition();
-                    rp[0].set(p1.X+trg.X , trg.Y+dhei , p1.Y+trg.Z);//计算出四个吸附点位置
-                    rp[1].set(p2.X+trg.X , trg.Y+dhei , p2.Y+trg.Z);
-                    rp[2].set(p3.X+trg.X , trg.Y+dhei , p3.Y+trg.Z);
-                    rp[3].set(p4.X+trg.X , trg.Y+dhei , p4.Y+trg.Z);
+
+                    if(buildingPrevConf->autoAttach.allowed[0])rp.push_back(vec3(p1.X+trg.X , trg.Y+dhei , p1.Y+trg.Z));//计算出四个吸附点位置
+                    if(buildingPrevConf->autoAttach.allowed[1])rp.push_back(vec3(p2.X+trg.X , trg.Y+dhei , p2.Y+trg.Z));
+                    if(buildingPrevConf->autoAttach.allowed[2])rp.push_back(vec3(p3.X+trg.X , trg.Y+dhei , p3.Y+trg.Z));
+                    if(buildingPrevConf->autoAttach.allowed[3])rp.push_back(vec3(p4.X+trg.X , trg.Y+dhei , p4.Y+trg.Z));
 
                     float mind = mhtDist(rp[0],p);
                     int minp   = 0;
 
-                    for(int i=1;i<4;i++){
+                    for(uint i=0;i<rp.size();i++){
                         float tmp = mhtDist(rp[i],p);//计算出曼哈顿距离，找出最小的
                         //printf("%f ",tmp);
                         if(tmp<mind){
@@ -659,6 +683,20 @@ void building::buildingApply()
 
     irr::core::aabbox3d<irr::f32> box=buildingPrevConf->fetchBB;
     buildingPrev->getAbsoluteTransformation().transformBoxEx(box);
+
+    {
+        int count=0;
+        dbvt3d::AABB bb;
+        bb.from=box.MinEdge;
+        bb.to=box.MaxEdge;
+        dbvt.collisionTest(&bb,[](dbvt3d::AABB *  , void * argp){
+            auto arg=(int*)argp;
+            ++(*arg);
+        },&count);
+        if(count>8)
+            return;
+    }
+
     cmd_addBuilding(buildingPrevId , p.X , p.Y , p.Z , r.X , r.Y , r.Z,[&](RakNet::BitStream * bs){
         std::unordered_set<std::string> cons;
         if(buildingTarget)
@@ -688,14 +726,18 @@ void building::buildingApply()
     buildingAllowBuild = false;
 }
 
-void building::buildingEnd(){
-    if(buildingAllowBuild)
+void building::buildingEnd(bool apply){
+    if(buildingAllowBuild && apply)
         buildingApply();
     if(buildingPrev)
         buildingPrev->remove();
     buildingPrev = NULL;
     buildingPrevConf = NULL;
     buildingAllowBuild=false;
+}
+
+void building::cancle(){
+    buildingEnd(false);
 }
 
 void building::removeBuilding(building::buildingBody * b){

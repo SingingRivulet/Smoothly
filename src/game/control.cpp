@@ -115,6 +115,9 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         parent->buildingEnd();
                     }
                 break;
+                case irr::KEY_OEM_3:
+                    parent->cancle();
+                break;
                 case irr::KEY_TAB:
                     /*
                     if(event.KeyInput.PressedDown){

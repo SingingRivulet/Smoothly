@@ -53,6 +53,7 @@ engine::engine(){
 */
     water = new RealisticWaterSceneNode(scene, 2048, 2048, "../../");
     water->setMaterialFlag(irr::video::EMF_FOG_ENABLE, true );
+    water->setWindForce(10);
     scene->getRootSceneNode()->addChild(water);
     auto g = scene->getGeometryCreator();
     auto m = g->createPlaneMesh(irr::core::dimension2df(2048,2048));
@@ -105,7 +106,6 @@ void engine::sceneLoop(){
         return;
     auto cm  = camera->getPosition();
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
-    water->setRotation(irr::core::vector3df(0,camera->getRotation().Y,0));
     water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
 
     renderSky();
@@ -117,12 +117,13 @@ void engine::sceneLoop(){
         driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
     }
     auto coll = scene->getSceneCollisionManager();
-    for(auto it:myBodies_mark){//在屏幕上标出自己拥有的物体
+    for(auto it:myBodies_mark){//在屏幕上标出自己拥有的单位
         auto p = coll->getScreenCoordinatesFrom3DPosition(it,camera);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
         driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
         driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
     }
+    onDraw();
     myBodies_mark.clear();
     gui->drawAll();
 
@@ -168,6 +169,8 @@ void engine::worldLoop(){
         }
     }
 }
+
+void engine::onDraw(){}
 void engine::deltaTimeUpdate(){
     if(deltaTimeUpdateFirst){
         deltaTimeUpdateFirst=false;

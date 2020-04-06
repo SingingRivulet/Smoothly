@@ -35,6 +35,8 @@ class building:public weather{
 
         virtual void updateLOD(int x,int y,int lv);
 
+        void onDraw()override;
+
     private:
         void addDefaultBuilding();
 
@@ -83,12 +85,15 @@ class building:public weather{
 
             irr::video::ITexture * texture;
 
+            irr::video::ITexture * desTexture;
+
             shapeGroup              bodyShape;
             bool                    haveBody;
 
             struct{
                 float deltaHei;
                 float deltaHor;
+                bool allowed[4];
             }autoAttach;
             bool useAutoAttach;
 
@@ -110,6 +115,10 @@ class building:public weather{
                 autoAttach.deltaHei  = 0;
                 autoAttach.deltaHor  = 1;
                 texture              = NULL;
+                desTexture           = NULL;
+                for(int i=0;i<4;++i){
+                    autoAttach.allowed[i]=true;
+                }
             }
         };
         std::map<int,conf*> config;
@@ -131,13 +140,16 @@ class building:public weather{
         void buildingStart();           //开始建筑模式
         void buildingUpdate();          //更新预览建筑
         void buildingApply();           //应用被预览的建筑
-        void buildingEnd();             //建筑模式结束
+        void buildingEnd(bool apply=true);             //建筑模式结束
+        virtual void cancle();
     private:
         irr::scene::ISceneNode  * buildingPrev;
         conf                    * buildingPrevConf;
         int                       buildingPrevId;
         bool                      buildingAllowBuild;
         buildingBody            * buildingTarget;
+
+        irr::u32 def_shader;
 };
 
 }//smoothly
