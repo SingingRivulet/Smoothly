@@ -57,8 +57,8 @@ class dispatherQueue{
             starts=clock();
             while(1){
                 ends = clock();
-                int dst = time(0)-startTime;
-                if((dst>20 && ends-starts>15) || ends-starts>90)
+                auto dtm = (ends-starts)/(CLOCKS_PER_SEC/1000);
+                if(dtm>1)
                     break;
                 
                 if(datas.empty())

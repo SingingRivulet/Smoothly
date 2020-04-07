@@ -112,7 +112,7 @@ void cloud::renderSky(){
         return;
     }
     ends=clock();
-    if(ends-starts<30)
+    if((ends-starts)/(CLOCKS_PER_SEC/1000.0)<0.005)
         goto begin;
 
     if(gametime_text)

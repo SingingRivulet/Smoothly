@@ -141,6 +141,8 @@ class building:public weather{
         void buildingUpdate();          //更新预览建筑
         void buildingApply();           //应用被预览的建筑
         void buildingEnd(bool apply=true);             //建筑模式结束
+        void switchBuilding();
+        std::vector<int>          availableBuilding;
         virtual void cancle();
     private:
         irr::scene::ISceneNode  * buildingPrev;
@@ -149,7 +151,12 @@ class building:public weather{
         bool                      buildingAllowBuild;
         buildingBody            * buildingTarget;
 
+        clock_t                   showningDes;
+
         irr::u32 def_shader;
+
+        int buildingSelect;
+
 };
 
 }//smoothly

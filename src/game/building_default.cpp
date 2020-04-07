@@ -20,6 +20,7 @@ void building::addDefaultBuilding(){
         ptr->autoAttach.deltaHor = 10;
         ptr->haveShader = true;
         ptr->shader = def_shader;
+        ptr->desTexture = driver->getTexture("../../res/description/building-1.png");
     }
     {
         irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
@@ -83,6 +84,8 @@ void building::addDefaultBuilding(){
         ptr->autoAttach.allowed[1]=false;
         ptr->autoAttach.allowed[2]=false;
         ptr->autoAttach.allowed[3]=false;
+
+        ptr->desTexture = driver->getTexture("../../res/description/building-2.png");
     }
     {
         irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
@@ -146,6 +149,7 @@ void building::addDefaultBuilding(){
         ptr->autoAttach.allowed[1]=false;
         ptr->autoAttach.allowed[2]=false;
         ptr->autoAttach.allowed[3]=false;
+        ptr->desTexture = driver->getTexture("../../res/description/building-3.png");
     }
     {
         irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
@@ -207,6 +211,10 @@ void building::addDefaultBuilding(){
         ptr->shader = def_shader;
         ptr->desTexture = driver->getTexture("../../res/description/building-4.png");
     }
+    availableBuilding.push_back(-1);
+    availableBuilding.push_back(-2);
+    availableBuilding.push_back(-3);
+    availableBuilding.push_back(-4);
 }
 
 }

@@ -84,7 +84,7 @@ void terrain_item::loop(){
         setRemoveTable(t.x,t.y,t.r);
         rmtQueue.pop();
         ends = clock();
-        if(ends-starts>5)
+        if((ends-starts)/(CLOCKS_PER_SEC/1000)>1)
             break;
     }
     int left = rmtQueue.size();

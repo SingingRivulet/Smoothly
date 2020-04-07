@@ -7,12 +7,14 @@ building::building(){
     buildingPrev = NULL;
     buildingPrevConf = NULL;
     buildingPrevId = -4;
+    showningDes    = 0;
     L = luaL_newstate();
     luaL_openlibs(L);
     lua_pushlightuserdata(L,this);
     luaL_dofile(L, "../script/building.lua");
     loadConfig();
     addDefaultBuilding();
+    buildingSelect = 0;
 }
 
 building::~building(){
@@ -109,9 +111,9 @@ void building::updateLOD(int x, int y, int lv){
 
 void building::onDraw(){
     weather::onDraw();
+    int ch = height/2;
+    int cw = width/2;
     if(buildingPrev){
-        int ch = height/2;
-        int cw = width/2;
         //画准星
 
         irr::video::SColor col(64,255,255,0);
@@ -136,10 +138,16 @@ void building::onDraw(){
             driver->draw2DLine(irr::core::vector2d<irr::s32>(cw-5,ch-5),irr::core::vector2d<irr::s32>(cw+5,ch+5),irr::video::SColor(255,255,0,0));
             driver->draw2DLine(irr::core::vector2d<irr::s32>(cw+5,ch-5),irr::core::vector2d<irr::s32>(cw-5,ch+5),irr::video::SColor(255,255,0,0));
         }
-
-        if(buildingPrevConf->desTexture){
+    }
+    if(buildingPrevConf && buildingPrevConf->desTexture){
+        clock_t ntm = clock();
+        clock_t dtm = ntm-showningDes;
+        int ms = dtm/(CLOCKS_PER_SEC/1000);
+        if(ms<3000){
             driver->draw2DImage(buildingPrevConf->desTexture,
-                                irr::core::vector2d<irr::s32>(cw-64,ch+16));
+                                irr::core::rect<irr::s32>(cw-64,ch+16,cw+64,ch+16+128),
+                                irr::core::rect<irr::s32>(0,0,128,128),
+                                0,0,true);
         }
     }
 }
@@ -492,6 +500,7 @@ void building::buildingStart(){
 void building::buildingUpdate(){
     if(buildingPrev==NULL)
         return;
+    showningDes         = clock();
 
     auto ori    = camera->getPosition();
     auto dir    = camera->getTarget()-ori;
@@ -734,6 +743,29 @@ void building::buildingEnd(bool apply){
     buildingPrev = NULL;
     buildingPrevConf = NULL;
     buildingAllowBuild=false;
+}
+
+void building::switchBuilding(){
+    if(availableBuilding.empty())
+        return;
+    int id;
+    try{
+        id = availableBuilding.at(buildingSelect);
+    }catch(...){
+        buildingSelect=0;
+        id = availableBuilding[buildingSelect];
+    }
+
+    buildingPrevId = id;
+    auto cit = config.find(buildingPrevId);
+    if(cit==config.end())
+        return;
+
+    buildingPrevConf = cit->second;
+
+    showningDes         = clock();
+
+    ++buildingSelect;
 }
 
 void building::cancle(){
