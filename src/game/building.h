@@ -46,10 +46,13 @@ class building:public weather{
             bool started;
             ipair position;
             std::set<buildingBody*> bodies;
+            buildingChunk *nearx0,*nearx1,*neary0,*neary1;//所有chunk构成一张二维链表，方便查询
             inline buildingChunk(int x,int y):position(x,y){
                 started = false;
             }
+            void unlink();
         };
+        void linkChunk(buildingChunk * , int x,int y);
         struct conf;
         struct buildingBody{
             std::string uuid;
@@ -81,11 +84,11 @@ class building:public weather{
             irr::s32                shader;
             bool                    haveShader;
 
-            irr::scene::IMesh *   mesh[4];
+            irr::scene::IMesh     * mesh[4];
 
-            irr::video::ITexture * texture;
+            irr::video::ITexture  * texture;
 
-            irr::video::ITexture * desTexture;
+            irr::video::ITexture  * desTexture;
 
             shapeGroup              bodyShape;
             bool                    haveBody;

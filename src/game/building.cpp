@@ -35,7 +35,32 @@ bool building::buildingChunkCreated(int x, int y) const{
     auto it = buildingChunks.find(ipair(x,y));
     if(it==buildingChunks.end())
         return false;
-    return it->second->started;
+
+    buildingChunk * c = it->second;
+
+    if(!it->second->started)
+        return false;
+
+    //检查上下左右
+    if(c->nearx0==NULL || !c->nearx0->started)
+        return false;
+    if(c->nearx1==NULL || !c->nearx1->started)
+        return false;
+    if(c->neary0==NULL || !c->neary0->started)
+        return false;
+    if(c->neary1==NULL || !c->neary1->started)
+        return false;
+
+    if(c->nearx0->neary0==NULL || !c->nearx0->neary0->started)
+        return false;
+    if(c->nearx1->neary1==NULL || !c->nearx1->neary1->started)
+        return false;
+    if(c->neary0->nearx0==NULL || !c->neary0->nearx0->started)
+        return false;
+    if(c->neary1->nearx1==NULL || !c->neary1->nearx1->started)
+        return false;
+
+    return true;
 }
 
 void building::buildingChunkStart(int x, int y){
@@ -56,6 +81,7 @@ void building::buildingChunkRelease(int x, int y){
         bodies.erase(it2->uuid);
         releaseBuilding(it2);
     }
+    it->second->unlink();
     //释放建筑chunk
     delete it->second;
     buildingChunks.erase(it);
@@ -254,6 +280,7 @@ building::buildingChunk *building::seekChunk(int x, int y){
     auto it = buildingChunks.find(ipair(x,y));
     if(it==buildingChunks.end()){
         c = new buildingChunk(x,y);
+        linkChunk(c,x,y);
         buildingChunks[ipair(x,y)] = c;
     }else
         c = it->second;
@@ -776,6 +803,63 @@ void building::removeBuilding(building::buildingBody * b){
     b->inchunk->bodies.erase(b);
     bodies.erase(b->uuid);
     releaseBuilding(b);
+}
+
+void building::buildingChunk::unlink(){
+    if(nearx0){
+        nearx0->nearx1 = NULL;
+        nearx0 = NULL;
+    }
+    if(nearx1){
+        nearx1->nearx0 = NULL;
+        nearx1 = NULL;
+    }
+    if(neary0){
+        neary0->neary1 = NULL;
+        neary0 = NULL;
+    }
+    if(neary1){
+        neary1->neary0 = NULL;
+        neary1 = NULL;
+    }
+}
+#define findChunk(x,y) \
+    auto it = buildingChunks.find(ipair(x,y)); \
+    if(it!=buildingChunks.end())
+
+void building::linkChunk(building::buildingChunk * c, int x, int y){
+    {
+        findChunk(x+1,y){
+            c->nearx1 = it->second;
+            it->second->nearx0 = c;
+        }else{
+            c->nearx1 = NULL;
+        }
+    }
+    {
+        findChunk(x-1,y){
+            c->nearx0 = it->second;
+            it->second->nearx1 = c;
+        }else{
+            c->nearx0 = NULL;
+        }
+    }
+    {
+        findChunk(x,y+1){
+            c->neary1 = it->second;
+            it->second->neary0 = c;
+        }else{
+            c->neary1 = NULL;
+        }
+    }
+    {
+        findChunk(x,y-1){
+            c->neary0 = it->second;
+            it->second->neary1 = c;
+        }else{
+            c->neary0 = NULL;
+        }
+    }
 }
 
 }
