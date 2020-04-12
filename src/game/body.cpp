@@ -102,6 +102,28 @@ void body::bodyItem::doFire(){
     }
 }
 
+void body::bodyItem::ghostTest(const btTransform & t, std::function<void (physical::bodyInfo *)> callback){
+    if(parent==NULL)
+        return;
+    btPairCachingGhostObject ghost;//ghost对象
+    ghost.setCollisionShape(m_character.getShape());
+    ghost.setWorldTransform(t);
+
+    parent->dynamicsWorld->addCollisionObject(&ghost);//加入世界
+
+    for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
+        btCollisionObject *btco = ghost.getOverlappingObject(i);
+
+        auto info = (bodyInfo*)(btco->getUserPointer());
+
+        if(info)
+            callback(info);
+
+    }
+
+    parent->dynamicsWorld->removeCollisionObject(&ghost);
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;

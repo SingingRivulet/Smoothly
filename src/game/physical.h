@@ -184,6 +184,10 @@ namespace smoothly{
                     inline void setGravity(const btVector3 & v){
                         controller->setGravity(v);
                     }
+
+                    inline btConvexShape* getShape(){
+                        return shape;
+                    }
             };
             
             class rigidBody:public bodyBase{

@@ -87,6 +87,11 @@ terrain::chunk * terrain::genChunk(int x,int y){
         irr::core::dimension2d<irr::u32>(33 , 33),
         true
     );
+    for(int i=0;i<16;++i){
+        for(int j=0;j<16;++j){
+            res->collMap[i][j]=floor(mapBuf[i*2][j*2]/2);
+        }
+    }
     res->node=scene->addMeshSceneNode(mesh,0,-1);
     res->node->setPosition(vec3(x*32.0f , 0 , y*32.0f));
     
@@ -277,6 +282,23 @@ int terrain::getLodLevel(int x, int y){
     }else{
         return 4;
     }
+}
+
+int terrain::getCollHeight(int x, int y){
+    int tx = floor(x/16.0);
+    int ty = floor(y/16.0);
+    int cx = x - tx*16;
+    int cy = y - ty*16;
+    if(cx<0 || cy<0 || cx>=16 || cy>=16){
+        printf("[error]getCollHeight:%d %d cx=%d cy=%d\n",x,y,cx,cy);
+        return 0;
+    }
+    auto it = chunks.find(ipair(tx,ty));
+    if(it!=chunks.end()){
+        chunk * c = it->second;
+        return c->collMap[cx][cy];
+    }else
+        return 0;
 }
 
 }

@@ -1,8 +1,9 @@
-﻿#ifndef SMOOTHLY_BUILDING
+#ifndef SMOOTHLY_BUILDING
 #define SMOOTHLY_BUILDING
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <queue>
 #include <functional>
 #include <math.h>
 
@@ -37,6 +38,20 @@ class building:public weather{
 
         void onDraw()override;
 
+        struct ghostSearch{
+                btBoxShape shape;
+                btPairCachingGhostObject ghost;
+                building * parent;
+                inline ghostSearch(const btVector3 & v,building * p):shape(v){
+                    ghost.setCollisionShape(&shape);
+                    parent = p;
+                }
+                void search(std::function<void (physical::bodyInfo *)> callback);
+        };
+        void ghostTest(const btVector3 & pos, float len,std::function<void (physical::bodyInfo *)> callback);
+
+        bool getCollMap(int x,int y,int z);
+
     private:
         void addDefaultBuilding();
 
@@ -54,6 +69,50 @@ class building:public weather{
         };
         void linkChunk(buildingChunk * , int x,int y);
         struct conf;
+        struct blockPosition{//点在chunk中的位置
+            int x,y,z;
+            inline blockPosition() {
+                x=0;
+                y=0;
+                z=0;
+            }
+            inline blockPosition(const blockPosition & i) {
+                x=i.x;
+                y=i.y;
+                z=i.z;
+            }
+            inline blockPosition(int ix,int iy,int iz) {
+                x=ix;
+                y=iy;
+                z=iz;
+            }
+            inline const blockPosition & operator=(const blockPosition & i) {
+                x=i.x;
+                y=i.y;
+                z=i.z;
+                return * this;
+            }
+            inline bool operator<(const blockPosition & i)const{
+                if(x<i.x)
+                    return true;
+                else
+                if(x==i.x){
+                    if(y<i.y)
+                        return true;
+                    else
+                    if(y==i.y){
+                        if(z<i.z){
+                            return true;
+                        }
+                    }
+                }
+                    return false;
+            }
+        };
+        std::map<blockPosition,bool> collTable;//用于寻路的碰撞表
+        std::queue<blockPosition>    checkingRemoveList;
+        void processCheckingRemove();
+
         struct buildingBody{
             std::string uuid;
             buildingChunk * inchunk;
@@ -63,10 +122,13 @@ class building:public weather{
             conf             * config;
             bodyInfo info;
             dbvt3d::AABB     * bb;
+            building         * parent;
             inline buildingBody(){
                 for(int i = 0;i<4;++i)
                     node[i] = NULL;
             }
+            void initCollTable(bool removeMode = false);
+            void buildAffectArea(std::queue<blockPosition> & t);
         };
         std::map<ipair,buildingChunk*> buildingChunks;
         std::unordered_map<std::string,buildingBody*> bodies;
@@ -93,6 +155,9 @@ class building:public weather{
             shapeGroup              bodyShape;
             bool                    haveBody;
 
+            btVector3               pathTarget;//寻路时作为目标点
+            bool                    canWalk;
+
             struct{
                 float deltaHei;
                 float deltaHor;
@@ -101,7 +166,7 @@ class building:public weather{
             bool useAutoAttach;
 
             bool                          canBuildOn;
-            irr::core::aabbox3d<irr::f32> fetchBB;//放置建筑时用于拾取周围建筑的包围盒
+            irr::core::aabbox3d<irr::f32> fetchBB;//放置建筑及搜索建筑时用于拾取周围建筑的包围盒
 
             int                           attachHandler;
             bool                          useAttachHandler;

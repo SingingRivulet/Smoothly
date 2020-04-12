@@ -25,6 +25,8 @@ namespace smoothly{
             int cm_cx,cm_cy;
             int getLodLevel(int x,int y);
             virtual int getVisualRange()=0;
+
+            int getCollHeight(int x,int y);
         private:
             float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(
@@ -53,6 +55,8 @@ namespace smoothly{
                 inline void hide(){
                     node->setVisible(false);
                 }
+
+                int collMap[16][16];
             };
             std::map<ipair,chunk*> chunks;
             chunk * genChunk(int x,int y);

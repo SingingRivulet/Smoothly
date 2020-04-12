@@ -89,6 +89,7 @@ void building::buildingChunkRelease(int x, int y){
 
 void building::loop(){
     buildingUpdate();
+    processCheckingRemove();
 }
 
 void building::msg_addBuilding(const char *uuid, int id, float px, float py, float pz, float rx, float ry, float rz){
@@ -178,6 +179,42 @@ void building::onDraw(){
     }
 }
 
+
+void building::ghostSearch::search(std::function<void (physical::bodyInfo *)> callback){
+    parent->dynamicsWorld->addCollisionObject(&ghost);//加入世界
+    for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
+        btCollisionObject *btco = ghost.getOverlappingObject(i);
+        auto info = (bodyInfo*)(btco->getUserPointer());
+        if(info)
+            callback(info);
+    }
+    parent->dynamicsWorld->removeCollisionObject(&ghost);
+}
+void building::ghostTest(const btVector3 & pos, float len, std::function<void (physical::bodyInfo *)> callback){
+    btBoxShape shape(btVector3(len,len,len));
+    btTransform xform;
+    xform.setOrigin(pos);
+    btPairCachingGhostObject ghost;//ghost对象
+    ghost.setCollisionShape(&shape);
+    ghost.setWorldTransform(xform);
+
+    dynamicsWorld->addCollisionObject(&ghost);//加入世界
+    for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
+        btCollisionObject *btco = ghost.getOverlappingObject(i);
+        auto info = (bodyInfo*)(btco->getUserPointer());
+        if(info)
+            callback(info);
+    }
+    dynamicsWorld->removeCollisionObject(&ghost);
+}
+
+bool building::getCollMap(int x, int y, int z){
+    auto it = collTable.find(blockPosition(x,y,z));
+    if(it==collTable.end())
+        return false;
+    return it->second;
+}
+
 void building::buildingAdd(const vec3 &p, const vec3 &r, int id, const std::string &uuid){
     auto it = bodies.find(uuid);
     if(it!=bodies.end())//已经存在
@@ -192,12 +229,15 @@ void building::buildingAdd(const vec3 &p, const vec3 &r, int id, const std::stri
     auto c = seekChunk(cx,cy);
     b->inchunk = c;
     c->bodies.insert(b);
+    b->initCollTable();
 
     bodies[uuid]=b;
 }
 void building::releaseBuilding(building::buildingBody * p){
     if(p->rigidBody){
         dynamicsWorld->removeRigidBody(p->rigidBody);
+        //p->initCollTable(true);
+        p->buildAffectArea(checkingRemoveList);//上面的方式可能造成一帧内大量堆积
         delete p->rigidBody;
     }
     if(p->bodyState)
@@ -219,6 +259,7 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
     conf * c = cit->second;
 
     auto res = new buildingBody;
+    res->parent = this;
 
     res->config = c;
 

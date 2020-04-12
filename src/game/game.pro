@@ -53,7 +53,8 @@ HEADERS += \
     ../utils/dbvt3d.h \
     RealisticWater.h \
     cloud.h \
-    weather.h
+    weather.h \
+    pathfinding.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -89,7 +90,8 @@ SOURCES += \
     weather.cpp \
     meshGenerator/tree.cpp \
     meshGenerator/grass.cpp \
-    building_default.cpp
+    building_default.cpp \
+    building_road.cpp
 
 FORMS += \
     ui/login.ui

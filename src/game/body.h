@@ -3,6 +3,7 @@
 #include "terrainDispather.h"
 #include "bone.h"
 #include <unordered_map>
+#include <functional>
 #include <stdlib.h>
 #include <mutex>
 namespace smoothly{
@@ -152,6 +153,8 @@ class body:public terrainDispather{
                 unsigned int fireDelta;
 
                 void doFire();
+
+                void ghostTest(const btTransform &,std::function<void(bodyInfo*)> callback);//假如此角色在哪个位置，会碰撞哪些物体
             protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
