@@ -56,8 +56,8 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
     float begX=x*32;
     float begY=y*32;
     float len=33.0f/((float)pointNum);
-    int mx = 0;
-    int my = 0;
+    //int mx = 0;
+    //int my = 0;
     for(int i=0;i<pointNum;i++){
         for(int j=0;j<pointNum;j++){
             //ix=len*(pointNum-i+1)+begX;
@@ -67,8 +67,8 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
             h=getRealHight(ix,iy);
             if(h>max){
                 max=h;
-                mx=ix;
-                my=iy;
+                //mx=ix;
+                //my=iy;
             }
             img[i][j]=h;
         }

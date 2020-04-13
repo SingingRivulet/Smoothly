@@ -69,6 +69,7 @@ class building:public weather{
         };
         void linkChunk(buildingChunk * , int x,int y);
         struct conf;
+    public:
         struct blockPosition{//点在chunk中的位置
             int x,y,z;
             inline blockPosition() {
@@ -108,7 +109,11 @@ class building:public weather{
                 }
                     return false;
             }
+            inline bool operator==(const blockPosition & i)const{
+                return (x==i.x) && (y==i.y) && (z==i.z);
+            }
         };
+    private:
         std::map<blockPosition,bool> collTable;//用于寻路的碰撞表
         std::queue<blockPosition>    checkingRemoveList;
         void processCheckingRemove();

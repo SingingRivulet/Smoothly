@@ -91,7 +91,8 @@ SOURCES += \
     meshGenerator/tree.cpp \
     meshGenerator/grass.cpp \
     building_default.cpp \
-    building_road.cpp
+    building_road.cpp \
+    pathfinding.cpp
 
 FORMS += \
     ui/login.ui
