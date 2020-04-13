@@ -199,6 +199,9 @@ class building:public weather{
         void loadConfig();
         void releaseConfig();
 
+        dbvt3d dbvt;
+
+    public:
         void fetchByRay(
                 const vec3 & from ,
                 const vec3 & to ,
@@ -207,9 +210,6 @@ class building:public weather{
             //默认忽略角色控制器
             return b->type!=BODY_BODY;
         });
-        dbvt3d dbvt;
-
-    public:
         void buildingStart();           //开始建筑模式
         void buildingUpdate();          //更新预览建筑
         void buildingApply();           //应用被预览的建筑

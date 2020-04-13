@@ -1,10 +1,10 @@
 #ifndef SMOOTHLY_INTERACTIVE
 #define SMOOTHLY_INTERACTIVE
-#include "body.h"
+#include "pathfinding.h"
 
 namespace smoothly{
 
-class interactive:public body{
+class interactive:public pathFinding{
     public:
         virtual void setInteractiveNode(bodyItem * b , const std::string & method);
 };

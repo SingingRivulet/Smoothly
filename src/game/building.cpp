@@ -138,8 +138,8 @@ void building::updateLOD(int x, int y, int lv){
 
 void building::onDraw(){
     weather::onDraw();
-    int ch = height/2;
-    int cw = width/2;
+    int cw = screenCenter.X;
+    int ch = screenCenter.Y;
     if(buildingPrev){
         //画准星
 

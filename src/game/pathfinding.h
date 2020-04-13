@@ -5,7 +5,8 @@ namespace smoothly{
 
 class pathFinding:public body{
     public:
-        pathFinding() {}
+        pathFinding();
+        bool pathFindingMode;
         class pathFindingContext{
             public:
                 struct node{
@@ -20,7 +21,11 @@ class pathFinding:public body{
 
                 node * processing;
                 node * result;
-                pathFindingContext();
+                inline pathFindingContext(){
+                    parent     = NULL;
+                    processing = NULL;
+                    result     = NULL;
+                }
 
                 std::map<blockPosition,node*> openlist,closelist;
 
@@ -36,17 +41,32 @@ class pathFinding:public body{
                 void init();//初始化寻路（先设置好start,target）
                 void process();
                 void clear();
-                void buildRoad(std::list<blockPosition> & res);
+                void buildRoad(std::function<void(const building::blockPosition &)> callback);
 
-                bool pathFindingStart(std::list<building::blockPosition> & r);
+                bool pathFindingStart(std::function<void(const building::blockPosition &)> callback);
         };
-        inline bool findPath(const blockPosition & A,const blockPosition & B,std::list<building::blockPosition> & r){
+        inline bool findPath(const blockPosition & A,const blockPosition & B,std::function<void(const building::blockPosition &)> callback){
             pathFindingContext ctx;
             ctx.parent = this;
             ctx.start = A;
             ctx.target = B;
-            return ctx.pathFindingStart(r);
+            return ctx.pathFindingStart(callback);
         }
+        bool findPath(const irr::core::vector3df & A,const irr::core::vector3df & B,std::list<irr::core::vector3df> & r);
+
+        void findPathByRay(const vec3 & start,const vec3 & end);
+        inline void findPathByRay(){
+            auto ori    = camera->getPosition();
+            auto dir    = camera->getTarget()-ori;
+            dir.normalize();
+            auto start  = ori;
+            auto end    = ori+dir*200;
+            findPathByRay(start,end);
+        }
+        void onDraw()override;
+    private:
+        irr::video::ITexture * texture_pathTarget;
+        irr::video::ITexture * texture_pathPoint;
 };
 
 }

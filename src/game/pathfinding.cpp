@@ -113,7 +113,7 @@ void pathFinding::pathFindingContext::process(){
         node * min;
         //ns中找一个f最小的
         for(auto it:ns){
-            if(it->position==target){
+            if(heuristic(it->position,target)<4){
                 processing = NULL;
                 result = it;
                 return;
@@ -148,24 +148,24 @@ void pathFinding::pathFindingContext::clear(){
     closelist.clear();
 }
 
-void pathFinding::pathFindingContext::buildRoad(std::list<building::blockPosition> & res){
+void pathFinding::pathFindingContext::buildRoad(std::function<void(const building::blockPosition &)> callback){
     if(result){
         auto p = result;
         while(p){
-            res.push_front(p->position);
+            callback(p->position);
             p=p->parent;
         }
     }
 }
 
-bool pathFinding::pathFindingContext::pathFindingStart(std::list<building::blockPosition> & r){
+bool pathFinding::pathFindingContext::pathFindingStart(std::function<void(const building::blockPosition &)> callback){
     init();
     bool res;
     int num=0;
     while(processing){
         process();
         ++num;
-        if(num>1024)
+        if(num>4096)
             break;
     }
     if(result==NULL)
@@ -173,13 +173,63 @@ bool pathFinding::pathFindingContext::pathFindingStart(std::list<building::block
     if(failed)
         res = false;
     else if(result){
-        buildRoad(r);
+        buildRoad(callback);
         res = true;
     }
 
     clear();
 
     return res;
+}
+
+pathFinding::pathFinding(){
+    texture_pathTarget = driver->getTexture("../../res/icon/pathTarget.png");
+    texture_pathPoint = driver->getTexture("../../res/icon/pathPoint.png");
+    pathFindingMode = false;
+}
+
+bool pathFinding::findPath(const core::vector3df & A, const core::vector3df & B, std::list<core::vector3df> & r){
+    blockPosition a(floor(A.X/2),floor(A.Y/2),floor(A.Z/2));
+    blockPosition b(floor(B.X/2),floor(B.Y/2)+1,floor(B.Z/2));
+    return findPath(a,b,[&](const building::blockPosition & p){
+        r.push_front(core::vector3df(
+                        p.x*2+1,
+                        p.y*2+1,
+                        p.z*2+1));
+    });
+}
+
+void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
+    if(mainControlBody==NULL)
+        return;
+    fetchByRay(start , end,[&](const vec3 & p,bodyInfo * ){
+        std::list<core::vector3df> l;
+        auto tg = scene->addBillboardSceneNode(0,core::dimension2d<f32>(5,5),p+vec3(0,1,0));
+        tg->setMaterialTexture(0,texture_pathTarget);
+        tg->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+        tg->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        auto am = scene->createDeleteAnimator(1000);
+        tg->addAnimator(am);
+        if(findPath(mainControlBody->node->getPosition(),p,l)){
+            for(auto it:l){
+                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
+                pn->setMaterialTexture(0,texture_pathPoint);
+                pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                pn->addAnimator(am);
+            }
+        }
+        am->drop();
+    });
+}
+
+void pathFinding::onDraw(){
+    body::onDraw();
+    if(pathFindingMode){
+        irr::video::SColor col(64,255,255,255);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X-10,screenCenter.Y),irr::core::vector2d<irr::s32>(screenCenter.X+10,screenCenter.Y),col);
+        driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y-10),irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y+10),col);
+    }
 }
 
 }

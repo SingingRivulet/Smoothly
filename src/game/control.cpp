@@ -108,6 +108,16 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_KEY_M:
                     //if(event.KeyInput.PressedDown)parent->eventQueue.push(gemeEPair(SET_BUILDING_MODE,6));
                 break;
+                case irr::KEY_KEY_Y:
+                    if(event.KeyInput.PressedDown){
+                        parent->pathFindingMode = true;
+                    }else{
+                        if(parent->pathFindingMode){
+                            parent->pathFindingMode = false;
+                            parent->findPathByRay();
+                        }
+                    }
+                break;
                 case irr::KEY_KEY_T:
                     if(event.KeyInput.PressedDown){
                         parent->buildingStart();

@@ -28,6 +28,8 @@ namespace smoothly{
             irr::scene::ICameraSceneNode * camera;
             irr::core::stringc          vendor;
             
+            irr::core::vector2di screenCenter;
+
             btDiscreteDynamicsWorld   * dynamicsWorld;
             btDefaultCollisionConfiguration* collisionConfiguration;
             btCollisionDispatcher* dispatcher;
