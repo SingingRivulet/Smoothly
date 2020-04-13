@@ -2,7 +2,7 @@
 namespace smoothly{
 
 int pathFinding::pathFindingContext::heuristic(const building::blockPosition & p1, building::blockPosition & p2){
-    return abs(p1.x-p2.x) + abs(p1.y+p2.y) + abs(p1.z+p2.z);
+    return abs(p1.x-p2.x) + abs(p1.y-p2.y) + abs(p1.z-p2.z);
 }
 
 void pathFinding::pathFindingContext::getWalkablePoint(int x, int y,int z, std::vector<blockPosition> & res){
@@ -161,9 +161,15 @@ void pathFinding::pathFindingContext::buildRoad(std::list<building::blockPositio
 bool pathFinding::pathFindingContext::pathFindingStart(std::list<building::blockPosition> & r){
     init();
     bool res;
+    int num=0;
     while(processing){
         process();
+        ++num;
+        if(num>1024)
+            break;
     }
+    if(result==NULL)
+        failed = true;
     if(failed)
         res = false;
     else if(result){

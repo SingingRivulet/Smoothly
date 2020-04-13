@@ -40,6 +40,13 @@ class pathFinding:public body{
 
                 bool pathFindingStart(std::list<building::blockPosition> & r);
         };
+        inline bool findPath(const blockPosition & A,const blockPosition & B,std::list<building::blockPosition> & r){
+            pathFindingContext ctx;
+            ctx.parent = this;
+            ctx.start = A;
+            ctx.target = B;
+            return ctx.pathFindingStart(r);
+        }
 };
 
 }
