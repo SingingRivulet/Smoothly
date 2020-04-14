@@ -181,8 +181,10 @@ class body:public terrainDispather{
 
     protected:
         lua_State * L;//
+    public:
         std::unordered_map<std::string,bodyItem*> bodies;
         std::unordered_map<std::string,bodyItem*> myBodies;
+    protected:
         void setBodyPosition(const std::string & uuid , const vec3 & posi);
         void removeBody(const std::string & uuid);
         void releaseBody(bodyItem*);
@@ -198,6 +200,7 @@ class body:public terrainDispather{
         struct bodyConf{
             float width,height,deltaY,jump;
             bool walkInSky,jumpInSky;
+            bool teleport;//传送功能(通过指挥功能使用)
             irr::scene::IAnimatedMesh * mesh;
             std::string aniCallback;
             float walkVelocity;
@@ -213,6 +216,7 @@ class body:public terrainDispather{
                 deltaY       = 1;
                 walkVelocity = 0.003;
                 jump         = 10;
+                teleport     = false;
             }
         };
         std::map<int,bodyConf*> bodyConfig;

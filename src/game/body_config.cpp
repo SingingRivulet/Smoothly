@@ -50,6 +50,9 @@ void body::loadBodyConfig(){
                                             if(strcmp(item->string,"jumpInSky")==0){
                                                 ptr->jumpInSky = (item->valueint!=0);
                                             }else
+                                            if(strcmp(item->string,"teleport")==0){
+                                                ptr->teleport = (item->valueint!=0);
+                                            }else
                                             if(strcmp(item->string,"walkVelocity")==0){
                                                 ptr->walkVelocity = item->valuedouble;
                                             }else

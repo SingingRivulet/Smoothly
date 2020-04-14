@@ -209,23 +209,53 @@ bool pathFinding::findPath(const core::vector3df & A, const core::vector3df & B,
 }
 
 void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
-    if(mainControlBody==NULL)
-        return;
+    controlling.insert(mainControl);
     fetchByRay(start , end,[&](const vec3 & p,bodyInfo * ){
-        std::list<core::vector3df> l;
         auto tg = scene->addBillboardSceneNode(0,core::dimension2d<f32>(5,5),p+vec3(0,1,0));
         tg->setMaterialTexture(0,texture_pathTarget);
         tg->setMaterialFlag(irr::video::EMF_LIGHTING, false );
         tg->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         auto am = scene->createDeleteAnimator(1000);
         tg->addAnimator(am);
-        if(findPath(mainControlBody->node->getPosition(),p,l)){
-            for(auto it:l){
-                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
-                pn->setMaterialTexture(0,texture_pathPoint);
-                pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-                pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-                pn->addAnimator(am);
+
+        for(auto uuid:controlling){
+            auto bodyit = myBodies.find(uuid);
+            if(bodyit!=myBodies.end()){
+                bodyItem * bd = bodyit->second;
+                bd->autoWalk.clear();
+                if(bd->uncreatedChunk)
+                    continue;
+                if(bd->config->teleport){//传送
+                    commond cmd;
+                    cmd.cmd = CMD_SET_POSITION;
+                    cmd.data_vec = p;
+                    cmd.uuid = uuid;
+                    pushCommond(cmd);
+                }else{
+                    if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
+                        bool first = true;
+                        vec3 lastp;
+                        for(auto it:bd->autoWalk){
+                            if(first)
+                                first = false;
+                            else{
+                                auto tmp = (lastp+it)*0.5;
+                                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                                pn->setMaterialTexture(0,texture_pathPoint);
+                                pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                                pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                                pn->addAnimator(am);
+                            }
+                            auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
+                            pn->setMaterialTexture(0,texture_pathPoint);
+                            pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                            pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                            pn->addAnimator(am);
+
+                            lastp = it;
+                        }
+                    }
+                }
             }
         }
         am->drop();

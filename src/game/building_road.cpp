@@ -2,6 +2,20 @@
 
 namespace smoothly{
 
+static int getBuildingNumInGhost(btPairCachingGhostObject * ghost){
+    int count=0;
+    int num = ghost->getNumOverlappingObjects();
+    for (int i = 0; i < num; i++){
+        btCollisionObject *btco = ghost->getOverlappingObject(i);
+        auto info = (building::bodyInfo*)(btco->getUserPointer());
+        if(info){
+            if(info->type==building::BODY_BUILDING)
+                ++count;
+        }
+    }
+    return count;
+}
+
 void building::buildingBody::initCollTable(bool removeMode){
     auto box = node[0]->getBoundingBox();
     auto deltaV = box.MaxEdge-box.MinEdge;
@@ -39,7 +53,7 @@ void building::buildingBody::initCollTable(bool removeMode){
                         gs.ghost.setWorldTransform(t);
 
                         parent->dynamicsWorld->addCollisionObject(&gs.ghost);//加入世界
-                        if(gs.ghost.getNumOverlappingObjects()==0){
+                        if(getBuildingNumInGhost(&gs.ghost)==0){
                             parent->collTable.erase(it);
                         }
                         parent->dynamicsWorld->removeCollisionObject(&gs.ghost);
@@ -55,7 +69,7 @@ void building::buildingBody::initCollTable(bool removeMode){
                         gs.ghost.setWorldTransform(t);
 
                         parent->dynamicsWorld->addCollisionObject(&gs.ghost);//加入世界
-                        if(gs.ghost.getNumOverlappingObjects()!=0)
+                        if(getBuildingNumInGhost(&gs.ghost)!=0)
                             parent->collTable[rv] = true;
                         parent->dynamicsWorld->removeCollisionObject(&gs.ghost);
                     }
@@ -114,7 +128,7 @@ void building::processCheckingRemove(){
             gs.ghost.setWorldTransform(t);
 
             dynamicsWorld->addCollisionObject(&gs.ghost);//加入世界
-            if(gs.ghost.getNumOverlappingObjects()==0){//没发生碰撞
+            if(getBuildingNumInGhost(&gs.ghost)==0){//没发生碰撞
                 collTable.erase(it);
             }
             dynamicsWorld->removeCollisionObject(&gs.ghost);

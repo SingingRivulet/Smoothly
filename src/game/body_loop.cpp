@@ -9,10 +9,10 @@ void body::loop(){
         auto cp=camera->getPosition();
         int l = std::max(abs(p.X-cp.X),abs(p.Z-cp.Z));
         if(l<getVisualRange()){
-            //if(mainControlBody==b)
-            //    b->node->setVisible(false);
-            //else
-            //    b->node->setVisible(true);
+            if(mainControlBody==b)
+                b->node->setVisible(false);
+            else
+                b->node->setVisible(true);
         }else{
             b->node->setVisible(false);
         }
@@ -64,12 +64,13 @@ void body::loop(){
             if(mainControlBody!=b){
                 commond cmd;//命令结构体
                 cmd.uuid = b->uuid;
+                vec3 posi(btPos.x(), btPos.y(), btPos.z());
                 while(!b->autoWalk.empty()){
                     auto target = b->autoWalk.front();
-                    vec3 posi(btPos.x(), btPos.y(), btPos.z());
                     vec3 dir = target-posi;
 
-                    if(dir.getLengthSQ()<2*2){
+                    irr::core::vector2df tdir(dir.X,dir.Z);
+                    if(tdir.getLengthSQ()<2*2){
                         b->autoWalk.pop_front();//到达目标，删除任务
                     }else{
 
@@ -88,6 +89,7 @@ void body::loop(){
                             cmd.data_vec.set(dir);
                             pushCommond(cmd);
                         }
+                        break;
                     }
                 }
                 if(b->autoWalk.empty()){//停止自动行走

@@ -1,6 +1,7 @@
 ﻿#ifndef SMOOTHLY_PATHFINDING
 #define SMOOTHLY_PATHFINDING
 #include "body.h"
+#include <unordered_set>
 namespace smoothly{
 
 class pathFinding:public body{
@@ -63,6 +64,9 @@ class pathFinding:public body{
             auto end    = ori+dir*200;
             findPathByRay(start,end);
         }
+
+        std::unordered_set<std::string> controlling;
+
         void onDraw()override;
         void cancle()override;
     private:
