@@ -9,10 +9,10 @@ void body::loop(){
         auto cp=camera->getPosition();
         int l = std::max(abs(p.X-cp.X),abs(p.Z-cp.Z));
         if(l<getVisualRange()){
-            if(mainControlBody==b)
-                b->node->setVisible(false);
-            else
-                b->node->setVisible(true);
+            //if(mainControlBody==b)
+            //    b->node->setVisible(false);
+            //else
+            //    b->node->setVisible(true);
         }else{
             b->node->setVisible(false);
         }
@@ -59,6 +59,43 @@ void body::loop(){
 
             if(b->firing)
                 b->doFire();
+
+            //ai控制
+            if(mainControlBody!=b){
+                commond cmd;//命令结构体
+                cmd.uuid = b->uuid;
+                while(!b->autoWalk.empty()){
+                    auto target = b->autoWalk.front();
+                    vec3 posi(btPos.x(), btPos.y(), btPos.z());
+                    vec3 dir = target-posi;
+
+                    if(dir.getLengthSQ()<2*2){
+                        b->autoWalk.pop_front();//到达目标，删除任务
+                    }else{
+
+                        //行走
+                        cmd.data_int = BM_WALK_F;
+                        cmd.cmd = CMD_STATUS_ADD;
+                        pushCommond(cmd);
+
+                        //更新旋转
+                        cmd.cmd = CMD_SET_LOOKAT;
+                        cmd.data_vec = dir;
+                        pushCommond(cmd);
+
+                        if(dir.Y>0){//目标点高于现在，跳跃
+                            cmd.cmd = CMD_JUMP;
+                            cmd.data_vec.set(dir);
+                            pushCommond(cmd);
+                        }
+                    }
+                }
+                if(b->autoWalk.empty()){//停止自动行走
+                    cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
+                    cmd.cmd = CMD_STATUS_REMOVE;
+                    pushCommond(cmd);
+                }
+            }
         }
     }
     doCommonds();

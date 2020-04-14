@@ -2,7 +2,11 @@
 namespace smoothly{
 
 int pathFinding::pathFindingContext::heuristic(const building::blockPosition & p1, building::blockPosition & p2){
-    return abs(p1.x-p2.x) + abs(p1.y-p2.y) + abs(p1.z-p2.z);
+    //return abs(p1.x-p2.x) + abs(p1.y-p2.y) + abs(p1.z-p2.z);
+    int x = p1.x-p2.x;
+    int y = p1.y-p2.y;
+    int z = p1.z-p2.z;
+    return sqrt(x*x+y*y+z*z);
 }
 
 void pathFinding::pathFindingContext::getWalkablePoint(int x, int y,int z, std::vector<blockPosition> & res){
@@ -10,6 +14,11 @@ void pathFinding::pathFindingContext::getWalkablePoint(int x, int y,int z, std::
     checkWalkablePoint(x,y,z-1,res);
     checkWalkablePoint(x-1,y,z,res);
     checkWalkablePoint(x+1,y,z,res);
+
+    checkWalkablePoint(x-1,y,z-1,res);
+    checkWalkablePoint(x-1,y,z+1,res);
+    checkWalkablePoint(x+1,y,z-1,res);
+    checkWalkablePoint(x+1,y,z+1,res);
 }
 
 void pathFinding::pathFindingContext::checkWalkablePoint(int x, int y, int z, std::vector<blockPosition> & res){
@@ -230,6 +239,11 @@ void pathFinding::onDraw(){
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X-10,screenCenter.Y),irr::core::vector2d<irr::s32>(screenCenter.X+10,screenCenter.Y),col);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y-10),irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y+10),col);
     }
+}
+
+void pathFinding::cancle(){
+    body::cancle();
+    pathFindingMode = false;
 }
 
 }

@@ -64,6 +64,7 @@ class pathFinding:public body{
             findPathByRay(start,end);
         }
         void onDraw()override;
+        void cancle()override;
     private:
         irr::video::ITexture * texture_pathTarget;
         irr::video::ITexture * texture_pathPoint;

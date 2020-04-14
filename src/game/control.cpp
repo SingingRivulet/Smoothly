@@ -16,9 +16,16 @@ void control::processControl(){
         vec3 dir = camera->getTarget()-line.start;
         line.end                 = line.start+dir.normalize()*32.0f;
         commond cmd;
+
         cmd.cmd = CMD_SET_LOOKAT;
         cmd.data_vec = dir;
         pushCommond(cmd);
+
+        //cmd.cmd = CMD_SET_ROTATION;
+        //cmd.data_vec = dir.getHorizontalAngle();
+        //cmd.data_vec.X = 0;
+        //cmd.data_vec.Z = 0;
+        //pushCommond(cmd);
     }
 }
 

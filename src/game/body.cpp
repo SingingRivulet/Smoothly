@@ -62,11 +62,11 @@ void body::bodyItem::updateFromWorld(){
         if(fabs(lastRotation.X-irrRot.X)>0.01 || fabs(lastRotation.Y!=irrRot.Y)>0.01 || fabs(lastRotation.Z!=irrRot.Z)>0.01){
             node->setRotation(irrRot);
             lastRotation = irrRot;
-            parent->cmd_setRotation(uuid,irrPos.X,irrPos.Y,irrPos.Z);
+            parent->cmd_setRotation(uuid,irrRot.X,irrRot.Y,irrRot.Z);
         }
         if(fabs(lastLookAt.X-lookAt.X)>0.01 || fabs(lastLookAt.Y!=lookAt.Y)>0.01 || fabs(lastLookAt.Z!=lookAt.Z)>0.01){
             lastLookAt = lookAt;
-            parent->cmd_setLookAt(uuid,irrPos.X,irrPos.Y,irrPos.Z);
+            parent->cmd_setLookAt(uuid,lookAt.X,lookAt.Y,lookAt.Z);
         }
         if(parent->mainControlBody!=this)
             parent->myBodies_mark.push_back(irrPos);
