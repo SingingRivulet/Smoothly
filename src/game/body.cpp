@@ -239,6 +239,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->m_character.world = dynamicsWorld;
     p->m_character.addIntoWorld();
     p->m_character.setRotation(r);
+    p->m_character.setDir(l);
     p->m_character.setUserPointer(&(p->info));
 
     p->info.ptr  = p;

@@ -262,7 +262,7 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
 void pathFinding::onDraw(){
     body::onDraw();
     if(pathFindingMode){
-        irr::video::SColor col(64,255,255,255);
+        irr::video::SColor col(255,255,255,255);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X-10,screenCenter.Y),irr::core::vector2d<irr::s32>(screenCenter.X+10,screenCenter.Y),col);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y-10),irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y+10),col);
     }

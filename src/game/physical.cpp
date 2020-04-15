@@ -380,6 +380,8 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     m_ghostObject->setCollisionFlags (btCollisionObject::CF_CHARACTER_OBJECT);
     
     controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
+
+    controller->setUp(btVector3(0,1,0));
     
     //controller->setGravity(btVector3(0, -10, 0));
     
