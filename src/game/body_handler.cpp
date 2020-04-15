@@ -70,7 +70,11 @@ void body::msg_setPosition(const char* uuid,float x,float y,float z){
 void body::msg_setRotation(const char* uuid,float x,float y,float z){
     findBody(uuid){
         returnInMine;
-        it->second->m_character.setRotation(vec3(x,y,z));
+        it->second->m_character.setRotation(vec3(
+                                                irr::core::degToRad(x),
+                                                irr::core::degToRad(y),
+                                                irr::core::degToRad(z)
+                                                ));
     }
 }
 

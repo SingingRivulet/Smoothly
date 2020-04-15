@@ -116,7 +116,7 @@ void body::doCommond(const commond & c){
 
     case CMD_STATUS_REMOVE:
         p->status_mask   = p->status.toMask();
-        p->status_mask  ^= c.data_int;
+        p->status_mask  &= ~c.data_int;
         p->status        = p->status_mask;
         cmd_setStatus(p->uuid , p->status_mask);
         break;

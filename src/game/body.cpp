@@ -568,6 +568,7 @@ void body::selectBodyByScreenPoint(const irr::core::vector2d<s32> & sp, int rang
             continue;
         if((p-sp).getLengthSQ()<range*range){
             selectedBodies.insert(bd);
+            printf("select body:%s\n",bd->uuid.c_str());
         }
     }
 }

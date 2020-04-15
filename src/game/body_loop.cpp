@@ -7,7 +7,7 @@ void body::loop(){
         bodyItem * b = it.second;
         auto p = b->node->getPosition();
         auto cp=camera->getPosition();
-        int l = std::max(abs(p.X-cp.X),abs(p.Z-cp.Z));
+        int l = std::max(abs((p.X-cp.X)/32),abs((p.Z-cp.Z)/32));
         if(l<getVisualRange()){
             if(mainControlBody==b)
                 b->node->setVisible(false);
@@ -70,7 +70,7 @@ void body::loop(){
                     vec3 dir = target-posi;
 
                     irr::core::vector2df tdir(dir.X,dir.Z);
-                    if(tdir.getLengthSQ()<2*2){
+                    if(tdir.getLengthSQ()<=1){
                         b->autoWalk.pop_front();//到达目标，删除任务
                     }else{
 
@@ -86,7 +86,7 @@ void body::loop(){
 
                         if(dir.Y>0){//目标点高于现在，跳跃
                             cmd.cmd = CMD_JUMP;
-                            cmd.data_vec.set(dir);
+                            cmd.data_vec.set(vec3(0,1,0));
                             pushCommond(cmd);
                         }
                         break;
@@ -117,6 +117,27 @@ void body::onDraw(){
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+            if(!bd->autoWalk.empty()){
+            #define dig120 (3.14159265358979323846*2)/3
+            #define inr    19
+            #define our    25
+                double t=(std::clock()*500.0/ CLOCKS_PER_SEC)/100.0;
+                driver->draw2DLine(
+                            irr::core::vector2d<irr::s32>(p.X + (inr*cos(-t)), p.Y + (inr*sin(-t))),
+                            irr::core::vector2d<irr::s32>(p.X + (our*cos(-t)), p.Y + (our*sin(-t))),
+                            irr::video::SColor(255,255,255,255));
+                driver->draw2DLine(
+                            irr::core::vector2d<irr::s32>(p.X + (inr*cos(-t+dig120)), p.Y + (inr*sin(-t+dig120))),
+                            irr::core::vector2d<irr::s32>(p.X + (our*cos(-t+dig120)), p.Y + (our*sin(-t+dig120))),
+                            irr::video::SColor(255,255,255,255));
+                driver->draw2DLine(
+                            irr::core::vector2d<irr::s32>(p.X + (inr*cos(-t-dig120)), p.Y + (inr*sin(-t-dig120))),
+                            irr::core::vector2d<irr::s32>(p.X + (our*cos(-t-dig120)), p.Y + (our*sin(-t-dig120))),
+                            irr::video::SColor(255,255,255,255));
+            #undef our
+            #undef inr
+            #undef dig120
+            }
         }
     }
     for(auto it:selectedBodies){
