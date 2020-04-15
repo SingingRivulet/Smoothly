@@ -65,8 +65,6 @@ class pathFinding:public body{
             findPathByRay(start,end);
         }
 
-        std::unordered_set<std::string> controlling;
-
         void onDraw()override;
         void cancle()override;
     private:

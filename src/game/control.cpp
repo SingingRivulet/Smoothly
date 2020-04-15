@@ -115,7 +115,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_KEY_M:
                     //if(event.KeyInput.PressedDown)parent->eventQueue.push(gemeEPair(SET_BUILDING_MODE,6));
                 break;
-                case irr::KEY_KEY_Y:
+                case irr::KEY_KEY_Y://设置移动目标
                     if(event.KeyInput.PressedDown){
                         parent->pathFindingMode = true;
                     }else{
@@ -125,19 +125,26 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         }
                     }
                 break;
-                case irr::KEY_KEY_T:
+                case irr::KEY_KEY_T://建造
                     if(event.KeyInput.PressedDown){
                         parent->buildingStart();
                     }else{
                         parent->buildingEnd();
                     }
                 break;
-                case irr::KEY_KEY_5:
+                case irr::KEY_KEY_5://切换建筑
                     if(event.KeyInput.PressedDown){
                         parent->switchBuilding();
                     }
                 break;
-                case irr::KEY_OEM_3:
+                case irr::KEY_KEY_H:
+                    if(event.KeyInput.PressedDown){
+                        parent->selectBodyStart();
+                    }else{
+                        parent->selectBodyEnd();
+                    }
+                break;
+                case irr::KEY_OEM_3://取消
                     parent->cancle();
                 break;
                 case irr::KEY_TAB:

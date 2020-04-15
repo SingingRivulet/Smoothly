@@ -57,7 +57,6 @@ namespace smoothly{
 
             irr::gui::IGUIFont * font;
 
-            std::vector<irr::core::vector3df> myBodies_mark;
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;

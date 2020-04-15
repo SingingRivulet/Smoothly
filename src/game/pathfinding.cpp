@@ -209,7 +209,6 @@ bool pathFinding::findPath(const core::vector3df & A, const core::vector3df & B,
 }
 
 void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
-    controlling.insert(mainControl);
     fetchByRay(start , end,[&](const vec3 & p,bodyInfo * ){
         auto tg = scene->addBillboardSceneNode(0,core::dimension2d<f32>(5,5),p+vec3(0,1,0));
         tg->setMaterialTexture(0,texture_pathTarget);
@@ -218,10 +217,8 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
         auto am = scene->createDeleteAnimator(1000);
         tg->addAnimator(am);
 
-        for(auto uuid:controlling){
-            auto bodyit = myBodies.find(uuid);
-            if(bodyit!=myBodies.end()){
-                bodyItem * bd = bodyit->second;
+        for(auto bd:selectedBodies){
+            if(bd){
                 bd->autoWalk.clear();
                 if(bd->uncreatedChunk)
                     continue;
@@ -229,7 +226,7 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                     commond cmd;
                     cmd.cmd = CMD_SET_POSITION;
                     cmd.data_vec = p;
-                    cmd.uuid = uuid;
+                    cmd.uuid = bd->uuid;
                     pushCommond(cmd);
                 }else{
                     if(findPath(bd->node->getPosition(),p,bd->autoWalk)){

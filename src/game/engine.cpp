@@ -119,14 +119,7 @@ void engine::sceneLoop(){
     if(cm.Y<waterLevel){//水下效果
         driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
     }
-    for(auto it:myBodies_mark){//在屏幕上标出自己拥有的单位
-        auto p = coll->getScreenCoordinatesFrom3DPosition(it,camera);
-        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
-        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
-        driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
-    }
     onDraw();
-    myBodies_mark.clear();
     gui->drawAll();
 
     driver->endScene();

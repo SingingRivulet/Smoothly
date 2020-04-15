@@ -105,6 +105,7 @@ class body:public terrainDispather{
 
     public:
         class bodyItem;
+        void onDraw()override;
 
     private:
         struct bodyConf;
@@ -157,6 +158,8 @@ class body:public terrainDispather{
                 void ghostTest(const btTransform &,std::function<void(bodyInfo*)> callback);//假如此角色在哪个位置，会碰撞哪些物体
 
                 std::list<vec3> autoWalk;
+
+                irr::core::vector2d<s32> screenPosition;
             protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
@@ -184,6 +187,15 @@ class body:public terrainDispather{
     public:
         std::unordered_map<std::string,bodyItem*> bodies;
         std::unordered_map<std::string,bodyItem*> myBodies;
+        std::set<bodyItem*> selectedBodies;
+        void selectBodyByScreenPoint(const irr::core::vector2d<s32> &,int range);
+        void selectBodyStart();
+        void selectBodyEnd();
+    private:
+        void selectBodyUpdate();
+        int selectBodyStartTime;
+        bool selecting;
+        int selectBodyRange;
     protected:
         void setBodyPosition(const std::string & uuid , const vec3 & posi);
         void removeBody(const std::string & uuid);

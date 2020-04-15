@@ -10,4 +10,5 @@ void main(){
     if(color.a<0.7)
         discard;
     gl_FragColor = color;
+    gl_FragColor.a =1.0;
 }

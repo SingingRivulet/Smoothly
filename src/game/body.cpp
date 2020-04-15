@@ -27,7 +27,8 @@ void body::removeBody(const std::string & uuid){
     if(it!=bodies.end()){
         releaseBody(it->second);
         bodies.erase(it);
-        myBodies.erase(it);
+        myBodies.erase(it->first);
+        selectedBodies.erase(it->second);
     }
 }
 
@@ -68,8 +69,6 @@ void body::bodyItem::updateFromWorld(){
             lastLookAt = lookAt;
             parent->cmd_setLookAt(uuid,lookAt.X,lookAt.Y,lookAt.Z);
         }
-        if(parent->mainControlBody!=this)
-            parent->myBodies_mark.push_back(irrPos);
     }else{
         node->setRotation(irrRot);
         node->setPosition(irrPos);
@@ -362,6 +361,7 @@ body::body():gravity(0,-10,0){
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_dofile(L, "../script/body.lua");
+    selecting = false;
 }
 
 body::~body(){
@@ -556,6 +556,42 @@ body::commond::commond(const body::commond & t){
     data_int    = t.data_int;
     data_str    = t.data_str;
     data_vec    = t.data_vec;
+}
+void body::selectBodyByScreenPoint(const irr::core::vector2d<s32> & sp, int range){
+    selectedBodies.clear();
+    for(auto it:myBodies){
+        bodyItem * bd = it.second;
+        auto p = bd->screenPosition;
+        if(bd==mainControlBody)
+            continue;
+        if(p.X<0 || p.Y<0 || p.X>width || p.Y>height)
+            continue;
+        if((p-sp).getLengthSQ()<range*range){
+            selectedBodies.insert(bd);
+        }
+    }
+}
+
+void body::selectBodyStart(){
+    if(selecting)
+        return;
+    selectBodyStartTime = timer->getTime();
+    selecting = true;
+    selectBodyRange = 0;
+}
+
+void body::selectBodyEnd(){
+    if(!selecting)
+        return;
+    selecting = false;
+    selectBodyByScreenPoint(screenCenter,selectBodyRange);
+}
+
+void body::selectBodyUpdate(){
+    if(!selecting)
+        return;
+    if((selectBodyRange+selectBodyRange)<height)
+        selectBodyRange = (timer->getTime()-selectBodyStartTime)*0.1;
 }
 
 }

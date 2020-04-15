@@ -101,6 +101,56 @@ void body::loop(){
         }
     }
     doCommonds();
+
+    selectBodyUpdate();
+}
+
+void body::onDraw(){
+    terrainDispather::onDraw();
+    for(auto it:myBodies){//在屏幕上标出自己拥有的单位
+        bodyItem * bd = it.second;
+        if(bd!=mainControlBody){
+            auto p = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(bd->node->getPosition(),camera);
+            bd->screenPosition = p;
+            if(p.X<0 || p.Y<0 || p.X>width || p.Y>height)
+                continue;
+            driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
+            driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+            driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+        }
+    }
+    for(auto it:selectedBodies){
+        bodyItem * bd = it;
+        auto p = bd->screenPosition;
+        if(bd==mainControlBody)
+            continue;
+        if(p.X<0 || p.Y<0 || p.X>width || p.Y>height)
+            continue;
+
+        #define dig120 (3.14159265358979323846*2)/3
+        #define inr    7
+        #define our    19
+        double t=(std::clock()*500.0/ CLOCKS_PER_SEC)/100.0;
+        driver->draw2DLine(
+                    irr::core::vector2d<irr::s32>(p.X + (inr*cos(t)), p.Y + (inr*sin(t))),
+                    irr::core::vector2d<irr::s32>(p.X + (our*cos(t)), p.Y + (our*sin(t))),
+                    irr::video::SColor(255,255,255,64));
+        driver->draw2DLine(
+                    irr::core::vector2d<irr::s32>(p.X + (inr*cos(t+dig120)), p.Y + (inr*sin(t+dig120))),
+                    irr::core::vector2d<irr::s32>(p.X + (our*cos(t+dig120)), p.Y + (our*sin(t+dig120))),
+                    irr::video::SColor(255,255,255,64));
+        driver->draw2DLine(
+                    irr::core::vector2d<irr::s32>(p.X + (inr*cos(t-dig120)), p.Y + (inr*sin(t-dig120))),
+                    irr::core::vector2d<irr::s32>(p.X + (our*cos(t-dig120)), p.Y + (our*sin(t-dig120))),
+                    irr::video::SColor(255,255,255,64));
+        #undef our
+        #undef inr
+        #undef dig120
+    }
+
+    if(selecting){
+        driver->draw2DPolygon(screenCenter,selectBodyRange,irr::video::SColor(255,255,255,255),36);
+    }
 }
 
 }
