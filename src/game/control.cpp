@@ -137,6 +137,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         parent->switchBuilding();
                     }
                 break;
+                case irr::KEY_KEY_6://开关自动寻路
+                    if(!event.KeyInput.PressedDown){
+                        parent->useAIPathingFinding =! parent->useAIPathingFinding;
+                    }
+                break;
                 case irr::KEY_KEY_H:
                     if(event.KeyInput.PressedDown){
                         parent->selectBodyStart();

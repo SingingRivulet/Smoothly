@@ -70,7 +70,7 @@ void body::loop(){
                     vec3 dir = target-posi;
 
                     irr::core::vector2df tdir(dir.X,dir.Z);
-                    if(tdir.getLengthSQ()<=1){
+                    if(tdir.getLengthSQ()<1){
                         b->autoWalk.pop_front();//到达目标，删除任务
                     }else{
 

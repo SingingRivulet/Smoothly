@@ -80,6 +80,8 @@ void body::bodyItem::updateFromWorld(){
     if(uuid==parent->mainControl){
         parent->camera->setPosition(irrPos+vec3(0,config->deltaY,0));
     }
+
+    coll_rigidBody->getMotionState()->setWorldTransform(transform);
 }
 
 void body::bodyItem::doAnimation(int speed, int start, int end, bool loop){
@@ -272,6 +274,18 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     cb->parent = p;
     p->node->setAnimationEndCallback(cb);
     cb->drop();
+
+    //设置碰撞刚体
+    p->coll_bodyState=setMotionState(p->node->getAbsoluteTransformation().pointer());
+    p->coll_rigidBody =createBody(p->m_character.getShape(),p->coll_bodyState);
+    p->coll_rigidBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+    p->coll_rigidBody->setActivationState(DISABLE_DEACTIVATION);
+    p->coll_rigidBody->setFriction(0.7);
+    p->coll_rigidBody->setRestitution(0.1);
+    p->coll_rigidBody->setUserPointer(&(p->coll_rigidBodyInfo));
+    dynamicsWorld->addRigidBody(p->coll_rigidBody);
+    p->coll_rigidBodyInfo.type = BODY_BODY_PART;
+    p->coll_rigidBodyInfo.ptr  = &p->m_character;
 
     p->updateFromWorld();
     p->updateStatus();
@@ -521,6 +535,10 @@ const body::bodyStatus & body::bodyStatus::operator=(int32_t m){
 }
 
 void body::releaseBody(bodyItem * b){
+    if(b->coll_rigidBody)
+        delete b->coll_rigidBody;
+    if(b->coll_bodyState)
+        delete b->coll_bodyState;
     b->m_character.removeFromWorld();
     b->node->remove();
     if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的

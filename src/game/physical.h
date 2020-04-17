@@ -42,6 +42,7 @@ namespace smoothly{
                 BODY_TERRAIN_ITEM,
                 BODY_BUILDING,
                 BODY_BODY,
+                BODY_BODY_PART,
                 BODY_BULLET
             };
             struct bodyInfo{
@@ -131,7 +132,13 @@ namespace smoothly{
             
             class character:public bodyBase{
                 private:
-                    btKinematicCharacterController * controller;
+                    class filterCharacterController:public btKinematicCharacterController{
+                        public:
+                            filterCharacterController(btPairCachingGhostObject* ghostObject,btConvexShape* convexShape,btScalar stepHeight, const btVector3& up = btVector3(1.0,0.0,0.0));
+                            bool needsCollision(const btCollisionObject *body0, const btCollisionObject *body1)override;
+                            character * parent;
+                    };
+                    filterCharacterController * controller;
                     btPairCachingGhostObject * m_ghostObject;
                     btConvexShape* shape;
                     bool walkInSky;

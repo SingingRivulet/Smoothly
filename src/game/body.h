@@ -147,6 +147,10 @@ class body:public terrainDispather{
                 bodyInfo                             info;
                 bool                                 uncreatedChunk;//未创建区块，锁住物体
 
+                btRigidBody      * coll_rigidBody;
+                btMotionState    * coll_bodyState;
+                bodyInfo           coll_rigidBodyInfo;
+
                 bool firing;
                 int firingWearingId;
                 int fireId;

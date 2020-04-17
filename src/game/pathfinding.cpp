@@ -122,7 +122,7 @@ void pathFinding::pathFindingContext::process(){
         node * min;
         //ns中找一个f最小的
         for(auto it:ns){
-            if(heuristic(it->position,target)<4){
+            if(heuristic(it->position,target)<=1){
                 processing = NULL;
                 result = it;
                 return;
@@ -194,7 +194,10 @@ bool pathFinding::pathFindingContext::pathFindingStart(std::function<void(const 
 pathFinding::pathFinding(){
     texture_pathTarget = driver->getTexture("../../res/icon/pathTarget.png");
     texture_pathPoint = driver->getTexture("../../res/icon/pathPoint.png");
+    texture_aiPathFindingOn = driver->getTexture("../../res/icon/aiPathFindingOn.png");
+    texture_aiPathFindingOff = driver->getTexture("../../res/icon/aiPathFindingOff.png");
     pathFindingMode = false;
+    useAIPathingFinding = true;
 }
 
 bool pathFinding::findPath(const core::vector3df & A, const core::vector3df & B, std::list<core::vector3df> & r){
@@ -229,28 +232,33 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                     cmd.uuid = bd->uuid;
                     pushCommond(cmd);
                 }else{
-                    if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
-                        bool first = true;
-                        vec3 lastp;
-                        for(auto it:bd->autoWalk){
-                            if(first)
-                                first = false;
-                            else{
-                                auto tmp = (lastp+it)*0.5;
-                                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                    if(useAIPathingFinding){
+                        if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
+                            bool first = true;
+                            vec3 lastp;
+                            for(auto it:bd->autoWalk){
+                                if(first)
+                                    first = false;
+                                else{
+                                    auto tmp = (lastp+it)*0.5;
+                                    auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                                    pn->setMaterialTexture(0,texture_pathPoint);
+                                    pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                                    pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                                    pn->addAnimator(am);
+                                }
+                                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
                                 pn->setMaterialTexture(0,texture_pathPoint);
                                 pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
                                 pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
                                 pn->addAnimator(am);
-                            }
-                            auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
-                            pn->setMaterialTexture(0,texture_pathPoint);
-                            pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-                            pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-                            pn->addAnimator(am);
 
-                            lastp = it;
+                                lastp = it;
+                            }
                         }
+                    }else{
+                        bd->autoWalk.clear();
+                        bd->autoWalk.push_back(p);
                     }
                 }
             }
@@ -261,10 +269,21 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
 
 void pathFinding::onDraw(){
     body::onDraw();
-    if(pathFindingMode){
+    if(!selectedBodies.empty()){
         irr::video::SColor col(255,255,255,255);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X-10,screenCenter.Y),irr::core::vector2d<irr::s32>(screenCenter.X+10,screenCenter.Y),col);
         driver->draw2DLine(irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y-10),irr::core::vector2d<irr::s32>(screenCenter.X,screenCenter.Y+10),col);
+        if(useAIPathingFinding){
+            driver->draw2DImage(texture_aiPathFindingOn,
+                                irr::core::rect<irr::s32>(width-128,16,width,16+32),
+                                irr::core::rect<irr::s32>(0,0,128,32),
+                                0,0,true);
+        }else{
+            driver->draw2DImage(texture_aiPathFindingOff,
+                                irr::core::rect<irr::s32>(width-128,16,width,16+32),
+                                irr::core::rect<irr::s32>(0,0,128,32),
+                                0,0,true);
+        }
     }
 }
 

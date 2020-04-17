@@ -379,13 +379,31 @@ physical::character::character(btScalar w,btScalar h,const btVector3 & position,
     m_ghostObject->setCollisionShape (shape);
     m_ghostObject->setCollisionFlags (btCollisionObject::CF_CHARACTER_OBJECT);
     
-    controller = new btKinematicCharacterController (m_ghostObject,shape,stepHeight);
-
-    controller->setUp(btVector3(0,1,0));
-    
+    controller = new filterCharacterController (m_ghostObject,shape,stepHeight,btVector3(0,1,0));
+    controller->parent = this;
     //controller->setGravity(btVector3(0, -10, 0));
     
     firstUpdate=true;
+}
+
+physical::character::filterCharacterController::filterCharacterController(btPairCachingGhostObject * ghostObject, btConvexShape * convexShape, btScalar stepHeight, const btVector3 & up):
+btKinematicCharacterController(ghostObject,convexShape,stepHeight,up){
+}
+
+bool physical::character::filterCharacterController::needsCollision(const btCollisionObject * body0, const btCollisionObject * body1){
+    auto p = body0->getUserPointer();
+    if(p){
+        auto i = (bodyInfo*)p;
+        if(i->type==BODY_BODY_PART && i->ptr==parent)
+            return false;
+    }
+    p = body1->getUserPointer();
+    if(p){
+        auto i = (bodyInfo*)p;
+        if(i->type==BODY_BODY_PART && i->ptr==parent)
+            return false;
+    }
+    return btKinematicCharacterController::needsCollision(body0,body1);
 }
 physical::character::~character(){
     delete controller;
