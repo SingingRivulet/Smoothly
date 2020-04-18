@@ -57,6 +57,9 @@ class pathFinding:public body{
         bool findPath(const irr::core::vector3df & A,const irr::core::vector3df & B,std::list<irr::core::vector3df> & r);
 
         void findPathByRay(const vec3 & start,const vec3 & end);
+
+        void followMainControl();//跟随主角
+
         inline void findPathByRay(){
             auto ori    = camera->getPosition();
             auto dir    = camera->getTarget()-ori;
@@ -68,6 +71,8 @@ class pathFinding:public body{
 
         void onDraw()override;
         void cancle()override;
+
+        int pathFindingMode_startTime;
     private:
         irr::video::ITexture * texture_pathTarget;
         irr::video::ITexture * texture_pathPoint;

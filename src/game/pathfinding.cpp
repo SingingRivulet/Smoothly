@@ -220,6 +220,8 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
         auto am = scene->createDeleteAnimator(1000);
         tg->addAnimator(am);
 
+        std::string follow;
+
         for(auto bd:selectedBodies){
             if(bd){
                 bd->autoWalk.clear();
@@ -232,39 +234,65 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                     cmd.uuid = bd->uuid;
                     pushCommond(cmd);
                 }else{
-                    if(useAIPathingFinding){
-                        if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
-                            bool first = true;
-                            vec3 lastp;
-                            for(auto it:bd->autoWalk){
-                                if(first)
-                                    first = false;
-                                else{
-                                    auto tmp = (lastp+it)*0.5;
-                                    auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                    if(!follow.empty()){
+                        bd->follow = follow;
+                        follow = bd->uuid;
+                    }else{
+                        if(useAIPathingFinding){
+                            if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
+                                bool first = true;
+                                vec3 lastp;
+                                for(auto it:bd->autoWalk){
+                                    if(first)
+                                        first = false;
+                                    else{
+                                        auto tmp = (lastp+it)*0.5;
+                                        auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                                        pn->setMaterialTexture(0,texture_pathPoint);
+                                        pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                                        pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                                        pn->addAnimator(am);
+                                    }
+                                    auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
                                     pn->setMaterialTexture(0,texture_pathPoint);
                                     pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
                                     pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
                                     pn->addAnimator(am);
-                                }
-                                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
-                                pn->setMaterialTexture(0,texture_pathPoint);
-                                pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
-                                pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-                                pn->addAnimator(am);
 
-                                lastp = it;
+                                    lastp = it;
+                                }
                             }
+                        }else{
+                            bd->autoWalk.clear();
+                            bd->autoWalk.push_back(p);
                         }
-                    }else{
-                        bd->autoWalk.clear();
-                        bd->autoWalk.push_back(p);
+                        bd->follow.clear();
+                        follow = bd->uuid;
                     }
                 }
             }
         }
         am->drop();
     });
+}
+
+void pathFinding::followMainControl(){
+    std::string follow = mainControl;
+
+    if(mainControlBody==NULL)
+        return;
+
+    mainControlBody->follow.clear();
+
+    for(auto bd:selectedBodies){
+        if(bd){
+            bd->autoWalk.clear();
+            if(bd->uncreatedChunk)
+                continue;
+            bd->follow = follow;
+            follow = bd->uuid;
+        }
+    }
 }
 
 void pathFinding::onDraw(){

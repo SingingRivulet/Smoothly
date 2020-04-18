@@ -65,37 +65,71 @@ void body::loop(){
                 commond cmd;//命令结构体
                 cmd.uuid = b->uuid;
                 vec3 posi(btPos.x(), btPos.y(), btPos.z());
-                while(!b->autoWalk.empty()){
-                    auto target = b->autoWalk.front();
-                    vec3 dir = target-posi;
+                if(!b->follow.empty() && b->autoWalk.empty()){
+                    //跟随模式
+                    auto bdit = bodies.find(b->follow);
+                    if(bdit!=bodies.end()){
+                        bodyItem * bd = bdit->second;
+                        auto target  = bd->node->getPosition();
 
-                    irr::core::vector2df tdir(dir.X,dir.Z);
-                    if(tdir.getLengthSQ()<1){
-                        b->autoWalk.pop_front();//到达目标，删除任务
-                    }else{
+                        irr::core::vector2df a(posi.X,posi.Z),b(target.X,target.Z);
 
-                        //行走
-                        cmd.data_int = BM_WALK_F;
-                        cmd.cmd = CMD_STATUS_ADD;
-                        pushCommond(cmd);
+                        if((a-b).getLengthSQ()>5*5){
+                            vec3 dir = target-posi;
+                            //行走
+                            cmd.data_int = BM_WALK_F;
+                            cmd.cmd = CMD_STATUS_ADD;
+                            pushCommond(cmd);
 
-                        //更新旋转
-                        cmd.cmd = CMD_SET_LOOKAT;
-                        cmd.data_vec = dir;
-                        pushCommond(cmd);
+                            //更新旋转
+                            cmd.cmd = CMD_SET_LOOKAT;
+                            cmd.data_vec = dir;
+                            pushCommond(cmd);
 
-                        if(dir.Y>0){//目标点高于现在，跳跃
-                            cmd.cmd = CMD_JUMP;
-                            cmd.data_vec.set(vec3(0,1,0));
+                            if(dir.Y>0){//目标点高于现在，跳跃
+                                cmd.cmd = CMD_JUMP;
+                                cmd.data_vec.set(vec3(0,1,0));
+                                pushCommond(cmd);
+                            }
+                        }else{
+                            cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
+                            cmd.cmd = CMD_STATUS_REMOVE;
                             pushCommond(cmd);
                         }
-                        break;
                     }
-                }
-                if(b->autoWalk.empty()){//停止自动行走
-                    cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
-                    cmd.cmd = CMD_STATUS_REMOVE;
-                    pushCommond(cmd);
+                }else{
+                    while(!b->autoWalk.empty()){
+                        auto target = b->autoWalk.front();
+                        vec3 dir = target-posi;
+
+                        irr::core::vector2df tdir(dir.X,dir.Z);
+                        if(tdir.getLengthSQ()<1){
+                            b->autoWalk.pop_front();//到达目标，删除任务
+                        }else{
+
+                            //行走
+                            cmd.data_int = BM_WALK_F;
+                            cmd.cmd = CMD_STATUS_ADD;
+                            pushCommond(cmd);
+
+                            //更新旋转
+                            cmd.cmd = CMD_SET_LOOKAT;
+                            cmd.data_vec = dir;
+                            pushCommond(cmd);
+
+                            if(dir.Y>0){//目标点高于现在，跳跃
+                                cmd.cmd = CMD_JUMP;
+                                cmd.data_vec.set(vec3(0,1,0));
+                                pushCommond(cmd);
+                            }
+                            break;
+                        }
+                    }
+                    if(b->autoWalk.empty()){//停止自动行走
+                        cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
+                        cmd.cmd = CMD_STATUS_REMOVE;
+                        pushCommond(cmd);
+                    }
                 }
             }
         }

@@ -147,6 +147,8 @@ class body:public terrainDispather{
                 bodyInfo                             info;
                 bool                                 uncreatedChunk;//未创建区块，锁住物体
 
+                std::string                          follow;//跟随
+
                 btRigidBody      * coll_rigidBody;
                 btMotionState    * coll_bodyState;
                 bodyInfo           coll_rigidBodyInfo;
