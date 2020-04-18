@@ -192,10 +192,11 @@ bool pathFinding::pathFindingContext::pathFindingStart(std::function<void(const 
 }
 
 pathFinding::pathFinding(){
-    texture_pathTarget = driver->getTexture("../../res/icon/pathTarget.png");
-    texture_pathPoint = driver->getTexture("../../res/icon/pathPoint.png");
-    texture_aiPathFindingOn = driver->getTexture("../../res/icon/aiPathFindingOn.png");
-    texture_aiPathFindingOff = driver->getTexture("../../res/icon/aiPathFindingOff.png");
+    texture_pathTarget          = driver->getTexture("../../res/icon/pathTarget.png");
+    texture_pathPoint           = driver->getTexture("../../res/icon/pathPoint.png");
+    texture_aiPathFindingOn     = driver->getTexture("../../res/icon/aiPathFindingOn.png");
+    texture_aiPathFindingOff    = driver->getTexture("../../res/icon/aiPathFindingOff.png");
+    texture_pathFindingButton   = driver->getTexture("../../res/icon/pathFindingButton.png");
     pathFindingMode = false;
     useAIPathingFinding = true;
 }
@@ -311,6 +312,21 @@ void pathFinding::onDraw(){
                                 irr::core::rect<irr::s32>(width-128,16,width,16+32),
                                 irr::core::rect<irr::s32>(0,0,128,32),
                                 0,0,true);
+        }
+        driver->draw2DImage(texture_pathFindingButton,
+                            irr::core::rect<irr::s32>(width-128,48,width,48+128),
+                            irr::core::rect<irr::s32>(0,0,128,128),
+                            0,0,true);
+        auto nowTime = timer->getTime();
+        int delta = nowTime - pathFindingMode_startTime - 1000;
+        if(pathFindingMode && delta > 0){
+            if(delta>1000)
+                delta = 1000;
+            int len = delta/10;
+            driver->draw2DRectangle(irr::video::SColor(255,0,255,255),irr::core::rect<s32>(
+                                        screenCenter.X-50,screenCenter.Y+30,
+                                        screenCenter.X+len-50,screenCenter.Y+35
+                                        ));
         }
     }
 }

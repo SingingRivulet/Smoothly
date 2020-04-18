@@ -118,18 +118,20 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_KEY_Y://设置移动目标
                     if(event.KeyInput.PressedDown){
                         if(parent->pathFindingMode){
-                            if(parent->timer->getTime() - parent->pathFindingMode_startTime > 2000){
-                                parent->pathFindingMode = false;
-                                parent->followMainControl();
-                            }
+
                         }else{
                             parent->pathFindingMode = true;
                             parent->pathFindingMode_startTime = parent->timer->getTime();
                         }
                     }else{
                         if(parent->pathFindingMode){
-                            parent->pathFindingMode = false;
-                            parent->findPathByRay();
+                            if(parent->timer->getTime() - parent->pathFindingMode_startTime > 2000){
+                                parent->pathFindingMode = false;
+                                parent->followMainControl();
+                            }else{
+                                parent->pathFindingMode = false;
+                                parent->findPathByRay();
+                            }
                         }
                     }
                 break;

@@ -202,6 +202,7 @@ class body:public terrainDispather{
         int selectBodyStartTime;
         bool selecting;
         int selectBodyRange;
+        bool selectAllBodies;
     protected:
         void setBodyPosition(const std::string & uuid , const vec3 & posi);
         void removeBody(const std::string & uuid);

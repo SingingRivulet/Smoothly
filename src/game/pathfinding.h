@@ -76,6 +76,7 @@ class pathFinding:public body{
     private:
         irr::video::ITexture * texture_pathTarget;
         irr::video::ITexture * texture_pathPoint;
+        irr::video::ITexture * texture_pathFindingButton;
         irr::video::ITexture * texture_aiPathFindingOn;
         irr::video::ITexture * texture_aiPathFindingOff;
 };

@@ -583,11 +583,9 @@ void body::selectBodyByScreenPoint(const irr::core::vector2d<s32> & sp, int rang
         auto p = bd->screenPosition;
         if(bd==mainControlBody)
             continue;
-        if(p.X<0 || p.Y<0 || p.X>width || p.Y>height)
-            continue;
-        if((p-sp).getLengthSQ()<range*range){
+        if(selectAllBodies || ((p.X>0 && p.Y>0 && p.X<width && p.Y<height) && (p-sp).getLengthSQ()<range*range)){
             selectedBodies.insert(bd);
-            printf("select body:%s\n",bd->uuid.c_str());
+            //printf("select body:%s\n",bd->uuid.c_str());
         }
     }
 }
@@ -597,6 +595,7 @@ void body::selectBodyStart(){
         return;
     selectBodyStartTime = timer->getTime();
     selecting = true;
+    selectAllBodies = false;
     selectBodyRange = 0;
 }
 
@@ -612,6 +611,9 @@ void body::selectBodyUpdate(){
         return;
     if((selectBodyRange+selectBodyRange)<height)
         selectBodyRange = (timer->getTime()-selectBodyStartTime)*0.1;
+    else{
+        selectAllBodies = true;
+    }
 }
 
 }
