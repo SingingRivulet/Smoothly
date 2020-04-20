@@ -83,6 +83,12 @@ void body::bodyItem::updateFromWorld(){
             needUpdateStatus = true;
         }
     }
+    int pitchAngle = getPitchAngle();
+    if(pitchAngle!=lastPitchAngle){
+        needUpdateStatus = true;
+        lastPitchAngle   = pitchAngle;
+    }
+
     if(needUpdateStatus)
         updateStatus();
 
@@ -96,12 +102,13 @@ void body::bodyItem::updateFromWorld(){
     coll_rigidBody->getMotionState()->setWorldTransform(transform);
 }
 
-void body::bodyItem::doAnimation(float speed, int start, int end, bool loop){
+void body::bodyItem::doAnimation(float speed, int start, int end,float frame, bool loop){
     if(node==NULL)
         return;
     node->setAnimationSpeed(speed);
     node->setLoopMode(loop);
     node->setFrameLoop(start,end);
+    node->setCurrentFrame(frame);
 }
 
 void body::bodyItem::doFire(){
@@ -152,6 +159,27 @@ void body::bodyItem::setFollow(body::bodyItem * p){
     followers.clear();
 }
 
+float body::bodyItem::getPitchAngle(){
+    auto dir = lookAt;
+    dir.normalize();
+    auto hor = dir;
+    hor.Y = 0;//水平方向向量
+
+    if(hor.getLengthSQ()==0)//垂直
+        return 90;
+
+    hor.normalize();
+
+    auto dot = dir.dotProduct(hor);
+
+    auto dig = irr::core::radToDeg(acos(dot));//得到角度
+
+    if(dir.Y>0)
+        return dig;
+    else
+        return -dig;
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;
@@ -175,6 +203,10 @@ void body::bodyItem::updateStatus(bool finish){
         lua_pushstring(parent->L,"status");
         lua_newtable(parent->L);
         {
+
+            lua_pushstring(parent->L,"pitchAngle");
+            lua_pushinteger(parent->L, lastPitchAngle);
+            lua_settable(parent->L, -3);
 
             lua_pushstring(parent->L,"walk");
             lua_newtable(parent->L);
@@ -234,6 +266,11 @@ void body::bodyItem::updateStatus(bool finish){
                 lua_pushstring(parent->L, "");
             }
             lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"mask");
+            lua_pushinteger(parent->L, status_mask);
+            lua_settable(parent->L, -3);
+
         }
         lua_settable(parent->L, -3);
 
@@ -246,18 +283,23 @@ void body::bodyItem::updateStatus(bool finish){
         lua_settable(parent->L, -3);
 
         // do the call (1 arguments, 4 result)
-        if (lua_pcall(parent->L, 1, 4, 0) != 0)
+        if (lua_pcall(parent->L, 1, 5, 0) != 0)
              printf("error running function : %s \n",lua_tostring(parent->L, -1));
         else{
             //printf("%s\n", luaL_typename(parent->L,-1));
             //printf("%s\n", luaL_typename(parent->L,-2));
             //printf("%s\n", luaL_typename(parent->L,-3));
             //printf("%s\n", luaL_typename(parent->L,-4));
-            if(lua_isboolean(parent->L,-1) && lua_isinteger(parent->L,-2) && lua_isinteger(parent->L,-3) && lua_isnumber(parent->L,-4)){
+            if(lua_isboolean(parent->L,-1) &&
+               lua_isnumber(parent->L,-2) &&
+               lua_isinteger(parent->L,-3) &&
+               lua_isinteger(parent->L,-4) &&
+               lua_isnumber(parent->L,-5)){
                 doAnimation(
-                            lua_tonumber(parent->L,-4),
+                            lua_tonumber(parent->L,-5),
+                            lua_tointeger(parent->L,-4),
                             lua_tointeger(parent->L,-3),
-                            lua_tointeger(parent->L,-2),
+                            lua_tonumber(parent->L,-2),
                             lua_toboolean(parent->L,-1));
             }
         }
@@ -307,6 +349,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->lastLookAt   = l;
     p->lastPosition = posi;
     p->lastRotation = r;
+    p->lastPitchAngle = p->getPitchAngle();
 
     p->uuid   = uuid;
     p->owner  = owner;
@@ -598,14 +641,21 @@ void body::releaseBody(bodyItem * b){
         delete b->coll_bodyState;
     b->m_character.removeFromWorld();
     b->node->remove();
+
     //清除跟随
     for(auto it:b->followers){
         it->follow = NULL;
     }
     b->followers.clear();
+    if(b->follow){
+        b->follow->followers.erase(b);
+        b->follow=NULL;
+    }
+
     if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的
         removeCharacterChunk(b->uuid);
     }
+
     if(!mainControl.empty() && mainControl==b->uuid){//是视角物体
         mainControl.clear();
         mainControlBody=NULL;

@@ -154,6 +154,7 @@ class body:public terrainDispather{
                 bool firing;
                 int firingWearingId;
                 int fireId;
+                int lastPitchAngle;
                 unsigned int lastFireTime;
                 unsigned int fireDelta;
 
@@ -167,13 +168,15 @@ class body:public terrainDispather{
 
                 void setFollow(bodyItem *);//设置跟随
 
+                float getPitchAngle();
+
             protected:
                 bodyItem                           * follow;//跟随
                 std::set<bodyItem*>                  followers;
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
                 void updateStatus(bool finish = false);
-                void doAnimation(float speed,int start,int end ,bool loop);
+                void doAnimation(float speed, int start, int end , float frame, bool loop);
                 void interactive(const char *);
                 void walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed);
 
