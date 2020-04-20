@@ -1,3 +1,4 @@
+uniform sampler2D tex;
 varying vec4 lcolor;
 void main(){
     gl_TexCoord[0] = gl_MultiTexCoord0;

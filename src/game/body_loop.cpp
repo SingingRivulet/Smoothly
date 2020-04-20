@@ -65,38 +65,36 @@ void body::loop(){
                 commond cmd;//命令结构体
                 cmd.uuid = b->uuid;
                 vec3 posi(btPos.x(), btPos.y(), btPos.z());
-                if(!b->follow.empty() && b->autoWalk.empty()){
+                if(b->follow != NULL && b->autoWalk.empty()){
                     //跟随模式
-                    auto bdit = bodies.find(b->follow);
-                    if(bdit!=bodies.end()){
-                        bodyItem * bd = bdit->second;
-                        auto target  = bd->node->getPosition();
+                    bodyItem * bd = b->follow;
+                    auto target  = bd->node->getPosition();
 
-                        irr::core::vector2df a(posi.X,posi.Z),b(target.X,target.Z);
+                    irr::core::vector2df a(posi.X,posi.Z),b(target.X,target.Z);
 
-                        if((a-b).getLengthSQ()>5*5){
-                            vec3 dir = target-posi;
-                            //行走
-                            cmd.data_int = BM_WALK_F;
-                            cmd.cmd = CMD_STATUS_ADD;
-                            pushCommond(cmd);
+                    if((a-b).getLengthSQ()>5*5){
+                        vec3 dir = target-posi;
+                        //行走
+                        cmd.data_int = BM_WALK_F;
+                        cmd.cmd = CMD_STATUS_ADD;
+                        pushCommond(cmd);
 
-                            //更新旋转
-                            cmd.cmd = CMD_SET_LOOKAT;
-                            cmd.data_vec = dir;
-                            pushCommond(cmd);
+                        //更新旋转
+                        cmd.cmd = CMD_SET_LOOKAT;
+                        cmd.data_vec = dir;
+                        pushCommond(cmd);
 
-                            if(dir.Y>0){//目标点高于现在，跳跃
-                                cmd.cmd = CMD_JUMP;
-                                cmd.data_vec.set(vec3(0,1,0));
-                                pushCommond(cmd);
-                            }
-                        }else{
-                            cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
-                            cmd.cmd = CMD_STATUS_REMOVE;
+                        if(dir.Y>2){//目标点高于现在，跳跃
+                            cmd.cmd = CMD_JUMP;
+                            cmd.data_vec.set(vec3(0,1,0));
                             pushCommond(cmd);
                         }
+                    }else{
+                        cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
+                        cmd.cmd = CMD_STATUS_REMOVE;
+                        pushCommond(cmd);
                     }
+
                 }else{
                     while(!b->autoWalk.empty()){
                         auto target = b->autoWalk.front();
@@ -117,7 +115,7 @@ void body::loop(){
                             cmd.data_vec = dir;
                             pushCommond(cmd);
 
-                            if(dir.Y>0){//目标点高于现在，跳跃
+                            if(dir.Y>2){//目标点高于现在，跳跃
                                 cmd.cmd = CMD_JUMP;
                                 cmd.data_vec.set(vec3(0,1,0));
                                 pushCommond(cmd);

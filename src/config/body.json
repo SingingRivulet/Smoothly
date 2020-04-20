@@ -8,6 +8,7 @@
         "deltaY":1.5,
         "jump":5,
         "jumpInSky":1,
-        "walkInSky":1
+        "walkInSky":1,
+        "aniCallback":"snoutx10kCallback"
     }
 ]

@@ -53,6 +53,7 @@ void body::bodyItem::updateFromWorld(){
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
 
+    bool needUpdateStatus = false;
     if(owner==parent->myUUID){//拥有的物体
         //尝试上传
         if(fabs(lastPosition.X-irrPos.X)>0.01 || fabs(lastPosition.Y!=irrPos.Y)>0.01 || fabs(lastPosition.Z!=irrPos.Z)>0.01){
@@ -69,10 +70,21 @@ void body::bodyItem::updateFromWorld(){
             lastLookAt = lookAt;
             parent->cmd_setLookAt(uuid,lookAt.X,lookAt.Y,lookAt.Z);
         }
+        if(lastStatus!=status_mask){
+            lastStatus = status_mask;
+            parent->cmd_setStatus(uuid , status_mask);
+            needUpdateStatus = true;
+        }
     }else{
         node->setRotation(irrRot);
         node->setPosition(irrPos);
+        if(lastStatus!=status_mask){
+            lastStatus = status_mask;
+            needUpdateStatus = true;
+        }
     }
+    if(needUpdateStatus)
+        updateStatus();
 
     //setPositionByTransform(node,t);
 
@@ -84,7 +96,7 @@ void body::bodyItem::updateFromWorld(){
     coll_rigidBody->getMotionState()->setWorldTransform(transform);
 }
 
-void body::bodyItem::doAnimation(int speed, int start, int end, bool loop){
+void body::bodyItem::doAnimation(float speed, int start, int end, bool loop){
     if(node==NULL)
         return;
     node->setAnimationSpeed(speed);
@@ -125,6 +137,21 @@ void body::bodyItem::ghostTest(const btTransform & t, std::function<void (physic
     parent->dynamicsWorld->removeCollisionObject(&ghost);
 }
 
+void body::bodyItem::setFollow(body::bodyItem * p){
+    if(follow){
+        follow->followers.erase(this);
+        follow = NULL;
+    }
+    if(p){
+        p->followers.insert(this);
+        follow = p;
+    }
+    for(auto it:followers){
+        it->follow=NULL;
+    }
+    followers.clear();
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;
@@ -136,73 +163,99 @@ void body::bodyAmCallback::OnAnimationEnd(irr::scene::IAnimatedMeshSceneNode *){
     parent->updateStatus(true);
 }
 void body::bodyItem::updateStatus(bool finish){
-    auto it = parent->bodyConfig.find(id);
-    if(it==parent->bodyConfig.end())
+    if(!config->haveAniCallback)
         return;
-    if(it->second->aniCallback.empty())
-        return;
-    lua_getglobal(parent->L,it->second->aniCallback.c_str());
+    auto nowFrame = node->getFrameNr();
+    lua_settop(parent->L , 0);
+    lua_rawgeti(parent->L,LUA_REGISTRYINDEX,config->aniCallback);
     if(lua_isfunction(parent->L,-1)){
 
-        lua_pushboolean(parent->L, status.walk_forward);
-        lua_pushboolean(parent->L, status.walk_leftOrRight);
-        lua_pushboolean(parent->L, status.useLeft);
-        lua_pushboolean(parent->L, status.useRight);
+        lua_newtable(parent->L);//创建主数组
 
-        if(status.bodyPosture==bodyStatus::BS_BODY_STAND){
-            lua_pushstring(parent->L, "stand");
-        }else
-        if(status.bodyPosture==bodyStatus::BS_BODY_SQUAT){
-            lua_pushstring(parent->L, "squat");
-        }else
-        if(status.bodyPosture==bodyStatus::BS_BODY_SIT){
-            lua_pushstring(parent->L, "sit");
-        }else
-        if(status.bodyPosture==bodyStatus::BS_BODY_RIDE){
-            lua_pushstring(parent->L, "ride");
-        }else
-        if(status.bodyPosture==bodyStatus::BS_BODY_LIE){
-            lua_pushstring(parent->L, "lie");
-        }else
-        if(status.bodyPosture==bodyStatus::BS_BODY_LIEP){
-            lua_pushstring(parent->L, "liep");
-        }else{
-            lua_pushstring(parent->L, "");
+        lua_pushstring(parent->L,"status");
+        lua_newtable(parent->L);
+        {
+
+            lua_pushstring(parent->L,"walk");
+            lua_newtable(parent->L);
+            {
+                lua_pushstring(parent->L,"forward");
+                lua_pushinteger(parent->L, status.walk_forward);
+                lua_settable(parent->L, -3);
+
+                lua_pushstring(parent->L,"leftOrRight");
+                lua_pushinteger(parent->L, status.walk_leftOrRight);
+                lua_settable(parent->L, -3);
+            }
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"useLeft");
+            lua_pushboolean(parent->L, status.useLeft);
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"useRight");
+            lua_pushboolean(parent->L, status.useRight);
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"posture");
+            if(status.bodyPosture==bodyStatus::BS_BODY_STAND){
+                lua_pushstring(parent->L, "stand");
+            }else if(status.bodyPosture==bodyStatus::BS_BODY_SQUAT){
+                lua_pushstring(parent->L, "squat");
+            }else if(status.bodyPosture==bodyStatus::BS_BODY_SIT){
+                lua_pushstring(parent->L, "sit");
+            }else if(status.bodyPosture==bodyStatus::BS_BODY_RIDE){
+                lua_pushstring(parent->L, "ride");
+            }else if(status.bodyPosture==bodyStatus::BS_BODY_LIE){
+                lua_pushstring(parent->L, "lie");
+            }else if(status.bodyPosture==bodyStatus::BS_BODY_LIEP){
+                lua_pushstring(parent->L, "liep");
+            }else{
+                lua_pushstring(parent->L, "");
+            }
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"hand");
+            if(status.handPosture==bodyStatus::BS_HAND_NONE){
+                lua_pushstring(parent->L, "none");
+            }else if(status.handPosture==bodyStatus::BS_HAND_AIM){
+                lua_pushstring(parent->L, "aim");
+            }else if(status.handPosture==bodyStatus::BS_HAND_THROW){
+                lua_pushstring(parent->L, "throw");
+            }else if(status.handPosture==bodyStatus::BS_HAND_BUILD){
+                lua_pushstring(parent->L, "build");
+            }else if(status.handPosture==bodyStatus::BS_HAND_BUILDP){
+                lua_pushstring(parent->L, "buildp");
+            }else if(status.handPosture==bodyStatus::BS_HAND_OPERATE){
+                lua_pushstring(parent->L, "operate");
+            }else if(status.handPosture==bodyStatus::BS_HAND_LIFT){
+                lua_pushstring(parent->L, "lift");
+            }else{
+                lua_pushstring(parent->L, "");
+            }
+            lua_settable(parent->L, -3);
         }
+        lua_settable(parent->L, -3);
 
-        if(status.handPosture==bodyStatus::BS_HAND_NONE){
-            lua_pushstring(parent->L, "none");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_AIM){
-            lua_pushstring(parent->L, "aim");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_THROW){
-            lua_pushstring(parent->L, "throw");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_BUILD){
-            lua_pushstring(parent->L, "build");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_BUILDP){
-            lua_pushstring(parent->L, "buildp");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_OPERATE){
-            lua_pushstring(parent->L, "operate");
-        }else
-        if(status.handPosture==bodyStatus::BS_HAND_LIFT){
-            lua_pushstring(parent->L, "lift");
-        }else{
-            lua_pushstring(parent->L, "");
-        }
-
+        lua_pushstring(parent->L,"finish");
         lua_pushboolean(parent->L,finish);
+        lua_settable(parent->L, -3);
 
-        // do the call (2 arguments, 1 result)
-        if (lua_pcall(parent->L, 7, 4, 0) != 0)
+        lua_pushstring(parent->L,"nowFrame");
+        lua_pushnumber(parent->L,nowFrame);
+        lua_settable(parent->L, -3);
+
+        // do the call (1 arguments, 4 result)
+        if (lua_pcall(parent->L, 1, 4, 0) != 0)
              printf("error running function : %s \n",lua_tostring(parent->L, -1));
         else{
-            if(lua_isboolean(parent->L,-1) && lua_isinteger(parent->L,-2) && lua_isinteger(parent->L,-3) && lua_isinteger(parent->L,-4)){
+            //printf("%s\n", luaL_typename(parent->L,-1));
+            //printf("%s\n", luaL_typename(parent->L,-2));
+            //printf("%s\n", luaL_typename(parent->L,-3));
+            //printf("%s\n", luaL_typename(parent->L,-4));
+            if(lua_isboolean(parent->L,-1) && lua_isinteger(parent->L,-2) && lua_isinteger(parent->L,-3) && lua_isnumber(parent->L,-4)){
                 doAnimation(
-                            lua_tointeger(parent->L,-4),
+                            lua_tonumber(parent->L,-4),
                             lua_tointeger(parent->L,-3),
                             lua_tointeger(parent->L,-2),
                             lua_toboolean(parent->L,-1));
@@ -238,6 +291,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     }
 
     bodyItem * p = new bodyItem(c->width , c->height , btVector3(posi.X,posi.Y,posi.Z) , c->walkInSky , c->jumpInSky);
+    p->config = c;
+    p->follow = NULL;
     p->m_character.world = dynamicsWorld;
     p->m_character.addIntoWorld();
     p->m_character.setRotation(r);
@@ -259,7 +314,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->hp     = hp;
     p->status = sta_mask;
     p->status_mask = sta_mask;
-    p->config = c;
+    p->lastStatus = sta_mask;
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
@@ -371,11 +426,13 @@ bool body::addWearingNode(bodyItem * n, int wearing){
 }
 body::body():gravity(0,-10,0){
     mainControlBody = NULL;
-    loadBodyConfig();
-    loadWearingConfig();
     L = luaL_newstate();
     luaL_openlibs(L);
-    luaL_dofile(L, "../script/body.lua");
+    if(luaL_dofile(L, "../script/body.lua")){
+        printf("[body]%s \n",lua_tostring(L, -1));
+    }
+    loadBodyConfig();
+    loadWearingConfig();
     selecting = false;
 }
 
@@ -541,6 +598,11 @@ void body::releaseBody(bodyItem * b){
         delete b->coll_bodyState;
     b->m_character.removeFromWorld();
     b->node->remove();
+    //清除跟随
+    for(auto it:b->followers){
+        it->follow = NULL;
+    }
+    b->followers.clear();
     if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的
         removeCharacterChunk(b->uuid);
     }

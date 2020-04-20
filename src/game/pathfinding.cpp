@@ -221,7 +221,7 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
         auto am = scene->createDeleteAnimator(1000);
         tg->addAnimator(am);
 
-        std::string follow;
+        bodyItem * follow = NULL;
 
         for(auto bd:selectedBodies){
             if(bd){
@@ -235,9 +235,9 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                     cmd.uuid = bd->uuid;
                     pushCommond(cmd);
                 }else{
-                    if(!follow.empty()){
-                        bd->follow = follow;
-                        follow = bd->uuid;
+                    if(follow!=NULL){
+                        bd->setFollow(follow);
+                        follow = bd;
                     }else{
                         if(useAIPathingFinding){
                             if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
@@ -267,8 +267,8 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                             bd->autoWalk.clear();
                             bd->autoWalk.push_back(p);
                         }
-                        bd->follow.clear();
-                        follow = bd->uuid;
+                        bd->setFollow(NULL);
+                        follow = bd;
                     }
                 }
             }
@@ -278,20 +278,20 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
 }
 
 void pathFinding::followMainControl(){
-    std::string follow = mainControl;
+    bodyItem * follow = mainControlBody;
 
     if(mainControlBody==NULL)
         return;
 
-    mainControlBody->follow.clear();
+    mainControlBody->setFollow(NULL);
 
     for(auto bd:selectedBodies){
         if(bd){
             bd->autoWalk.clear();
             if(bd->uncreatedChunk)
                 continue;
-            bd->follow = follow;
-            follow = bd->uuid;
+            bd->setFollow(follow);
+            follow = bd;
         }
     }
 }

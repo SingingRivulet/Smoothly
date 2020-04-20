@@ -104,21 +104,21 @@ void body::doCommond(const commond & c){
     case CMD_STATUS_SET:
         p->status_mask   = c.data_int;
         p->status        = c.data_int;
-        cmd_setStatus(p->uuid , p->status_mask);
+        //cmd_setStatus(p->uuid , p->status_mask);
         break;
 
     case CMD_STATUS_ADD:
         p->status_mask   = p->status.toMask();
         p->status_mask  |= c.data_int;
         p->status        = p->status_mask;
-        cmd_setStatus(p->uuid , p->status_mask);
+        //cmd_setStatus(p->uuid , p->status_mask);
         break;
 
     case CMD_STATUS_REMOVE:
         p->status_mask   = p->status.toMask();
         p->status_mask  &= ~c.data_int;
         p->status        = p->status_mask;
-        cmd_setStatus(p->uuid , p->status_mask);
+        //cmd_setStatus(p->uuid , p->status_mask);
         break;
 
     case CMD_INTERACTIVE:

@@ -112,4 +112,8 @@ DISTFILES += \
     ../shader/tree.ps.glsl \
     ../shader/tree.vs.glsl \
     ../shader/building_default.ps.glsl \
-    ../shader/building_default.vs.glsl
+    ../shader/building_default.vs.glsl \
+    ../script/body.lua \
+    ../script/building.lua \
+    ../script/terrainItem.lua \
+    ../script/utils/print_r.lua

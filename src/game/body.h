@@ -136,7 +136,7 @@ class body:public terrainDispather{
             public:
                 character                            m_character;
                 bodyStatus                           status;
-                int32_t                              status_mask;
+                int32_t                              status_mask,lastStatus;
                 int                                  id,hp;
                 std::string                          uuid,owner;
                 irr::scene::IAnimatedMeshSceneNode * node;
@@ -146,8 +146,6 @@ class body:public terrainDispather{
                 std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
                 bodyInfo                             info;
                 bool                                 uncreatedChunk;//未创建区块，锁住物体
-
-                std::string                          follow;//跟随
 
                 btRigidBody      * coll_rigidBody;
                 btMotionState    * coll_bodyState;
@@ -166,11 +164,16 @@ class body:public terrainDispather{
                 std::list<vec3> autoWalk;
 
                 irr::core::vector2d<s32> screenPosition;
+
+                void setFollow(bodyItem *);//设置跟随
+
             protected:
+                bodyItem                           * follow;//跟随
+                std::set<bodyItem*>                  followers;
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
                 void updateStatus(bool finish = false);
-                void doAnimation(int speed,int start,int end ,bool loop);
+                void doAnimation(float speed,int start,int end ,bool loop);
                 void interactive(const char *);
                 void walk(int forward,int leftOrRight/*-1 left,1 right*/,float speed);
 
@@ -221,13 +224,13 @@ class body:public terrainDispather{
             bool walkInSky,jumpInSky;
             bool teleport;//传送功能(通过指挥功能使用)
             irr::scene::IAnimatedMesh * mesh;
-            std::string aniCallback;
+            int aniCallback;
+            bool haveAniCallback;
             float walkVelocity;
             irr::video::ITexture * texture;
             inline bodyConf(){
                 mesh         = NULL;
                 texture      = NULL;
-                aniCallback.clear();
                 walkInSky    = false;
                 jumpInSky    = false;
                 width        = 1;
@@ -236,6 +239,7 @@ class body:public terrainDispather{
                 walkVelocity = 0.003;
                 jump         = 10;
                 teleport     = false;
+                haveAniCallback = false;
             }
         };
         std::map<int,bodyConf*> bodyConfig;
