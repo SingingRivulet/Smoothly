@@ -6,7 +6,8 @@
 ![img](img/2020-04-06-10-02-57.png)  
 ![img](img/2020-04-07-10-49-48.png)  
 ## 编译  
-在编译前，请先安装qt,irrlicht,bullet,raknet,leveldb，然后进入src目录，执行`qmake && make`即可  
+在编译前，请先安装qt,bullet,raknet,leveldb，然后进入src目录，执行`qmake && make`即可  
+irrlicht请通过git子模块的方式来安装。本项目使用了修改过的[irrlicht](https://github.com/SingingRivulet/splicht)，与原引擎不兼容。  
 ## 使用  
 服务器端直接运行即可。管理员客户端和游戏客户端均具有GUI界面。  
 ## 计划（按时间顺序）  
