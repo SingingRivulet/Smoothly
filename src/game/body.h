@@ -187,6 +187,13 @@ class body:public terrainDispather{
                 void wearing_clear_c();
 
                 vec3 lastPosition,lastRotation,lastLookAt;
+                class JointCallback:public irr::scene::ISkinnedMesh::ISkinnedMeshAnimationOverrideCallback{
+                    public:
+                        bool getFrameData(irr::f32 frame, irr::scene::ISkinnedMesh::SJoint *joint,
+                                            irr::core::vector3df &position, irr::s32 &positionHint,
+                                            irr::core::vector3df &scale, irr::s32 &scaleHint,
+                                            irr::core::quaternion &rotation, irr::s32 &rotationHint)override;
+                }jointCallback;
 
             public:
                 void setLookAt(const vec3 &);

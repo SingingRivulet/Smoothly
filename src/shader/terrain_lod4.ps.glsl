@@ -159,7 +159,7 @@ void main(){
     vec3 rnormal=normalize(normal);
 
     NdotL = max(dot(rnormal, lightDir), 0.0);
-    diffuse = gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse;
+    diffuse = gl_LightSource[0].diffuse;
     vec4 lcolor =  NdotL * diffuse;
     lcolor.x +=0.1;
     lcolor.y +=0.1;

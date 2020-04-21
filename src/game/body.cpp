@@ -361,6 +361,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    irr::scene::ISkinnedMesh* skinnedMesh = reinterpret_cast<irr::scene::ISkinnedMesh*>(p->node->getMesh());
+    skinnedMesh->animationOverrideCallback = &p->jointCallback;
     if(c->texture){
         p->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         p->node->setMaterialTexture( 0 , c->texture);
@@ -726,6 +728,10 @@ void body::selectBodyUpdate(){
     else{
         selectAllBodies = true;
     }
+}
+
+bool body::bodyItem::JointCallback::getFrameData(f32 frame, scene::ISkinnedMesh::SJoint * joint, core::vector3df & position, s32 & positionHint, core::vector3df & scale, s32 & scaleHint, core::quaternion & rotation, s32 & rotationHint){
+    return false;
 }
 
 }
