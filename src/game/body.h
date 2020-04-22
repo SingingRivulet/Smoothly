@@ -170,6 +170,13 @@ class body:public terrainDispather{
 
                 float getPitchAngle();
 
+                irr::core::array<irr::scene::IAnimatedMeshSceneNode::IAnimationBlend> animationBlend;//动画混合器
+
+                inline void setBlenderAsDefault(){
+                    animationBlend.clear();
+                    animationBlend.insert(scene::IAnimatedMeshSceneNode::IAnimationBlend((irr::scene::ISkinnedMesh*)config->mesh,1.0));
+                }
+
             protected:
                 bodyItem                           * follow;//跟随
                 std::set<bodyItem*>                  followers;
@@ -238,6 +245,7 @@ class body:public terrainDispather{
             bool haveAniCallback;
             float walkVelocity;
             irr::video::ITexture * texture;
+            std::vector<irr::scene::ISkinnedMesh*> animation;//用于混合的动画
             inline bodyConf(){
                 mesh         = NULL;
                 texture      = NULL;

@@ -23,15 +23,21 @@ arg={
 }
 返回值格式
     返回0个参数：继续之前的动画
-    返回5个参数：播放速度，起始帧，结束帧，当前帧，是否循环
+    返回1个参数：{播放速度，起始帧，结束帧，当前帧，是否循环}
 ]]--
 function snoutx10kCallback(arg)
     --print_r(arg)
     if arg.status.walk.forward==1 then
-        return 80,0,80,arg.nowFrame,true
+
+        return {["speed"]=80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true}
+
     elseif arg.status.walk.forward==-1 then
-        return -80,0,80,arg.nowFrame,true
+
+        return {["speed"]=-80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true}
+
     else
-        return 1,1,1,1,true
+
+        return {["speed"]=1,["start"]=1,["end"]=1,["frame"]=1,["loop"]=true}
+
     end
 end

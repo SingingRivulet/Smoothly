@@ -53,6 +53,8 @@ void body::bodyItem::updateFromWorld(){
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
 
+    node->animateJoints(true,&animationBlend);
+
     bool needUpdateStatus = false;
     if(owner==parent->myUUID){//拥有的物体
         //尝试上传
@@ -282,25 +284,113 @@ void body::bodyItem::updateStatus(bool finish){
         lua_pushnumber(parent->L,nowFrame);
         lua_settable(parent->L, -3);
 
-        // do the call (1 arguments, 4 result)
-        if (lua_pcall(parent->L, 1, 5, 0) != 0)
+        // do the call (1 arguments, 1 result)
+        if (lua_pcall(parent->L, 1, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(parent->L, -1));
         else{
-            //printf("%s\n", luaL_typename(parent->L,-1));
-            //printf("%s\n", luaL_typename(parent->L,-2));
-            //printf("%s\n", luaL_typename(parent->L,-3));
-            //printf("%s\n", luaL_typename(parent->L,-4));
-            if(lua_isboolean(parent->L,-1) &&
-               lua_isnumber(parent->L,-2) &&
-               lua_isinteger(parent->L,-3) &&
-               lua_isinteger(parent->L,-4) &&
-               lua_isnumber(parent->L,-5)){
-                doAnimation(
-                            lua_tonumber(parent->L,-5),
-                            lua_tointeger(parent->L,-4),
-                            lua_tointeger(parent->L,-3),
-                            lua_tonumber(parent->L,-2),
-                            lua_toboolean(parent->L,-1));
+            if(lua_istable(parent->L,-1)){
+
+                float speed = 1;
+                int start = 1;
+                int end = 1;
+                float frame = 1;
+                bool loop = false;
+
+                lua_pushstring(parent->L, "speed");
+                lua_gettable(parent->L, -2);
+                if(lua_isnumber(parent->L,-1)){
+                    speed = lua_tonumber(parent->L,-1);
+                }
+                lua_pop(parent->L,1);
+
+                lua_pushstring(parent->L, "frame");
+                lua_gettable(parent->L, -2);
+                if(lua_isnumber(parent->L,-1)){
+                    frame = lua_tonumber(parent->L,-1);
+                }
+                lua_pop(parent->L,1);
+
+                lua_pushstring(parent->L, "start");
+                lua_gettable(parent->L, -2);
+                if(lua_isinteger(parent->L,-1)){
+                    start = lua_tointeger(parent->L,-1);
+                }
+                lua_pop(parent->L,1);
+
+                lua_pushstring(parent->L, "end");
+                lua_gettable(parent->L, -2);
+                if(lua_isinteger(parent->L,-1)){
+                    end = lua_tointeger(parent->L,-1);
+                }
+                lua_pop(parent->L,1);
+
+                lua_pushstring(parent->L, "loop");
+                lua_gettable(parent->L, -2);
+                if(lua_isboolean(parent->L,-1)){
+                    loop = lua_toboolean(parent->L,-1);
+                }
+                lua_pop(parent->L,1);
+
+                lua_pushstring(parent->L, "blend");
+                lua_gettable(parent->L, -2);
+                if(lua_istable(parent->L,-1)){
+                    //blend
+                    animationBlend.clear();
+                    int len = luaL_len(parent->L,-1);
+                    for (int i = 1; i <= len; ++i) {
+                        lua_rawgeti(parent->L, -1, i);
+                        if(lua_istable(parent->L,-1) && luaL_len(parent->L,-1)>=2){
+
+                            bool getArrOk = true;
+
+                            int amid;
+                            lua_rawgeti(parent->L, -1, 1);
+                            if(lua_isinteger(parent->L,-1)){
+                                amid = lua_tointeger(parent->L,-1);
+                                if(amid<0 || amid >= config->animation.size()){
+                                    getArrOk = false;
+                                }
+                            }else
+                                getArrOk = false;
+                            lua_pop(parent->L,1);
+
+                            float blend;
+                            lua_rawgeti(parent->L, -1, 2);
+                            if(lua_isnumber(parent->L,-1)){
+                                blend = lua_tonumber(parent->L,-1);
+                            }else
+                                getArrOk = false;
+                            lua_pop(parent->L,1);
+
+                            try{
+                                if(getArrOk){
+                                    animationBlend.push_back(
+                                                irr::scene::IAnimatedMeshSceneNode::IAnimationBlend(
+                                                    config->animation.at(amid),blend
+                                                    )
+                                                );
+                                }
+                            }catch(...){}
+
+                        }else if(lua_isnumber(parent->L,-1)){
+                            //自己的动画
+                            animationBlend.push_back(
+                                        irr::scene::IAnimatedMeshSceneNode::IAnimationBlend(
+                                                (irr::scene::ISkinnedMesh*)config->mesh,
+                                                lua_tonumber(parent->L,-1)
+                                            )
+                                        );
+                        }
+                        lua_pop(parent->L, 1);
+                    }
+                    if(animationBlend.empty())
+                        setBlenderAsDefault();
+                }else{
+                    setBlenderAsDefault();
+                }
+                lua_pop(parent->L,1);
+
+                doAnimation(speed,start,end,frame,loop);
             }
         }
 
@@ -361,8 +451,14 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+
     irr::scene::ISkinnedMesh* skinnedMesh = reinterpret_cast<irr::scene::ISkinnedMesh*>(p->node->getMesh());
     skinnedMesh->animationOverrideCallback = &p->jointCallback;
+
+    p->setBlenderAsDefault();
+
+    p->node->setJointMode(irr::scene::EJUOR_CONTROL);//设为控制模式，因为要混合
+
     if(c->texture){
         p->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         p->node->setMaterialTexture( 0 , c->texture);
