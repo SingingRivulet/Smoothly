@@ -62,8 +62,7 @@ void body::loadBodyConfig(){
                                             if(strcmp(item->string,"jump")==0){
                                                 ptr->jump = item->valuedouble;
                                             }
-                                        }else
-                                        if(item->type==cJSON_String){
+                                        }else if(item->type==cJSON_String){
                                             if(strcmp(item->string,"aniCallback")==0){
 
                                                 lua_settop(L,0);
@@ -80,6 +79,32 @@ void body::loadBodyConfig(){
                                             }else
                                             if(strcmp(item->string,"texture")==0){
                                                 ptr->texture = driver->getTexture(item->string);
+                                            }
+                                        }else if(item->type==cJSON_Array){
+                                            if(strcmp(item->string,"animation")==0){
+                                                auto line = item->child;
+                                                while(line){
+                                                    if(line->type==cJSON_String){
+                                                        auto path = line->valuestring;
+                                                        if(strlen(path)>0){
+                                                            auto animesh = scene->getMesh(path);
+                                                            if(animesh){
+                                                                //处理mesh
+                                                                if(animesh->getMeshType()==irr::scene::EAMT_SKINNED){
+                                                                    //是骨骼动画
+                                                                    auto bmesh = (irr::scene::ISkinnedMesh*)animesh;
+                                                                    ptr->animation.push_back(bmesh);
+                                                                }else{
+                                                                    animesh->drop();
+                                                                    printf("[error]%s is not skinned mesh\n",path);
+                                                                }
+                                                            }else{
+                                                                printf("[error]fail to load %s\n",path);
+                                                            }
+                                                        }
+                                                    }
+                                                    line = line->next;
+                                                }
                                             }
                                         }
                                         item = item->next;

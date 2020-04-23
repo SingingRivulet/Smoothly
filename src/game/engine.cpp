@@ -9,13 +9,22 @@ engine::engine(){
     lastFPS                 = 0;
     width                   = 1024;
     height                  = 768;
-    device = irr::createDevice(
-                irr::video::EDT_OPENGL,
-                irr::core::dimension2d<irr::u32>(width,height),
-                16,
-                false,
-                true
-    );
+
+    //device = irr::createDevice(
+    //            irr::video::EDT_OPENGL,
+    //            irr::core::dimension2d<irr::u32>(width,height),
+    //            16,
+    //            false,
+    //            true
+    //);
+    irr::SIrrlichtCreationParameters param;
+    param.DriverType = irr::video::EDT_OPENGL;
+    param.DeviceType = irr::EIDT_BEST;
+    param.WindowSize.set(width,height);
+    param.Bits = 16;
+
+    device = irr::createDeviceEx(param);
+
     driver = device->getVideoDriver();
     scene  = device->getSceneManager();
     gui    = device->getGUIEnvironment();

@@ -29,15 +29,15 @@ function snoutx10kCallback(arg)
     --print_r(arg)
     if arg.status.walk.forward==1 then
 
-        return {["speed"]=80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true}
+        return {["speed"]=80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true,["blend"]={1}}
 
     elseif arg.status.walk.forward==-1 then
 
-        return {["speed"]=-80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true}
+        return {["speed"]=-80,["start"]=0,["end"]=80,["frame"]=arg.nowFrame,["loop"]=true,["blend"]={1}}
 
     else
 
-        return {["speed"]=1,["start"]=1,["end"]=1,["frame"]=1,["loop"]=true}
+        return {["speed"]=1,["start"]=1,["end"]=1,["frame"]=1,["loop"]=true,["blend"]={1}}
 
     end
 end

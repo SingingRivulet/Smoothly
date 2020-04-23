@@ -9,6 +9,9 @@
         "jump":5,
         "jumpInSky":1,
         "walkInSky":1,
-        "aniCallback":"snoutx10kCallback"
+        "aniCallback":"snoutx10kCallback",
+        "animation":[
+            "../../res/model/player/snoutx10k/snoutx10k_fire.b3d"
+        ]
     }
 ]
