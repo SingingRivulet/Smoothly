@@ -263,9 +263,10 @@ class body:public terrainDispather{
         std::map<int,bodyConf*> bodyConfig;
 
         struct wearingConf{
-            std::map<int,std::string> attach;
+            std::map<int,std::string>   attach;
             irr::scene::IAnimatedMesh * mesh;
-            irr::video::ITexture * texture;
+            irr::video::ITexture      * texture;
+            vec3                        skillFrom;//从这个点开始放技能
             inline wearingConf(){
                 mesh    =NULL;
                 texture =NULL;

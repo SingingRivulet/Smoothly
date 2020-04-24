@@ -52,11 +52,10 @@ class building:public weather{
 
         bool getCollMap(int x,int y,int z);
 
+        struct buildingBody;
     private:
         void addDefaultBuilding();
-
         lua_State * L;
-        struct buildingBody;
         struct buildingChunk{
             bool started;
             ipair position;
@@ -117,7 +116,7 @@ class building:public weather{
         std::map<blockPosition,bool> collTable;//用于寻路的碰撞表
         std::queue<blockPosition>    checkingRemoveList;
         void processCheckingRemove();
-
+    public:
         struct buildingBody{
             std::string uuid;
             buildingChunk * inchunk;
@@ -135,6 +134,7 @@ class building:public weather{
             void initCollTable(bool removeMode = false);
             void buildAffectArea(std::queue<blockPosition> & t);
         };
+    private:
         std::map<ipair,buildingChunk*> buildingChunks;
         std::unordered_map<std::string,buildingBody*> bodies;
 

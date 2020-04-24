@@ -139,7 +139,6 @@ namespace smoothly{
                             character * parent;
                     };
                     filterCharacterController * controller;
-                    btPairCachingGhostObject * m_ghostObject;
                     btConvexShape* shape;
                     bool walkInSky;
                     bool jumpInSky;
@@ -195,6 +194,8 @@ namespace smoothly{
                     inline btConvexShape* getShape(){
                         return shape;
                     }
+
+                    btPairCachingGhostObject * m_ghostObject;
             };
             
             class rigidBody:public bodyBase{

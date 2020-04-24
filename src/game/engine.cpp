@@ -34,6 +34,8 @@ engine::engine(){
     vendor = driver->getVendorInfo();
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
     scene->setShadowColor(irr::video::SColor(150, 0, 0, 0));
+
+    //初始化物理世界
     this->collisionConfiguration = new btDefaultCollisionConfiguration();
     this->dispatcher = new btCollisionDispatcher(collisionConfiguration);
     this->overlappingPairCache = new btDbvtBroadphase();
@@ -44,8 +46,28 @@ engine::engine(){
         solver,
         collisionConfiguration
     );
-    overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+    overlappingPairCache->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());//ghost查询的回调函数
+
+    struct collisionFilterCallback : public btOverlapFilterCallback{//碰撞过滤器
+            virtual bool  needBroadphaseCollision(btBroadphaseProxy * proxy0,btBroadphaseProxy* proxy1) const{
+                btCollisionObject* b0 = (btCollisionObject*)proxy0->m_clientObject;
+                btCollisionObject* b1 = (btCollisionObject*)proxy1->m_clientObject;
+                auto bf0 = (bodyInfo*)b0->getUserPointer();
+                auto bf1 = (bodyInfo*)b1->getUserPointer();
+                if(bf0 && bf1 && bf0->type==BODY_BULLET && bf1->type==BODY_BULLET){
+                    //两个都是子弹
+                    return false;
+                }
+                bool collides = (proxy0->m_collisionFilterGroup &proxy1->m_collisionFilterMask) != 0;
+                collides = collides && (proxy1->m_collisionFilterGroup &proxy0->m_collisionFilterMask);
+                return collides;
+            }
+    };
+    dynamicsWorld->getPairCache()->setOverlapFilterCallback(new collisionFilterCallback());//加入碰撞过滤器
+
     this->dynamicsWorld->setGravity(btVector3(0, -10, 0));
+
+
     camera=scene->addCameraSceneNodeFPS();
 
     //隐藏鼠标

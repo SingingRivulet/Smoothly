@@ -43,6 +43,52 @@ void fire::msg_fire(const char * uuid,int id,float fx,float fy,float fz,float dx
     }
 }
 
+struct	laserResult : public btCollisionWorld::ClosestRayResultCallback{
+    laserResult(const btVector3&	rayFromWorld,const btVector3&	rayToWorld)
+        :ClosestRayResultCallback(rayFromWorld,rayToWorld){}
+
+    std::string characterFilter;
+
+    virtual bool needsCollision(btBroadphaseProxy* proxy0) const{
+        bool collides = (proxy0->m_collisionFilterGroup & m_collisionFilterMask) != 0;
+        collides = collides && (m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+        auto p = (btCollisionObject*)proxy0->m_clientObject;
+        if(p){
+            auto i = (fire::bodyInfo*)p->getUserPointer();
+            if(i){
+                if(i->type==fire::BODY_BODY){
+                    //身体外面的ghostBody
+                    return false;
+                }else if(i->type==fire::BODY_BODY_PART){
+                    if(!characterFilter.empty()){
+                        auto bd = fire::getBodyFromBodyPart(i);
+                        if(bd){
+                            if(bd->uuid==characterFilter)
+                                return false;
+                        }
+                    }
+                }
+            }
+        }
+        return collides;
+    }
+};
+
+body::bodyItem *fire::getBodyFromBodyPart(physical::bodyInfo * i){
+    if(i->type==building::BODY_BODY_PART){
+        //身体本身
+        auto c = (building::character*)i->ptr;
+        if(c){
+            auto bdp = (fire::bodyInfo*)c->m_ghostObject->getUserPointer();
+            if(bdp->type==fire::BODY_BODY){
+                auto bd = (bodyItem*)bdp->ptr;
+                return bd;
+            }
+        }
+    }
+    return NULL;
+}
+
 void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , const vec3 & dir,bool attack){
     auto it = config.find(id);
     if(it==config.end())
@@ -67,6 +113,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
 
         if(attack && conf->castShape){
 
+            /*
             btTransform bfrom,bto;
             auto rotate=dir.getHorizontalAngle();//旋转角度
             irr::core::matrix4 matF,matT;//从矩阵F到矩阵T
@@ -97,6 +144,35 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                         bfrom,
                         bto,
                         callback);
+            */
+
+            //用ghost实现
+            auto rotate=dir.getHorizontalAngle();//旋转角度
+            irr::core::matrix4 mat;
+            mat.setRotationDegrees(rotate);
+            mat.setTranslation(from);
+
+            btTransform tran;//bullet矩阵
+            tran.setFromOpenGLMatrix(mat.pointer());
+
+            btPairCachingGhostObject ghost;//ghost对象
+            ghost.setCollisionShape(conf->castShape);
+            ghost.setWorldTransform(tran);
+
+            dynamicsWorld->addCollisionObject(&ghost);//加入世界
+
+            for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
+                btCollisionObject *btco = ghost.getOverlappingObject(i);
+
+                auto info = (bodyInfo*)(btco->getUserPointer());
+
+                if(info && info->type!=BODY_BODY){
+                    attackBody(uuid , conf , info);
+                }
+
+            }
+
+            dynamicsWorld->removeCollisionObject(&ghost);
 
         }
         if(conf->type==FIRE_CHOP){
@@ -144,7 +220,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
         auto to=from+dir;
         vec3 tdir = dir;
         btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
-        btCollisionWorld::ClosestRayResultCallback rayCallback(bfrom,bto);
+        laserResult rayCallback(bfrom,bto);
         dynamicsWorld->rayTest(bfrom, bto, rayCallback);//使用bullet的rayTest接口
         if (rayCallback.hasHit()){
             //攻击到物体

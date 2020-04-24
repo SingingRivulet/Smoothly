@@ -118,7 +118,16 @@ void body::bodyItem::doFire(){
     if(fireDelta>0 && ntm>fireDelta+lastFireTime){
         auto wnode = wearing.find(firingWearingId);
         if(wnode!=wearing.end()){
-            parent->fireTo(uuid,fireId,wnode->second->getPosition(),lookAt);
+            irr::scene::ISceneNode * n = wnode->second;
+            n->updateAbsolutePosition();
+            auto mat = n->getAbsoluteTransformation();//变换矩阵
+            auto cit = parent->wearingConfig.find(firingWearingId);//找到配置
+            if(cit!=parent->wearingConfig.end()){
+                wearingConf * c = cit->second;
+                vec3 p = c->skillFrom;//技能释放点
+                mat.transformVect(p);//变换到角色的手上
+                parent->fireTo(uuid,fireId,p,lookAt);//执行开火
+            }
         }
         lastFireTime = ntm;
     }

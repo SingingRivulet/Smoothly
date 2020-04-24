@@ -142,7 +142,11 @@ class fire:public interactive{
 
         void onCollision(bodyInfo * A,bodyInfo * B,const btManifoldPoint & point);
         virtual void onCollision(btPersistentManifold *contact)override;
+
+        int attackBuilding(const std::string & uuid, fireConfig * conf, buildingBody * b, float force);
     public:
+
+        static bodyItem * getBodyFromBodyPart(bodyInfo*);
         void worldLoop()override;
 };
 

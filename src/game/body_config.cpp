@@ -97,9 +97,11 @@ void body::loadBodyConfig(){
                                                                 }else{
                                                                     animesh->drop();
                                                                     printf("[error]%s is not skinned mesh\n",path);
+                                                                    break;
                                                                 }
                                                             }else{
                                                                 printf("[error]fail to load %s\n",path);
+                                                                break;
                                                             }
                                                         }
                                                     }

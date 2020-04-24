@@ -3,14 +3,21 @@
 namespace smoothly{
 
 void fire::attackBody(const std::string &uuid, fireConfig *conf, bodyInfo *body, float force){
-    if(body->type==BODY_BODY){
-        auto b   = (bodyItem*)body->type;
-        int dh = attackBody(uuid,conf,b,force);
-        if(dh!=0)
-            cmd_HPInc(b->uuid , dh);
+    if(body->type==BODY_BODY_PART){
+        auto b   = getBodyFromBodyPart(body);
+        if(b){
+            int dh = attackBody(uuid,conf,b,force);
+            if(dh!=0)
+                cmd_HPInc(b->uuid , dh);
+        }
     }else
     if(body->type==BODY_BUILDING){
-        //暂时留空
+        auto b = (buildingBody*)body->ptr;
+        if(b){
+            int dh = attackBuilding(uuid,conf,b,force);
+            if(dh!=0)
+                cmd_damageBuilding(b->uuid , dh);
+        }
     }else
     if(body->type==BODY_TERRAIN_ITEM){
         auto mid = (mapId*)body->ptr;
@@ -57,6 +64,31 @@ bool fire::attackTerrainItem(const std::string &uuid, fireConfig *conf, mapId * 
         lua_pushnumber (L, force);
 
         if (lua_pcall(L, 7, 1, 0) != 0)
+             printf("error running function : %s \n",lua_tostring(L, -1));
+        else{
+            if(lua_isnumber(L,-1)){
+                res = lua_tointeger(L,-1);
+            }
+
+        }
+
+    }
+    lua_settop(L , 0);
+    return res;
+}
+
+int fire::attackBuilding(const std::string &uuid, fireConfig *conf, buildingBody * b, float force){
+    bool res = false;
+    lua_getglobal(L,"attackTerrainItem");
+    if(lua_isfunction(L,-1)){
+
+        lua_pushstring (L, uuid.c_str());
+        lua_pushinteger(L, conf->id);
+        lua_pushstring (L, b->uuid.c_str());
+        lua_pushinteger(L, b->config->id);
+        lua_pushnumber (L, force);
+
+        if (lua_pcall(L, 5, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(L, -1));
         else{
             if(lua_isnumber(L,-1)){
