@@ -147,6 +147,9 @@ class fire:public interactive{
         virtual void onCollision(btPersistentManifold *contact)override;
 
         int attackBuilding(const std::string & uuid, fireConfig * conf, buildingBody * b, float force);
+
+        irr::scene::IMesh * laserMesh;
+        void createLaserMesh();
     public:
 
         static bodyItem * getBodyFromBodyPart(bodyInfo*);

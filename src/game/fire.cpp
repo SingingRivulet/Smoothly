@@ -4,6 +4,7 @@ namespace smoothly{
 
 fire::fire(){
     openConfig();
+    createLaserMesh();
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_dofile(L, "../script/fire.lua");
@@ -313,6 +314,126 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             dp->drop();
         }
     }
+}
+
+void fire::createLaserMesh(){
+    irr::scene::SMeshBuffer * buffer = new irr::scene::SMeshBuffer();
+    irr::video::S3DVertex v;
+    v.Color.set(255,255,255,255);
+
+    v.Pos.X = 1;
+    v.Pos.Y = 0;
+    v.Pos.Z = 0;
+    v.TCoords.X=1.f;
+    v.TCoords.Y=0.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = -1;
+    v.Pos.Y = 0;
+    v.Pos.Z = 0;
+    v.TCoords.X=0.f;
+    v.TCoords.Y=0.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = 1;
+    v.Pos.Y = 0;
+    v.Pos.Z = 1;
+    v.TCoords.X=1.f;
+    v.TCoords.Y=1.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = -1;
+    v.Pos.Y = 0;
+    v.Pos.Z = 1;
+    v.TCoords.X=0.f;
+    v.TCoords.Y=1.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    buffer->Indices.push_back(0);
+    buffer->Indices.push_back(2);
+    buffer->Indices.push_back(3);
+
+    buffer->Indices.push_back(0);
+    buffer->Indices.push_back(3);
+    buffer->Indices.push_back(1);
+
+    buffer->Indices.push_back(0);
+    buffer->Indices.push_back(1);
+    buffer->Indices.push_back(3);
+
+    buffer->Indices.push_back(0);
+    buffer->Indices.push_back(3);
+    buffer->Indices.push_back(2);
+
+    v.Pos.X = 0;
+    v.Pos.Y = 1;
+    v.Pos.Z = 0;
+    v.TCoords.X=1.f;
+    v.TCoords.Y=0.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = 0;
+    v.Pos.Y = -1;
+    v.Pos.Z = 0;
+    v.TCoords.X=0.f;
+    v.TCoords.Y=0.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = 0;
+    v.Pos.Y = 1;
+    v.Pos.Z = 1;
+    v.TCoords.X=1.f;
+    v.TCoords.Y=1.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    v.Pos.X = 0;
+    v.Pos.Y = -1;
+    v.Pos.Z = 1;
+    v.TCoords.X=0.f;
+    v.TCoords.Y=1.f;
+    v.Normal = v.Pos;
+    v.Normal.normalize();
+    buffer->Vertices.push_back(v);
+
+    buffer->Indices.push_back(0+4);
+    buffer->Indices.push_back(2+4);
+    buffer->Indices.push_back(3+4);
+
+    buffer->Indices.push_back(0+4);
+    buffer->Indices.push_back(3+4);
+    buffer->Indices.push_back(1+4);
+
+    buffer->Indices.push_back(0+4);
+    buffer->Indices.push_back(1+4);
+    buffer->Indices.push_back(3+4);
+
+    buffer->Indices.push_back(0+4);
+    buffer->Indices.push_back(3+4);
+    buffer->Indices.push_back(2+4);
+
+    auto mesh = new irr::scene::SMesh();
+    scene->getMeshManipulator()->recalculateNormals(buffer);
+    mesh->addMeshBuffer(buffer);
+    mesh->setHardwareMappingHint(irr::scene::EHM_STATIC);
+    mesh->recalculateBoundingBox();
+    mesh->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    buffer->drop();
+
+    laserMesh = mesh;
 }
 
 }
