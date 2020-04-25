@@ -79,7 +79,7 @@ bool fire::attackTerrainItem(const std::string &uuid, fireConfig *conf, mapId * 
 
 int fire::attackBuilding(const std::string &uuid, fireConfig *conf, buildingBody * b, float force){
     bool res = false;
-    lua_getglobal(L,"attackTerrainItem");
+    lua_getglobal(L,"attackBuilding");
     if(lua_isfunction(L,-1)){
 
         lua_pushstring (L, uuid.c_str());

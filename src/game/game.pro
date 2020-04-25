@@ -116,4 +116,5 @@ DISTFILES += \
     ../script/body.lua \
     ../script/building.lua \
     ../script/terrainItem.lua \
-    ../script/utils/print_r.lua
+    ../script/utils/print_r.lua \
+    ../script/fire.lua
