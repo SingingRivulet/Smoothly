@@ -76,8 +76,8 @@ fire::fireConfig::fireConfig(){
     this->particleConfig.gravity.have       = false;
     this->particleConfig.gravity.timeForceLost = 1000;
     this->particleConfig.have       = false;
-    this->particleConfig.lifeTimeMax= 4000;
-    this->particleConfig.lifeTimeMin= 2000;
+    this->particleConfig.lifeTimeMax= 2000;
+    this->particleConfig.lifeTimeMin= 1000;
     this->particleConfig.light      = false;
 
     this->particleConfig.maxAngleDegrees = 90;
@@ -100,6 +100,9 @@ fire::fireConfig::fireConfig(){
     this->type                      = FIRE_SHOOT;
     this->mass                      = 1;
     this->inertia.setValue(1,1,1);
+
+    this->impulse                   = 100;
+    this->billboardSize             = 5;
     //this->shape
 }
 void fire::releaseConfig(fireConfig * c){
@@ -147,16 +150,16 @@ void fire::openConfig(){
                                         p->particleConfig.gravity.gravity=json2vec(line);
                                     }else
                                     if(strcmp(line->string,"particleMinStartSize")==0){
-                                        p->particleConfig.minStartSize=json2dimension(json);
+                                        p->particleConfig.minStartSize=json2dimension(line);
                                     }else
                                     if(strcmp(line->string,"particleMaxStartSize")==0){
-                                        p->particleConfig.maxStartSize=json2dimension(json);
+                                        p->particleConfig.maxStartSize=json2dimension(line);
                                     }else
                                     if(strcmp(line->string,"particleMinStartColor")==0){
-                                        p->particleConfig.minStartColor=json2color(json);
+                                        p->particleConfig.minStartColor=json2color(line);
                                     }else
                                     if(strcmp(line->string,"particleMaxStartColor")==0){
-                                        p->particleConfig.maxStartColor=json2color(json);
+                                        p->particleConfig.maxStartColor=json2color(line);
                                     }else
                                     if(strcmp(line->string,"inertia")==0){
                                         auto v = json2vec(json);
@@ -288,7 +291,13 @@ void fire::openConfig(){
                                         p->particleConfig.light=line->valueint;
                                     }else
                                     if(strcmp(line->string,"mass")==0){
-                                        p->mass=line->valueint;
+                                        p->mass=line->valuedouble;
+                                    }else
+                                    if(strcmp(line->string,"impulse")==0){
+                                        p->impulse=line->valuedouble;
+                                    }else
+                                    if(strcmp(line->string,"billboardSize")==0){
+                                        p->billboardSize=line->valuedouble;
                                     }
                                 }
                                 line=line->next;

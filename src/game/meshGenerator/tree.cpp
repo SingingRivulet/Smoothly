@@ -355,7 +355,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     trunk->setMaterialFlag(irr::video::EMF_ANISOTROPIC_FILTER, true );
     trunk->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
     trunk->setMaterialTexture(0,texture_treeTrunk);
-    trunk->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    trunk->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     bodyMesh = createBtMesh(trunk_mesh);
     trunk_mesh->drop();
 
@@ -373,7 +373,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     res->setMaterialFlag(irr::video::EMF_ANISOTROPIC_FILTER, true );
     leaves->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
     leaves->setMaterialTexture(0,texture_treeLeaves);
-    leaves->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    leaves->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     leaves_mesh->drop();
 
     return res;

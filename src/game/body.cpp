@@ -119,6 +119,7 @@ void body::bodyItem::doFire(){
         auto wnode = wearing.find(firingWearingId);
         if(wnode!=wearing.end()){
             irr::scene::ISceneNode * n = wnode->second;
+            node->updateAbsolutePosition();
             n->updateAbsolutePosition();
             auto mat = n->getAbsoluteTransformation();//变换矩阵
             auto cit = parent->wearingConfig.find(firingWearingId);//找到配置

@@ -9,10 +9,11 @@ void body::loop(){
         auto cp=camera->getPosition();
         int l = std::max(abs((p.X-cp.X)/32),abs((p.Z-cp.Z)/32));
         if(l<getVisualRange()){
-            if(mainControlBody==b)
+            if(mainControlBody==b){
                 b->node->setVisible(false);
-            else
+            }else{
                 b->node->setVisible(true);
+            }
         }else{
             b->node->setVisible(false);
         }

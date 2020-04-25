@@ -56,6 +56,9 @@ class fire:public interactive{
             btConvexShape * castShape;  //碰撞体
             shapeGroup      shape;      //子弹形状
 
+            float       impulse;//发射子弹的冲量
+            float       billboardSize;//billboard模式下子弹的大小
+
             struct{
                 bool have;
                 struct{
@@ -108,7 +111,7 @@ class fire:public interactive{
             fire                        * parent;
             irr::scene::ISceneNode      * node;
             bool                          attack;
-            std::string                   owner;
+            std::string                   owner;//拥有这颗子弹的单位
             fireConfig                  * config;
             unsigned int                  expire;
             void update();

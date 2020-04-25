@@ -95,7 +95,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 break;
 
                 case irr::KEY_KEY_Z:
-                    //if(event.KeyInput.PressedDown)parent->eventQueue.push(gemeEPair(SET_BUILDING_MODE,0));
+                    //if(!event.KeyInput.PressedDown){
+                    //    cmd.cmd = CMD_WEARING_ADD;
+                    //    cmd.data_int = 1001;
+                    //    parent->pushCommond(cmd);
+                    //}
                 break;
                 case irr::KEY_KEY_X:
                     //if(event.KeyInput.PressedDown)parent->eventQueue.push(gemeEPair(SET_BUILDING_MODE,1));
@@ -212,7 +216,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
 
                 break;
                 case irr::EMIE_LMOUSE_LEFT_UP:
-                    cmd.cmd = CMD_FIRE_BEGIN;
+                    cmd.cmd = CMD_FIRE_END;
                     parent->pushCommond(cmd);
                 break;
                 case irr::EMIE_RMOUSE_LEFT_UP:

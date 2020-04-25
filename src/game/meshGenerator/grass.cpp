@@ -16,7 +16,7 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed){
     int r = randg.rand()%texture_grass.size();
     res->setMaterialTexture(0,texture_grass[r]);
 
-    res->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    res->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
 
     res->setRotation(vec3(0,randg.frand()*360,0));
     res->setScale(vec3(1+randg.frand()*4,1+randg.frand()*4,1+randg.frand()*4));

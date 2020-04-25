@@ -57,10 +57,10 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
             if(conf->bulletConf.texture){
 
                 //set bullet as billboard
-                auto n = scene->addBillboardSceneNode(b->node);
+                auto n = scene->addBillboardSceneNode(b->node,irr::core::dimension2df(conf->billboardSize,conf->billboardSize));
                 n->setMaterialFlag(irr::video::EMF_LIGHTING, conf->bulletConf.light );
                 n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-                n->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                n->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
                 n->setMaterialTexture( 0 , conf->bulletConf.texture);
 
             }
@@ -81,7 +81,7 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     if(conf->particleConfig.have){
         auto ps = scene->addParticleSystemSceneNode(false , b->node);
         auto em = ps->createPointEmitter(
-                    vec3(0,0,-1),
+                    vec3(0.005,0,0),
                     conf->particleConfig.minParticlesPerSecond  ,   conf->particleConfig.maxParticlesPerSecond,
                     conf->particleConfig.minStartColor          ,   conf->particleConfig.maxStartColor,
                     conf->particleConfig.lifeTimeMin            ,   conf->particleConfig.lifeTimeMax,
@@ -90,8 +90,8 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
                     );
         ps->setEmitter(em);//粒子系统设置发射器
         em->drop();
+        ps->setParticlesAreGlobal(true);
 
-        ps->setParticlesAreGlobal(false);
         ps->setMaterialFlag(irr::video::EMF_LIGHTING, conf->particleConfig.light);
         ps->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true);
         if(conf->particleConfig.texture){
@@ -104,6 +104,9 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
             ps->addAffector(af);
             af->drop();
         }
+        auto fd = ps->createFadeOutParticleAffector(video::SColor(0,0,0,0),500);
+        ps->addAffector(fd);
+        fd->drop();
     }
 
     //set node status
@@ -117,6 +120,11 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     b->rigidBody->setMassProps(conf->mass,conf->inertia);
 
     dynamicsWorld->addRigidBody(b->rigidBody);
+
+    vec3 imp = dir;
+    imp.normalize();
+    imp*=conf->impulse;
+    b->rigidBody->applyCentralImpulse(btVector3(imp.X , imp.Y , imp.Z));
 
     bullets.insert(b);
 }
@@ -164,7 +172,7 @@ void fire::processBullets(){
     auto tm = timer->getRealTime();
     std::list<bullet*> brm;
     for(auto it:bullets){//找出过期的
-        if(it->expire>tm)
+        if(it->expire<tm)
             brm.push_back(it);
     }
     for(auto it:brm){//删除过期的
