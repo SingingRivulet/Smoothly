@@ -171,6 +171,9 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             res->rigidBody->setFriction(0.7);
             res->rigidBody->setRestitution(0.1);
+            res->info.type=BODY_TERRAIN_ITEM;//设置用户数据，指向mapId
+            res->info.ptr=&res->id;
+            res->rigidBody->setUserPointer(&(res->info));
             dynamicsWorld->addRigidBody(res->rigidBody);
             res->hideLodLevel=4;
             return res;

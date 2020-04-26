@@ -195,7 +195,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                 ps->setEmitter(em);//粒子系统设置发射器
                 em->drop();
 
-                ps->setParticlesAreGlobal(false);
+                ps->setParticlesAreGlobal(true);
                 ps->setMaterialFlag(irr::video::EMF_LIGHTING, conf->particleConfig.light);
                 ps->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true);
                 if(conf->particleConfig.texture){
@@ -218,8 +218,11 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
     }else
     if(conf->type==FIRE_LASER){
 
-        auto to=from+dir;
-        vec3 tdir = dir;
+        vec3 ldir = dir;
+        ldir.normalize();
+        ldir*=conf->range;
+        auto to=from+ldir;
+        vec3 tdir = ldir;
         btVector3 bfrom(from.X,from.Y,from.Z),bto(to.X,to.Y,to.Z);//转换为bullet向量
         laserResult rayCallback(bfrom,bto);
         dynamicsWorld->rayTest(bfrom, bto, rayCallback);//使用bullet的rayTest接口
@@ -233,55 +236,39 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                             rayCallback.m_hitPointWorld.getZ());
             tdir=targ-from;
         }
-        if(attack){
+        if(attack && rayCallback.m_collisionObject){
             auto ptr = (bodyInfo*)rayCallback.m_collisionObject->getUserPointer();
-            attackBody(uuid , conf , ptr);
+            if(ptr){
+                attackBody(uuid , conf , ptr);
+            }
         }
 
-        //创建十字交叉的两个矩形，包上粒子来作为激光
+
         {
-            auto node   = scene->addEmptySceneNode();//创建主节点
+            auto node   = scene->addMeshSceneNode(laserMesh);
             auto length = tdir.getLength();
             vec3 center(0,0,length/2);
 
-            auto geo  = scene->getGeometryCreator();//几何体绘制工具
+            node->setScale(vec3(1,1,length));
 
-            auto mesh = geo->createPlaneMesh(irr::core::dimension2d<irr::f32>(1,1));//创建一个正方形
-
-            //创建一个水平的和一个垂直的矩形，贴上相同的纹理
-            auto n1 = scene->addMeshSceneNode(
-                        mesh,node,-1,
-                        center,
-                        vec3(0,0,0),//水平方向
-                        vec3(conf->radius,conf->radius,length));
-            n1->setMaterialFlag(irr::video::EMF_LIGHTING, false );//不受光照
-            if(conf->bulletConf.texture)
-                n1->setMaterialTexture( 0 , conf->bulletConf.texture);//纹理
-            n1->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);//开启透明
-
-            auto n2 = scene->addMeshSceneNode(
-                        mesh,node,-1,
-                        center,
-                        vec3(0,0,90),//垂直方向
-                        vec3(conf->radius,conf->radius,length));
-
-            n2->setMaterialFlag(irr::video::EMF_LIGHTING, false );//不受光照
-            if(conf->bulletConf.texture)
-                n2->setMaterialTexture( 0 , conf->bulletConf.texture);//纹理
-            n2->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);//开启透明
-
-            mesh->drop();//mesh不再使用了
+            node->setMaterialFlag(irr::video::EMF_LIGHTING, false );//不受光照
+            //if(conf->bulletConf.texture)
+            //    node->setMaterialTexture( 0 , conf->bulletConf.texture);//纹理
+            auto ani = scene->createTextureAnimator(conf->textures,conf->timePerFrame,false);
+            node->addAnimator(ani);
+            ani->drop();
+            node->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
 
             if(conf->particleConfig.have){
                 auto ps = scene->addParticleSystemSceneNode(false , node);
                 auto em = ps->createCylinderEmitter(
                             center,
                             conf->radius,
-                            vec3(0,0,1),
+                            vec3(0,0,-1),
                             length,
                             false,
-                            vec3(0,0,0.3),
-                            conf->particleConfig.minParticlesPerSecond  ,   conf->particleConfig.maxParticlesPerSecond,
+                            vec3(0,0,0.001),
+                            conf->particleConfig.minParticlesPerSecond*length ,   conf->particleConfig.maxParticlesPerSecond*length,
                             conf->particleConfig.minStartColor          ,   conf->particleConfig.maxStartColor,
                             conf->particleConfig.lifeTimeMin            ,   conf->particleConfig.lifeTimeMax,
                             conf->particleConfig.maxAngleDegrees,
@@ -290,7 +277,11 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                 ps->setEmitter(em);//粒子系统设置发射器
                 em->drop();
 
-                ps->setParticlesAreGlobal(false);
+                auto fd = ps->createFadeOutParticleAffector(video::SColor(0,0,0,0),500);
+                ps->addAffector(fd);
+                fd->drop();
+
+                ps->setParticlesAreGlobal(true);
                 ps->setMaterialFlag(irr::video::EMF_LIGHTING, conf->particleConfig.light);
                 ps->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true);
                 if(conf->particleConfig.texture){

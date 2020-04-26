@@ -103,6 +103,8 @@ fire::fireConfig::fireConfig(){
 
     this->impulse                   = 100;
     this->billboardSize             = 5;
+
+    this->timePerFrame              = 30;
     //this->shape
 }
 void fire::releaseConfig(fireConfig * c){
@@ -164,6 +166,20 @@ void fire::openConfig(){
                                     if(strcmp(line->string,"inertia")==0){
                                         auto v = json2vec(json);
                                         p->inertia.setValue(v.X , v.Y , v.Z);
+                                    }
+                                }else
+                                if(line->type==cJSON_Array){
+                                    if(strcmp(line->string,"textures")==0){
+                                        auto i = line->child;
+                                        while(i){
+                                            if(i->type==cJSON_String){
+                                                auto t = driver->getTexture(i->valuestring);
+                                                if(t){
+                                                    p->textures.push_back(t);
+                                                }
+                                            }
+                                            i=i->next;
+                                        }
                                     }
                                 }else
                                 if(line->type==cJSON_String){
@@ -298,6 +314,9 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"billboardSize")==0){
                                         p->billboardSize=line->valuedouble;
+                                    }else
+                                    if(strcmp(line->string,"timePerFrame")==0){
+                                        p->timePerFrame=line->valueint;
                                     }
                                 }
                                 line=line->next;

@@ -47,6 +47,9 @@ class fire:public interactive{
             float       radius;         //半径（子弹）
             bool        breakWhenHit;   //击中后消失（子弹）
 
+            irr::core::array<irr::video::ITexture*> textures;
+            irr::s32                                timePerFrame;
+
             int         streamParticleNum;
             float       streamParticleVelocity;
 

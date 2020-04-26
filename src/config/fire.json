@@ -1,6 +1,25 @@
 [
     {
         "id":1001,
+        "name":"激光",
+        "type":"laser",
+        "lifetime":500,
+        "textures":[
+            "../../res/laser/1.png",
+            "../../res/laser/2.png",
+            "../../res/laser/3.png",
+            "../../res/laser/4.png",
+            "../../res/laser/5.png",
+            "../../res/laser/6.png",
+            "../../res/laser/7.png",
+            "../../res/laser/8.png",
+            "../../res/laser/9.png",
+            "../../res/laser/10.png"
+        ],
+        "range":1000
+    },
+    {
+        "id":1002,
         "name":"喷射子弹",
         "type":"shoot",
         "haveBullet":1,
