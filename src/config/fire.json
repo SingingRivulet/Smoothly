@@ -1,6 +1,26 @@
 [
     {
         "id":1001,
+        "name":"爆炸",
+        "type":"radio",
+        "haveBullet":1,
+        "bulletTexture":"../../res/particle/particlegreen.jpg",
+        "castShape":"sphere",
+        "castShapeRad":10,
+        "range":1,
+        "lifetime":10000,
+        "mass":1,
+        "impulse":100,
+        "billboardSize":5,
+        "haveParticle":1,
+        "particleTexture":"../../res/particle/particlegreen.jpg",
+        "particleMaxAngleDegrees":360,
+        "particleMaxStartSize":{"w":0.5,"h":0.5},
+        "particleMinStartSize":{"w":2,"h":2}
+        
+    },
+    {
+        "id":1002,
         "name":"激光",
         "type":"laser",
         "lifetime":500,
@@ -19,7 +39,7 @@
         "range":1000
     },
     {
-        "id":1002,
+        "id":1003,
         "name":"喷射子弹",
         "type":"shoot",
         "haveBullet":1,

@@ -114,14 +114,16 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
 
         if(attack && conf->castShape){
 
-            /*
             btTransform bfrom,bto;
             auto rotate=dir.getHorizontalAngle();//旋转角度
+            vec3 ldir = dir;
+            ldir.normalize();
+            ldir*=conf->range;
             irr::core::matrix4 matF,matT;//从矩阵F到矩阵T
             matF.setRotationDegrees(rotate);
             matT=matF;
             matF.setTranslation(from);
-            matT.setTranslation(from+dir);
+            matT.setTranslation(from+ldir);
             bfrom.setFromOpenGLMatrix(matF.pointer());
             bto.setFromOpenGLMatrix(matT.pointer());
             class closeCombCallback:public btCollisionWorld::ConvexResultCallback{//定义一个bt的回调函数类
@@ -131,8 +133,25 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                     std::string uuid;
                     virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult & convexResult,bool){
                         auto ptr = (bodyInfo*)convexResult.m_hitCollisionObject->getUserPointer();
-                        parent->attackBody(uuid , attconf , ptr);
+                        if(ptr){
+                            parent->attackBody(uuid , attconf , ptr);
+                        }
                         return convexResult.m_hitFraction;
+                    }
+                    virtual bool needsCollision(btBroadphaseProxy* proxy0) const{
+                        bool collides = (proxy0->m_collisionFilterGroup & m_collisionFilterMask) != 0;
+                        collides = collides && (m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+                        auto p = (btCollisionObject*)proxy0->m_clientObject;
+                        if(p){
+                            auto i = (fire::bodyInfo*)p->getUserPointer();
+                            if(i){
+                                if(i->type==fire::BODY_BODY){
+                                    //身体外面的ghostBody
+                                    return false;
+                                }
+                            }
+                        }
+                        return collides;
                     }
             };
             closeCombCallback callback;
@@ -145,36 +164,6 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                         bfrom,
                         bto,
                         callback);
-            */
-
-            //用ghost实现
-            auto rotate=dir.getHorizontalAngle();//旋转角度
-            irr::core::matrix4 mat;
-            mat.setRotationDegrees(rotate);
-            mat.setTranslation(from);
-
-            btTransform tran;//bullet矩阵
-            tran.setFromOpenGLMatrix(mat.pointer());
-
-            btPairCachingGhostObject ghost;//ghost对象
-            ghost.setCollisionShape(conf->castShape);
-            ghost.setWorldTransform(tran);
-
-            dynamicsWorld->addCollisionObject(&ghost);//加入世界
-
-            for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
-                btCollisionObject *btco = ghost.getOverlappingObject(i);
-
-                auto info = (bodyInfo*)(btco->getUserPointer());
-
-                if(info && info->type!=BODY_BODY){
-                    attackBody(uuid , conf , info);
-                }
-
-            }
-
-            dynamicsWorld->removeCollisionObject(&ghost);
-
         }
         if(conf->type==FIRE_CHOP){
             //这个不知道怎么写，暂时留空
@@ -185,7 +174,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
             if(conf->particleConfig.have){
                 auto ps = scene->addParticleSystemSceneNode(false);
                 auto em = ps->createPointEmitter(
-                            vec3(0,1,0),//垂直向上发射
+                            vec3(0,0.003,0),//垂直向上发射
                             conf->particleConfig.minParticlesPerSecond  ,   conf->particleConfig.maxParticlesPerSecond,
                             conf->particleConfig.minStartColor          ,   conf->particleConfig.maxStartColor,
                             conf->particleConfig.lifeTimeMin            ,   conf->particleConfig.lifeTimeMax,
@@ -208,7 +197,11 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                     ps->addAffector(af);
                     af->drop();
                 }
+                auto fd = ps->createFadeOutParticleAffector(video::SColor(0,0,0,0),500);
+                ps->addAffector(fd);
+                fd->drop();
                 auto dp = scene->createDeleteAnimator(conf->lifeTime);
+                ps->setPosition(from);
                 ps->addAnimator(dp);//自动删除
                 dp->drop();
             }
