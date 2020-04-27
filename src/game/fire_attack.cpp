@@ -31,13 +31,14 @@ int fire::attackBody(const std::string &uuid, fireConfig *conf, bodyItem * b, fl
     lua_getglobal(L,"attackBody");
     if(lua_isfunction(L,-1)){
 
+        lua_pushlightuserdata(L,this);
         lua_pushstring (L, uuid.c_str());
         lua_pushinteger(L, conf->id);
         lua_pushinteger(L, b->id);
         lua_pushstring (L, b->uuid.c_str());
         lua_pushnumber (L, force);
 
-        if (lua_pcall(L, 5, 1, 0) != 0)
+        if (lua_pcall(L, 6, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(L, -1));
         else{
             if(lua_isnumber(L,-1)){
@@ -55,6 +56,7 @@ bool fire::attackTerrainItem(const std::string &uuid, fireConfig *conf, mapId * 
     lua_getglobal(L,"attackTerrainItem");
     if(lua_isfunction(L,-1)){
 
+        lua_pushlightuserdata(L,this);
         lua_pushstring (L, uuid.c_str());
         lua_pushinteger(L, conf->id);
         lua_pushinteger(L, m->x);
@@ -63,7 +65,7 @@ bool fire::attackTerrainItem(const std::string &uuid, fireConfig *conf, mapId * 
         lua_pushinteger(L, m->id.index);
         lua_pushnumber (L, force);
 
-        if (lua_pcall(L, 7, 1, 0) != 0)
+        if (lua_pcall(L, 8, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(L, -1));
         else{
             if(lua_isnumber(L,-1)){
@@ -82,13 +84,14 @@ int fire::attackBuilding(const std::string &uuid, fireConfig *conf, buildingBody
     lua_getglobal(L,"attackBuilding");
     if(lua_isfunction(L,-1)){
 
+        lua_pushlightuserdata(L,this);
         lua_pushstring (L, uuid.c_str());
         lua_pushinteger(L, conf->id);
         lua_pushstring (L, b->uuid.c_str());
         lua_pushinteger(L, b->config->id);
         lua_pushnumber (L, force);
 
-        if (lua_pcall(L, 5, 1, 0) != 0)
+        if (lua_pcall(L, 6, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(L, -1));
         else{
             if(lua_isnumber(L,-1)){

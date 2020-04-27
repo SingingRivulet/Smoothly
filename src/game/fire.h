@@ -153,6 +153,8 @@ class fire:public interactive{
 
         irr::scene::IMesh * laserMesh;
         void createLaserMesh();
+
+        void loadAPIs();
     public:
 
         static bodyItem * getBodyFromBodyPart(bodyInfo*);

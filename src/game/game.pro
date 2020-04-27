@@ -92,7 +92,8 @@ SOURCES += \
     meshGenerator/grass.cpp \
     building_default.cpp \
     building_road.cpp \
-    pathfinding.cpp
+    pathfinding.cpp \
+    fire_api.cpp
 
 FORMS += \
     ui/login.ui

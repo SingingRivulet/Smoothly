@@ -7,6 +7,7 @@ fire::fire(){
     createLaserMesh();
     L = luaL_newstate();
     luaL_openlibs(L);
+    loadAPIs();
     luaL_dofile(L, "../script/fire.lua");
 }
 
