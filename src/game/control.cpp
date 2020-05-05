@@ -195,6 +195,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_ESCAPE:
                     parent->running = false;
                 break;
+                case irr::KEY_F11:
+                    if(!event.KeyInput.PressedDown){
+                        parent->showVoxelsByCamera();
+                    }
+                break;
                 default:
                 break;
             }

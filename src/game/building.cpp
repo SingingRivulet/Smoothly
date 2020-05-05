@@ -8,12 +8,14 @@ building::building(){
     buildingPrevConf = NULL;
     buildingPrevId = -4;
     showningDes    = 0;
+    texture_collPoint = driver->getTexture("../../res/icon/collPoint.png");
     L = luaL_newstate();
     luaL_openlibs(L);
     lua_pushlightuserdata(L,this);
     luaL_dofile(L, "../script/building.lua");
     loadConfig();
     addDefaultBuilding();
+    pathFindingInit();
     buildingSelect = 0;
 }
 
@@ -89,7 +91,6 @@ void building::buildingChunkRelease(int x, int y){
 
 void building::loop(){
     buildingUpdate();
-    processCheckingRemove();
 }
 
 void building::msg_addBuilding(const char *uuid, int id, float px, float py, float pz, float rx, float ry, float rz){
@@ -179,35 +180,6 @@ void building::onDraw(){
     }
 }
 
-
-void building::ghostSearch::search(std::function<void (physical::bodyInfo *)> callback){
-    parent->dynamicsWorld->addCollisionObject(&ghost);//加入世界
-    for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
-        btCollisionObject *btco = ghost.getOverlappingObject(i);
-        auto info = (bodyInfo*)(btco->getUserPointer());
-        if(info)
-            callback(info);
-    }
-    parent->dynamicsWorld->removeCollisionObject(&ghost);
-}
-void building::ghostTest(const btVector3 & pos, float len, std::function<void (physical::bodyInfo *)> callback){
-    btBoxShape shape(btVector3(len,len,len));
-    btTransform xform;
-    xform.setOrigin(pos);
-    btPairCachingGhostObject ghost;//ghost对象
-    ghost.setCollisionShape(&shape);
-    ghost.setWorldTransform(xform);
-
-    dynamicsWorld->addCollisionObject(&ghost);//加入世界
-    for (int i = 0; i < ghost.getNumOverlappingObjects(); i++){
-        btCollisionObject *btco = ghost.getOverlappingObject(i);
-        auto info = (bodyInfo*)(btco->getUserPointer());
-        if(info)
-            callback(info);
-    }
-    dynamicsWorld->removeCollisionObject(&ghost);
-}
-
 bool building::getCollMap(int x, int y, int z){
     auto it = collTable.find(blockPosition(x,y,z));
     if(it==collTable.end())
@@ -229,15 +201,17 @@ void building::buildingAdd(const vec3 &p, const vec3 &r, int id, const std::stri
     auto c = seekChunk(cx,cy);
     b->inchunk = c;
     c->bodies.insert(b);
-    b->initCollTable();
-
+    b->getVoxels([&](const blockPosition & p){
+       markVoxel(p,1);
+    });
     bodies[uuid]=b;
 }
 void building::releaseBuilding(building::buildingBody * p){
     if(p->rigidBody){
         dynamicsWorld->removeRigidBody(p->rigidBody);
-        //p->initCollTable(true);
-        p->buildAffectArea(checkingRemoveList);//上面的方式可能造成一帧内大量堆积
+        p->getVoxels([&](const blockPosition & posi){
+            markVoxel(posi,-1);
+        });
         delete p->rigidBody;
     }
     if(p->bodyState)
@@ -256,7 +230,7 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
     auto cit = config.find(id);
     if(cit==config.end())
         return NULL;
-    conf * c = cit->second;
+    buildingConf * c = cit->second;
 
     auto res = new buildingBody;
     res->parent = this;
@@ -356,7 +330,7 @@ void building::loadConfig(){
                                 if(mnode && mnode->type==cJSON_String){
                                     auto mesh = scene->getMesh(mnode->valuestring);
                                     if(mesh){
-                                        auto ptr  = new conf;
+                                        auto ptr  = new buildingConf;
                                         ptr->id   = id;
                                         config[id]= ptr;
                                         ptr->mesh[0] = mesh;

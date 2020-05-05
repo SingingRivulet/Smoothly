@@ -38,21 +38,10 @@ class building:public weather{
 
         void onDraw()override;
 
-        struct ghostSearch{
-                btBoxShape shape;
-                btPairCachingGhostObject ghost;
-                building * parent;
-                inline ghostSearch(const btVector3 & v,building * p):shape(v){
-                    ghost.setCollisionShape(&shape);
-                    parent = p;
-                }
-                void search(std::function<void (physical::bodyInfo *)> callback);
-        };
-        void ghostTest(const btVector3 & pos, float len,std::function<void (physical::bodyInfo *)> callback);
-
         bool getCollMap(int x,int y,int z);
 
         struct buildingBody;
+
     private:
         void addDefaultBuilding();
         lua_State * L;
@@ -67,8 +56,9 @@ class building:public weather{
             void unlink();
         };
         void linkChunk(buildingChunk * , int x,int y);
-        struct conf;
+
     public:
+        struct buildingConf;
         struct blockPosition{//点在chunk中的位置
             int x,y,z;
             inline blockPosition() {
@@ -113,9 +103,9 @@ class building:public weather{
             }
         };
     private:
-        std::map<blockPosition,bool> collTable;//用于寻路的碰撞表
-        std::queue<blockPosition>    checkingRemoveList;
-        void processCheckingRemove();
+        std::map<blockPosition,int> collTable;//用于寻路的碰撞表
+        void pathFindingInit();
+        void markVoxel(const blockPosition &,int delta);
     public:
         struct buildingBody{
             std::string uuid;
@@ -123,7 +113,7 @@ class building:public weather{
             irr::scene::IMeshSceneNode * node[4];
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
-            conf             * config;
+            buildingConf             * config;
             bodyInfo info;
             dbvt3d::AABB     * bb;
             building         * parent;
@@ -131,9 +121,11 @@ class building:public weather{
                 for(int i = 0;i<4;++i)
                     node[i] = NULL;
             }
-            void initCollTable(bool removeMode = false);
-            void buildAffectArea(std::queue<blockPosition> & t);
+            void showVoxels();
+            void getVoxels(std::function<void(const blockPosition &)> callback);
         };
+        void showVoxelsByRay(const vec3 & from , const vec3 & to );
+        void showVoxelsByCamera();
     private:
         std::map<ipair,buildingChunk*> buildingChunks;
         std::unordered_map<std::string,buildingBody*> bodies;
@@ -145,7 +137,10 @@ class building:public weather{
 
         buildingChunk * seekChunk(int x,int y);
 
-        struct conf{
+        irr::video::ITexture * texture_collPoint;
+
+    public:
+        struct buildingConf{
             int                     id;
 
             irr::s32                shader;
@@ -176,7 +171,9 @@ class building:public weather{
             int                           attachHandler;
             bool                          useAttachHandler;
 
-            conf(){
+            std::vector<vec3>             collisionVoxels;
+
+            buildingConf(){
                 haveBody             = false;
                 haveShader           = false;
                 for(int i = 0;i<4;++i)
@@ -194,8 +191,9 @@ class building:public weather{
                 }
             }
         };
-        std::map<int,conf*> config;
+        std::map<int,buildingConf*> config;
 
+    private:
         void loadConfig();
         void releaseConfig();
 
@@ -219,7 +217,7 @@ class building:public weather{
         virtual void cancle();
     private:
         irr::scene::ISceneNode  * buildingPrev;
-        conf                    * buildingPrevConf;
+        buildingConf            * buildingPrevConf;
         int                       buildingPrevId;
         bool                      buildingAllowBuild;
         buildingBody            * buildingTarget;

@@ -137,19 +137,25 @@ void main(){
     float noise                 = (n1+n2)*2.0+0.5;
     //float texture_delta_fissure = turbulence(pointPosition.xz*0.1);
     vec3  texture_grass         = vec3(0.1,0.9,0.1)*noise;
-    vec3  texture_sand          = vec3(0.9,0.7,0.4)*noise;
-    vec3  texture_mud           = vec3(0.5,0.3,0.1)*noise;
+    vec3  texture_mud           = vec3(0.9,0.7,0.4)*noise;
+    vec3  texture_sand          = vec3(0.5,0.3,0.1)*noise;
     vec3  texture_snow          = vec3(1.2,1.2,1.2)*noise;
     vec4  diffuseColor;
     float theta                 = snoise(pointPosition);
+
+    vec3 padd;
+    float sand_theta = (theta*16.0+2.0) - pointPosition.y;
+    if(sand_theta<0.0)
+        padd = texture_mud;
+    else
+        padd = mix(texture_mud,texture_sand,min(sand_theta,1.0));
+
     if(temp>theta*2.0+0.5){
-        if(onormal.y>theta*2.0+0.9){
-            diffuseColor = vec4(texture_grass,1.0);
+        float grass_theta = onormal.y-(theta*2.0+0.9);
+        if(grass_theta>0.0){
+            diffuseColor = vec4(mix(padd,texture_grass,min(grass_theta*10.0,1.0)),1.0);
         }else{
-            if(pointPosition.y>theta*16.0+2.0)
-                diffuseColor = vec4(texture_mud,1.0);
-            else
-                diffuseColor = vec4(texture_sand,1.0);
+            diffuseColor = vec4(padd,1.0);
         }
     }else{
         diffuseColor = vec4(texture_snow,1.0);

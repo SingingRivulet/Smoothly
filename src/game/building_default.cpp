@@ -7,7 +7,7 @@ void building::addDefaultBuilding(){
                 "../shader/building_default.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/building_default.ps.glsl", "main", irr::video::EPST_PS_1_1);
     {
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -1;
         config[-1]= ptr;
         ptr->mesh[0] = scene->getGeometryCreator()->createCubeMesh(vec3(10,0.5,10));
@@ -67,7 +67,7 @@ void building::addDefaultBuilding(){
         mesh->recalculateBoundingBox();
 
         //创建配置
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -2;
         config[-2]= ptr;
         ptr->mesh[0] = mesh;
@@ -132,7 +132,7 @@ void building::addDefaultBuilding(){
         mesh->recalculateBoundingBox();
 
         //创建配置
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -3;
         config[-3]= ptr;
         ptr->mesh[0] = mesh;
@@ -194,7 +194,7 @@ void building::addDefaultBuilding(){
 
         mesh->recalculateBoundingBox();
 
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -4;
         config[-4]= ptr;
         ptr->mesh[0] = mesh;
@@ -257,7 +257,7 @@ void building::addDefaultBuilding(){
         mesh->recalculateBoundingBox();
 
         //创建配置
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -5;
         config[-5]= ptr;
         ptr->mesh[0] = mesh;
@@ -322,7 +322,7 @@ void building::addDefaultBuilding(){
         mesh->recalculateBoundingBox();
 
         //创建配置
-        auto ptr  = new conf;
+        auto ptr  = new buildingConf;
         ptr->id   = -6;
         config[-6]= ptr;
         ptr->mesh[0] = mesh;
