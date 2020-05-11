@@ -7,13 +7,16 @@ namespace smoothly{
 class meshGenerator{
     public:
         meshGenerator(uint t) {
-            tesselation = t;
             buffer = new irr::scene::SMeshBuffer();
+            setSteps(t);
+            index = 0;
+        }
+        void setSteps(uint t){
+            tesselation = t;
             recTesselation = core::reciprocal((f32)tesselation);
             recTesselationHalf = recTesselation * 0.5f;
             angleStep = (core::PI * 2.f ) / tesselation;
             angleStepHalf = angleStep*0.5f;
-            index = 0;
         }
         ~meshGenerator(){
             buffer->drop();
@@ -280,7 +283,7 @@ class leavesBuffer{//树叶buffer
 };
 
 irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMesh){
-    meshGenerator m(3);
+    meshGenerator m(4);
     leavesBuffer   g;
     world::terrain::predictableRand randg;
     randg.setSeed(seed);
@@ -311,6 +314,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     if(!oris.empty())
         oris.pop_back();
     for(auto it:oris){
+        m.setSteps(3);
         oris_child.clear();
         auto rotation = vec3(90+(randg.frand()-0.5)*30,randg.frand()*360,0);
         m.transform.setRotationDegrees(rotation);
@@ -322,6 +326,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
         //二级分支
         if(!oris_child.empty())
             oris_child.pop_back();
+        m.setSteps(2);
         for(auto it2:oris_child){
             irr::core::matrix4 st,rt;
             st.setRotationDegrees(rotation);

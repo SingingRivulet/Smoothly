@@ -3,7 +3,7 @@
 
 namespace smoothly{
 
-irr::scene::ISceneNode * terrain_item::genGrass(int seed){
+irr::scene::ISceneNode * terrain_item::genGrass(int seed,int & lodLevel){
     world::terrain::predictableRand randg;
     randg.setSeed(seed);
 
@@ -19,7 +19,14 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed){
     res->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
 
     res->setRotation(vec3(0,randg.frand()*360,0));
-    res->setScale(vec3(1+randg.frand()*4,1+randg.frand()*4,1+randg.frand()*4));
+    res->setScale(vec3(1+randg.frand()*2,1+randg.frand()*2,1+randg.frand()*4));
+
+    int lodRand =  randg.rand() % 10;
+
+    if(lodRand>7)
+        lodLevel = 3;
+    else
+        lodLevel = 2;
 
     return res;
 }

@@ -187,12 +187,11 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.y=y;
             res->id.id.id=id;
             res->id.id.index=index;
-            res->node[0]=genGrass(x * y + index + id);
+            res->node[0]=genGrass(x * y + index + id,res->hideLodLevel);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
             res->node[0]->setPosition(vec3(x,realHeight,y));
             res->node[0]->updateAbsolutePosition();//更新矩阵
-            res->hideLodLevel = 3;
             return res;
         }
         return NULL;

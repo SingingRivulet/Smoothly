@@ -1,0 +1,11 @@
+{
+    "maxDurability":[
+        {"id":10,"durability":200}
+    ],
+    "resource":[
+        {"id":1001,"weight":1}
+    ],
+    "tool":[
+        {"id":1001,"weight":1,"durability":200}
+    ]
+}
