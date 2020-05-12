@@ -79,11 +79,11 @@ bool bag::bag_inner::addResource(int id, int num){
         auto rit = resources.find(id);
         if(rit==resources.end()){
             if(num>0){
-                if(wei > maxDurability-durability){
+                if(wei > maxWeight-weight){
                     //超过重量
                     return false;
                 }else{
-                    durability+=wei;
+                    weight+=wei;
                     resources.insert(std::pair<int,int>(id,num));
                     return true;
                 }
@@ -92,23 +92,23 @@ bool bag::bag_inner::addResource(int id, int num){
             }
         }else{
             if(num>0){
-                if(wei > maxDurability-durability){
+                if(wei > maxWeight-weight){
                     //超过重量
                     return false;
                 }else{
-                    durability+=wei;
+                    weight+=wei;
                     rit->second+=num;
                     return true;
                 }
             }else{
-                if(durability<wei){
+                if(weight<wei){
                     return false;
                 }
                 if(rit->second < abs(num)){//数量不足
                     return false;
                 }
                 rit->second+=num;//num是负数
-                durability-=wei;
+                weight-=wei;
                 return true;
             }
         }
@@ -133,13 +133,13 @@ void bag::bag_inner::addTool(const std::string & tuuid){
     //检查重量
     if(tool.conf==NULL)
         throw std::runtime_error("tool.conf=NULL");
-    if(tool.conf->weight > maxDurability-durability)
-        throw std::runtime_error("tool.conf->weight > maxDurability-durability");
+    if(tool.conf->weight > maxWeight-weight)
+        throw std::runtime_error("tool.conf->weight > maxWeight-weight");
 
     //放入
     tools.insert(tuuid);
     tool.inbag = uuid;
-    durability += tool.conf->weight;
+    weight += tool.conf->weight;
 }
 
 void bag::bag_inner::removeTool(const std::string & uuid){
@@ -162,7 +162,7 @@ void bag::bag_inner::removeTool(const std::string & uuid){
 void bag::bag_inner::toString(std::string & str){
     cJSON * json = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(json,"maxDurability",maxDurability);
+    cJSON_AddNumberToObject(json,"maxWeight",maxWeight);
 
     cJSON * res = cJSON_CreateObject();//资源
     cJSON_AddItemToObject(json,"resource",res);//加入对象
@@ -195,9 +195,9 @@ void bag::bag_inner::loadString(const std::string & str){
 
     if(json){
 
-        auto mxd = cJSON_GetObjectItem(json,"maxDurability");
+        auto mxd = cJSON_GetObjectItem(json,"maxWeight");
         if(mxd && mxd->type==cJSON_Number){
-            maxDurability = mxd->valueint;
+            maxWeight = mxd->valueint;
         }
 
         auto res = cJSON_GetObjectItem(json,"resource");
@@ -283,12 +283,12 @@ void bag::cache_bag_inner_t::onLoad(const std::string & uuid, bag::bag_inner & b
     }else{
         //没找到的话，尝试获取id，初始化背包
         int id = parent->getId(uuid);//找不到会导致throw
-        auto it = parent->maxDurabilities.find(id);
-        if(it==parent->maxDurabilities.end()){
-            throw std::runtime_error("it=maxDurabilities.end()");
+        auto it = parent->maxWeights.find(id);
+        if(it==parent->maxWeights.end()){
+            throw std::runtime_error("it=maxWeights.end()");
         }
-        b.maxDurability = it->second;
-        b.durability = 0;
+        b.maxWeight = it->second;
+        b.weight = 0;
     }
 }
 
@@ -355,7 +355,7 @@ bag::bag(){
     cache_tools.parent = this;
     cache_bag_inner.parent = this;
     resource_config.clear();
-    maxDurabilities.clear();
+    maxWeights.clear();
     printf(L_GREEN "[status]" NONE "get bag config\n" );
     QFile file("../config/bag.json");
     if(!file.open(QFile::ReadOnly)){
@@ -369,19 +369,19 @@ bag::bag(){
     if(json){
         if(json->type==cJSON_Object){
 
-            auto mxd = cJSON_GetObjectItem(json,"maxDurability");
+            auto mxd = cJSON_GetObjectItem(json,"maxWeights");
             if(mxd && mxd->type==cJSON_Array){
-                printf(L_GREEN "[status]" NONE "load bag maxDurability from json\n" );
+                printf(L_GREEN "[status]" NONE "load bag maxWeights from json\n" );
                 auto line = mxd->child;
                 while (line) {
                     if(line->type==cJSON_Object){
 
                         auto id = cJSON_GetObjectItem(line,"id");
-                        auto durability = cJSON_GetObjectItem(line,"durability");
+                        auto durability = cJSON_GetObjectItem(line,"weight");
                         if(id && durability && id->type==cJSON_Number && durability->type==cJSON_Number){
-                            maxDurabilities[id->valueint] = durability->valueint;
+                            maxWeights[id->valueint] = durability->valueint;
                         }else{
-                            printf(L_RED "[error]" NONE "can not set maxDurabilities\n");
+                            printf(L_RED "[error]" NONE "can not set maxWeights\n");
                         }
 
                     }
@@ -461,7 +461,7 @@ bag::bag(){
     //测试资源添加
     //b.addResource(1001,1);
     //printf("resource num:%d\n",b.resources[1001]);
-    //printf("weight:%d\n",b.durability);
+    //printf("weight:%d\n",b.weight);
     //测试添加装备
     //auto uuid = createTool(1001);
     //b.addTool(uuid);
@@ -469,10 +469,10 @@ bag::bag(){
     //    std::cout<<"tool:"<<it<<std::endl;
     //}
     //测试消耗耐久
-    //29b9d5f6-56d4-4bef-8fcb-2d283dcf2ec6
+    ////29b9d5f6-56d4-4bef-8fcb-2d283dcf2ec6
     //bag_tool & t = cache_tools["29b9d5f6-56d4-4bef-8fcb-2d283dcf2ec6"];
     //printf("tool dur:%d\n",t.durability);
-    //consume("df400259-237b-473e-b65f-0abaf27f46f","29b9d5f6-56d4-4bef-8fcb-2d283dcf2ec6",1);
+    //consume("df400259-237b-473e-b65f-0abaf27f46f5","29b9d5f6-56d4-4bef-8fcb-2d283dcf2ec6",1);
 }
 
 bag::~bag(){

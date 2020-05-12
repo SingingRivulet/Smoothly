@@ -1,6 +1,6 @@
 {
-    "maxDurability":[
-        {"id":10,"durability":200}
+    "maxWeights":[
+        {"id":10,"weight":200}
     ],
     "resource":[
         {"id":1001,"weight":1}

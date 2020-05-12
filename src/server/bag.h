@@ -45,31 +45,31 @@ class bag:public body{
         struct bag_inner{
                 std::map<int,int>                           resources;  //基础资源，弹药（id=>数量）
                 std::unordered_set<std::string>             tools;      //工具（存放uuid）
-                int durability,maxDurability;
+                int weight,maxWeight;
                 bag * parent;
                 std::string                                 uuid;       //自己的uuid(load的时候不会被设置，需要手动设置)
 
                 inline bag_inner(){
                     resources.clear();
                     tools.clear();
-                    durability = 0;
-                    maxDurability = 0;
+                    weight = 0;
+                    maxWeight = 0;
                     parent = NULL;
                     uuid.clear();
                 }
                 inline bag_inner(const bag_inner & i){
                     resources   =   i.resources;
                     tools       =   i.tools;
-                    durability  =   i.durability;
-                    maxDurability = i.maxDurability;
+                    weight  =   i.weight;
+                    maxWeight = i.maxWeight;
                     parent      =   i.parent;
                     uuid        =   i.uuid;
                 }
                 inline const bag_inner & operator=(const bag_inner & i){
                     resources   =   i.resources;
                     tools       =   i.tools;
-                    durability  =   i.durability;
-                    maxDurability = i.maxDurability;
+                    weight  =   i.weight;
+                    maxWeight = i.maxWeight;
                     parent      =   i.parent;
                     uuid        =   i.uuid;
                     return * this;
@@ -89,7 +89,7 @@ class bag:public body{
             public:
                 bag * parent;
         }cache_bag_inner;
-        std::map<int,int> maxDurabilities;
+        std::map<int,int> maxWeights;
 
         bool consume(const std::string & bag_uuid,const std::string & tool_uuid,int num)noexcept;//消耗耐久
         bool consume(const std::string & tool_uuid,int num)noexcept;//消耗耐久
