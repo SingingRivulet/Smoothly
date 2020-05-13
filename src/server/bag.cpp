@@ -109,6 +109,9 @@ bool bag::bag_inner::addResource(int id, int num){
                 }
                 rit->second+=num;//num是负数
                 weight-=wei;
+                if(rit->second<=0){
+                    resources.erase(rit);
+                }
                 return true;
             }
         }
@@ -484,6 +487,37 @@ bag::~bag(){
         delete it.second;
     }
     resource_config.clear();
+}
+
+void bag::sendBagToAddr(const RakNet::SystemAddress & addr,const std::string & uuid){
+    try{
+        bag_inner & b =  cache_bag_inner[uuid];
+        std::string str;
+        b.toString(str);
+        sendAddr_bag(addr,uuid,str);
+    }catch(...){
+
+    }
+}
+
+bool bag::addResource(const RakNet::SystemAddress & addr, const std::string & uuid, int id, int delta){
+    try{
+        bag_inner & b =  cache_bag_inner[uuid];
+        bool res = b.addResource(id,delta);
+        if(res){
+            auto it = b.resources.find(id);
+            if(it!=b.resources.end()){
+                sendAddr_bag_resourceNum(addr,uuid,id,it->second);
+            }else{
+                sendAddr_bag_resourceNum(addr,uuid,id,0);
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }catch(...){
+        return false;
+    }
 }
 
 void bag::release(){

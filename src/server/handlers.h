@@ -41,6 +41,11 @@ class handlers:public admin{
         void sendAddr_removeTable(const RakNet::SystemAddress & addr,
             int x,int y,
             const std::list<std::pair<int,int> > & rmt)override;
+
+
+        void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)override;
+        void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)override;
+
         
         void boardcast_addRemovedItem(int x,int y,int id,int index);
         

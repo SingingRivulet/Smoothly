@@ -155,6 +155,28 @@ void handlers::sendAddr_removeTable(const RakNet::SystemAddress & addr,
     
 }
 
+void handlers::sendAddr_bag(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & text){
+    makeHeader('P','=');
+
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    t = text.c_str();
+    bs.Write(t);
+
+    sendMessage(&bs,addr);
+}
+
+void handlers::sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr, const std::string & uuid, int id, int num){
+    makeHeader('P','R');
+
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    bs.Write((int32_t)id);
+    bs.Write((int32_t)num);
+
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast_addRemovedItem(int x,int y,int id,int index){
     makeHeader('R','+');
     bs.Write((int32_t)x);

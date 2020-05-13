@@ -108,6 +108,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     }
     for(auto it:buuids){//先发送body
         sendBodyToAddr(addr,it);
+        sendBagToAddr(addr,it);
     }
     for(auto p:m){
         //发rmt

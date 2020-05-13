@@ -4,6 +4,9 @@
 #include "../utils/uuid.h"
 #include "../utils/cJSON.h"
 #include <unordered_set>
+
+#include <raknet/RakPeerInterface.h>
+
 namespace smoothly{
 namespace server{
 
@@ -30,8 +33,25 @@ class bag:public body{
                 bag * parent;
                 void toString(std::string & str);
                 void loadString(const std::string & str);//使用前请先设置parent
-                inline bag_tool(){
 
+                inline bag_tool(){
+                    conf        = NULL;
+                    durability  = 0;
+                    inbag.clear();
+                    parent      = NULL;
+                }
+                inline bag_tool(const bag_tool & i){
+                    conf        = i.conf;
+                    durability  = i.durability;
+                    inbag       = i.inbag;
+                    parent      = i.parent;
+                }
+                inline const bag_tool & operator=(const bag_tool & i){
+                    conf        = i.conf;
+                    durability  = i.durability;
+                    inbag       = i.inbag;
+                    parent      = i.parent;
+                    return * this;
                 }
         };
         class cache_tools_t:public cache<bag_tool>{//用cache存放
@@ -96,6 +116,11 @@ class bag:public body{
 
         bag();
         ~bag();
+
+        void sendBagToAddr(const RakNet::SystemAddress & addr, const std::string & uuid);
+        bool addResource(const RakNet::SystemAddress & addr, const std::string & uuid,int id,int delta);
+        virtual void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
+        virtual void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)=0;
 
         void release()override;
         void loop()override;
