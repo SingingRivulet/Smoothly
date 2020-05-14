@@ -41,9 +41,13 @@ building::building(int thnum):buildingSolver("building.db",thnum)
 
                     auto line = c->child;
                     while(line){
-                        if(strcmp(line->string,"hp")==0){
-                            if(line->type==cJSON_Number){
+                        if(line->type==cJSON_Number){
+                            if(strcmp(line->string,"hp")==0){
                                 o->hp = line->valueint;
+                            }else if(strcmp(line->string,"cost")==0){
+                                o->cost = line->valueint;
+                            }else if(strcmp(line->string,"costNum")==0){
+                                o->costNum = line->valueint;
                             }
                         }
                         line = line->next;
@@ -67,12 +71,27 @@ building::~building()
     }
 }
 
-void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id)
+void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id, const std::string & uuid, const RakNet::SystemAddress & addr){
+    createBuilding(position,rotation,conn,id,[&](int cost,int costNum){
+        if(costNum==0)
+            return true;
+        try{
+            auto body = getMainControl(uuid);
+            return addResource(addr,body,cost,costNum);
+        }catch(...){
+            return false;
+        }
+    });
+}
+
+void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id,std::function<bool(int,int)> needBuild)
 {
     auto it = config.find(id);
     if(it==config.end())
         return;
     conf * c = it->second;
+    if(!needBuild(c->cost,c->costNum))
+        return;
 
     std::string uuid;
     getUUID(uuid);

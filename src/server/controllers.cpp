@@ -181,7 +181,7 @@ void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress 
         shoot(ob , id , f , d);
 }
 
-void controllers::ctl_addBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress &, RakNet::BitStream * data){
+void controllers::ctl_addBuilding(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     vec3 p,r;
     int32_t id;
     data->Read(id);
@@ -202,7 +202,7 @@ void controllers::ctl_addBuilding(const std::string & /*uuid*/, const RakNet::Sy
     for(auto it:s){
         l.push_back(it);
     }
-    createBuilding(p,r,l,id);
+    createBuilding(p,r,l,id,uuid,addr);
 }
 
 void controllers::ctl_damageBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress &, RakNet::BitStream * data){

@@ -28,7 +28,7 @@ class controllers:public handlers{
 
         void ctl_fire(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
 
-        void ctl_addBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
+        void ctl_addBuilding(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_damageBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         void ctl_getBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
         
