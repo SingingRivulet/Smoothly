@@ -6,6 +6,8 @@
 #include <functional>
 #include <stdlib.h>
 #include <mutex>
+#include <unordered_set>
+#include <unordered_map>
 namespace smoothly{
 
 class body:public terrainDispather{
@@ -28,6 +30,10 @@ class body:public terrainDispather{
         void msg_createBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float)override;
         void msg_setBody(const char*,int,int,int,const char*,float,float,float,float,float,float,float,float,float,const std::set<int> &)override;
         void msg_setMainControl(const char *)override;//设置第一人称的body
+        void msg_setBag(const char *,const char *);
+        void msg_setBagResource(const char *,int,int);
+        void msg_setBagTool(const char *,const char *)override;
+        void msg_setBagToolDur(const char *,int)override;
 
     public:
         typedef enum:int32_t{//身体姿势掩码
@@ -146,6 +152,11 @@ class body:public terrainDispather{
                 std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
                 bodyInfo                             info;
                 bool                                 uncreatedChunk;//未创建区块，锁住物体
+
+                std::map<int,int>                    resources;
+                std::unordered_set<std::string>      tools;
+                int                                  weight,maxWeight;
+                void loadBag(const char * str);
 
                 btRigidBody      * coll_rigidBody;
                 btMotionState    * coll_bodyState;
@@ -322,6 +333,29 @@ class body:public terrainDispather{
         std::mutex cmdQueue_locker;
         std::queue<commond> cmdQueue;
         void doCommonds();
+
+    private:
+        void updateBagUI();
+        struct tool{
+                int dur;
+                int id;
+                inline tool(){
+                    dur = 0;
+                    id  = 0;
+                }
+                inline tool(const tool & i){
+                    dur = i.dur;
+                    id  = i.id;
+                }
+                inline const tool & operator=(const tool & i){
+                    dur = i.dur;
+                    id  = i.id;
+                    return * this;
+                }
+                void loadStr(const char *);
+        };
+        std::unordered_map<std::string,tool> tools;
+        irr::gui::IGUIStaticText * body_bag_resource;
 
 };
 

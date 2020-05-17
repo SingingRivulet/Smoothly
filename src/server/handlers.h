@@ -45,7 +45,7 @@ class handlers:public admin{
 
         void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)override;
         void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)override;
-
+        void sendAddr_bag_toolDur(const RakNet::SystemAddress & addr,const std::string & uuid,int dur)override;
         
         void boardcast_addRemovedItem(int x,int y,int id,int index);
         

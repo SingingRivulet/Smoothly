@@ -111,8 +111,8 @@ class bag:public body{
         }cache_bag_inner;
         std::map<int,int> maxWeights;
 
-        bool consume(const std::string & bag_uuid,const std::string & tool_uuid,int num)noexcept;//消耗耐久
-        bool consume(const std::string & tool_uuid,int num)noexcept;//消耗耐久
+        bool consume(const RakNet::SystemAddress & addr,const std::string & bag_uuid,const std::string & tool_uuid,int num)noexcept;//消耗耐久
+        bool consume(const RakNet::SystemAddress & addr,const std::string & tool_uuid,int num)noexcept;//消耗耐久
 
         bag();
         ~bag();
@@ -121,6 +121,7 @@ class bag:public body{
         bool addResource(const RakNet::SystemAddress & addr, const std::string & uuid,int id,int delta);
         virtual void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
         virtual void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)=0;
+        virtual void sendAddr_bag_toolDur(const RakNet::SystemAddress & addr,const std::string & uuid,int dur)=0;
 
         void release()override;
         void loop()override;

@@ -78,6 +78,13 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'P':
+            switch (a) {
+                case 'G':
+                    ctl_getTool(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -218,6 +225,23 @@ void controllers::ctl_getBuilding(const std::string & /*uuid*/, const RakNet::Sy
     data->Read(x);
     data->Read(y);
     sendBuildingChunk(x,y,addr);
+}
+
+void controllers::ctl_getTool(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString u;
+    data->Read(u);
+    if(u.IsEmpty())
+        return;
+    try{
+        bag_tool & t = cache_tools[u.C_String()];
+        makeHeader('P','G');
+        bs.Write(u);
+        std::string str;
+        t.toString(str);
+        u = str.c_str();
+        bs.Write(u);
+        sendMessage(&bs,addr);
+    }catch(...){}
 }
 /////////////////
 }//////server

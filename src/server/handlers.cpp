@@ -177,6 +177,14 @@ void handlers::sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr, cons
     sendMessage(&bs,addr);
 }
 
+void handlers::sendAddr_bag_toolDur(const RakNet::SystemAddress & addr, const std::string & uuid, int dur){
+    makeHeader('P','D');
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    bs.Write((int32_t)dur);
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast_addRemovedItem(int x,int y,int id,int index){
     makeHeader('R','+');
     bs.Write((int32_t)x);

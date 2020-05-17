@@ -54,8 +54,7 @@ HEADERS += \
     RealisticWater.h \
     cloud.h \
     weather.h \
-    pathfinding.h \
-    bag.h
+    pathfinding.h
 
 SOURCES += \
     createTerrainMesh.cpp \

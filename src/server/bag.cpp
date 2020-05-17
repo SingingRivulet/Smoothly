@@ -321,7 +321,7 @@ std::string bag::createTool(int id){
     return uuid;
 }
 
-bool bag::consume(const std::string & bag_uuid, const std::string & tool_uuid, int num)noexcept{
+bool bag::consume(const RakNet::SystemAddress & addr,const std::string & bag_uuid, const std::string & tool_uuid, int num)noexcept{
     if(bag_uuid.empty())
         return false;
     try{
@@ -332,6 +332,7 @@ bool bag::consume(const std::string & bag_uuid, const std::string & tool_uuid, i
             if(t.durability<num)
                 return false;
             t.durability-=num;
+            sendAddr_bag_toolDur(addr,tool_uuid,t.durability);
             return true;
         }
     }catch(...){
@@ -340,13 +341,14 @@ bool bag::consume(const std::string & bag_uuid, const std::string & tool_uuid, i
     }
 }
 
-bool bag::consume(const std::string & tool_uuid, int num)noexcept{
+bool bag::consume(const RakNet::SystemAddress & addr, const std::string & tool_uuid, int num)noexcept{
     try{
         bag_tool & t = cache_tools[tool_uuid];//找不到会throw
 
         if(t.durability<num)
             return false;
         t.durability-=num;
+        sendAddr_bag_toolDur(addr,tool_uuid,t.durability);
         return true;
     }catch(...){
         //没找到返回false

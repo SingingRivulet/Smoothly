@@ -113,6 +113,54 @@ void body::bodyItem::doAnimation(float speed, int start, int end,float frame, bo
     node->setCurrentFrame(frame);
 }
 
+void body::bodyItem::loadBag(const char * str){
+    auto json = cJSON_Parse(str);
+
+    if(json){
+
+        auto mxd = cJSON_GetObjectItem(json,"maxWeight");
+        if(mxd && mxd->type==cJSON_Number){
+            maxWeight = mxd->valueint;
+        }
+
+        auto res = cJSON_GetObjectItem(json,"resource");
+        if(res){
+            auto line = res->child;
+            while(line){
+                if(line->type == cJSON_Number){
+                    int id = atoi(line->string);
+                    int num = line->valueint;
+                    try{
+                        resources[id]=num;
+                    }catch(...){
+
+                    }
+                }
+                line = line->next;
+            }
+        }
+
+        auto tool = cJSON_GetObjectItem(json,"tools");
+        if(tool){
+            auto line = tool->child;
+            while(line){
+                if(line->type == cJSON_String){
+                    auto uuid = line->valuestring;
+                    try{
+                        tools.insert(uuid);
+                        parent->cmd_getBagTool(uuid);
+                    }catch(...){
+
+                    }
+                }
+                line = line->next;
+            }
+        }
+
+        cJSON_Delete(json);
+    }
+}
+
 void body::bodyItem::doFire(){
     auto ntm = parent->timer->getRealTime();
     if(fireDelta>0 && ntm>fireDelta+lastFireTime){
@@ -585,6 +633,7 @@ body::body():gravity(0,-10,0){
     loadBodyConfig();
     loadWearingConfig();
     selecting = false;
+    body_bag_resource = NULL;
 }
 
 body::~body(){
@@ -838,6 +887,49 @@ void body::selectBodyUpdate(){
 
 bool body::bodyItem::JointCallback::getFrameData(f32 frame, scene::ISkinnedMesh::SJoint * joint, core::vector3df & position, s32 & positionHint, core::vector3df & scale, s32 & scaleHint, core::quaternion & rotation, s32 & rotationHint){
     return false;
+}
+
+void body::updateBagUI(){
+    if(body_bag_resource)
+        body_bag_resource->remove();
+    if(mainControlBody){
+        std::wstring str;
+        wchar_t buf[256];
+        for(auto it:mainControlBody->resources){
+            swprintf(buf,256,L"%d:%d\n",it.first,it.second);
+            str+=buf;
+        }
+        for(auto it:mainControlBody->tools){
+            auto t = tools.find(it);
+            if(t!=tools.end()){
+                swprintf(buf,256,L"%s:%d\n",it.c_str(),t->second.dur);
+                str+=buf;
+            }
+        }
+        body_bag_resource=gui->addStaticText(str.c_str(),irr::core::rect<irr::s32>(0,0,width,height),false,false);
+        body_bag_resource->setOverrideColor(irr::video::SColor(255,255,255,255));
+        body_bag_resource->setOverrideFont(font);
+    }
+}
+
+void body::tool::loadStr(const char * str){
+    auto json = cJSON_Parse(str);
+    if(json){
+
+        cJSON *c=json->child;
+        while(c){
+            if(c->type==cJSON_Number){
+                if(strcmp(c->string,"id")==0){
+                    id = c->valueint;
+                }else if(strcmp(c->string,"durability")==0){
+                    dur = c->valueint;
+                }
+            }
+            c=c->next;
+        }
+
+        cJSON_Delete(json);
+    }
 }
 
 }

@@ -204,6 +204,22 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'P':
+                                    switch (data->data[3]) {
+                                        case '=':
+                                            ctl_setBag(&bs);
+                                        break;
+                                        case 'R':
+                                            ctl_setBagResource(&bs);
+                                        break;
+                                        case 'G':
+                                            ctl_setBagTool(&bs);
+                                        break;
+                                        case 'D':
+                                            ctl_setBagToolDur(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -323,6 +339,12 @@ class connectionBase{
             makeHeader('T','G');
             bs.Write(x);
             bs.Write(y);
+            sendMessage(&bs);
+        }
+        inline void cmd_getBagTool(const char * uuid){
+            makeHeader('P','G');
+            RakNet::RakString u = uuid;
+            bs.Write(u);
             sendMessage(&bs);
         }
     private:
@@ -511,6 +533,33 @@ class connectionBase{
             data->Read(y);
             msg_startChunk(x,y);
         }
+        inline void ctl_setBag(RakNet::BitStream * data){
+            RakNet::RakString uuid,t;
+            data->Read(uuid);
+            data->Read(t);
+            msg_setBag(uuid.C_String(),t.C_String());
+        }
+        inline void ctl_setBagResource(RakNet::BitStream * data){
+            RakNet::RakString uuid;
+            int32_t id,num;
+            data->Read(uuid);
+            data->Read(id);
+            data->Read(num);
+            msg_setBagResource(uuid.C_String(),id,num);
+        }
+        inline void ctl_setBagTool(RakNet::BitStream * data){
+            RakNet::RakString uuid,str;
+            data->Read(uuid);
+            data->Read(str);
+            msg_setBagTool(uuid.C_String(),str.C_String());
+        }
+        inline void ctl_setBagToolDur(RakNet::BitStream * data){
+            RakNet::RakString uuid;
+            int32_t dur;
+            data->Read(uuid);
+            data->Read(dur);
+            msg_setBagToolDur(uuid.C_String(),dur);
+        }
 
         time_t lastHeartbeat;
 
@@ -535,6 +584,10 @@ class connectionBase{
         virtual void msg_addBuilding(const char *,int,float,float,float,float,float,float)=0;
         virtual void msg_removeBuilding(const char *)=0;
         virtual void msg_startChunk(int,int)=0;
+        virtual void msg_setBag(const char *,const char *)=0;
+        virtual void msg_setBagResource(const char *,int,int)=0;
+        virtual void msg_setBagTool(const char *,const char *)=0;
+        virtual void msg_setBagToolDur(const char *,int)=0;
 };
 ///////////////////////
 }//////client
