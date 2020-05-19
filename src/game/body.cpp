@@ -633,7 +633,17 @@ body::body():gravity(0,-10,0){
     loadBodyConfig();
     loadWearingConfig();
     selecting = false;
-    body_bag_resource = NULL;
+
+    int cx = width/2;
+    int cy = height/2;
+    bag_icons = gui->addEmptySpriteBank("bag_icons");
+    loadBagIcons();
+    body_bag_resource = gui->addListBox(irr::core::rect<irr::s32>(cx-200,cy-128,cx+200,cy+144),0,-1,true);
+    body_bag_resource->setSpriteBank(bag_icons);
+    bagPage = 0;
+    body_bag_resource->setItemHeight(32);
+    body_bag_resource->setVisible(false);
+    body_bag_page = NULL;
 }
 
 body::~body(){
@@ -890,25 +900,48 @@ bool body::bodyItem::JointCallback::getFrameData(f32 frame, scene::ISkinnedMesh:
 }
 
 void body::updateBagUI(){
-    if(body_bag_resource)
-        body_bag_resource->remove();
+    body_bag_resource->clear();
+    int bagStartAt = bagPage*8;
+    int index=0;
+    wchar_t buf[256];
     if(mainControlBody){
-        std::wstring str;
-        wchar_t buf[256];
-        for(auto it:mainControlBody->resources){
-            swprintf(buf,256,L"%d:%d\n",it.first,it.second);
-            str+=buf;
-        }
         for(auto it:mainControlBody->tools){
-            auto t = tools.find(it);
-            if(t!=tools.end()){
-                swprintf(buf,256,L"%s:%d\n",it.c_str(),t->second.dur);
-                str+=buf;
+            if(index>=bagStartAt && index<=(bagStartAt+8)){
+                auto t = tools.find(it);
+                if(t!=tools.end()){
+                    swprintf(buf,256,L"\nUUID:%s\nDP:%d\n",it.c_str(),t->second.dur);
+                    int id;
+                    auto icit = bag_tool_icons_mapping.find(t->second.id);
+                    if(icit==bag_tool_icons_mapping.end()){
+                        id = body_bag_resource->addItem(buf);
+                    }else{
+                        id = body_bag_resource->addItem(buf,icit->second);
+                    }
+                    body_bag_resource->setItemOverrideColor(id,irr::video::SColor(255,255,255,255));
+                }
             }
+            ++index;
         }
-        body_bag_resource=gui->addStaticText(str.c_str(),irr::core::rect<irr::s32>(0,0,width,height),false,false);
-        body_bag_resource->setOverrideColor(irr::video::SColor(255,255,255,255));
-        body_bag_resource->setOverrideFont(font);
+        for(auto it:mainControlBody->resources){
+            if(index>=bagStartAt && index<=(bagStartAt+8)){
+                swprintf(buf,256,L"\nx%d\n",it.second);
+                int id;
+                auto icit = bag_res_icons_mapping.find(it.first);
+                if(icit==bag_res_icons_mapping.end()){
+                    id = body_bag_resource->addItem(buf);
+                }else{
+                    id = body_bag_resource->addItem(buf,icit->second);
+                }
+                body_bag_resource->setItemOverrideColor(id,irr::video::SColor(255,255,255,255));
+            }
+            ++index;
+        }
+        if(body_bag_page)
+            body_bag_page->remove();
+        swprintf(buf,256,L"%d\n",bagPage);
+        body_bag_page = gui->addStaticText(buf,irr::core::rect<irr::s32>(380,256,400,272),false,true,body_bag_resource);
+        body_bag_page->setOverrideColor(irr::video::SColor(255,255,255,255));
+        body_bag_page->setOverrideFont(font);
     }
 }
 

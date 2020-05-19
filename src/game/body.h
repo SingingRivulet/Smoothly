@@ -335,7 +335,6 @@ class body:public terrainDispather{
         void doCommonds();
 
     private:
-        void updateBagUI();
         struct tool{
                 int dur;
                 int id;
@@ -355,7 +354,14 @@ class body:public terrainDispather{
                 void loadStr(const char *);
         };
         std::unordered_map<std::string,tool> tools;
-        irr::gui::IGUIStaticText * body_bag_resource;
+        irr::gui::IGUISpriteBank * bag_icons;
+        std::map<int,irr::s32> bag_res_icons_mapping,bag_tool_icons_mapping;
+        void loadBagIcons();
+    public:
+        int bagPage;
+        void updateBagUI();
+        irr::gui::IGUIListBox * body_bag_resource;
+        irr::gui::IGUIStaticText * body_bag_page;
 
 };
 

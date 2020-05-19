@@ -167,30 +167,29 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     parent->cancle();
                 break;
                 case irr::KEY_TAB:
-                    /*
                     if(event.KeyInput.PressedDown){
-                        parent->flyMode=!parent->flyMode;
-                        if(parent->flyMode==false){
-                            {
-                                if(!parent->mainControlUUID.empty()){//发送命令，关闭飞行模式
-                                    subsCommond cmd;
-                                    cmd.uuid=parent->mainControlUUID;
-                                    cmd.method=subsCommond::FLY_STOP;
-                                    parent->pushSubsCommond(cmd);//该函数是线程安全的，所以可以这样用
-                                }
-                            }
-                        }else{
-                            {
-                                if(!parent->mainControlUUID.empty()){//发送命令，关闭行走模式
-                                    subsCommond cmd;
-                                    cmd.uuid=parent->mainControlUUID;
-                                    cmd.method=subsCommond::WALK_STOP;
-                                    parent->pushSubsCommond(cmd);//该函数是线程安全的，所以可以这样用
-                                }
-                            }
+                        parent->body_bag_resource->setVisible(true);
+                    }else{
+                        parent->body_bag_resource->setVisible(false);
+                    }
+                break;
+                case irr::KEY_PRIOR:
+                    if(event.KeyInput.PressedDown){
+                        if(parent->body_bag_resource->isVisible()){
+                            --parent->bagPage;
+                            if(parent->bagPage<0)
+                                parent->bagPage=0;
+                            parent->updateBagUI();
                         }
                     }
-                    */
+                break;
+                case irr::KEY_NEXT:
+                    if(event.KeyInput.PressedDown){
+                        if(parent->body_bag_resource->isVisible()){
+                            ++parent->bagPage;
+                            parent->updateBagUI();
+                        }
+                    }
                 break;
                 case irr::KEY_ESCAPE:
                     parent->running = false;

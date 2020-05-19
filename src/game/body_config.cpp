@@ -225,6 +225,46 @@ void body::loadWearingConfig(){
         printf("[error]fail to load json\n" );
     }
 }
+void body::loadBagIcons(){
+    printf("[status]get bag_icon config\n" );
+    QFile file("../config/bag_icon.json");
+    if(!file.open(QFile::ReadOnly)){
+        printf("[error]fail to read ../config/bag_icon.json\n" );
+        return;
+    }
+    QByteArray allData = file.readAll();
+    file.close();
+    auto str = allData.toStdString();
+    cJSON * json=cJSON_Parse(str.c_str());
+    if(json){
+        if(json->type==cJSON_Array){
+            cJSON *c=json->child;
+            while (c){
+                if(c->type==cJSON_Object){
+                    auto idnode = cJSON_GetObjectItem(c,"id");
+                    auto texnode = cJSON_GetObjectItem(c,"icon");
+                    if(idnode && texnode && idnode->type==cJSON_Number && texnode->type==cJSON_String){
+                        auto tex = driver->getTexture(texnode->valuestring);
+                        if(tex){
+                            auto istool = cJSON_GetObjectItem(c,"istool");
+                            if(istool && istool->type==cJSON_Number && istool->valueint!=0){
+                                bag_tool_icons_mapping[idnode->valueint] = bag_icons->addTextureAsSprite(tex);
+                            }else{
+                                bag_res_icons_mapping[idnode->valueint] = bag_icons->addTextureAsSprite(tex);
+                            }
+                        }
+                    }
+                }
+                c=c->next;
+            }
+        }else{
+            printf("[error]root in ../config/bag_icon.json is not Array!\n" );
+        }
+        cJSON_Delete(json);
+    }else{
+        printf("[error]fail to load json\n" );
+    }
+}
 
 void body::releaseBodyConfig(){
     for(auto it:bodyConfig){

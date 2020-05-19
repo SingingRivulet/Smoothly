@@ -1,0 +1,4 @@
+[
+    {"id":1001,"icon":"../../res/rain.png","istool":1},
+    {"id":1001,"icon":"../../res/snow.png","istool":0}
+]

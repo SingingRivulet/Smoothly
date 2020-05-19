@@ -35,6 +35,13 @@ engine::engine(){
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
     scene->setShadowColor(irr::video::SColor(150, 0, 0, 0));
 
+    //gui
+    gui::IGUISkin* newskin = gui->createSkin(gui::EGST_WINDOWS_CLASSIC);
+    font = gui->getFont("../../res/font/fonthaettenschweiler.bmp");
+    newskin->setFont(font);
+    gui->setSkin(newskin);
+    newskin->drop();
+
     //初始化物理世界
     this->collisionConfiguration = new btDefaultCollisionConfiguration();
     this->dispatcher = new btCollisionDispatcher(collisionConfiguration);
@@ -122,7 +129,6 @@ engine::engine(){
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     m->drop();
 
-    font = gui->getFont("../../res/font/fonthaettenschweiler.bmp");
 }
 engine::~engine(){
     device->drop();
