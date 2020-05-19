@@ -1,4 +1,4 @@
 [
-    {"id":1001,"icon":"../../res/rain.png","istool":1},
-    {"id":1001,"icon":"../../res/snow.png","istool":0}
+    {"id":1001,"icon":"../../res/icon/tool/pickaxe.png","istool":1},
+    {"id":1001,"icon":"../../res/icon/resource/wood.png","istool":0}
 ]

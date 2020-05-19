@@ -924,7 +924,7 @@ void body::updateBagUI(){
         }
         for(auto it:mainControlBody->resources){
             if(index>=bagStartAt && index<=(bagStartAt+8)){
-                swprintf(buf,256,L"\nx%d\n",it.second);
+                swprintf(buf,256,L"\n×%d\n",it.second);
                 int id;
                 auto icit = bag_res_icons_mapping.find(it.first);
                 if(icit==bag_res_icons_mapping.end()){
@@ -938,7 +938,7 @@ void body::updateBagUI(){
         }
         if(body_bag_page)
             body_bag_page->remove();
-        swprintf(buf,256,L"%d\n",bagPage);
+        swprintf(buf,256,L"%d\n",bagPage+1);
         body_bag_page = gui->addStaticText(buf,irr::core::rect<irr::s32>(380,256,400,272),false,true,body_bag_resource);
         body_bag_page->setOverrideColor(irr::video::SColor(255,255,255,255));
         body_bag_page->setOverrideFont(font);
