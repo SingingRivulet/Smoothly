@@ -163,7 +163,9 @@ void body::bodyItem::loadBag(const char * str){
 
 void body::bodyItem::doFire(){
     auto ntm = parent->timer->getRealTime();
-    if(fireDelta>0 && ntm>fireDelta+lastFireTime){
+    auto deltaFireTime = ntm - lastFireTime;
+    if(fireDelta>0 && fireDelta < deltaFireTime){
+        lastFireTime = ntm;
         auto wnode = wearing.find(firingWearingId);
         if(wnode!=wearing.end()){
             irr::scene::ISceneNode * n = wnode->second;
@@ -175,10 +177,28 @@ void body::bodyItem::doFire(){
                 wearingConf * c = cit->second;
                 vec3 p = c->skillFrom;//技能释放点
                 mat.transformVect(p);//变换到角色的手上
+                //消耗弹药
+                auto it = parent->fire_costs.find(fireId);
+                if(it!=parent->fire_costs.end()){
+                    if(it->second.cost_num!=0){//需要弹药
+                        auto bgr = resources.find(it->second.cost_id);//定位资源
+                        if(bgr!=resources.end()){
+                            int nnm = bgr->second + it->second.cost_num;
+                            if(nnm>=0)
+                                bgr->second = nnm;
+                            else
+                                return;
+                            parent->needUpdateUI = true;
+                        }else{
+                            return;
+                        }
+                    }
+                }else{
+                    return;
+                }
                 parent->fireTo(uuid,fireId,p,lookAt);//执行开火
             }
         }
-        lastFireTime = ntm;
     }
 }
 
@@ -483,6 +503,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     bodyItem * p = new bodyItem(c->width , c->height , btVector3(posi.X,posi.Y,posi.Z) , c->walkInSky , c->jumpInSky);
     p->config = c;
     p->follow = NULL;
+    p->fireDelta = 0;
     p->m_character.world = dynamicsWorld;
     p->m_character.addIntoWorld();
     p->m_character.setRotation(r);
@@ -632,6 +653,7 @@ body::body():gravity(0,-10,0){
     }
     loadBodyConfig();
     loadWearingConfig();
+    loadFireCost();
     selecting = false;
 
     int cx = width/2;
@@ -644,6 +666,7 @@ body::body():gravity(0,-10,0){
     body_bag_resource->setItemHeight(32);
     body_bag_resource->setVisible(false);
     body_bag_page = NULL;
+    needUpdateUI = false;
 }
 
 body::~body(){
@@ -922,7 +945,12 @@ void body::updateBagUI(){
             }
             ++index;
         }
+        std::vector<int> rms;
         for(auto it:mainControlBody->resources){
+            if(it.second<=0){
+                rms.push_back(it.first);
+                continue;
+            }
             if(index>=bagStartAt && index<=(bagStartAt+8)){
                 swprintf(buf,256,L"\n×%d\n",it.second);
                 int id;
@@ -936,6 +964,9 @@ void body::updateBagUI(){
             }
             ++index;
         }
+        for(auto it:rms){
+            mainControlBody->resources.erase(it);
+        }
         if(body_bag_page)
             body_bag_page->remove();
         swprintf(buf,256,L"%d\n",bagPage+1);
@@ -943,6 +974,7 @@ void body::updateBagUI(){
         body_bag_page->setOverrideColor(irr::video::SColor(255,255,255,255));
         body_bag_page->setOverrideFont(font);
     }
+    needUpdateUI = false;
 }
 
 void body::tool::loadStr(const char * str){

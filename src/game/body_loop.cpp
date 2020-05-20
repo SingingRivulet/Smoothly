@@ -136,6 +136,10 @@ void body::loop(){
     doCommonds();
 
     selectBodyUpdate();
+
+    if(needUpdateUI){
+        updateBagUI();
+    }
 }
 
 void body::onDraw(){

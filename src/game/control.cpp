@@ -179,7 +179,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             --parent->bagPage;
                             if(parent->bagPage<0)
                                 parent->bagPage=0;
-                            parent->updateBagUI();
+                            parent->needUpdateUI = true;
                         }
                     }
                 break;
@@ -187,7 +187,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     if(event.KeyInput.PressedDown){
                         if(parent->body_bag_resource->isVisible()){
                             ++parent->bagPage;
-                            parent->updateBagUI();
+                            parent->needUpdateUI = true;
                         }
                     }
                 break;

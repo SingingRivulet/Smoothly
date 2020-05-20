@@ -174,7 +174,7 @@ void controllers::ctl_getBody(const std::string & ,const RakNet::SystemAddress &
     sendBodyToAddr(addr , u.C_String());
 }
 
-void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){
+void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress & addr,RakNet::BitStream * data){
     RakNet::RakString u;
     int32_t id;
     vec3 f,d;
@@ -185,7 +185,7 @@ void controllers::ctl_fire(const std::string & uuid,const RakNet::SystemAddress 
 
     std::string ob = u.C_String();
     if(getOwner(ob)==uuid && !uuid.empty())//验证权限
-        shoot(ob , id , f , d);
+        shoot(addr , ob , id , f , d);
 }
 
 void controllers::ctl_addBuilding(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){

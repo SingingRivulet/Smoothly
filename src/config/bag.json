@@ -3,7 +3,8 @@
         {"id":10,"weight":200}
     ],
     "resource":[
-        {"id":1001,"weight":1}
+        {"id":1001,"weight":1,"name":"木头"},
+        {"id":1002,"weight":1,"name":"放射管"}
     ],
     "tool":[
         {"id":1001,"weight":1,"durability":200}

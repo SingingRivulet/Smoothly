@@ -357,9 +357,44 @@ class body:public terrainDispather{
         irr::gui::IGUISpriteBank * bag_icons;
         std::map<int,irr::s32> bag_res_icons_mapping,bag_tool_icons_mapping;
         void loadBagIcons();
-    public:
-        int bagPage;
+
+    private:
+        struct fire_cost{
+                int id;
+                int cost_id;//开火消耗
+                int cost_num;
+                int get_id;//开火获得
+                int get_num;
+                inline fire_cost(){
+                    id          = 0;
+                    cost_id     = 0;
+                    cost_num    = 0;
+                    get_id      = 0;
+                    get_num     = 0;
+                }
+                inline fire_cost(const fire_cost & i){
+                    id          = i.id;
+                    cost_id     = i.cost_id;
+                    cost_num    = i.cost_num;
+                    get_id      = i.get_id;
+                    get_num     = i.get_num;
+                }
+                inline const fire_cost & operator=(const fire_cost & i){
+                    id          = i.id;
+                    cost_id     = i.cost_id;
+                    cost_num    = i.cost_num;
+                    get_id      = i.get_id;
+                    get_num     = i.get_num;
+                    return * this;
+                }
+        };
+        std::map<int,fire_cost> fire_costs;
+        void loadFireCost();
         void updateBagUI();
+
+    public:
+        bool needUpdateUI;
+        int bagPage;
         irr::gui::IGUIListBox * body_bag_resource;
         irr::gui::IGUIStaticText * body_bag_page;
 

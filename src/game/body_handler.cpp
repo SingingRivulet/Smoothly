@@ -122,7 +122,8 @@ void body::msg_setBag(const char * uuid, const char * text){
     findBody(uuid){
         it->second->loadBag(text);
         if(it->second==mainControlBody)
-            updateBagUI();
+            //updateBagUI();
+            needUpdateUI = true;
     }
 }
 
@@ -130,20 +131,23 @@ void body::msg_setBagResource(const char * uuid, int id, int num){
     findBody(uuid){
         it->second->resources[id] = num;
         if(it->second==mainControlBody)
-            updateBagUI();
+            //updateBagUI();
+            needUpdateUI = true;
     }
 }
 
 void body::msg_setBagTool(const char * uuid, const char * str){
     tools[uuid].loadStr(str);
-    updateBagUI();
+    //updateBagUI();
+    needUpdateUI = true;
 }
 
 void body::msg_setBagToolDur(const char * uuid, int dur){
     auto it = tools.find(uuid);
     if(it!=tools.end()){
         it->second.dur = dur;
-        updateBagUI();
+        //updateBagUI();
+        needUpdateUI = true;
     }
 }
 
