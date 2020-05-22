@@ -391,6 +391,7 @@ class body:public terrainDispather{
         std::map<int,fire_cost> fire_costs;
         void loadFireCost();
         void updateBagUI();
+        std::vector<std::string> usingToolsTable;
 
     public:
         bool needUpdateUI;

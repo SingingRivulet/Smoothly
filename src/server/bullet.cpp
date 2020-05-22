@@ -25,6 +25,7 @@ bullet::bullet(){
                     auto cost_id  = cJSON_GetObjectItem(c,"cost_id");
                     auto get_num = cJSON_GetObjectItem(c,"get_num");
                     auto get_id  = cJSON_GetObjectItem(c,"get_id");
+                    auto dur_cost = cJSON_GetObjectItem(c,"dur_cost");
                     if(id && cost_num && cost_id && id->type==cJSON_Number && cost_num->type==cJSON_Number && cost_id->type==cJSON_Number){
                         fire_cost f;
                         f.id        = id->valueint;
@@ -33,6 +34,9 @@ bullet::bullet(){
                         if(get_num && get_id && get_num->type==cJSON_Number && get_id->type==cJSON_Number){
                             f.get_id  = get_id->valueint;
                             f.get_num = get_num->valueint;
+                        }
+                        if(dur_cost && dur_cost->type == cJSON_Number){
+                            f.dur_cost = dur_cost->valueint;
                         }
                         fire_costs[f.id] = f;
                     }
@@ -49,18 +53,28 @@ bullet::bullet(){
 }
 
 void bullet::shoot(const RakNet::SystemAddress & addr,const std::string & uuid,int id,const vec3 & from,const vec3 & dir){
-    auto it = fire_costs.find(id);
-    if(it!=fire_costs.end()){
-        if(it->second.cost_num!=0){
-            if(!addResource(addr,uuid,it->second.cost_id,it->second.cost_num))
+    try{
+        auto tuuid = cache_bag_inner[uuid].usingTool;
+        if(tuuid.empty())//未装备武器
+            return;
+        auto it = fire_costs.find(id);
+        if(it!=fire_costs.end()){
+            auto dur_cost = it->second.dur_cost;
+            if(cache_tools[tuuid].durability < dur_cost)//耐久不足
                 return;
-        }
-        if(it->second.get_num!=0){
-            addResource(addr,uuid,it->second.get_id,it->second.get_num);
-        }
+            if(!consume(addr,uuid,tuuid,dur_cost))//消耗耐久失败
+                return;
+            if(it->second.cost_num!=0){
+                if(!addResource(addr,uuid,it->second.cost_id,it->second.cost_num))
+                    return;
+            }
+            if(it->second.get_num!=0){
+                addResource(addr,uuid,it->second.get_id,it->second.get_num);
+            }
 
-        boardcast_shoot(uuid,id,from,dir);
-    }
+            boardcast_shoot(uuid,id,from,dir);
+        }
+    }catch(...){}
 }
 ////////////////
 }//////server

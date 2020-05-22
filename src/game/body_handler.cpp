@@ -13,28 +13,28 @@ namespace smoothly{
 
 void body::msg_wearing_add(const char* uuid,int d){
     findBody(uuid){
-        returnInMine;
+        //returnInMine;
         addWearing(it->second , d);
     }
 }
 
 void body::msg_wearing_set(const char* uuid,const std::set<int> & t){
     findBody(uuid){
-        returnInMine;
+        //returnInMine;
         setWearing(it->second , t);
     }
 }
 
 void body::msg_wearing_remove(const char* uuid,int d){
     findBody(uuid){
-        returnInMine;
+        //returnInMine;
         removeWearing(it->second , d);
     }
 }
 
 void body::msg_HPInc(const char* uuid,int d){
     findBody(uuid){
-        returnInMine;
+        //returnInMine;
         it->second->hp = d;
     }
 }

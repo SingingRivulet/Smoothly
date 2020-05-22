@@ -926,13 +926,20 @@ void body::updateBagUI(){
     body_bag_resource->clear();
     int bagStartAt = bagPage*8;
     int index=0;
+    int keyIndex=0;
     wchar_t buf[256];
+    static const char keyMap[] = {'z','x','c','v','b','n','m','l','k'};
+    usingToolsTable.clear();
     if(mainControlBody){
         for(auto it:mainControlBody->tools){
             if(index>=bagStartAt && index<=(bagStartAt+8)){
                 auto t = tools.find(it);
                 if(t!=tools.end()){
-                    swprintf(buf,256,L"\nUUID:%s\nDP:%d\n",it.c_str(),t->second.dur);
+                    if(keyIndex>9)
+                        break;
+                    usingToolsTable.push_back(it);
+                    swprintf(buf,256,L"\nUUID:%s(%c)\nDP:%d\n",it.c_str(),keyMap[keyIndex],t->second.dur);
+                    ++keyIndex;
                     int id;
                     auto icit = bag_tool_icons_mapping.find(t->second.id);
                     if(icit==bag_tool_icons_mapping.end()){

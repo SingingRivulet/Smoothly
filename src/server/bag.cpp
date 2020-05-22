@@ -166,6 +166,7 @@ void bag::bag_inner::toString(std::string & str){
     cJSON * json = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(json,"maxWeight",maxWeight);
+    cJSON_AddStringToObject(json,"usingTool",usingTool.c_str());
 
     cJSON * res = cJSON_CreateObject();//资源
     cJSON_AddItemToObject(json,"resource",res);//加入对象
@@ -197,6 +198,13 @@ void bag::bag_inner::loadString(const std::string & str){
     auto json = cJSON_Parse(str.c_str());
 
     if(json){
+
+        auto ust = cJSON_GetObjectItem(json,"usingTool");
+        if(ust && ust->type==cJSON_String){
+            usingTool = ust->valuestring;
+        }else{
+            usingTool.clear();
+        }
 
         auto mxd = cJSON_GetObjectItem(json,"maxWeight");
         if(mxd && mxd->type==cJSON_Number){
@@ -440,6 +448,18 @@ bag::bag(){
                                 p->id = id->valueint;
                                 p->weight = weight->valueint;
                                 p->durability = durability->valueint;
+
+                                auto wearing = cJSON_GetObjectItem(line,"wearing");//wearing的配置
+                                if(wearing && wearing->type==cJSON_Array){
+                                    auto wearing_item = wearing->child;
+                                    while(wearing_item){
+                                        if(wearing_item->type==cJSON_Number){
+                                            p->wearing.insert(wearing_item->valueint);
+                                        }
+                                        wearing_item = wearing_item->next;
+                                    }
+                                }
+
                                 tool_config[id->valueint] = p;
                             }else{
                                 printf(L_RED "[error]" NONE "can not redefine tool:%d\n",id->valueint);
@@ -522,10 +542,54 @@ bool bag::addResource(const RakNet::SystemAddress & addr, const std::string & uu
     }
 }
 
+void bag::useTool(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID){
+    if(uuid.empty())
+        return;
+    if(toolUUID.empty()){
+        try{
+            bag_inner & b = cache_bag_inner[uuid];//获取背包 失败会导致throw
+            if(!b.usingTool.empty()){//有使用中的装备
+                //卸下装备
+                try{
+                    bag_tool & ot = cache_tools[b.usingTool];
+                    for(auto it:ot.conf->wearing){
+                        wearing_remove(uuid,it);
+                    }
+                }catch(...){}
+            }
+            b.usingTool.clear();
+            sendAddr_bag_tool_use(addr,uuid,"");//发送到客户端
+        }catch(...){}
+    }else{
+        try{
+            bag_tool & t = cache_tools[toolUUID];//失败会导致throw
+            if(t.inbag != uuid)//不是自己的装备
+                return;
+            bag_inner & b = cache_bag_inner[uuid];//获取背包 失败会导致throw
+            if(!b.usingTool.empty()){//有使用中的装备
+                //卸下装备
+                try{
+                    bag_tool & ot = cache_tools[b.usingTool];
+                    for(auto it:ot.conf->wearing){
+                        wearing_remove(uuid,it);
+                    }
+                }catch(...){}
+            }
+            //设置新的装备
+            b.usingTool = toolUUID;//先设置
+            //设置wearing
+            for(auto it:t.conf->wearing){
+                wearing_add(uuid,it);
+            }
+            sendAddr_bag_tool_use(addr,uuid,toolUUID);//发送到客户端
+        }catch(...){}
+    }
+}
+
 void bag::release(){
-    body::release();
     cache_tools.clear();
     cache_bag_inner.clear();
+    body::release();
 }
 
 void bag::loop(){

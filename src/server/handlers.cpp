@@ -185,6 +185,39 @@ void handlers::sendAddr_bag_toolDur(const RakNet::SystemAddress & addr, const st
     sendMessage(&bs,addr);
 }
 
+void handlers::sendAddr_bag_tool_add(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID){
+    makeHeader('P','+');
+
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    t = toolUUID.c_str();
+    bs.Write(t);
+
+    sendMessage(&bs,addr);
+}
+
+void handlers::sendAddr_bag_tool_remove(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID){
+    makeHeader('P','-');
+
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    t = toolUUID.c_str();
+    bs.Write(t);
+
+    sendMessage(&bs,addr);
+}
+
+void handlers::sendAddr_bag_tool_use(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID){
+    makeHeader('P','<');
+
+    RakNet::RakString t = uuid.c_str();
+    bs.Write(t);
+    t = toolUUID.c_str();
+    bs.Write(t);
+
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast_addRemovedItem(int x,int y,int id,int index){
     makeHeader('R','+');
     bs.Write((int32_t)x);

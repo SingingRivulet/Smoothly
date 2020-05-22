@@ -17,6 +17,7 @@ class bag:public body{
                 int  id;
                 int  weight;    //重量
                 int  durability;//耐久度
+                std::set<int> wearing;
         };
         std::map<int,bag_tool_conf*> tool_config;
         ////////////////////////////////////////////////////////////
@@ -68,6 +69,7 @@ class bag:public body{
                 int weight,maxWeight;
                 bag * parent;
                 std::string                                 uuid;       //自己的uuid(load的时候不会被设置，需要手动设置)
+                std::string                                 usingTool;  //使用中的工具
 
                 inline bag_inner(){
                     resources.clear();
@@ -76,6 +78,7 @@ class bag:public body{
                     maxWeight = 0;
                     parent = NULL;
                     uuid.clear();
+                    usingTool.clear();
                 }
                 inline bag_inner(const bag_inner & i){
                     resources   =   i.resources;
@@ -84,6 +87,7 @@ class bag:public body{
                     maxWeight = i.maxWeight;
                     parent      =   i.parent;
                     uuid        =   i.uuid;
+                    usingTool   =   i.usingTool;
                 }
                 inline const bag_inner & operator=(const bag_inner & i){
                     resources   =   i.resources;
@@ -92,6 +96,7 @@ class bag:public body{
                     maxWeight = i.maxWeight;
                     parent      =   i.parent;
                     uuid        =   i.uuid;
+                    usingTool   =   i.usingTool;
                     return * this;
                 }
 
@@ -119,9 +124,14 @@ class bag:public body{
 
         void sendBagToAddr(const RakNet::SystemAddress & addr, const std::string & uuid);
         bool addResource(const RakNet::SystemAddress & addr, const std::string & uuid,int id,int delta);
+        void useTool(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID);//toolUUID为空或不存在时卸下
+
         virtual void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
         virtual void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)=0;
         virtual void sendAddr_bag_toolDur(const RakNet::SystemAddress & addr,const std::string & uuid,int dur)=0;
+        virtual void sendAddr_bag_tool_add(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
+        virtual void sendAddr_bag_tool_remove(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
+        virtual void sendAddr_bag_tool_use(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
 
         void release()override;
         void loop()override;
