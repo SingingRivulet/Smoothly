@@ -39,6 +39,10 @@ engine::engine(){
     gui::IGUISkin* newskin = gui->createSkin(gui::EGST_WINDOWS_CLASSIC);
     font = gui->getFont("../../res/font/fonthaettenschweiler.bmp");
     newskin->setFont(font);
+    newskin->setColor(irr::gui::EGDC_3D_DARK_SHADOW,irr::video::SColor(0, 0, 0, 0));
+    newskin->setColor(irr::gui::EGDC_3D_SHADOW,irr::video::SColor(0, 0, 0, 0));
+    newskin->setColor(irr::gui::EGDC_3D_HIGH_LIGHT,irr::video::SColor(0, 0, 0, 0));
+    newskin->setColor(irr::gui::EGDC_3D_LIGHT,irr::video::SColor(0, 0, 0, 0));
     gui->setSkin(newskin);
     newskin->drop();
 

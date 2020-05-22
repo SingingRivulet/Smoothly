@@ -83,6 +83,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'G':
                     ctl_getTool(uuid,addr,data);
                 break;
+                case 'U':
+                    ctl_useTool(uuid,addr,data);
+                break;
             }
         break;
     }
@@ -241,6 +244,17 @@ void controllers::ctl_getTool(const std::string & /*uuid*/, const RakNet::System
         u = str.c_str();
         bs.Write(u);
         sendMessage(&bs,addr);
+    }catch(...){}
+}
+
+void controllers::ctl_useTool(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString u,t;
+    data->Read(u);
+    data->Read(t);
+    if(u.IsEmpty())
+        return;
+    try{
+        useTool(addr,u.C_String(),t.C_String());
     }catch(...){}
 }
 /////////////////

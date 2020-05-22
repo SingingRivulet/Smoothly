@@ -209,6 +209,15 @@ class connectionBase{
                                         case '=':
                                             ctl_setBag(&bs);
                                         break;
+                                        case '+':
+                                            ctl_bag_tool_add(&bs);
+                                        break;
+                                        case '-':
+                                            ctl_bag_tool_remove(&bs);
+                                        break;
+                                        case '<':
+                                            ctl_bag_tool_use(&bs);
+                                        break;
                                         case 'R':
                                             ctl_setBagResource(&bs);
                                         break;
@@ -344,6 +353,14 @@ class connectionBase{
         inline void cmd_getBagTool(const char * uuid){
             makeHeader('P','G');
             RakNet::RakString u = uuid;
+            bs.Write(u);
+            sendMessage(&bs);
+        }
+        inline void cmd_useBagTool(const char * uuid,const char * tuuid){
+            makeHeader('P','U');
+            RakNet::RakString u = uuid;
+            bs.Write(u);
+            u = tuuid;
             bs.Write(u);
             sendMessage(&bs);
         }
@@ -560,6 +577,24 @@ class connectionBase{
             data->Read(dur);
             msg_setBagToolDur(uuid.C_String(),dur);
         }
+        inline void ctl_bag_tool_add(RakNet::BitStream * data){
+            RakNet::RakString uuid,tuuid;
+            data->Read(uuid);
+            data->Read(tuuid);
+            msg_bag_tool_add(uuid.C_String(),tuuid.C_String());
+        }
+        inline void ctl_bag_tool_remove(RakNet::BitStream * data){
+            RakNet::RakString uuid,tuuid;
+            data->Read(uuid);
+            data->Read(tuuid);
+            msg_bag_tool_remove(uuid.C_String(),tuuid.C_String());
+        }
+        inline void ctl_bag_tool_use(RakNet::BitStream * data){
+            RakNet::RakString uuid,tuuid;
+            data->Read(uuid);
+            data->Read(tuuid);
+            msg_bag_tool_use(uuid.C_String(),tuuid.C_String());
+        }
 
         time_t lastHeartbeat;
 
@@ -588,6 +623,9 @@ class connectionBase{
         virtual void msg_setBagResource(const char *,int,int)=0;
         virtual void msg_setBagTool(const char *,const char *)=0;
         virtual void msg_setBagToolDur(const char *,int)=0;
+        virtual void msg_bag_tool_add(const char *,const char *)=0;
+        virtual void msg_bag_tool_remove(const char *,const char *)=0;
+        virtual void msg_bag_tool_use(const char *,const char *)=0;
 };
 ///////////////////////
 }//////client

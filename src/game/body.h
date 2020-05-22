@@ -34,6 +34,9 @@ class body:public terrainDispather{
         void msg_setBagResource(const char *,int,int);
         void msg_setBagTool(const char *,const char *)override;
         void msg_setBagToolDur(const char *,int)override;
+        void msg_bag_tool_add(const char *,const char *)override;
+        void msg_bag_tool_remove(const char *,const char *)override;
+        void msg_bag_tool_use(const char *,const char *)override;
 
     public:
         typedef enum:int32_t{//身体姿势掩码
@@ -156,6 +159,7 @@ class body:public terrainDispather{
                 std::map<int,int>                    resources;
                 std::unordered_set<std::string>      tools;
                 int                                  weight,maxWeight;
+                std::string                          usingTool;
                 void loadBag(const char * str);
 
                 btRigidBody      * coll_rigidBody;
@@ -394,9 +398,10 @@ class body:public terrainDispather{
         std::vector<std::string> usingToolsTable;
 
     public:
+        void useTool(int id);
         bool needUpdateUI;
         int bagPage;
-        irr::gui::IGUIListBox * body_bag_resource;
+        irr::gui::IGUIListBox * body_bag_resource , * body_bag_using;
         irr::gui::IGUIStaticText * body_bag_page;
 
 };

@@ -118,6 +118,13 @@ void body::bodyItem::loadBag(const char * str){
 
     if(json){
 
+        auto ust = cJSON_GetObjectItem(json,"usingTool");
+        if(ust && ust->type==cJSON_String){
+            usingTool = ust->valuestring;
+        }else{
+            usingTool.clear();
+        }
+
         auto mxd = cJSON_GetObjectItem(json,"maxWeight");
         if(mxd && mxd->type==cJSON_Number){
             maxWeight = mxd->valueint;
@@ -660,12 +667,20 @@ body::body():gravity(0,-10,0){
     int cy = height/2;
     bag_icons = gui->addEmptySpriteBank("bag_icons");
     loadBagIcons();
+
     body_bag_resource = gui->addListBox(irr::core::rect<irr::s32>(cx-200,cy-128,cx+200,cy+144),0,-1,true);
     body_bag_resource->setSpriteBank(bag_icons);
     bagPage = 0;
     body_bag_resource->setItemHeight(32);
     body_bag_resource->setVisible(false);
+    gui->addImage(driver->getTexture("../../res/icon/bag_footer.png"),irr::core::vector2di(0,256),true,body_bag_resource);
     body_bag_page = NULL;
+
+    body_bag_using = gui->addListBox(irr::core::rect<irr::s32>(20,20,100,52),0,-1,false);
+    body_bag_using->setSpriteBank(bag_icons);
+    body_bag_using->setItemHeight(32);
+    body_bag_using->setVisible(false);
+
     needUpdateUI = false;
 }
 
@@ -924,11 +939,13 @@ bool body::bodyItem::JointCallback::getFrameData(f32 frame, scene::ISkinnedMesh:
 
 void body::updateBagUI(){
     body_bag_resource->clear();
+    body_bag_using->clear();
+    body_bag_using->setVisible(false);
     int bagStartAt = bagPage*8;
     int index=0;
     int keyIndex=0;
     wchar_t buf[256];
-    static const char keyMap[] = {'z','x','c','v','b','n','m','l','k'};
+    static const char keyMap[] = {'Z','X','C','V','B','N','M','L','K'};
     usingToolsTable.clear();
     if(mainControlBody){
         for(auto it:mainControlBody->tools){
@@ -938,7 +955,7 @@ void body::updateBagUI(){
                     if(keyIndex>9)
                         break;
                     usingToolsTable.push_back(it);
-                    swprintf(buf,256,L"\nUUID:%s(%c)\nDP:%d\n",it.c_str(),keyMap[keyIndex],t->second.dur);
+                    swprintf(buf,256,L"\nUUID:%s (%c)\nDP:%d\n",it.c_str(),keyMap[keyIndex],t->second.dur);
                     ++keyIndex;
                     int id;
                     auto icit = bag_tool_icons_mapping.find(t->second.id);
@@ -947,10 +964,45 @@ void body::updateBagUI(){
                     }else{
                         id = body_bag_resource->addItem(buf,icit->second);
                     }
+                    if(mainControlBody->usingTool==it){//正在使用
+                        body_bag_resource->setSelected(id);
+                    }
                     body_bag_resource->setItemOverrideColor(id,irr::video::SColor(255,255,255,255));
                 }
             }
             ++index;
+        }
+        if(!mainControlBody->usingTool.empty()){
+            int bullets = 0;
+            int dur = 0;
+
+            auto cit = fire_costs.find(mainControlBody->fireId);
+            if(cit!=fire_costs.end()){
+                if(cit->second.cost_num!=0){//需要弹药
+                    auto bgr = mainControlBody->resources.find(cit->second.cost_id);//定位资源
+                    if(bgr!=mainControlBody->resources.end()){
+                        bullets = bgr->second;
+                    }
+                }
+            }
+
+            auto t = tools.find(mainControlBody->usingTool);
+            if(t!=tools.end()){
+                dur=t->second.dur;
+
+                swprintf(buf,256,L"\n%d/%d\n",bullets,dur);
+
+                int usingId;
+
+                auto icit = bag_tool_icons_mapping.find(t->second.id);
+                if(icit==bag_tool_icons_mapping.end()){
+                    usingId = body_bag_using->addItem(buf);
+                }else{
+                    usingId = body_bag_using->addItem(buf,icit->second);
+                }
+                body_bag_using->setItemOverrideColor(usingId,irr::video::SColor(128,105,218,213));
+                body_bag_using->setVisible(true);
+            }
         }
         std::vector<int> rms;
         for(auto it:mainControlBody->resources){
@@ -982,6 +1034,16 @@ void body::updateBagUI(){
         body_bag_page->setOverrideFont(font);
     }
     needUpdateUI = false;
+}
+
+void body::useTool(int id){
+    if(mainControlBody==NULL)
+        return;
+    try{
+        cmd_useBagTool(mainControl.c_str(),usingToolsTable.at(id).c_str());
+    }catch(...){
+        cmd_useBagTool(mainControl.c_str(),"");
+    }
 }
 
 void body::tool::loadStr(const char * str){

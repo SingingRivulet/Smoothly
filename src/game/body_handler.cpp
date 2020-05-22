@@ -151,4 +151,30 @@ void body::msg_setBagToolDur(const char * uuid, int dur){
     }
 }
 
+void body::msg_bag_tool_add(const char * uuid, const char * tuuid){
+    findBody(uuid){
+        it->second->tools.insert(tuuid);
+        cmd_getBagTool(tuuid);
+    }
+}
+
+void body::msg_bag_tool_remove(const char * uuid, const char * tuuid){
+    findBody(uuid){
+        it->second->tools.erase(tuuid);
+        tools.erase(tuuid);
+        if(it->second->usingTool == tuuid)
+            it->second->usingTool.clear();
+        if(it->second==mainControlBody)
+            needUpdateUI = true;
+    }
+}
+
+void body::msg_bag_tool_use(const char * uuid, const char * tuuid){
+    findBody(uuid){
+        it->second->usingTool = tuuid;
+        if(it->second==mainControlBody)
+            needUpdateUI = true;
+    }
+}
+
 }

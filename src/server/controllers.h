@@ -33,6 +33,7 @@ class controllers:public handlers{
         void ctl_getBuilding(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data);
 
         void ctl_getTool(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+        void ctl_useTool(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         
 };
 /////////////////
