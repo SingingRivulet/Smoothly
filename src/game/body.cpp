@@ -695,6 +695,7 @@ body::body():gravity(0,-10,0){
     body_bag_using->setVisible(false);
 
     needUpdateUI = false;
+    bag_selectId = -1;
 }
 
 body::~body(){
@@ -958,7 +959,6 @@ void body::updateBagUI(){
     int index=0;
     int keyIndex=0;
     wchar_t buf[256];
-    static const char keyMap[] = {'Z','X','C','V','B','N','M','L','K'};
     usingToolsTable.clear();
     if(mainControlBody){
         for(auto it:mainControlBody->tools){
@@ -968,7 +968,7 @@ void body::updateBagUI(){
                     if(keyIndex>9)
                         break;
                     usingToolsTable.push_back(it);
-                    swprintf(buf,256,L"\nUUID:%s (%c)\nDP:%d\n",it.c_str(),keyMap[keyIndex],t->second.dur);
+                    swprintf(buf,256,L"\nUUID:%s\nDP:%d\n",it.c_str(),t->second.dur);
                     ++keyIndex;
                     int id;
                     auto icit = bag_tool_icons_mapping.find(t->second.id);
@@ -1057,6 +1057,22 @@ void body::useTool(int id){
     }catch(...){
         cmd_useBagTool(mainControl.c_str(),"");
     }
+}
+
+void body::bag_selectLast(){
+    --bag_selectId;
+    if(bag_selectId<-1)
+        bag_selectId = -1;
+    useTool(bag_selectId);
+}
+
+void body::bag_selectNext(){
+    ++bag_selectId;
+    auto max = usingToolsTable.size();
+    if(bag_selectId>max){
+        bag_selectId = max;
+    }
+    useTool(bag_selectId);
 }
 
 void body::tool::loadStr(const char * str){

@@ -93,35 +93,6 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     }else{
                     }
                 break;
-
-                case irr::KEY_KEY_Z:
-                    if(event.KeyInput.PressedDown)parent->useTool(0);
-                break;
-                case irr::KEY_KEY_X:
-                    if(event.KeyInput.PressedDown)parent->useTool(1);
-                break;
-                case irr::KEY_KEY_C:
-                    if(event.KeyInput.PressedDown)parent->useTool(2);
-                break;
-                case irr::KEY_KEY_V:
-                    if(event.KeyInput.PressedDown)parent->useTool(3);
-                break;
-                case irr::KEY_KEY_B:
-                    if(event.KeyInput.PressedDown)parent->useTool(4);
-                break;
-                case irr::KEY_KEY_N:
-                    if(event.KeyInput.PressedDown)parent->useTool(5);
-                break;
-                case irr::KEY_KEY_M:
-                    if(event.KeyInput.PressedDown)parent->useTool(6);
-                break;
-                case irr::KEY_KEY_L:
-                    if(event.KeyInput.PressedDown)parent->useTool(7);
-                break;
-                case irr::KEY_KEY_K:
-                    if(event.KeyInput.PressedDown)parent->useTool(8);
-                break;
-
                 case irr::KEY_KEY_Y://设置移动目标
                     if(event.KeyInput.PressedDown){
                         if(parent->pathFindingMode){
@@ -232,6 +203,13 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 break;
                 case irr::EMIE_MMOUSE_LEFT_UP:
 
+                break;
+                case irr::EMIE_MOUSE_WHEEL:
+                    if(event.MouseInput.Wheel>0){
+                        parent->bag_selectLast();
+                    }else if(event.MouseInput.Wheel<0){
+                        parent->bag_selectNext();
+                    }
                 break;
                 default:break;
             }

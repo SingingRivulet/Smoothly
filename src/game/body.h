@@ -400,9 +400,12 @@ class body:public terrainDispather{
         void loadFireCost();
         void updateBagUI();
         std::vector<std::string> usingToolsTable;
+        int bag_selectId;
 
     public:
         void useTool(int id);
+        void bag_selectLast();
+        void bag_selectNext();
         bool needUpdateUI;
         int bagPage;
         irr::gui::IGUIListBox * body_bag_resource , * body_bag_using;
