@@ -187,6 +187,19 @@ void body::bodyItem::doFire(){
                 //消耗弹药
                 auto it = parent->fire_costs.find(fireId);
                 if(it!=parent->fire_costs.end()){
+                    if(it->second.dur_cost!=0){//需要耐久
+                        if(!usingTool.empty()){
+                            auto t = parent->tools.find(usingTool);
+                            if(t!=parent->tools.end()){
+                                if(t->second.dur >= it->second.dur_cost){
+                                    t->second.dur -= it->second.dur_cost;
+                                    parent->needUpdateUI = true;
+                                }else{
+                                    return;
+                                }
+                            }
+                        }
+                    }
                     if(it->second.cost_num!=0){//需要弹药
                         auto bgr = resources.find(it->second.cost_id);//定位资源
                         if(bgr!=resources.end()){

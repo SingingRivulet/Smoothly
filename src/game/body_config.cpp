@@ -287,6 +287,7 @@ void body::loadFireCost(){
                     auto cost_id  = cJSON_GetObjectItem(c,"cost_id");
                     auto get_num = cJSON_GetObjectItem(c,"get_num");
                     auto get_id  = cJSON_GetObjectItem(c,"get_id");
+                    auto dur_cost = cJSON_GetObjectItem(c,"dur_cost");
                     if(id && cost_num && cost_id && id->type==cJSON_Number && cost_num->type==cJSON_Number && cost_id->type==cJSON_Number){
                         fire_cost f;
                         f.id        = id->valueint;
@@ -295,6 +296,9 @@ void body::loadFireCost(){
                         if(get_num && get_id && get_num->type==cJSON_Number && get_id->type==cJSON_Number){
                             f.get_id  = get_id->valueint;
                             f.get_num = get_num->valueint;
+                        }
+                        if(dur_cost && dur_cost->type == cJSON_Number){
+                            f.dur_cost = dur_cost->valueint;
                         }
                         fire_costs[f.id] = f;
                     }
