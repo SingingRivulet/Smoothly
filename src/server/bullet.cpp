@@ -26,6 +26,7 @@ bullet::bullet(){
                     auto get_num = cJSON_GetObjectItem(c,"get_num");
                     auto get_id  = cJSON_GetObjectItem(c,"get_id");
                     auto dur_cost = cJSON_GetObjectItem(c,"dur_cost");
+                    auto pwr_cost = cJSON_GetObjectItem(c,"pwr_cost");
                     if(id && cost_num && cost_id && id->type==cJSON_Number && cost_num->type==cJSON_Number && cost_id->type==cJSON_Number){
                         fire_cost f;
                         f.id        = id->valueint;
@@ -37,6 +38,9 @@ bullet::bullet(){
                         }
                         if(dur_cost && dur_cost->type == cJSON_Number){
                             f.dur_cost = dur_cost->valueint;
+                        }
+                        if(pwr_cost && pwr_cost->type == cJSON_Number){
+                            f.pwr_cost = pwr_cost->valueint;
                         }
                         fire_costs[f.id] = f;
                     }
@@ -60,9 +64,12 @@ void bullet::shoot(const RakNet::SystemAddress & addr,const std::string & uuid,i
         auto it = fire_costs.find(id);
         if(it!=fire_costs.end()){
             auto dur_cost = it->second.dur_cost;
+            auto pwr_cost = it->second.pwr_cost;
             if(cache_tools[tuuid].durability < dur_cost)//耐久不足
                 return;
-            if(!consume(addr,uuid,tuuid,dur_cost))//消耗耐久失败
+            if(cache_tools[tuuid].power < pwr_cost)//能量不足
+                return;
+            if(!consume(addr,uuid,tuuid,dur_cost,pwr_cost))//消耗耐久失败
                 return;
             if(it->second.cost_num!=0){
                 if(!addResource(addr,uuid,it->second.cost_id,it->second.cost_num))

@@ -219,4 +219,33 @@ void engine::deltaTimeUpdate(){
     lastTime  = tt;
 }
 
+void engine::drawArcProgressBar(core::position2d<s32> center,
+    f32 radius, video::SColor color, s32 count,f32 progress){
+    if (count < 2)
+        return;
+
+    f32 rpro = progress;
+    if(rpro>1.f)
+        rpro = 1.f;
+    else if(rpro<0.f)
+        rpro = 0.f;
+
+    s32 drawCount = count*rpro;
+
+    core::position2d<s32> first;
+    core::position2d<s32> a,b;
+
+    for (s32 j=0; j<drawCount+1; ++j){
+        b = a;
+
+        f32 p = j / (f32)count * (core::PI*2);
+        a = center + core::position2d<s32>((s32)(sin(p)*radius), (s32)(cos(p)*radius));
+
+        if (j==0)
+            first = a;
+        else
+            driver->draw2DLine(a, b, color);
+    }
+}
+
 }

@@ -120,6 +120,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         parent->buildingEnd();
                     }
                 break;
+                case irr::KEY_KEY_L://手动模式
+                    if(!event.KeyInput.PressedDown){
+                        parent->controlSelectedBody();
+                    }
+                break;
                 case irr::KEY_KEY_5://切换建筑
                     if(event.KeyInput.PressedDown){
                         parent->switchBuilding();
@@ -128,6 +133,15 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 case irr::KEY_KEY_6://开关自动寻路
                     if(!event.KeyInput.PressedDown){
                         parent->useAIPathingFinding =! parent->useAIPathingFinding;
+                    }
+                break;
+                case irr::KEY_KEY_R://装弹
+                    if(parent->mainControlBody){
+                        if(event.KeyInput.PressedDown){
+                            parent->mainControlBody->reloadStart();
+                        }else{
+                            parent->mainControlBody->reloadEnd();
+                        }
                     }
                 break;
                 case irr::KEY_KEY_H:
@@ -210,6 +224,14 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     }else if(event.MouseInput.Wheel<0){
                         parent->bag_selectNext();
                     }
+                break;
+                default:break;
+            }
+        break;
+        case irr::EET_GUI_EVENT:
+            switch(event.MouseInput.Event){
+                case irr::gui::EGET_LISTBOX_CHANGED:
+
                 break;
                 default:break;
             }

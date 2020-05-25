@@ -112,9 +112,15 @@ void body::msg_setBody(
 }
 
 void body::msg_setMainControl(const char * uuid){//设置第一人称的body
+    defaultMainControl = uuid;
+    setMainControl(uuid);
+}
+
+void body::setMainControl(const std::string & uuid){
     mainControl = uuid;
     findBody(uuid){
         mainControlBody = it->second;
+        needUpdateUI = true;
     }
 }
 
@@ -142,10 +148,11 @@ void body::msg_setBagTool(const char * uuid, const char * str){
     needUpdateUI = true;
 }
 
-void body::msg_setBagToolDur(const char * uuid, int dur){
+void body::msg_setBagToolDur(const char * uuid, int dur,int pwr){
     auto it = tools.find(uuid);
     if(it!=tools.end()){
         it->second.dur = dur;
+        it->second.pwr = pwr;
         //updateBagUI();
         needUpdateUI = true;
     }

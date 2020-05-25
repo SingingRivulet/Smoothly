@@ -33,7 +33,7 @@ class body:public terrainDispather{
         void msg_setBag(const char *,const char *);
         void msg_setBagResource(const char *,int,int);
         void msg_setBagTool(const char *,const char *)override;
-        void msg_setBagToolDur(const char *,int)override;
+        void msg_setBagToolDur(const char *,int,int)override;
         void msg_bag_tool_add(const char *,const char *)override;
         void msg_bag_tool_remove(const char *,const char *)override;
         void msg_bag_tool_use(const char *,const char *)override;
@@ -124,15 +124,17 @@ class body:public terrainDispather{
                 bodyItem * parent;
         };
         struct wearingBullet{
-            int id,deltaTime;
+            int id,deltaTime,reloadTime;
             inline wearingBullet(){}
-            inline wearingBullet(int i , int d){
+            inline wearingBullet(int i , int d , int r){
                 id          =   i;
                 deltaTime   =   d;
+                reloadTime  =   r;
             }
             inline wearingBullet(const wearingBullet & w){
                 id          =   w.id;
                 deltaTime   =   w.deltaTime;
+                reloadTime  =   w.reloadTime;
             }
         };
         std::map<int,wearingBullet> wearingToBullet;
@@ -174,6 +176,12 @@ class body:public terrainDispather{
                 unsigned int fireDelta;
 
                 void doFire();
+                void reloadTool();
+                void reloadStart();
+                void reloadEnd();
+                irr::u32 reloadStartTime;
+                irr::u32 reloadNeedTime;
+                int reloading;
 
                 void ghostTest(const btTransform &,std::function<void(bodyInfo*)> callback);//假如此角色在哪个位置，会碰撞哪些物体
 
@@ -340,19 +348,23 @@ class body:public terrainDispather{
 
     private:
         struct tool{
-                int dur;
                 int id;
+                int dur;
+                int pwr;
                 inline tool(){
                     dur = 0;
                     id  = 0;
+                    pwr = 0;
                 }
                 inline tool(const tool & i){
                     dur = i.dur;
                     id  = i.id;
+                    pwr = i.pwr;
                 }
                 inline const tool & operator=(const tool & i){
                     dur = i.dur;
                     id  = i.id;
+                    pwr = i.pwr;
                     return * this;
                 }
                 void loadStr(const char *);
@@ -370,6 +382,7 @@ class body:public terrainDispather{
                 int get_id;//开火获得
                 int get_num;
                 int dur_cost;
+                int pwr_cost;
                 inline fire_cost(){
                     id          = 0;
                     cost_id     = 0;
@@ -377,6 +390,7 @@ class body:public terrainDispather{
                     get_id      = 0;
                     get_num     = 0;
                     dur_cost    = 0;
+                    pwr_cost    = 0;
                 }
                 inline fire_cost(const fire_cost & i){
                     id          = i.id;
@@ -385,6 +399,7 @@ class body:public terrainDispather{
                     get_id      = i.get_id;
                     get_num     = i.get_num;
                     dur_cost    = i.dur_cost;
+                    pwr_cost    = i.pwr_cost;
                 }
                 inline const fire_cost & operator=(const fire_cost & i){
                     id          = i.id;
@@ -393,6 +408,7 @@ class body:public terrainDispather{
                     get_id      = i.get_id;
                     get_num     = i.get_num;
                     dur_cost    = i.dur_cost;
+                    pwr_cost    = i.pwr_cost;
                     return * this;
                 }
         };
@@ -410,6 +426,30 @@ class body:public terrainDispather{
         int bagPage;
         irr::gui::IGUIListBox * body_bag_resource , * body_bag_using;
         irr::gui::IGUIStaticText * body_bag_page;
+
+    private:
+        std::string defaultMainControl;
+    public:
+        void setMainControl(const std::string & uuid);
+        inline void resetMainControl(){
+            setMainControl(defaultMainControl);
+        }
+        inline void controlSelectedBody(){
+            auto len = selectedBodies.size();
+            if(len==0){
+                resetMainControl();
+            }else{
+                if(len==1){
+                    auto it = selectedBodies.begin();
+                    if(it!=selectedBodies.end()){
+                        if((*it)->uuid==mainControl)
+                            resetMainControl();
+                        else
+                            setMainControl((*it)->uuid);
+                    }
+                }
+            }
+        }
 
 };
 

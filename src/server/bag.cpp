@@ -11,6 +11,7 @@ void bag::bag_tool::toString(std::string & str){
 
     cJSON_AddNumberToObject(json,"id",conf->id);
     cJSON_AddNumberToObject(json,"durability",durability);
+    cJSON_AddNumberToObject(json,"power",power);
     cJSON_AddStringToObject(json,"inbag",inbag.c_str());
 
     char * pp = cJSON_PrintUnformatted(json);
@@ -40,6 +41,8 @@ void bag::bag_tool::loadString(const std::string & str){
                 }else if(strcmp(c->string,"durability")==0 && !arg2){
                     durability = c->valueint;
                     arg2 = true;
+                }else if(strcmp(c->string,"power")==0){
+                    power = c->valueint;
                 }
             }else if(c->type==cJSON_String){
                 if(strcmp(c->string,"inbag")==0){
@@ -329,7 +332,7 @@ std::string bag::createTool(int id){
     return uuid;
 }
 
-bool bag::consume(const RakNet::SystemAddress & addr,const std::string & bag_uuid, const std::string & tool_uuid, int num)noexcept{
+bool bag::consume(const RakNet::SystemAddress & addr, const std::string & bag_uuid, const std::string & tool_uuid, int num, int pwn)noexcept{
     if(bag_uuid.empty())
         return false;
     try{
@@ -339,8 +342,11 @@ bool bag::consume(const RakNet::SystemAddress & addr,const std::string & bag_uui
         else{
             if(t.durability<num)
                 return false;
+            if(t.power<pwn)
+                return false;
             t.durability-=num;
-            sendAddr_bag_toolDur(addr,tool_uuid,t.durability);
+            t.power-=pwn;
+            sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
             return true;
         }
     }catch(...){
@@ -349,14 +355,17 @@ bool bag::consume(const RakNet::SystemAddress & addr,const std::string & bag_uui
     }
 }
 
-bool bag::consume(const RakNet::SystemAddress & addr, const std::string & tool_uuid, int num)noexcept{
+bool bag::consume(const RakNet::SystemAddress & addr, const std::string & tool_uuid, int num , int pwn)noexcept{
     try{
         bag_tool & t = cache_tools[tool_uuid];//找不到会throw
 
         if(t.durability<num)
             return false;
+        if(t.power<pwn)
+            return false;
         t.durability-=num;
-        sendAddr_bag_toolDur(addr,tool_uuid,t.durability);
+        t.power-=pwn;
+        sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
         return true;
     }catch(...){
         //没找到返回false
@@ -390,9 +399,9 @@ bag::bag(){
                     if(line->type==cJSON_Object){
 
                         auto id = cJSON_GetObjectItem(line,"id");
-                        auto durability = cJSON_GetObjectItem(line,"weight");
-                        if(id && durability && id->type==cJSON_Number && durability->type==cJSON_Number){
-                            maxWeights[id->valueint] = durability->valueint;
+                        auto weight = cJSON_GetObjectItem(line,"weight");
+                        if(id && weight && id->type==cJSON_Number && weight->type==cJSON_Number){
+                            maxWeights[id->valueint] = weight->valueint;
                         }else{
                             printf(L_RED "[error]" NONE "can not set maxWeights\n");
                         }
@@ -440,7 +449,9 @@ bag::bag(){
                         auto id = cJSON_GetObjectItem(line,"id");
                         auto durability = cJSON_GetObjectItem(line,"durability");
                         auto weight = cJSON_GetObjectItem(line,"weight");
-                        if(id && weight && durability && id->type==cJSON_Number && weight->type==cJSON_Number && durability->type==cJSON_Number){
+                        auto power = cJSON_GetObjectItem(line,"power");
+                        if(id && weight && durability && power &&
+                           id->type==cJSON_Number && weight->type==cJSON_Number && durability->type==cJSON_Number && power->type==cJSON_Number){
 
                             auto it = tool_config.find(id->valueint);
                             if(it==tool_config.end()){
@@ -448,6 +459,7 @@ bag::bag(){
                                 p->id = id->valueint;
                                 p->weight = weight->valueint;
                                 p->durability = durability->valueint;
+                                p->power = power->valueint;
 
                                 auto wearing = cJSON_GetObjectItem(line,"wearing");//wearing的配置
                                 if(wearing && wearing->type==cJSON_Array){
@@ -584,6 +596,16 @@ void bag::useTool(const RakNet::SystemAddress & addr, const std::string & uuid, 
             sendAddr_bag_tool_use(addr,uuid,toolUUID);//发送到客户端
         }catch(...){}
     }
+}
+
+void bag::reloadTool(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID){
+    try{
+        bag_tool & t = cache_tools[toolUUID];//失败会导致throw
+        if(t.inbag!=uuid)
+            return;
+        t.reload();
+        sendAddr_bag_toolDur(addr,toolUUID,t.durability,t.power);
+    }catch(...){}
 }
 
 void bag::release(){

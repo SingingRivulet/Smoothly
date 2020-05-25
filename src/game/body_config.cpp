@@ -141,8 +141,9 @@ void body::loadBodyConfig(){
                 int firingWearingId;
                 int fireId;
                 int fireDelta;
-                if(sscanf(buf,"%d=%d,%d" , &firingWearingId , &fireId , &fireDelta)>=3){
-                    wearingToBullet[firingWearingId] = wearingBullet(fireId , fireDelta);
+                int fireReload;
+                if(sscanf(buf,"%d=%d,%d:%d" , &firingWearingId , &fireId , &fireDelta , &fireReload)>=4){
+                    wearingToBullet[firingWearingId] = wearingBullet(fireId , fireDelta , fireReload);
                 }
             }
         }
@@ -288,6 +289,7 @@ void body::loadFireCost(){
                     auto get_num = cJSON_GetObjectItem(c,"get_num");
                     auto get_id  = cJSON_GetObjectItem(c,"get_id");
                     auto dur_cost = cJSON_GetObjectItem(c,"dur_cost");
+                    auto pwr_cost = cJSON_GetObjectItem(c,"pwr_cost");
                     if(id && cost_num && cost_id && id->type==cJSON_Number && cost_num->type==cJSON_Number && cost_id->type==cJSON_Number){
                         fire_cost f;
                         f.id        = id->valueint;
@@ -299,6 +301,9 @@ void body::loadFireCost(){
                         }
                         if(dur_cost && dur_cost->type == cJSON_Number){
                             f.dur_cost = dur_cost->valueint;
+                        }
+                        if(pwr_cost && pwr_cost->type == cJSON_Number){
+                            f.pwr_cost = pwr_cost->valueint;
                         }
                         fire_costs[f.id] = f;
                     }

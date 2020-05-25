@@ -187,19 +187,36 @@ void body::bodyItem::doFire(){
                 //消耗弹药
                 auto it = parent->fire_costs.find(fireId);
                 if(it!=parent->fire_costs.end()){
-                    if(it->second.dur_cost!=0){//需要耐久
-                        if(!usingTool.empty()){
-                            auto t = parent->tools.find(usingTool);
-                            if(t!=parent->tools.end()){
+
+                    if(!usingTool.empty()){
+                        auto t = parent->tools.find(usingTool);
+                        if(t!=parent->tools.end()){
+                            int ndur,npwr;
+                            if(it->second.dur_cost!=0){//需要耐久
                                 if(t->second.dur >= it->second.dur_cost){
-                                    t->second.dur -= it->second.dur_cost;
+                                    ndur = t->second.dur-it->second.dur_cost;
                                     parent->needUpdateUI = true;
                                 }else{
                                     return;
                                 }
                             }
+                            if(it->second.pwr_cost!=0){//需要能量
+                                if(t->second.pwr >= it->second.pwr_cost){
+                                    npwr = t->second.pwr-it->second.pwr_cost;
+                                    parent->needUpdateUI = true;
+                                }else{
+                                    return;
+                                }
+                            }
+                            t->second.dur = ndur;
+                            t->second.pwr = npwr;
+                        }else{
+                            return;
                         }
+                    }else{
+                        return;
                     }
+
                     if(it->second.cost_num!=0){//需要弹药
                         auto bgr = resources.find(it->second.cost_id);//定位资源
                         if(bgr!=resources.end()){
@@ -220,6 +237,33 @@ void body::bodyItem::doFire(){
             }
         }
     }
+}
+
+void body::bodyItem::reloadTool(){
+    if(!usingTool.empty()){
+        parent->cmd_reloadBagTool(uuid.c_str(),usingTool.c_str());
+    }
+}
+
+void body::bodyItem::reloadStart(){
+    if(reloading)
+        return;
+    if(usingTool.empty())
+        return;
+    if(reloadNeedTime<=0)
+        return;
+    reloading = true;
+    reloadStartTime = parent->timer->getTime();
+}
+
+void body::bodyItem::reloadEnd(){
+    if(!reloading)
+        return;
+    reloading = false;
+    auto ntm = parent->timer->getTime();
+    auto delta = ntm - reloadStartTime;
+    if(delta>reloadNeedTime)
+        reloadTool();
 }
 
 void body::bodyItem::ghostTest(const btTransform & t, std::function<void (physical::bodyInfo *)> callback){
@@ -544,6 +588,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->owner  = owner;
     p->id     = id;
     p->hp     = hp;
+    p->reloading = false;
+    p->reloadStartTime = 0;
     p->status = sta_mask;
     p->status_mask = sta_mask;
     p->lastStatus = sta_mask;
@@ -624,11 +670,13 @@ void body::addWearing(bodyItem * n, int wearing){
         n->firingWearingId  = wearing;
         n->fireId           = it->second.id;
         n->fireDelta        = it->second.deltaTime;
+        n->reloadEnd();
+        n->reloadNeedTime   = it->second.reloadTime;
     }
 }
 void body::removeWearing(bodyItem * n, int wearing){
     auto it = n->wearing.find(wearing);
-    if(it!=n->wearing.end())
+    if(it==n->wearing.end())
         return;
     it->second->remove();
     n->wearing.erase(it);
@@ -637,6 +685,8 @@ void body::removeWearing(bodyItem * n, int wearing){
         n->firingWearingId  = 0;
         n->fireId           = 0;
         n->fireDelta        = 0;
+        n->reloadEnd();
+        n->reloadNeedTime   = 0;
     }
 }
 bool body::addWearingNode(bodyItem * n, int wearing){
@@ -689,7 +739,7 @@ body::body():gravity(0,-10,0){
     gui->addImage(driver->getTexture("../../res/icon/bag_footer.png"),irr::core::vector2di(0,256),true,body_bag_resource);
     body_bag_page = NULL;
 
-    body_bag_using = gui->addListBox(irr::core::rect<irr::s32>(20,20,100,52),0,-1,false);
+    body_bag_using = gui->addListBox(irr::core::rect<irr::s32>(20,20,200,52),0,-1,false);
     body_bag_using->setSpriteBank(bag_icons);
     body_bag_using->setItemHeight(32);
     body_bag_using->setVisible(false);
@@ -987,7 +1037,6 @@ void body::updateBagUI(){
         }
         if(!mainControlBody->usingTool.empty()){
             int bullets = 0;
-            int dur = 0;
 
             auto cit = fire_costs.find(mainControlBody->fireId);
             if(cit!=fire_costs.end()){
@@ -1001,9 +1050,8 @@ void body::updateBagUI(){
 
             auto t = tools.find(mainControlBody->usingTool);
             if(t!=tools.end()){
-                dur=t->second.dur;
 
-                swprintf(buf,256,L"\n%d/%d\n",bullets,dur);
+                swprintf(buf,256,L"\n%d/%d %d\n",t->second.pwr,bullets,t->second.dur);
 
                 int usingId;
 
@@ -1086,6 +1134,8 @@ void body::tool::loadStr(const char * str){
                     id = c->valueint;
                 }else if(strcmp(c->string,"durability")==0){
                     dur = c->valueint;
+                }else if(strcmp(c->string,"power")==0){
+                    pwr = c->valueint;
                 }
             }
             c=c->next;

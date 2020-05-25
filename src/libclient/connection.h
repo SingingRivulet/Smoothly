@@ -364,6 +364,14 @@ class connectionBase{
             bs.Write(u);
             sendMessage(&bs);
         }
+        inline void cmd_reloadBagTool(const char * uuid,const char * tuuid){
+            makeHeader('P','R');
+            RakNet::RakString u = uuid;
+            bs.Write(u);
+            u = tuuid;
+            bs.Write(u);
+            sendMessage(&bs);
+        }
     private:
         //controllers
         inline void ctl_setVisualRange(RakNet::BitStream * data){
@@ -572,10 +580,11 @@ class connectionBase{
         }
         inline void ctl_setBagToolDur(RakNet::BitStream * data){
             RakNet::RakString uuid;
-            int32_t dur;
+            int32_t dur,pwr;
             data->Read(uuid);
             data->Read(dur);
-            msg_setBagToolDur(uuid.C_String(),dur);
+            data->Read(pwr);
+            msg_setBagToolDur(uuid.C_String(),dur,pwr);
         }
         inline void ctl_bag_tool_add(RakNet::BitStream * data){
             RakNet::RakString uuid,tuuid;
@@ -622,7 +631,7 @@ class connectionBase{
         virtual void msg_setBag(const char *,const char *)=0;
         virtual void msg_setBagResource(const char *,int,int)=0;
         virtual void msg_setBagTool(const char *,const char *)=0;
-        virtual void msg_setBagToolDur(const char *,int)=0;
+        virtual void msg_setBagToolDur(const char *,int,int)=0;
         virtual void msg_bag_tool_add(const char *,const char *)=0;
         virtual void msg_bag_tool_remove(const char *,const char *)=0;
         virtual void msg_bag_tool_use(const char *,const char *)=0;

@@ -177,11 +177,12 @@ void handlers::sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr, cons
     sendMessage(&bs,addr);
 }
 
-void handlers::sendAddr_bag_toolDur(const RakNet::SystemAddress & addr, const std::string & uuid, int dur){
+void handlers::sendAddr_bag_toolDur(const RakNet::SystemAddress & addr, const std::string & uuid, int dur, int pwr){
     makeHeader('P','D');
     RakNet::RakString t = uuid.c_str();
     bs.Write(t);
     bs.Write((int32_t)dur);
+    bs.Write((int32_t)pwr);
     sendMessage(&bs,addr);
 }
 

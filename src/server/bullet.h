@@ -16,6 +16,7 @@ class bullet:public bag{
                 int get_id;//开火获得
                 int get_num;
                 int dur_cost;
+                int pwr_cost;
                 inline fire_cost(){
                     id          = 0;
                     cost_id     = 0;
@@ -23,6 +24,7 @@ class bullet:public bag{
                     get_id      = 0;
                     get_num     = 0;
                     dur_cost    = 0;
+                    pwr_cost    = 0;
                 }
                 inline fire_cost(const fire_cost & i){
                     id          = i.id;
@@ -31,6 +33,7 @@ class bullet:public bag{
                     get_id      = i.get_id;
                     get_num     = i.get_num;
                     dur_cost    = i.dur_cost;
+                    pwr_cost    = i.pwr_cost;
                 }
                 inline const fire_cost & operator=(const fire_cost & i){
                     id          = i.id;
@@ -39,6 +42,7 @@ class bullet:public bag{
                     get_id      = i.get_id;
                     get_num     = i.get_num;
                     dur_cost    = i.dur_cost;
+                    pwr_cost    = i.pwr_cost;
                     return * this;
                 }
         };

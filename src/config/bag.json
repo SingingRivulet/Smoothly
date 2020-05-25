@@ -7,6 +7,6 @@
         {"id":1002,"weight":1,"name":"放射管"}
     ],
     "tool":[
-        {"id":1001,"weight":1,"durability":200,"wearing":[1001]}
+        {"id":1001,"weight":1,"durability":200,"power":30,"wearing":[1001]}
     ]
 }

@@ -34,6 +34,7 @@ class controllers:public handlers{
 
         void ctl_getTool(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_useTool(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+        void ctl_reloadTool(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         
 };
 /////////////////

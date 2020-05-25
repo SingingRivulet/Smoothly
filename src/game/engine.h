@@ -57,6 +57,9 @@ namespace smoothly{
 
             irr::gui::IGUIFont * font;
 
+            void drawArcProgressBar(core::position2d<s32> center,
+                f32 radius, video::SColor color, s32 count,f32 progress);
+
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;

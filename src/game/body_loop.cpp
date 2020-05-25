@@ -209,6 +209,12 @@ void body::onDraw(){
     if(selecting){
         driver->draw2DPolygon(screenCenter,selectBodyRange,irr::video::SColor(255,255,255,255),36);
     }
+    if(mainControlBody && mainControlBody->reloading){//换弹进度条
+        auto ntm = timer->getTime();
+        auto delta = ntm - mainControlBody->reloadStartTime;
+        float prog = ((float)delta)/((float)mainControlBody->reloadNeedTime);
+        drawArcProgressBar(screenCenter,128,irr::video::SColor(255,255,255,255),128,prog);
+    }
 }
 
 }

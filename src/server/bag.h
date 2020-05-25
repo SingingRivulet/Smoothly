@@ -17,6 +17,7 @@ class bag:public body{
                 int  id;
                 int  weight;    //重量
                 int  durability;//耐久度
+                int  power;     //能量/电量/弹匣
                 std::set<int> wearing;
         };
         std::map<int,bag_tool_conf*> tool_config;
@@ -30,28 +31,36 @@ class bag:public body{
         struct bag_tool{
                 bag_tool_conf * conf;
                 int durability;
+                int power;//能量/电量/弹匣
                 std::string inbag;
                 bag * parent;
                 void toString(std::string & str);
                 void loadString(const std::string & str);//使用前请先设置parent
+
+                void reload(){
+                    power = conf->power;
+                }
 
                 inline bag_tool(){
                     conf        = NULL;
                     durability  = 0;
                     inbag.clear();
                     parent      = NULL;
+                    power       = 0;
                 }
                 inline bag_tool(const bag_tool & i){
                     conf        = i.conf;
                     durability  = i.durability;
                     inbag       = i.inbag;
                     parent      = i.parent;
+                    power       = i.power;
                 }
                 inline const bag_tool & operator=(const bag_tool & i){
                     conf        = i.conf;
                     durability  = i.durability;
                     inbag       = i.inbag;
                     parent      = i.parent;
+                    power       = i.power;
                     return * this;
                 }
         };
@@ -116,8 +125,8 @@ class bag:public body{
         }cache_bag_inner;
         std::map<int,int> maxWeights;
 
-        bool consume(const RakNet::SystemAddress & addr,const std::string & bag_uuid,const std::string & tool_uuid,int num)noexcept;//消耗耐久
-        bool consume(const RakNet::SystemAddress & addr,const std::string & tool_uuid,int num)noexcept;//消耗耐久
+        bool consume(const RakNet::SystemAddress & addr,const std::string & bag_uuid,const std::string & tool_uuid,int num,int pwn)noexcept;//消耗耐久
+        bool consume(const RakNet::SystemAddress & addr, const std::string & tool_uuid, int num, int pwn)noexcept;//消耗耐久
 
         bag();
         ~bag();
@@ -125,10 +134,11 @@ class bag:public body{
         void sendBagToAddr(const RakNet::SystemAddress & addr, const std::string & uuid);
         bool addResource(const RakNet::SystemAddress & addr, const std::string & uuid,int id,int delta);
         void useTool(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID);//toolUUID为空或不存在时卸下
+        void reloadTool(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & toolUUID);
 
         virtual void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
         virtual void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)=0;
-        virtual void sendAddr_bag_toolDur(const RakNet::SystemAddress & addr,const std::string & uuid,int dur)=0;
+        virtual void sendAddr_bag_toolDur(const RakNet::SystemAddress & addr,const std::string & uuid,int dur,int pwr)=0;
         virtual void sendAddr_bag_tool_add(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
         virtual void sendAddr_bag_tool_remove(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
         virtual void sendAddr_bag_tool_use(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & toolUUID)=0;
