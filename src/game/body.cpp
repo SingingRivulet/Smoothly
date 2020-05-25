@@ -188,10 +188,13 @@ void body::bodyItem::doFire(){
                 auto it = parent->fire_costs.find(fireId);
                 if(it!=parent->fire_costs.end()){
 
+                    int ndur=0,npwr=0;
+
                     if(!usingTool.empty()){
                         auto t = parent->tools.find(usingTool);
                         if(t!=parent->tools.end()){
-                            int ndur,npwr;
+                            ndur = t->second.dur;
+                            npwr = t->second.pwr;
                             if(it->second.dur_cost!=0){//需要耐久
                                 if(t->second.dur >= it->second.dur_cost){
                                     ndur = t->second.dur-it->second.dur_cost;
@@ -208,8 +211,24 @@ void body::bodyItem::doFire(){
                                     return;
                                 }
                             }
+
+                            if(it->second.cost_num!=0){//需要弹药
+                                auto bgr = resources.find(it->second.cost_id);//定位资源
+                                if(bgr!=resources.end()){
+                                    int nnm = bgr->second + it->second.cost_num;
+                                    if(nnm>=0)
+                                        bgr->second = nnm;
+                                    else
+                                        return;
+                                    parent->needUpdateUI = true;
+                                }else{
+                                    return;
+                                }
+                            }
+
                             t->second.dur = ndur;
                             t->second.pwr = npwr;
+
                         }else{
                             return;
                         }
@@ -217,19 +236,6 @@ void body::bodyItem::doFire(){
                         return;
                     }
 
-                    if(it->second.cost_num!=0){//需要弹药
-                        auto bgr = resources.find(it->second.cost_id);//定位资源
-                        if(bgr!=resources.end()){
-                            int nnm = bgr->second + it->second.cost_num;
-                            if(nnm>=0)
-                                bgr->second = nnm;
-                            else
-                                return;
-                            parent->needUpdateUI = true;
-                        }else{
-                            return;
-                        }
-                    }
                 }else{
                     return;
                 }

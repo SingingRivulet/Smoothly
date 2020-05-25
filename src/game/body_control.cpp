@@ -145,6 +145,14 @@ void body::doCommond(const commond & c){
         p->firing = false;
         break;
 
+    case CMD_TOOL_RELOAD_START:
+        p->reloadStart();
+        break;
+
+    case CMD_TOOL_RELOAD_END:
+        p->reloadEnd();
+        break;
+
     default:
         break;
     }

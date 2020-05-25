@@ -136,13 +136,12 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     }
                 break;
                 case irr::KEY_KEY_R://装弹
-                    if(parent->mainControlBody){
-                        if(event.KeyInput.PressedDown){
-                            parent->mainControlBody->reloadStart();
-                        }else{
-                            parent->mainControlBody->reloadEnd();
-                        }
+                    if(event.KeyInput.PressedDown){
+                        cmd.cmd = CMD_TOOL_RELOAD_START;
+                    }else{
+                        cmd.cmd = CMD_TOOL_RELOAD_END;
                     }
+                    parent->pushCommond(cmd);
                 break;
                 case irr::KEY_KEY_H:
                     if(event.KeyInput.PressedDown){

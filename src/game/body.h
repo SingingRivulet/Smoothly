@@ -328,7 +328,9 @@ class body:public terrainDispather{
             CMD_WEARING_REMOVE,
             CMD_WEARING_CLEAR,
             CMD_FIRE_BEGIN,
-            CMD_FIRE_END
+            CMD_FIRE_END,
+            CMD_TOOL_RELOAD_START,
+            CMD_TOOL_RELOAD_END
         }bodyCmd_t;
         struct commond{
             std::string uuid;

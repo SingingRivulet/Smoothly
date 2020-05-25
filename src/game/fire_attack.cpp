@@ -68,8 +68,8 @@ bool fire::attackTerrainItem(const std::string &uuid, fireConfig *conf, mapId * 
         if (lua_pcall(L, 8, 1, 0) != 0)
              printf("error running function : %s \n",lua_tostring(L, -1));
         else{
-            if(lua_isnumber(L,-1)){
-                res = lua_tointeger(L,-1);
+            if(lua_isboolean(L,-1)){
+                res = lua_toboolean(L,-1);
             }
 
         }

@@ -132,12 +132,17 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                     fire * parent;
                     fireConfig * attconf;
                     std::string uuid;
+                    std::set<bodyInfo*> processing;
                     virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult & convexResult,bool){
                         auto ptr = (bodyInfo*)convexResult.m_hitCollisionObject->getUserPointer();
                         if(ptr){
-                            parent->attackBody(uuid , attconf , ptr);
+                            processing.insert(ptr);
                         }
                         return convexResult.m_hitFraction;
+                    }
+                    void processAll(){
+                        for(auto it:processing)
+                            parent->attackBody(uuid , attconf , it);
                     }
                     virtual bool needsCollision(btBroadphaseProxy* proxy0) const{
                         bool collides = (proxy0->m_collisionFilterGroup & m_collisionFilterMask) != 0;
@@ -165,6 +170,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                         bfrom,
                         bto,
                         callback);
+            callback.processAll();
         }
         if(conf->type==FIRE_CHOP){
             //这个不知道怎么写，暂时留空

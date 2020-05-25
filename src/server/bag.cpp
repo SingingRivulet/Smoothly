@@ -340,10 +340,14 @@ bool bag::consume(const RakNet::SystemAddress & addr, const std::string & bag_uu
         if(t.inbag!=bag_uuid)
             return false;
         else{
-            if(t.durability<num)
+            if(t.durability<num){
+                sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
                 return false;
-            if(t.power<pwn)
+            }
+            if(t.power<pwn){
+                sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
                 return false;
+            }
             t.durability-=num;
             t.power-=pwn;
             sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
@@ -359,10 +363,14 @@ bool bag::consume(const RakNet::SystemAddress & addr, const std::string & tool_u
     try{
         bag_tool & t = cache_tools[tool_uuid];//找不到会throw
 
-        if(t.durability<num)
+        if(t.durability<num){
+            sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
             return false;
-        if(t.power<pwn)
+        }
+        if(t.power<pwn){
+            sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
             return false;
+        }
         t.durability-=num;
         t.power-=pwn;
         sendAddr_bag_toolDur(addr,tool_uuid,t.durability,t.power);
@@ -538,17 +546,13 @@ bool bag::addResource(const RakNet::SystemAddress & addr, const std::string & uu
     try{
         bag_inner & b =  cache_bag_inner[uuid];
         bool res = b.addResource(id,delta);
-        if(res){
-            auto it = b.resources.find(id);
-            if(it!=b.resources.end()){
-                sendAddr_bag_resourceNum(addr,uuid,id,it->second);
-            }else{
-                sendAddr_bag_resourceNum(addr,uuid,id,0);
-            }
-            return true;
+        auto it = b.resources.find(id);
+        if(it!=b.resources.end()){
+            sendAddr_bag_resourceNum(addr,uuid,id,it->second);
         }else{
-            return false;
+            sendAddr_bag_resourceNum(addr,uuid,id,0);
         }
+        return res;
     }catch(...){
         return false;
     }
