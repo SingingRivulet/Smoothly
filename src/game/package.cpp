@@ -4,10 +4,6 @@
 namespace smoothly{
 
 package::package(){
-    auto zp = new package_config_t;
-    zp->mesh = scene->getGeometryCreator()->createCubeMesh();
-    package_configs[0] = zp;
-
     packageRoot = scene->addEmptySceneNode();
     selectedPackageSceneNode = NULL;
 
@@ -33,10 +29,12 @@ package::package(){
                             auto meshnode = cJSON_GetObjectItem(c,"mesh");
                             if(meshnode && meshnode->type==cJSON_String){
                                 auto mesh = scene->getMesh(meshnode->valuestring);
-                                auto conf = new package_config_t;
-                                conf->id = id;
-                                conf->mesh = mesh;
-                                package_configs[id] = conf;
+                                if(mesh){
+                                    auto conf = new package_config_t;
+                                    conf->id = id;
+                                    conf->mesh = mesh;
+                                    package_configs[id] = conf;
+                                }
                             }
                         }
                     }
@@ -70,7 +68,18 @@ void package::addPackage(int id ,int x , int y , const vec3 & posi, const std::s
                 pack.cx   = x;
                 pack.cy   = y;
                 pack.node = scene->addMeshSceneNode(conf->mesh,packageRoot);
-                pack.node->setPosition(posi);
+                vec3 tmpp = posi;
+                auto hei = getRealHight(tmpp.X,tmpp.Z);
+                if(tmpp.Y<hei)
+                    tmpp.Y = hei;
+                else{
+                    vec3 hto = tmpp;
+                    hto.Y -= 32;
+                    fetchByRay(posi,hto,[&](const vec3 & p,bodyInfo * ){
+                        tmpp = p;
+                    });
+                }
+                pack.node->setPosition(tmpp);
                 pack.node->setName(uuid.c_str());
                 packages[uuid] = pack;
             }
@@ -83,6 +92,8 @@ void package::removePackage(const std::string & uuid){
     if(pkit!=packages.end()){
         package_t & pack = pkit->second;
         if(pack.node){
+            if(pack.node==selectedPackageSceneNode)
+                selectedPackageSceneNode = NULL;
             pack.node->remove();
         }
         packages.erase(pkit);
