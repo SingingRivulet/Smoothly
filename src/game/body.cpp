@@ -114,6 +114,9 @@ void body::bodyItem::doAnimation(float speed, int start, int end,float frame, bo
 }
 
 void body::bodyItem::loadBag(const char * str){
+    resources.clear();
+    tools.clear();
+    usingTool.clear();
     auto json = cJSON_Parse(str);
 
     if(json){
@@ -751,6 +754,7 @@ body::body():gravity(0,-10,0){
     body_bag_using->setVisible(false);
 
     needUpdateUI = false;
+    usingResource = false;
     bag_selectId = -1;
 }
 
@@ -1015,7 +1019,7 @@ void body::updateBagUI(){
     int index=0;
     int keyIndex=0;
     wchar_t buf[256];
-    usingToolsTable.clear();
+    handItems.clear();
     if(mainControlBody){
         for(auto it:mainControlBody->tools){
             if(index>=bagStartAt && index<=(bagStartAt+8)){
@@ -1023,7 +1027,7 @@ void body::updateBagUI(){
                 if(t!=tools.end()){
                     if(keyIndex>9)
                         break;
-                    usingToolsTable.push_back(it);
+                    handItems.push_back(hand_t(it));
                     swprintf(buf,256,L"\nUUID:%s\nDP:%d\n",it.c_str(),t->second.dur);
                     ++keyIndex;
                     int id;
@@ -1041,36 +1045,6 @@ void body::updateBagUI(){
             }
             ++index;
         }
-        if(!mainControlBody->usingTool.empty()){
-            int bullets = 0;
-
-            auto cit = fire_costs.find(mainControlBody->fireId);
-            if(cit!=fire_costs.end()){
-                if(cit->second.cost_num!=0){//需要弹药
-                    auto bgr = mainControlBody->resources.find(cit->second.cost_id);//定位资源
-                    if(bgr!=mainControlBody->resources.end()){
-                        bullets = bgr->second;
-                    }
-                }
-            }
-
-            auto t = tools.find(mainControlBody->usingTool);
-            if(t!=tools.end()){
-
-                swprintf(buf,256,L"\n%d/%d %d\n",t->second.pwr,bullets,t->second.dur);
-
-                int usingId;
-
-                auto icit = bag_tool_icons_mapping.find(t->second.id);
-                if(icit==bag_tool_icons_mapping.end()){
-                    usingId = body_bag_using->addItem(buf);
-                }else{
-                    usingId = body_bag_using->addItem(buf,icit->second);
-                }
-                body_bag_using->setItemOverrideColor(usingId,irr::video::SColor(128,105,218,213));
-                body_bag_using->setVisible(true);
-            }
-        }
         std::vector<int> rms;
         for(auto it:mainControlBody->resources){
             if(it.second<=0){
@@ -1078,6 +1052,9 @@ void body::updateBagUI(){
                 continue;
             }
             if(index>=bagStartAt && index<=(bagStartAt+8)){
+                if(keyIndex>9)
+                    break;
+                handItems.push_back(hand_t(it.first));
                 swprintf(buf,256,L"\n×%d\n",it.second);
                 int id;
                 auto icit = bag_res_icons_mapping.find(it.first);
@@ -1100,14 +1077,83 @@ void body::updateBagUI(){
         body_bag_page->setOverrideColor(irr::video::SColor(255,255,255,255));
         body_bag_page->setOverrideFont(font);
     }
+    if(!mainControlBody->usingTool.empty()){
+        int bullets = 0;
+
+        auto cit = fire_costs.find(mainControlBody->fireId);
+        if(cit!=fire_costs.end()){
+            if(cit->second.cost_num!=0){//需要弹药
+                auto bgr = mainControlBody->resources.find(cit->second.cost_id);//定位资源
+                if(bgr!=mainControlBody->resources.end()){
+                    bullets = bgr->second;
+                }
+            }
+        }
+
+        auto t = tools.find(mainControlBody->usingTool);
+        if(t!=tools.end()){
+
+            swprintf(buf,256,L"\n%d/%d %d\n",t->second.pwr,bullets,t->second.dur);
+
+            int usingId;
+
+            auto icit = bag_tool_icons_mapping.find(t->second.id);
+            if(icit==bag_tool_icons_mapping.end()){
+                usingId = body_bag_using->addItem(buf);
+            }else{
+                usingId = body_bag_using->addItem(buf,icit->second);
+            }
+            body_bag_using->setItemOverrideColor(usingId,irr::video::SColor(128,105,218,213));
+            body_bag_using->setVisible(true);
+        }
+    }else if(usingResource){
+        int usingId;
+        auto icit = bag_res_icons_mapping.find(usingResource_id);
+        if(icit!=bag_res_icons_mapping.end()){
+
+            auto urit = mainControlBody->resources.find(usingResource_id);
+            if(urit!=mainControlBody->resources.end() && urit->second>0){
+
+                swprintf(buf,256,L"\n×%d",urit->second);
+                usingId = body_bag_using->addItem(buf,icit->second);
+                body_bag_using->setItemOverrideColor(usingId,irr::video::SColor(128,255,255,255));
+                body_bag_using->setVisible(true);
+
+            }
+        }
+    }
     needUpdateUI = false;
+}
+
+void body::dropHand(){
+    if(mainControlBody==NULL)
+        return;
+    try{
+        hand_t & h = handItems.at(bag_selectId);
+        auto posi = mainControlBody->node->getPosition();
+        if(h.isTool){
+            cmd_putPackage(0,posi.X,posi.Y,posi.Z,mainControl.c_str(),h.toolUUID.c_str());
+        }else{
+            cmd_putPackage(0,posi.X,posi.Y,posi.Z,mainControl.c_str(),h.resourceId,1);
+        }
+    }catch(...){
+
+    }
 }
 
 void body::useTool(int id){
     if(mainControlBody==NULL)
         return;
+    usingResource = false;
     try{
-        cmd_useBagTool(mainControl.c_str(),usingToolsTable.at(id).c_str());
+        hand_t & h = handItems.at(id);
+        if(h.isTool){
+            cmd_useBagTool(mainControl.c_str(),h.toolUUID.c_str());
+        }else{
+            cmd_useBagTool(mainControl.c_str(),"");
+            usingResource = true;
+            usingResource_id = h.resourceId;
+        }
     }catch(...){
         cmd_useBagTool(mainControl.c_str(),"");
     }
@@ -1122,11 +1168,17 @@ void body::bag_selectLast(){
 
 void body::bag_selectNext(){
     ++bag_selectId;
-    auto max = usingToolsTable.size();
+    auto max = handItems.size();
     if(bag_selectId>max){
         bag_selectId = max;
     }
     useTool(bag_selectId);
+}
+
+void body::pickupPackageToBag(int x, int y, const std::string & uuid){
+    if(mainControlBody){
+        cmd_pickupPackage(mainControl.c_str(),x,y,uuid.c_str());
+    }
 }
 
 void body::tool::loadStr(const char * str){

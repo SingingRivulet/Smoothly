@@ -1,10 +1,10 @@
 #ifndef SMOOTHLY_SERVER_BULLET
 #define SMOOTHLY_SERVER_BULLET
-#include "bag.h"
+#include "package.h"
 namespace smoothly{
 namespace server{
 
-class bullet:public bag{
+class bullet:public package{
     public:
         bullet();
         void shoot(const RakNet::SystemAddress & addr, const std::string & uuid, int id, const vec3 & from, const vec3 & dir);

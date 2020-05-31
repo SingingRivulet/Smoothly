@@ -54,7 +54,8 @@ HEADERS += \
     RealisticWater.h \
     cloud.h \
     weather.h \
-    pathfinding.h
+    pathfinding.h \
+    package.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -93,7 +94,8 @@ SOURCES += \
     building_default.cpp \
     building_road.cpp \
     pathfinding.cpp \
-    fire_api.cpp
+    fire_api.cpp \
+    package.cpp
 
 FORMS += \
     ui/login.ui

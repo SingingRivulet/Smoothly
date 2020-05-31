@@ -58,6 +58,10 @@ class handlers:public admin{
         void boardcast_buildingAdd(const std::string & uuid ,int id,const vec3 & p , const vec3 & r, int x,int y);
         void sendBuildingChunk(int32_t x, int32_t y,const RakNet::SystemAddress & addr);
 
+        void boardcast_packageRemove(int x,int y,const std::string & uuid);
+        void boardcast_packageAdd(int x,int y,const std::string & uuid,const std::string & text);
+        void sendAddr_packageAdd(const RakNet::SystemAddress & addr,int x,int y,const std::string & uuid,const std::string & text);
+
         void boardcast(int x,int y,RakNet::BitStream * data);
         
 };

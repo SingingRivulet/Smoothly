@@ -271,6 +271,34 @@ void handlers::sendBuildingChunk(int32_t x, int32_t y, const RakNet::SystemAddre
     sendMessage(&bs,addr);
 }
 
+void handlers::boardcast_packageRemove(int x, int y, const std::string & uuid){
+    makeHeader('p','-');
+    bs.Write((int32_t)x);
+    bs.Write((int32_t)y);
+    RakNet::RakString t=uuid.c_str();
+    bs.Write(t);
+    boardcast(x,y,&bs);
+}
+
+#define makePackageAdd \
+    makeHeader('p','+');\
+    bs.Write((int32_t)x);\
+    bs.Write((int32_t)y);\
+    RakNet::RakString t=uuid.c_str();\
+    bs.Write(t);\
+    t=text.c_str();\
+    bs.Write(t);
+
+void handlers::boardcast_packageAdd(int x, int y, const std::string & uuid, const std::string & text){
+    makePackageAdd;
+    boardcast(x,y,&bs);
+}
+
+void handlers::sendAddr_packageAdd(const RakNet::SystemAddress & addr, int x, int y, const std::string & uuid, const std::string & text){
+    makePackageAdd;
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

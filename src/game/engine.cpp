@@ -29,6 +29,7 @@ engine::engine(){
     scene  = device->getSceneManager();
     gui    = device->getGUIEnvironment();
     timer  = device->getTimer();
+    collisionManager = scene->getSceneCollisionManager();
     device->setWindowCaption(L"Smoothly");
     driver->setAllowZWriteOnTransparent(true);
     vendor = driver->getVendorInfo();

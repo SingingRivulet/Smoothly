@@ -91,6 +91,16 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'p':
+            switch (a) {
+                case 'p':
+                    ctl_putPackage(uuid,addr,data);
+                break;
+                case 'u':
+                    ctl_pickupPackage(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -231,6 +241,7 @@ void controllers::ctl_getBuilding(const std::string & /*uuid*/, const RakNet::Sy
     data->Read(x);
     data->Read(y);
     sendBuildingChunk(x,y,addr);
+    sendAddr_chunkPackage(addr,x,y);//发送地面散落的物体
 }
 
 void controllers::ctl_getTool(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
@@ -272,6 +283,38 @@ void controllers::ctl_reloadTool(const std::string & /*uuid*/, const RakNet::Sys
     try{
         reloadTool(addr,u.C_String(),t.C_String());
     }catch(...){}
+}
+
+void controllers::ctl_putPackage(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    bool isResource;
+    int32_t skin;
+    float x,y,z;
+    RakNet::RakString b;
+    if(data->Read(isResource) && data->Read(skin) && data->ReadVector(x,y,z) && data->Read(b)){
+
+        if(isResource){
+            int32_t id,num;
+            if(data->Read(id) && data->Read(num)){
+                putPackage_resource(addr,b.C_String(),skin,vec3(x,y,z),id,num);
+            }
+        }else{
+            RakNet::RakString t;
+            if(data->Read(t)){
+                putPackage_tool(addr,b.C_String(),skin,vec3(x,y,z),t.C_String());
+            }
+        }
+
+    }
+}
+
+void controllers::ctl_pickupPackage(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t x,y;
+    RakNet::RakString b,t;
+    data->Read(b);
+    data->Read(x);
+    data->Read(y);
+    data->Read(t);
+    pickupPackage(addr,x,y,t.C_String(),b.C_String());
 }
 /////////////////
 }//////server

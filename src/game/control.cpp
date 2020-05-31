@@ -120,6 +120,18 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         parent->buildingEnd();
                     }
                 break;
+                case irr::KEY_KEY_G://建造
+                    if(event.KeyInput.PressedDown){
+                    }else{
+                        parent->dropHand();
+                    }
+                break;
+                case irr::KEY_KEY_E://拾取
+                    if(event.KeyInput.PressedDown){
+                    }else{
+                        parent->pickupPackage();
+                    }
+                break;
                 case irr::KEY_KEY_L://手动模式
                     if(!event.KeyInput.PressedDown){
                         parent->controlSelectedBody();

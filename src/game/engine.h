@@ -26,6 +26,7 @@ namespace smoothly{
             irr::ITimer               * timer;
             irr::video::IVideoDriver * driver;
             irr::scene::ICameraSceneNode * camera;
+            irr::scene::ISceneCollisionManager * collisionManager;
             irr::core::stringc          vendor;
             
             irr::core::vector2di screenCenter;

@@ -161,6 +161,7 @@ void bag::bag_inner::removeTool(const std::string & uuid){
         throw std::runtime_error("tool.inbag!=uuid");
 
     //丢弃在数据库端不会清除
+    weight -= tool.conf->weight;
     tools.erase(uuid);
     tool.inbag.clear();
 }

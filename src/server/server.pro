@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     ../utils/cJSON.c \
     ../utils/dbvt2d.cpp \
     building.cpp \
-    bag.cpp
+    bag.cpp \
+    package.cpp
 
 HEADERS += \
     body.h \
@@ -58,7 +59,8 @@ HEADERS += \
     ../utils/ipair.h \
     ../utils/cyqueue.h \
     building.h \
-    bag.h
+    bag.h \
+    package.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

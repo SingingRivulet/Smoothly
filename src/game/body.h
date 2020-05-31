@@ -1,6 +1,6 @@
 #ifndef SMOOTHLY_BODY
 #define SMOOTHLY_BODY
-#include "terrainDispather.h"
+#include "package.h"
 #include "bone.h"
 #include <unordered_map>
 #include <functional>
@@ -10,7 +10,7 @@
 #include <unordered_map>
 namespace smoothly{
 
-class body:public terrainDispather{
+class body:public package{
     public:
         body();
         ~body();
@@ -417,13 +417,35 @@ class body:public terrainDispather{
         std::map<int,fire_cost> fire_costs;
         void loadFireCost();
         void updateBagUI();
-        std::vector<std::string> usingToolsTable;
+        struct hand_t{
+                bool isTool;
+                std::string toolUUID;
+                int resourceId;
+                hand_t(const std::string & uuid) {
+                    isTool = true;
+                    toolUUID = uuid;
+                }
+                hand_t(int rid) {
+                    isTool = false;
+                    resourceId = rid;
+                }
+                hand_t(const hand_t & h){
+                    isTool = h.isTool;
+                    toolUUID = h.toolUUID;
+                    resourceId = h.resourceId;
+                }
+        };
+        std::vector<hand_t> handItems;//可以使用的物体
+        bool usingResource;
+        int usingResource_id;
         int bag_selectId;
 
     public:
         void useTool(int id);
+        void dropHand();
         void bag_selectLast();
         void bag_selectNext();
+        void pickupPackageToBag(int x,int y,const std::string & uuid)override;
         bool needUpdateUI;
         int bagPage;
         irr::gui::IGUIListBox * body_bag_resource , * body_bag_using;

@@ -229,6 +229,16 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'p':
+                                    switch (data->data[3]) {
+                                        case '+':
+                                            ctl_package_add(&bs);
+                                        break;
+                                        case '-':
+                                            ctl_package_remove(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -370,6 +380,35 @@ class connectionBase{
             bs.Write(u);
             u = tuuid;
             bs.Write(u);
+            sendMessage(&bs);
+        }
+        inline void cmd_putPackage(int32_t skin,float x,float y,float z,const char * bag,int32_t id,int32_t num){
+            makeHeader('p','p');
+            bool isResource = true;
+            bs.Write(isResource);
+            bs.Write(skin);
+            bs.WriteVector(x,y,z);
+            bs.Write(RakNet::RakString(bag));
+            bs.Write(id);
+            bs.Write(num);
+            sendMessage(&bs);
+        }
+        inline void cmd_putPackage(int32_t skin,float x,float y,float z,const char * bag,const char * package){
+            makeHeader('p','p');
+            bool isResource = false;
+            bs.Write(isResource);
+            bs.Write(skin);
+            bs.WriteVector(x,y,z);
+            bs.Write(RakNet::RakString(bag));
+            bs.Write(RakNet::RakString(package));
+            sendMessage(&bs);
+        }
+        inline void cmd_pickupPackage(const char * bag,int32_t x,int32_t y,const char * package){
+            makeHeader('p','u');
+            bs.Write(RakNet::RakString(bag));
+            bs.Write(x);
+            bs.Write(y);
+            bs.Write(RakNet::RakString(package));
             sendMessage(&bs);
         }
     private:
@@ -604,6 +643,23 @@ class connectionBase{
             data->Read(tuuid);
             msg_bag_tool_use(uuid.C_String(),tuuid.C_String());
         }
+        inline void ctl_package_add(RakNet::BitStream * data){
+            int32_t x,y;
+            RakNet::RakString uuid,text;
+            data->Read(x);
+            data->Read(y);
+            data->Read(uuid);
+            data->Read(text);
+            msg_package_add(x,y,uuid.C_String(),text.C_String());
+        }
+        inline void ctl_package_remove(RakNet::BitStream * data){
+            int32_t x,y;
+            RakNet::RakString uuid;
+            data->Read(x);
+            data->Read(y);
+            data->Read(uuid);
+            msg_package_remove(x,y,uuid.C_String());
+        }
 
         time_t lastHeartbeat;
 
@@ -635,6 +691,8 @@ class connectionBase{
         virtual void msg_bag_tool_add(const char *,const char *)=0;
         virtual void msg_bag_tool_remove(const char *,const char *)=0;
         virtual void msg_bag_tool_use(const char *,const char *)=0;
+        virtual void msg_package_add(int32_t x,int32_t y,const char * uuid,const char * text)=0;
+        virtual void msg_package_remove(int32_t x,int32_t y,const char * uuid)=0;
 };
 ///////////////////////
 }//////client
