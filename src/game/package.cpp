@@ -6,6 +6,7 @@ namespace smoothly{
 package::package(){
     packageRoot = scene->addEmptySceneNode();
     selectedPackageSceneNode = NULL;
+    autoPickup = false;
 
     printf("[status]get package config\n" );
     QFile file("../config/package.json");
@@ -155,6 +156,12 @@ void package::loop(){
     if(p && (p->getPosition()-ray.start).getLengthSQ()<8){
         p->setMaterialFlag(irr::video::EMF_LIGHTING, false);
         selectedPackageSceneNode = p;
+        if(autoPickup){
+            auto packit = packages.find(selectedPackageSceneNode->getName());
+            if(packit!=packages.end()){
+                pickupPackageToBag(packit->second.cx,packit->second.cy,packit->second.uuid);
+            }
+        }
     }
 }
 

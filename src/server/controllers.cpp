@@ -105,13 +105,16 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
 }
 //===========================================================================================================
 void controllers::ctl_addRemovedItem(const std::string & ,const RakNet::SystemAddress &,RakNet::BitStream * data){
-    int32_t x,y,id,index;
+    int32_t cx,cy,id,index;
+    float x,y;
+    data->Read(cx);
+    data->Read(cy);
     data->Read(x);
     data->Read(y);
     data->Read(id);
     data->Read(index);
-    addRemovedItem(x,y,id,index);
-    boardcast_addRemovedItem(x,y,id,index);
+    addRemovedItem(cx,cy,x,y,id,index);
+    boardcast_addRemovedItem(cx,cy,id,index);
 }
 
 void controllers::ctl_wearing_add(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){

@@ -1,3 +1,4 @@
 [
-    {"id":0,"mesh":"../../res/model/package/default/default.obj"}
+    {"id":0,"mesh":"../../res/model/package/default/default.obj"},
+    {"id":1001,"mesh":"../../res/model/package/wood/wood.obj"}
 ]

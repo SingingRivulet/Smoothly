@@ -22,7 +22,7 @@ void fire::attackBody(const std::string &uuid, fireConfig *conf, bodyInfo *body,
     if(body->type==BODY_TERRAIN_ITEM){
         auto mid = (mapId*)body->ptr;
         if(attackTerrainItem(uuid,conf,mid,force))
-            cmd_addRemovedItem(mid->x , mid->y , mid->id.id , mid->id.index);
+            cmd_addRemovedItem(mid->cx , mid->cy ,mid->x , mid->y , mid->id.id , mid->id.index);
     }
 }
 

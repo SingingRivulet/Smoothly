@@ -4,5 +4,5 @@ function attackBuilding(fire,uuid,bulletid,targetuuid,targetid,force)
 end
 function attackTerrainItem(fire,uuid,bulletid,x,y,id,index,force)
     ----print(uuid,bulletid,x,y,id,index,force)
-    ----return true
+    return true
 end

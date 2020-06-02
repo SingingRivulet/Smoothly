@@ -22,12 +22,20 @@ void removeTable::getRemovedItem(int x,int y,std::list<std::pair<int,int> > & o)
     }
     delete it;
 }
-void removeTable::addRemovedItem(int x,int y,int id,int index){
+void removeTable::addRemovedItem(int cx,int cy,float x,float y,int id,int index){
     char key[256];
     char val[256];
-    snprintf(key ,sizeof(key) ,"mRMT%d,%d:%d,%d",x,y,id,index);
-    snprintf(val ,sizeof(val) ,"%d %d",id,index);
-    db->Put(leveldb::WriteOptions(), key, val);
+    if(floor(x/32.f)!=cx)
+        return;
+    if(floor(y/32.f)!=cy)
+        return;
+    std::string tmp;
+    snprintf(key ,sizeof(key) ,"mRMT%d,%d:%d,%d",cx,cy,id,index);
+    if(db->Get(leveldb::ReadOptions(),key,&tmp).IsNotFound()){
+        snprintf(val ,sizeof(val) ,"%d %d",id,index);
+        db->Put(leveldb::WriteOptions(), key, val);
+        destroyTerrainItem(x,y,id);
+    }
 }
 void removeTable::clearRemovedChunk(int x,int y){
     char prefix[256];

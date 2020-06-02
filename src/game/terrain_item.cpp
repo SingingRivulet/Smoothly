@@ -153,8 +153,10 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             if(realHeight<waterLevel)
                 return NULL;
             auto res = new item;
-            res->id.x=floor(x/32.f);
-            res->id.y=floor(y/32.f);
+            res->id.cx=floor(x/32.f);
+            res->id.cy=floor(y/32.f);
+            res->id.x =x;
+            res->id.y =y;
             res->id.id.id=id;
             res->id.id.index=index;
             btTriangleMesh * mesh;
@@ -183,8 +185,10 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             if(texture_grass.empty())
                 return NULL;
             auto res = new item;
-            res->id.x=floor(x/32.f);
-            res->id.y=floor(y/32.f);
+            res->id.cx=floor(x/32.f);
+            res->id.cy=floor(y/32.f);
+            res->id.x =x;
+            res->id.y =y;
             res->id.id.id=id;
             res->id.id.index=index;
             res->node[0]=genGrass(x * y + index + id,res->hideLodLevel);
@@ -201,8 +205,10 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
         return NULL;
     
     auto res = new item;
-    res->id.x=floor(x/32.f);
-    res->id.y=floor(y/32.f);
+    res->id.cx=floor(x/32.f);
+    res->id.cy=floor(y/32.f);
+    res->id.x =x;
+    res->id.y =y;
     res->id.id.id=id;
     res->id.id.index=index;
 

@@ -15,7 +15,8 @@ namespace smoothly{
             void removeTerrainItem(int x , int y ,int index,int id);
             void releaseTerrainItems(int x , int y);
             struct mapId{
-                int x,y;
+                int cx,cy;
+                float x,y;
                 mapItem id;
             };
             virtual void msg_addRemovedItem(int x,int y,int,int);

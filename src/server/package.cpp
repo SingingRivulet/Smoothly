@@ -2,6 +2,10 @@
 namespace smoothly{
 namespace server{
 
+package::package(){
+    loadCollectionConfig();
+}
+
 std::string package::getPackagePrefix(int x, int y){
     char buf[256];
     snprintf(buf,sizeof(buf),"pkg#%d,%d:",x,y);
@@ -180,6 +184,64 @@ void package::fetchPackageByChunk(int cx, int cy, std::function<void (package::p
 
     }
     delete it;
+}
+
+void package::destroyTerrainItem(float x, float y, int id){
+    auto coll_conf = collection_config.find(id);
+    if(coll_conf!=collection_config.end()){
+        package_item p;
+        p.position = vec3(x,-9999,y);//高度设-9999，在客户端会自动被修正到地形高度
+        p.skin = 0;
+        for(auto res : coll_conf->second){
+            int resid = res.first;
+            int resnumm_min = res.second.first;
+            int resnumm_delta = res.second.second;
+            int resnum;
+            if(resnumm_delta>=1){
+                resnum = resnumm_min + (rand()%(resnumm_delta+1));
+            }else{
+                resnum = resnumm_min;
+            }
+            p.resource.push_back(package_item::resource_t(resid,resnum));
+        }
+        auto skit = collection_skin.find(id);
+        if(skit!=collection_skin.end()){
+            p.skin = skit->second;
+        }
+        putPackage(p);
+    }
+}
+
+void package::addCollectionConfig(const char * str){
+    if(strlen(str)>2){
+        if(str[0]=='$'){
+            int terrid,skid;
+            if(sscanf(str+1,"%d=>%d",&terrid,&skid)==2){
+                collection_skin[terrid] = skid;
+            }
+        }else{
+            int terrid,resid,min,delta;
+            if(sscanf(str,"%d=>{%d=>(%d,%d)}",&terrid,&resid,&min,&delta)==4){
+                collection_config[terrid][resid] = std::pair<int,int>(min,delta);
+            }
+        }
+    }
+}
+
+void package::loadCollectionConfig(){
+    auto fp = fopen("../config/collection.txt","r");
+    if(fp){
+        printf(L_GREEN "[status]" NONE "get collection config\n" );
+        char buf[256];
+        while(!feof(fp)){
+            bzero(buf,256);
+            fgets(buf,256,fp);
+            addCollectionConfig(buf);
+        }
+        fclose(fp);
+    }else{
+        printf(L_RED "[error]" NONE "fail to read ../config/collection.txt\n" );
+    }
 }
 
 void package::package_item::toString(std::string & str){

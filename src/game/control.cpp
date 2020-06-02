@@ -128,8 +128,9 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 break;
                 case irr::KEY_KEY_E://拾取
                     if(event.KeyInput.PressedDown){
+                        parent->autoPickup = true;
                     }else{
-                        parent->pickupPackage();
+                        parent->autoPickup = false;
                     }
                 break;
                 case irr::KEY_KEY_L://手动模式

@@ -248,10 +248,12 @@ class connectionBase{
         }
         
         //cmds
-        inline void cmd_addRemovedItem(int x,int y,int id,int index){
+        inline void cmd_addRemovedItem(int cx,int cy,float x,float y,int id,int index){
             makeHeader('R','+');
-            bs.Write((int32_t)x);
-            bs.Write((int32_t)y);
+            bs.Write((int32_t)cx);
+            bs.Write((int32_t)cy);
+            bs.Write(x);
+            bs.Write(y);
             bs.Write((int32_t)id);
             bs.Write((int32_t)index);
             sendMessageU(&bs);

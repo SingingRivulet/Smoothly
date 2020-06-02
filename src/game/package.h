@@ -27,6 +27,7 @@ class package:public terrainDispather{
         void addPackage(int id, int x, int y, const vec3 & posi, const std::string & uuid);
         void removePackage(const std::string & uuid);
         void pickupPackage();
+        bool autoPickup;
         virtual void pickupPackageToBag(int x,int y,const std::string & uuid)=0;
 
         void msg_package_add(int32_t x,int32_t y,const char * uuid,const char * text)override;

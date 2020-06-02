@@ -9,6 +9,7 @@ namespace server{
 class package:public bag{
     //背包中的物品被丢了出来，变成了可以拾取的包裹
     public:
+        package();
         struct package_item{
                 int skin;//显示时使用的皮肤
                 std::string uuid;
@@ -71,6 +72,12 @@ class package:public bag{
                 sendAddr_packageAdd(addr,cx,cy,p.uuid,t);
             });
         }
+
+        std::map<int,int> collection_skin;
+        std::map<int,std::map<int,std::pair<int,int> > > collection_config;//被采集的id => { 资源id => (最小,浮动) }
+        void destroyTerrainItem(float x,float y,int id)override;//采集资源
+        void addCollectionConfig(const char * str);
+        void loadCollectionConfig();
 
         virtual void boardcast_packageRemove(int x,int y,const std::string & uuid)=0;
         virtual void boardcast_packageAdd(int x,int y,const std::string & uuid,const std::string & text)=0;
