@@ -7,6 +7,7 @@ class control:public fire{
     public:
         control();
         void processControl();
+        void setGUIMode(bool m);
     private:
         class eventRecv:public irr::IEventReceiver{
             public:

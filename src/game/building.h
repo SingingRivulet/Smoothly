@@ -192,6 +192,7 @@ class building:public weather{
             }
         };
         std::map<int,buildingConf*> config;
+        std::set<int> unlockedBuilding;
 
     private:
         void loadConfig();
@@ -215,6 +216,10 @@ class building:public weather{
         void switchBuilding();
         std::vector<int>          availableBuilding;
         virtual void cancle();
+        inline void unlockBuilding(int id){
+            availableBuilding.push_back(id);
+            unlockedBuilding.insert(id);
+        }
     private:
         irr::scene::ISceneNode  * buildingPrev;
         buildingConf            * buildingPrevConf;

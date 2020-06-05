@@ -2,7 +2,7 @@
 namespace smoothly{
 
 void body::loop(){
-    package::loop();
+    technology::loop();
     for(auto it:bodies){
         bodyItem * b = it.second;
         auto p = b->node->getPosition();
@@ -143,7 +143,7 @@ void body::loop(){
 }
 
 void body::onDraw(){
-    package::onDraw();
+    technology::onDraw();
     for(auto it:myBodies){//在屏幕上标出自己拥有的单位
         bodyItem * bd = it.second;
         if(bd!=mainControlBody){

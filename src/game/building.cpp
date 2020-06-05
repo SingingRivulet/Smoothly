@@ -522,6 +522,8 @@ void building::fetchByRay(const vec3 &from, const vec3 &to, std::function<void (
 void building::buildingStart(){
     if(buildingPrev!=NULL)
         return;
+    if(unlockedBuilding.find(buildingPrevId)==unlockedBuilding.end())
+        return;
     auto cit = config.find(buildingPrevId);
     if(cit==config.end())
         return;
@@ -795,7 +797,11 @@ void building::switchBuilding(){
         id = availableBuilding.at(buildingSelect);
     }catch(...){
         buildingSelect=0;
-        id = availableBuilding[buildingSelect];
+        try{
+            id = availableBuilding.at(buildingSelect);
+        }catch(...){
+            return;
+        }
     }
 
     buildingPrevId = id;

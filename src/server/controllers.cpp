@@ -264,18 +264,23 @@ void controllers::ctl_getTool(const std::string & /*uuid*/, const RakNet::System
     }catch(...){}
 }
 
-void controllers::ctl_useTool(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+void controllers::ctl_useTool(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     RakNet::RakString u,t;
     data->Read(u);
     data->Read(t);
     if(u.IsEmpty())
         return;
     try{
+
+        auto ow = getOwner(u.C_String());
+        if(uuid!=ow)
+            return;
+
         useTool(addr,u.C_String(),t.C_String());
     }catch(...){}
 }
 
-void controllers::ctl_reloadTool(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+void controllers::ctl_reloadTool(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     RakNet::RakString u,t;
     data->Read(u);
     data->Read(t);
@@ -284,16 +289,25 @@ void controllers::ctl_reloadTool(const std::string & /*uuid*/, const RakNet::Sys
     if(t.IsEmpty())
         return;
     try{
+
+        auto ow = getOwner(u.C_String());
+        if(uuid!=ow)
+            return;
+
         reloadTool(addr,u.C_String(),t.C_String());
     }catch(...){}
 }
 
-void controllers::ctl_putPackage(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+void controllers::ctl_putPackage(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     bool isResource;
     int32_t skin;
     float x,y,z;
     RakNet::RakString b;
     if(data->Read(isResource) && data->Read(skin) && data->ReadVector(x,y,z) && data->Read(b)){
+
+        auto ow = getOwner(b.C_String());
+        if(uuid!=ow)
+            return;
 
         if(isResource){
             int32_t id,num;

@@ -341,12 +341,12 @@ void building::addDefaultBuilding(){
         ptr->autoAttach.allowed[3]=false;
         ptr->desTexture = driver->getTexture("../../res/description/building-6.png");
     }
-    availableBuilding.push_back(-1);
-    availableBuilding.push_back(-2);
-    availableBuilding.push_back(-3);
-    availableBuilding.push_back(-4);
-    availableBuilding.push_back(-5);
-    availableBuilding.push_back(-6);
+    //availableBuilding.push_back(-1);
+    //availableBuilding.push_back(-2);
+    //availableBuilding.push_back(-3);
+    //availableBuilding.push_back(-4);
+    //availableBuilding.push_back(-5);
+    //availableBuilding.push_back(-6);
 }
 
 }

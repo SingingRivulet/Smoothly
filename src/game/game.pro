@@ -55,7 +55,8 @@ HEADERS += \
     cloud.h \
     weather.h \
     pathfinding.h \
-    package.h
+    package.h \
+    technology.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -95,7 +96,9 @@ SOURCES += \
     building_road.cpp \
     pathfinding.cpp \
     fire_api.cpp \
-    package.cpp
+    package.cpp \
+    body_bag.cpp \
+    technology.cpp
 
 FORMS += \
     ui/login.ui
