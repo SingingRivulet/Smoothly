@@ -34,7 +34,9 @@ SOURCES += main.cpp \
     ../utils/dbvt2d.cpp \
     building.cpp \
     bag.cpp \
-    package.cpp
+    package.cpp \
+    technology.cpp \
+    making.cpp
 
 HEADERS += \
     body.h \
@@ -60,7 +62,9 @@ HEADERS += \
     ../utils/cyqueue.h \
     building.h \
     bag.h \
-    package.h
+    package.h \
+    technology.h \
+    making.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

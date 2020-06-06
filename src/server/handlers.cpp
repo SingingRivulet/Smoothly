@@ -299,6 +299,19 @@ void handlers::sendAddr_packageAdd(const RakNet::SystemAddress & addr, int x, in
     sendMessage(&bs,addr);
 }
 
+void handlers::sendAddr_unlockTech(const RakNet::SystemAddress & addr, bool newTech, int id){
+    makeHeader('t','u');
+    bs.Write(newTech);
+    bs.Write((int32_t)id);
+    sendMessage(&bs,addr);
+}
+
+void handlers::sendAddr_techTarget(const RakNet::SystemAddress & addr, int id){
+    makeHeader('t','t');
+    bs.Write((int32_t)id);
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

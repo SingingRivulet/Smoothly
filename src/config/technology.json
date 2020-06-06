@@ -1,4 +1,4 @@
 [
-    {"id":1,"parent":-1,"iconId":1,"description":"../../res/tech/build_basic.png"},
-    {"id":2,"parent":-1,"iconId":2,"description":"../../res/tech/make_basic.png"}
+    {"id":1,"parent":-1,"iconId":1,"description":"../../res/tech/build_basic.png","probability":100},
+    {"id":2,"parent":-1,"iconId":2,"description":"../../res/tech/make_basic.png","probability":100}
 ]

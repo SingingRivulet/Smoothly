@@ -62,6 +62,9 @@ class handlers:public admin{
         void boardcast_packageAdd(int x,int y,const std::string & uuid,const std::string & text);
         void sendAddr_packageAdd(const RakNet::SystemAddress & addr,int x,int y,const std::string & uuid,const std::string & text);
 
+        void sendAddr_unlockTech(const RakNet::SystemAddress & addr,bool newTech,int id);
+        void sendAddr_techTarget(const RakNet::SystemAddress & addr,int id);
+
         void boardcast(int x,int y,RakNet::BitStream * data);
         
 };

@@ -101,6 +101,20 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 't':
+            switch (a) {
+                case 't':
+                    ctl_setTechTarget(uuid,addr,data);
+                break;
+            }
+        break;
+        case 'M':
+            switch (a) {
+                case 'm':
+                    ctl_making(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -331,7 +345,34 @@ void controllers::ctl_pickupPackage(const std::string & uuid, const RakNet::Syst
     data->Read(x);
     data->Read(y);
     data->Read(t);
+    auto ow = getOwner(b.C_String());
+    if(uuid!=ow)
+        return;
     pickupPackage(addr,x,y,t.C_String(),b.C_String());
+}
+
+void controllers::ctl_setTechTarget(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t target;
+    if(data->Read(target)){
+        setTechTarget(addr,uuid,target);
+    }
+}
+
+void controllers::ctl_making(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t id;
+    float x,y,z;
+    RakNet::RakString bag;
+    if(data->Read(id) && data->ReadVector(x,y,z) && data->Read(bag)){
+        auto ow = getOwner(bag.C_String());
+        if(uuid!=ow)
+            return;//检查所有权
+
+        bool status = make(addr,uuid,bag.C_String(),id,vec3(x,y,z));
+
+        makeHeader('M','s');
+        bs.Write(status);
+        sendMessage(&bs,addr);
+    }
 }
 /////////////////
 }//////server

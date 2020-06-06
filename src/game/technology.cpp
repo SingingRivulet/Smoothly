@@ -173,7 +173,7 @@ void technology::selectTech(gui::IGUITreeViewNode * n){
                 tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"make");
             }
         }else{
-            tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"unlock");
+            tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"target");
         }
     }
 }
