@@ -1,4 +1,5 @@
 #include "technology.h"
+#include <QFile>
 
 namespace smoothly{
 namespace server{
@@ -46,6 +47,47 @@ technology::technology(){
     cache_tech_user.parent = this;
 
     //加载配置
+    printf(L_GREEN "[status]" NONE "get technology config\n" );
+    QFile file("../config/technology.json");
+    if(!file.open(QFile::ReadOnly)){
+        printf(L_RED "[error]" NONE "fail to read ../config/technology.json\n" );
+        return;
+    }
+    QByteArray allData = file.readAll();
+    file.close();
+    auto str = allData.toStdString();
+    cJSON * json=cJSON_Parse(str.c_str());
+    if(json){
+        if(json->type==cJSON_Array){
+            cJSON *c=json->child;
+            while (c){
+                if(c->type == cJSON_Object){
+
+                    cJSON * node_id = cJSON_GetObjectItem(c,"id");
+                    cJSON * node_parent = cJSON_GetObjectItem(c,"parent");
+                    cJSON * node_probability = cJSON_GetObjectItem(c,"probability");
+
+                    if(node_id && node_parent && node_probability &&
+                       node_id->type==cJSON_Number && node_parent->type==cJSON_Number && node_probability->type==cJSON_Number){
+
+                        int id = node_id->valueint;
+
+                        tech_conf_t c;
+                        c.need = node_parent->valueint;
+                        c.probability = node_probability->valueint;
+                        tech_conf[id] = c;
+                    }
+
+                }
+                c = c->next;
+            }
+        }else{
+            printf(L_RED "[error]" NONE "root in ../config/technology.json is not Object!\n" );
+        }
+        cJSON_Delete(json);
+    }else{
+        printf(L_RED "[error]" NONE "fail to load json\n" );
+    }
 }
 
 void technology::cache_tech_user_t::onExpire(const std::string & uuid, technology::tech_user_t & t){

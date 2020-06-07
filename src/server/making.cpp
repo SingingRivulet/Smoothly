@@ -5,7 +5,67 @@ namespace smoothly{
 namespace server{
 
 making::making(){
+    printf(L_GREEN "[status]" NONE "get making config\n" );
+    QFile file("../config/making.json");
+    if(!file.open(QFile::ReadOnly)){
+        printf(L_RED "[error]" NONE "fail to read ../config/making.json\n" );
+        return;
+    }
+    QByteArray allData = file.readAll();
+    file.close();
+    auto str = allData.toStdString();
+    cJSON * json=cJSON_Parse(str.c_str());
+    if(json){
+        if(json->type==cJSON_Array){
+            cJSON *c=json->child;
+            while (c){
+                if(c->type == cJSON_Object){
 
+                    cJSON * node_id = cJSON_GetObjectItem(c,"id");
+                    cJSON * node_isTool = cJSON_GetObjectItem(c,"isTool");
+                    cJSON * node_needTech = cJSON_GetObjectItem(c,"needTech");
+                    cJSON * node_needResource = cJSON_GetObjectItem(c,"needResource");
+                    cJSON * node_outId = cJSON_GetObjectItem(c,"outId");
+
+                    if(node_id && node_isTool && node_needTech && node_outId &&
+                       node_id->type==cJSON_Number &&
+                       node_isTool->type==cJSON_Number &&
+                       node_needTech->type==cJSON_Number &&
+                       node_outId->type==cJSON_Number){
+
+                        making_config_t c;
+
+                        int id = node_id->valueint;
+
+                        c.isTool = (node_isTool->valueint!=0);
+                        c.needTech = node_needTech->valueint;
+                        c.outId = node_outId->valueint;
+
+                        if(node_needResource && node_needResource->type==cJSON_Object){
+                            auto line = node_needResource->child;
+                            while(line){
+                                if(line->type == cJSON_Number){
+                                    int id = atoi(line->string);
+                                    int num = line->valueint;
+                                    c.needResource.push_back(std::pair<int,int>(id,num));
+                                }
+                                line = line->next;
+                            }
+                        }
+
+                        making_config[id] = c;
+                    }
+
+                }
+                c = c->next;
+            }
+        }else{
+            printf(L_RED "[error]" NONE "root in ../config/making.json is not Object!\n" );
+        }
+        cJSON_Delete(json);
+    }else{
+        printf(L_RED "[error]" NONE "fail to load json\n" );
+    }
 }
 
 bool making::make(const RakNet::SystemAddress & addr, const std::string & user, const std::string & bag, int id, const vec3 & outPosition){

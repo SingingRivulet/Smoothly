@@ -11,7 +11,7 @@ class making:public technology{
         making();
         struct making_config_t{
                 int outId;//生产出来的id
-                int isTool;
+                bool isTool;
                 std::vector<std::pair<int,int> > needResource;//id=>num
                 int needTech;
         };
