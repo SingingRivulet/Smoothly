@@ -199,6 +199,7 @@ class body:public technology{
                     animationBlend.clear();
                     animationBlend.insert(scene::IAnimatedMeshSceneNode::IAnimationBlend((irr::scene::ISkinnedMesh*)config->mesh,1.0));
                 }
+                void make(int id);
 
             protected:
                 bodyItem                           * follow;//跟随
@@ -375,6 +376,7 @@ class body:public technology{
         irr::gui::IGUISpriteBank * bag_icons;
         std::map<int,irr::s32> bag_res_icons_mapping,bag_tool_icons_mapping;
         void loadBagIcons();
+        void make(int id)override;
 
     private:
         struct fire_cost{

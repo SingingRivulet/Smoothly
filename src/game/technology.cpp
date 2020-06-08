@@ -8,7 +8,7 @@ technology::technology(){
     int cy = height/2;
     tech_tree_view = gui->addTreeView(irr::core::rect<irr::s32>(cx-300,cy-200,cx+300,cy+200),0,-1,true,true,true);
     tech_tree_view->setVisible(false);
-    tech_tree_img = gui->createImageList(driver->getTexture("../../res/tech.png"),irr::core::dimension2d<irr::s32>(128,16),true);
+    tech_tree_img = gui->createImageList(driver->getTexture("../../res/techSystem/tech.png"),irr::core::dimension2d<irr::s32>(128,16),true);
     //高16
     //使用pinta绘制图标时，请在16*index+5处点击，字号9
     tech_tree_view->setImageList(tech_tree_img);
@@ -25,6 +25,13 @@ technology::technology(){
     tech_root->description = NULL;
     tech_index[-1] = tech_root;
     needUpdateTechUI = true;
+    techTarget = -1;
+    tech_active_status = NULL;
+    tech_active_success = driver->getTexture("../../res/techSystem/success.png");
+    tech_active_fail = driver->getTexture("../../res/techSystem/fail.png");
+    tech_active_unlock = driver->getTexture("../../res/techSystem/unlock.png");
+    tech_active_target = driver->getTexture("../../res/techSystem/target.png");
+    tech_status_background = driver->getTexture("../../res/techSystem/background.png");
     loadTechConfig();
 }
 
@@ -73,6 +80,13 @@ void technology::loop(){
     if(needUpdateTechUI){
         techUIUpdate();
         needUpdateTechUI = false;
+    }
+
+    if(tech_active_status){
+        if(timer->getTime()-tech_active_time>3000){
+            tech_active_status->remove();
+            tech_active_status = NULL;
+        }
     }
 }
 
@@ -153,6 +167,7 @@ void technology::selectTech(gui::IGUITreeViewNode * n){
     if(tech_status){
         tech_status->remove();
         tech_status = NULL;
+        tech_button = NULL;
     }
     auto p = (tech_node*)n->getData();
     if(p==NULL)
@@ -160,7 +175,7 @@ void technology::selectTech(gui::IGUITreeViewNode * n){
 
     if(p->description){
         tech_status = gui->addImage(
-                          driver->getTexture("../../res/tech_status_background.png"),
+                          tech_status_background,
                           irr::core::position2di(384,2),
                           true,
                           tech_tree_view);
@@ -168,13 +183,52 @@ void technology::selectTech(gui::IGUITreeViewNode * n){
 
         if(p->unlocked){
             if(p->type==TECH_BUILD){
-                tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"use");
+                tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"select");
             }else if(p->type==TECH_MAKE){
                 tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"make");
             }
         }else{
             tech_button = gui->addButton(irr::core::rect<irr::s32>(8 , 8+300 , 64 , 32+300) , tech_status , -1 , L"target");
         }
+    }
+}
+
+void technology::techActive(){
+    auto treeNode = tech_tree_view->getSelected();
+    if(treeNode){
+        auto p = (tech_node*)treeNode->getData();
+        if(p){
+            if(!p->unlocked){//设为解锁目标
+                cmd_setTechTarget(p->techId);
+            }else{
+                if(p->type==TECH_MAKE){
+                    make(p->relatedId);
+                }else if(p->type==TECH_BUILD){
+                    buildingSelect = p->relatedId;
+                }
+            }
+        }
+    }
+}
+
+void technology::msg_techTarget(bool newTarget,int32_t target){
+    techTarget = target;
+    needUpdateTechUI = true;
+    if(newTarget)
+        showTechStatus(tech_active_target);
+}
+
+void technology::msg_unlockTech(bool newtech, int32_t id){
+    unlockTech(id);
+    if(newtech)
+        showTechStatus(tech_active_unlock);
+}
+
+void technology::msg_makeStatus(int32_t, bool status){
+    if(status){
+        showTechStatus(tech_active_success);
+    }else{
+        showTechStatus(tech_active_fail);
     }
 }
 
@@ -197,7 +251,10 @@ void technology::drawTechNode(std::shared_ptr<technology::tech_node> node,irr::g
             default:break;
         }
     }else{
-        swprintf(buf,64,L"(?""?""?)");
+        if(techTarget==node->techId && node->techId!=-1)
+            swprintf(buf,64,L"(~~~)");
+        else
+            swprintf(buf,64,L"(?""?""?)");
     }
     auto c = uinode->addChildBack(buf,0,node->iconId,-1,node.get(),0);
 

@@ -370,6 +370,7 @@ void controllers::ctl_making(const std::string & uuid, const RakNet::SystemAddre
         bool status = make(addr,uuid,bag.C_String(),id,vec3(x,y,z));
 
         makeHeader('M','s');
+        bs.Write(id);
         bs.Write(status);
         sendMessage(&bs,addr);
     }

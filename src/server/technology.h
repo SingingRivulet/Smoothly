@@ -28,7 +28,7 @@ class technology:public package{
                 void toString(std::string & str);
 
                 bool checkTech(const RakNet::SystemAddress & addr,int id);//检查科技是否可用
-                void tryUnlockTech(const RakNet::SystemAddress & addr);//尝试解锁科技
+                void tryUnlockTech(const RakNet::SystemAddress & addr, int activeId);//尝试解锁科技
 
                 void setUnlockTarget(const RakNet::SystemAddress & addr,int id);
         };
@@ -42,7 +42,7 @@ class technology:public package{
         void sendAddr_unlockedTech(const RakNet::SystemAddress & addr, const std::string & uuid);
 
         virtual void sendAddr_unlockTech(const RakNet::SystemAddress & addr,bool newTech,int id)=0;
-        virtual void sendAddr_techTarget(const RakNet::SystemAddress & addr,int id)=0;
+        virtual void sendAddr_techTarget(const RakNet::SystemAddress & addr,bool newTarget,int id)=0;
 
         bool checkTech(const RakNet::SystemAddress & addr,const std::string & uuid,int id);//只应该在任务执行时调用。因为此操作可能会导致其他科技解锁
 

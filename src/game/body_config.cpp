@@ -267,6 +267,12 @@ void body::loadBagIcons(){
     }
 }
 
+void body::make(int id){
+    if(mainControlBody){
+        mainControlBody->make(id);
+    }
+}
+
 void body::loadFireCost(){
     printf("[status]get fire_cost config\n" );
     QFile file("../config/fire_cost.json");

@@ -239,6 +239,23 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 't':
+                                    switch (data->data[3]) {
+                                        case 'u':
+                                            ctl_unlockTech(&bs);
+                                        break;
+                                        case 't':
+                                            ctl_techTarget(&bs);
+                                        break;
+                                    }
+                                break;
+                                case 'M':
+                                    switch (data->data[3]) {
+                                        case 's':
+                                            ctl_makeStatus(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -411,6 +428,18 @@ class connectionBase{
             bs.Write(x);
             bs.Write(y);
             bs.Write(RakNet::RakString(package));
+            sendMessage(&bs);
+        }
+        inline void cmd_make(int32_t id,float x,float y,float z,const char * bag){
+            makeHeader('M','m');
+            bs.Write(id);
+            bs.WriteVector(x,y,z);
+            bs.Write(RakNet::RakString(bag));
+            sendMessage(&bs);
+        }
+        inline void cmd_setTechTarget(int32_t target){
+            makeHeader('t','t');
+            bs.Write(target);
             sendMessage(&bs);
         }
     private:
@@ -662,6 +691,27 @@ class connectionBase{
             data->Read(uuid);
             msg_package_remove(x,y,uuid.C_String());
         }
+        inline void ctl_unlockTech(RakNet::BitStream * data){
+            bool newTech;
+            int32_t id;
+            data->Read(newTech);
+            data->Read(id);
+            msg_unlockTech(newTech,id);
+        }
+        inline void ctl_techTarget(RakNet::BitStream * data){
+            bool newTarget;
+            int32_t target;
+            data->Read(newTarget);
+            data->Read(target);
+            msg_techTarget(newTarget,target);
+        }
+        inline void ctl_makeStatus(RakNet::BitStream * data){
+            int32_t id;
+            bool status;
+            data->Read(id);
+            data->Read(status);
+            msg_makeStatus(id,status);
+        }
 
         time_t lastHeartbeat;
 
@@ -695,6 +745,9 @@ class connectionBase{
         virtual void msg_bag_tool_use(const char *,const char *)=0;
         virtual void msg_package_add(int32_t x,int32_t y,const char * uuid,const char * text)=0;
         virtual void msg_package_remove(int32_t x,int32_t y,const char * uuid)=0;
+        virtual void msg_unlockTech(bool newtech,int32_t id)=0;
+        virtual void msg_techTarget(bool newtarget,int32_t target)=0;
+        virtual void msg_makeStatus(int32_t id,bool status)=0;
 };
 ///////////////////////
 }//////client

@@ -10,7 +10,7 @@ void technology::sendAddr_unlockedTech(const RakNet::SystemAddress & addr,const 
         for(auto it:u.unlocked){
             sendAddr_unlockTech(addr,false,it);
         }
-        sendAddr_techTarget(addr,u.target);
+        sendAddr_techTarget(addr,false,u.target);
     }catch(...){}
 }
 
@@ -178,16 +178,22 @@ void technology::tech_user_t::toString(std::string & str){
 
 bool technology::tech_user_t::checkTech(const RakNet::SystemAddress & addr,int id){
     if(unlocked.find(id)!=unlocked.end()){
-        if(target!=-1 && (target_need==id || target_need==-1))
-            tryUnlockTech(addr);
+        if(target!=-1)
+            tryUnlockTech(addr,id);
         return true;
     }else{
         return false;
     }
 }
 
-void technology::tech_user_t::tryUnlockTech(const RakNet::SystemAddress & addr){
-    if(target!=-1 && (rand()%1000)<target_prob){
+void technology::tech_user_t::tryUnlockTech(const RakNet::SystemAddress & addr,int activeId){
+    int maxp;
+    if(target_need==activeId || target_need==-1)
+        maxp = 1000;
+    else
+        maxp = 64000;
+
+    if(target!=-1 && (rand()%maxp)<target_prob){
         unlocked.insert(target);
         parent->sendAddr_unlockTech(addr,true,target);
         target = -1;
@@ -207,7 +213,7 @@ void technology::tech_user_t::setUnlockTarget(const RakNet::SystemAddress & addr
         target_need = -1;
         target_prob = -1;
     }
-    parent->sendAddr_techTarget(addr,target);
+    parent->sendAddr_techTarget(addr,true,target);
 }
 
 

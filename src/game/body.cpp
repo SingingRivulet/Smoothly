@@ -333,6 +333,11 @@ float body::bodyItem::getPitchAngle(){
         return -dig;
 }
 
+void body::bodyItem::make(int id){
+    auto p = node->getPosition();
+    parent->cmd_make(id,p.X,p.Y,p.Z,uuid.c_str());
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;

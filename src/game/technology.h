@@ -33,6 +33,7 @@ class technology:public package{
                 irr::video::ITexture * description;
         };
         std::map<int,std::shared_ptr<tech_node> > tech_index;//所有可查看的科技
+        int techTarget;
         std::shared_ptr<tech_node> tech_root;//根节点
         void addTech(int techId, int parentId, tech_type type, int relatedId, const std::string & relatedName, int iconId,irr::video::ITexture * description);//添加科技
         void unlockTech(int techId);
@@ -42,13 +43,42 @@ class technology:public package{
         void loadTechConfig();
 
         void selectTech(irr::gui::IGUITreeViewNode *);
+        void techActive();
 
         irr::gui::IGUIImage * tech_status;
         irr::gui::IGUIButton * tech_button;
 
+        void msg_techTarget(bool newTarget, int32_t target)override;
+        void msg_unlockTech(bool newtech,int32_t id)override;
+        void msg_makeStatus(int32_t id,bool status)override;
+
+        virtual void make(int id)=0;
+
     private:
 
         void drawTechNode(std::shared_ptr<tech_node> node, gui::IGUITreeViewNode * uinode);
+
+        irr::gui::IGUIImage * tech_active_status;
+        irr::s32 tech_active_time;
+        inline void showTechStatus(irr::video::ITexture * tex){
+            if(tex==NULL)
+                return;
+            if(tech_active_status)
+                tech_active_status->remove();
+            tech_active_time = timer->getTime();
+            int cx = width/2;
+            int cy = height/2;
+            cx -= (tex->getSize().Width)/2;
+            cy+=(cy/2);
+            tech_active_status = gui->addImage(tex,irr::core::position2di(cx,cy));
+        }
+
+        irr::video::ITexture
+            * tech_active_success,
+            * tech_active_fail,
+            * tech_active_unlock,
+            * tech_active_target,
+            * tech_status_background;
 };
 
 }

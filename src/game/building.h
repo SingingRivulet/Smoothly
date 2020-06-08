@@ -231,6 +231,7 @@ class building:public weather{
 
         irr::u32 def_shader;
 
+    public:
         int buildingSelect;
 
 };

@@ -306,8 +306,9 @@ void handlers::sendAddr_unlockTech(const RakNet::SystemAddress & addr, bool newT
     sendMessage(&bs,addr);
 }
 
-void handlers::sendAddr_techTarget(const RakNet::SystemAddress & addr, int id){
+void handlers::sendAddr_techTarget(const RakNet::SystemAddress & addr, bool newTarget, int id){
     makeHeader('t','t');
+    bs.Write(newTarget);
     bs.Write((int32_t)id);
     sendMessage(&bs,addr);
 }

@@ -297,6 +297,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                                 }
                             }
                             break;
+                        case irr::gui::EGET_BUTTON_CLICKED:
+                            if(event.GUIEvent.Caller && event.GUIEvent.Caller==parent->tech_button){
+                                parent->techActive();
+                            }
+                            break;
                         default:break;
                     }
                     break;
