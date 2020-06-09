@@ -169,7 +169,7 @@ void pathFinding::pathFindingContext::buildRoad(std::function<void(const buildin
 
 bool pathFinding::pathFindingContext::pathFindingStart(std::function<void(const building::blockPosition &)> callback){
     init();
-    bool res;
+    bool res = false;
     int num=0;
     while(processing){
         process();

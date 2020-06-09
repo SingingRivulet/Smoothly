@@ -8,41 +8,47 @@
         "hp":500,
         "description":"系统预定义-1:木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":3
     },
     {
         "id":-2,
         "hp":500,
         "description":"系统预定义-2:45度木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":4
     },
     {
         "id":-3,
         "hp":500,
         "description":"系统预定义-3:26度木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":5
     },
     {
         "id":-4,
         "hp":500,
         "description":"系统预定义-4:90度木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":6
     },
     {
         "id":-5,
         "hp":500,
         "description":"系统预定义-5:-45度木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":7
     },
     {
         "id":-6,
         "hp":500,
         "description":"系统预定义-6:-26度木板",
         "cost":1001,
-        "costNum":-1
+        "costNum":-1,
+        "needTech":8
     }
 ]

@@ -816,6 +816,22 @@ void building::switchBuilding(){
     ++buildingSelect;
 }
 
+void building::selectBuilding(int id){
+    if(availableBuilding.empty())
+        return;
+
+    buildingPrevId = id;
+    auto cit = config.find(buildingPrevId);
+    if(cit==config.end())
+        return;
+
+    buildingPrevConf = cit->second;
+
+    showningDes         = clock();
+
+    ++buildingSelect;
+}
+
 void building::cancle(){
     buildingEnd(false);
 }

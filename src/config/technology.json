@@ -1,4 +1,10 @@
 [
-    {"id":1,"parent":-1,"iconId":1,"description":"../../res/tech/build_basic.png","probability":100},
-    {"id":2,"parent":-1,"iconId":2,"description":"../../res/tech/make_basic.png","probability":100}
+    {"id":1,"parent":-1,"iconId":1,"description":"../../res/tech/build_basic.png","probability":1000,"name":"基础建筑技能"},
+    {"id":2,"parent":-1,"iconId":2,"description":"../../res/tech/make_basic.png","probability":1000,"name":"基础制造技能"},
+    {"id":3,"parent":1,"iconId":3,"description":"../../res/tech/build/woodboard1.png","probability":1000,"name":"木板","type":"build","relatedId":-1},
+    {"id":4,"parent":3,"iconId":4,"description":"../../res/tech/build/woodboard2.png","probability":400,"name":"45°木板","type":"build","relatedId":-2},
+    {"id":5,"parent":3,"iconId":5,"description":"../../res/tech/build/woodboard3.png","probability":400,"name":"26°木板","type":"build","relatedId":-3},
+    {"id":6,"parent":3,"iconId":6,"description":"../../res/tech/build/woodboard4.png","probability":400,"name":"垂直木板","type":"build","relatedId":-4},
+    {"id":7,"parent":3,"iconId":7,"description":"../../res/tech/build/woodboard5.png","probability":400,"name":"-45°木板","type":"build","relatedId":-5},
+    {"id":8,"parent":3,"iconId":8,"description":"../../res/tech/build/woodboard6.png","probability":400,"name":"-26°木板","type":"build","relatedId":-6}
 ]

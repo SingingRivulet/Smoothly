@@ -10,6 +10,7 @@ controllers::controllers(int thnum):handlers(thnum){
 }
 
 void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress & addr,char c,char a,RakNet::BitStream * data){
+    techLoop;
     switch(c){
         case 'R':
             switch(a){
@@ -127,8 +128,9 @@ void controllers::ctl_addRemovedItem(const std::string & ,const RakNet::SystemAd
     data->Read(y);
     data->Read(id);
     data->Read(index);
-    addRemovedItem(cx,cy,x,y,id,index);
-    boardcast_addRemovedItem(cx,cy,id,index);
+    if(addRemovedItem(cx,cy,x,y,id,index)){
+        boardcast_addRemovedItem(cx,cy,id,index);
+    }
 }
 
 void controllers::ctl_wearing_add(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){

@@ -204,7 +204,7 @@ void technology::techActive(){
                 if(p->type==TECH_MAKE){
                     make(p->relatedId);
                 }else if(p->type==TECH_BUILD){
-                    buildingSelect = p->relatedId;
+                    selectBuilding(p->relatedId);
                 }
             }
         }

@@ -101,6 +101,7 @@ void technology::cache_tech_user_t::onExpire(const std::string & uuid, technolog
 void technology::cache_tech_user_t::onLoad(const std::string & uuid, technology::tech_user_t & t){
     t.parent = parent;
     t.uuid   = uuid;
+    t.tech_loop_time = 0;
 
     //尝试从数据库读取
     char key[256];
@@ -191,9 +192,10 @@ void technology::tech_user_t::tryUnlockTech(const RakNet::SystemAddress & addr,i
     if(target_need==activeId || target_need==-1)
         maxp = 1000;
     else
-        maxp = 64000;
+        maxp = 10000;
 
-    if(target!=-1 && (rand()%maxp)<target_prob){
+    int randv = rand()%maxp;
+    if(target!=-1 && randv<target_prob){
         unlocked.insert(target);
         parent->sendAddr_unlockTech(addr,true,target);
         target = -1;
@@ -204,7 +206,7 @@ void technology::tech_user_t::tryUnlockTech(const RakNet::SystemAddress & addr,i
 
 void technology::tech_user_t::setUnlockTarget(const RakNet::SystemAddress & addr, int id){
     auto it = parent->tech_conf.find(id);
-    if(it!=parent->tech_conf.end()){
+    if(it!=parent->tech_conf.end() && unlocked.find(it->second.need)!=unlocked.end()){
         target = id;
         target_need = it->second.need;
         target_prob = it->second.probability;

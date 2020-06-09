@@ -214,6 +214,7 @@ class building:public weather{
         void buildingApply();           //应用被预览的建筑
         void buildingEnd(bool apply=true);             //建筑模式结束
         void switchBuilding();
+        void selectBuilding(int id);
         std::vector<int>          availableBuilding;
         virtual void cancle();
         inline void unlockBuilding(int id){
@@ -231,7 +232,6 @@ class building:public weather{
 
         irr::u32 def_shader;
 
-    public:
         int buildingSelect;
 
 };

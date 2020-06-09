@@ -23,6 +23,16 @@ class technology:public package{
                 int target_need;//解锁目标的前置科技
                 int target_prob;//解锁目标的概率
 
+                time_t tech_loop_time;
+                void tech_loop(const RakNet::SystemAddress & addr){
+                    auto ntm = time(0);
+                    if(ntm - tech_loop_time > 10){
+                        tech_loop_time = ntm;
+                        if(rand()%4 == 1)
+                            tryUnlockTech(addr,-1);
+                    }
+                }
+
                 void init();
                 void loadString(const std::string & str);
                 void toString(std::string & str);
@@ -53,6 +63,12 @@ class technology:public package{
 
         technology();
 };
+
+#define techLoop \
+    try{ \
+        if(rand()%2 == 1) \
+            cache_tech_user[uuid].tech_loop(addr); \
+    }catch(...){}
 
 }
 }

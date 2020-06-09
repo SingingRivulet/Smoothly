@@ -48,6 +48,8 @@ building::building(int thnum):buildingSolver("building.db",thnum)
                                 o->cost = line->valueint;
                             }else if(strcmp(line->string,"costNum")==0){
                                 o->costNum = line->valueint;
+                            }else if(strcmp(line->string,"needTech")==0){
+                                o->needTech = line->valueint;
                             }
                         }
                         line = line->next;
@@ -72,11 +74,21 @@ building::~building()
 }
 
 void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id, const std::string & uuid, const RakNet::SystemAddress & addr){
-    createBuilding(position,rotation,conn,id,[&](int cost,int costNum){
-        if(costNum==0)
-            return true;
+    createBuilding(position,rotation,conn,id,[&](int cost,int costNum,int needTech){
+        if(costNum==0){
+            return (needTech==-1 || checkTech(addr,uuid,needTech));
+        }
         try{
             auto body = getMainControl(uuid);
+            bag_inner & b =  cache_bag_inner[body];
+            auto it = b.resources.find(cost);
+            if(it==b.resources.end()){
+                return false;
+            }
+            if(it->second+costNum < 0)
+                return false;
+            if(needTech!=-1 && !checkTech(addr,uuid,needTech))
+                return false;
             return addResource(addr,body,cost,costNum);
         }catch(...){
             return false;
@@ -84,13 +96,13 @@ void building::createBuilding(const vec3 & position, const vec3 & rotation, cons
     });
 }
 
-void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id,std::function<bool(int,int)> needBuild)
+void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id,std::function<bool(int,int,int)> needBuild)
 {
     auto it = config.find(id);
     if(it==config.end())
         return;
     conf * c = it->second;
-    if(!needBuild(c->cost,c->costNum))
+    if(!needBuild(c->cost,c->costNum,c->needTech))
         return;
 
     std::string uuid;

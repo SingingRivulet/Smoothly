@@ -12,7 +12,7 @@ class building:public bullet{
         building(int thnum);
         ~building();
         void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id,const std::string & uuid, const RakNet::SystemAddress & addr);
-        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id,std::function<bool(int,int)> needBuild);
+        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id,std::function<bool(int,int,int)> needBuild);
         void removeBuilding(const std::string & uuid);
         void damageBuilding(const std::string & uuid , int dthp);
         void getBuildingChunk(int x, int y,
@@ -65,10 +65,12 @@ class building:public bullet{
         struct conf{
                 int hp;
                 int cost,costNum;
+                int needTech;
                 inline conf(){
                     hp=1;
                     cost = 0;
                     costNum = 0;
+                    needTech = -1;
                 }
         };
         std::map<int,conf*> config;
