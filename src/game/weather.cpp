@@ -138,15 +138,20 @@ void weather::updateWeather(int tm){
         setRain(0);
     }
 
+    lightTarget = camera->getPosition();
+    auto level = getRealHight(floor(lightTarget.X/32.f)*32,floor(lightTarget.Z/32.f)*32);
+    if(level<32)
+        level = 32;
+    lightTarget.Y = level;
+
     auto ldir = astronomical;
     ldir.Z = -ldir.X;
     ldir.X = 0;
     ldir.normalize();
-    ldir*=100;
-    ldir+=camera->getPosition();
+    ldir*=80;
+    ldir+=lightTarget;
     light->setPosition(ldir);
 
-    lightTarget = camera->getPosition();
     video::SLight lconf;
     lconf.DiffuseColor.set(glow.X,glow.Y,glow.Z);
     light->setLightData(lconf);
