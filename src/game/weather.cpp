@@ -137,6 +137,19 @@ void weather::updateWeather(int tm){
     }else{
         setRain(0);
     }
+
+    auto ldir = astronomical;
+    ldir.Z = -ldir.X;
+    ldir.X = 0;
+    ldir.normalize();
+    ldir*=100;
+    ldir+=camera->getPosition();
+    light->setPosition(ldir);
+
+    lightTarget = camera->getPosition();
+    video::SLight lconf;
+    lconf.DiffuseColor.set(glow.X,glow.Y,glow.Z);
+    light->setLightData(lconf);
 }
 
 }

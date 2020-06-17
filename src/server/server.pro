@@ -69,3 +69,5 @@ HEADERS += \
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -lsqlite3 -llua -ldl
+
+DISTFILES +=

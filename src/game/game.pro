@@ -56,7 +56,8 @@ HEADERS += \
     weather.h \
     pathfinding.h \
     package.h \
-    technology.h
+    technology.h \
+    shadow.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -98,7 +99,8 @@ SOURCES += \
     fire_api.cpp \
     package.cpp \
     body_bag.cpp \
-    technology.cpp
+    technology.cpp \
+    shadow.cpp
 
 FORMS += \
     ui/login.ui
@@ -123,4 +125,6 @@ DISTFILES += \
     ../script/building.lua \
     ../script/terrainItem.lua \
     ../script/utils/print_r.lua \
-    ../script/fire.lua
+    ../script/fire.lua \
+    ../shader/shadow.ps.glsl \
+    ../shader/shadow.vs.glsl

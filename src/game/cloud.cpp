@@ -42,6 +42,7 @@ cloud::cloud(){
 
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     light = scene->addLightSceneNode();
+    scene->addSphereSceneNode(1,16,light);
     light->setPosition(irr::core::vector3df(0,500,0));
 
     //setSnow(1);
@@ -87,16 +88,6 @@ void cloud::setRain(float k){
 void cloud::renderSky(){
     rain->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
     snow->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
-    {
-        auto ldir = astronomical;
-        ldir.normalize();
-        ldir*=4096;
-        ldir+=camera->getPosition();
-        light->setPosition(ldir);
-        video::SLight lconf;
-        lconf.DiffuseColor.set(glow.X,glow.Y,glow.Z);
-        light->setLightData(lconf);
-    }
     clock_t starts,ends;
     starts=clock();
     begin:
@@ -109,6 +100,7 @@ void cloud::renderSky(){
         sky_pb = tmp;
         cloudTime = time(0);//更新时间
         updateWeather(cloudTime);
+
         return;
     }
     ends=clock();

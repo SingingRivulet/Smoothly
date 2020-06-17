@@ -45,11 +45,14 @@ class cloud:public engine{
         }cloudShaderCallback;
         irr::s32 cloudTime;
         irr::scene::IParticleSystemSceneNode *rain,*snow;
-        irr::scene::ILightSceneNode * light;
 
         irr::gui::IGUIStaticText * cloudy_text;
         irr::gui::IGUIStaticText * daytime_text;
         irr::gui::IGUIStaticText * gametime_text;
+
+    public:
+        irr::scene::ILightSceneNode * light;
+        irr::core::vector3df lightTarget;
 };
 
 }

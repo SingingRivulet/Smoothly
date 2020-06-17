@@ -24,22 +24,28 @@ terrain::terrain(){
     printf("[terrain]load shaderv1\n");
     shaderv1 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/terrain_lod1.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/terrain_lod1.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &terrainShaderCallback);
     printf("[terrain]load shaderv2\n");
     shaderv2 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/terrain_lod2.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/terrain_lod2.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &terrainShaderCallback);
     printf("[terrain]load shaderv3\n");
     shaderv3 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/terrain_lod3.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/terrain_lod3.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &terrainShaderCallback);
     printf("[terrain]load shaderv4\n");
     shaderv4 = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/terrain_lod4.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/terrain_lod4.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &terrainShaderCallback);
 
     first = true;
     lastUCT = 0;
+
+    terrainShaderCallback.parent = this;
 }
 terrain::~terrain(){
     for(auto it:chunks)
@@ -92,9 +98,12 @@ terrain::chunk * terrain::genChunk(int x,int y){
             res->collMap[i][j]=floor(mapBuf[i*2][j*2]/2);
         }
     }
-    res->node=scene->addMeshSceneNode(mesh,0,-1);
-    res->node->setPosition(vec3(x*32.0f , 0 , y*32.0f));
-    
+    auto posi = vec3(x*32.0f , 0 , y*32.0f);
+    res->node = scene->addMeshSceneNode(mesh,0,-1);
+    res->shadowNode = createShadowNode(mesh,0,-1);
+    res->node->setPosition(posi);
+    res->shadowNode->setPosition(posi);
+
     auto selector=scene->createOctreeTriangleSelector(mesh,res->node);   //创建选择器
     res->node->setTriangleSelector(selector);
     selector->drop();
@@ -139,6 +148,7 @@ void terrain::freeChunk(terrain::chunk * p){
     delete p->bodyShape;
     delete p->bodyMesh;
     p->node->remove();
+    p->shadowNode->remove();
     delete p;
 }
 
@@ -299,6 +309,15 @@ int terrain::getCollHeight(int x, int y){
         return c->collMap[cx][cy];
     }else
         return 0;
+}
+
+void terrain::TerrainShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    s32 var0 = 0;
+    services->setPixelShaderConstant("shadowMap",&var0, 1);
+    services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
+    core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
+    services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);
+    services->setVertexShaderConstant("transformMatrix" , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
 }
 
 }

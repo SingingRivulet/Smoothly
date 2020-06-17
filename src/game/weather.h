@@ -1,9 +1,9 @@
 #ifndef SMOOTHLY_WEATHER
 #define SMOOTHLY_WEATHER
-#include "cloud.h"
+#include "shadow.h"
 namespace smoothly{
 
-class weather:public cloud{
+class weather:public shadow{
     public:
         weather();
         void updateWeather(int)override;

@@ -4,6 +4,7 @@
 namespace smoothly{
 
 building::building(){
+    buildingShaderCallback.parent = this;
     buildingPrev = NULL;
     buildingPrevConf = NULL;
     buildingPrevId = -4;
@@ -253,13 +254,15 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
         if(c->haveShader){
             res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
         }
+        res->node[i]->setMaterialTexture(0,shadowMapTexture);
         if(c->texture){
-            res->node[i]->setMaterialTexture(0,c->texture);
+            res->node[i]->setMaterialTexture(1,c->texture);
         }
         res->node[i]->setVisible(false);
         res->node[i]->updateAbsolutePosition();//更新矩阵
     }
     res->node[ml]->setVisible(true);//显示最低lod级别
+    res->shadowNode = createShadowNode(c->mesh[ml],0,-1,p,r);//创建光影
 
     res->uuid = uuid;
 
@@ -381,7 +384,8 @@ void building::loadConfig(){
                                                         ptr->haveShader = true;
                                                         ptr->shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                                                     vs->valuestring, "main", irr::video::EVST_VS_1_1,
-                                                                    ps->valuestring, "main", irr::video::EPST_PS_1_1);
+                                                                    ps->valuestring, "main", irr::video::EPST_PS_1_1,
+                                                                    &buildingShaderCallback);
                                                     }
                                                 }else if(strcmp(item->string,"fetchBB")==0){
                                                     auto from = cJSON_GetObjectItem(item,"from");
@@ -534,8 +538,12 @@ void building::buildingStart(){
     buildingPrev->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     buildingPrev->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     buildingPrev->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-    if(buildingPrevConf->texture)
-        buildingPrev->setMaterialTexture(0,buildingPrevConf->texture);
+
+    buildingPrev->setMaterialTexture(0,shadowMapTexture);
+    if(buildingPrevConf->texture){
+        buildingPrev->setMaterialTexture(1,buildingPrevConf->texture);
+    }
+
     if(buildingPrevConf->haveShader){
         buildingPrev->setMaterialType((irr::video::E_MATERIAL_TYPE)buildingPrevConf->shader);
     }
@@ -897,6 +905,17 @@ void building::linkChunk(building::buildingChunk * c, int x, int y){
             c->neary0 = NULL;
         }
     }
+}
+
+void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    s32 var0 = 0;
+    s32 var1 = 1;
+    services->setPixelShaderConstant("shadowMap",&var0, 1);
+    services->setPixelShaderConstant("tex",&var1, 1);
+    services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
+    core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
+    services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);
+    services->setVertexShaderConstant("transformMatrix" , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
 }
 
 }

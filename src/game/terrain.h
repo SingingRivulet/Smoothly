@@ -40,7 +40,7 @@ namespace smoothly{
             float genTerrain(float ** img,int x , int y ,int pointNum);
             
             struct chunk{//各组件维护各自的chunk
-                irr::scene::IMeshSceneNode  * node;
+                irr::scene::IMeshSceneNode  * node , * shadowNode;
                 
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -122,6 +122,13 @@ namespace smoothly{
                 return res;
             }
             int lastUCT;
+
+            class TerrainShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
+                public:
+                    terrain * parent;
+                    void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+            }terrainShaderCallback;
+
     };
 }
 #endif

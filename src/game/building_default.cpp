@@ -5,7 +5,8 @@ namespace smoothly{
 void building::addDefaultBuilding(){
     def_shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/building_default.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                "../shader/building_default.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                "../shader/building_default.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                &buildingShaderCallback);
     {
         auto ptr  = new buildingConf;
         ptr->id   = -1;

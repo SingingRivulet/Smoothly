@@ -1,4 +1,11 @@
+uniform sampler2D shadowMap;
+uniform mat4 shadowMatrix;
+uniform mat4 modelMatrix;
+uniform mat4 transformMatrix;
+
 varying vec3 pointPosition;//坐标
+varying vec4 pointPosition4;
+
 varying float temp;//温度
 varying float humi;//湿度
 
@@ -80,7 +87,9 @@ float cnoise(vec3 P){
 
 void main(){
     gl_Position = ftransform();//设置坐标
-    pointPosition = gl_Vertex.xyz; //把坐标点传给像素
+    vec4 posi = modelMatrix * gl_Vertex;
+    pointPosition4 = posi;
+    pointPosition = posi.xyz/posi.w; //把坐标点传给像素
     humi          = cnoise(vec3(pointPosition.x*0.01,pointPosition.y*0.02,pointPosition.z*0.01))*10.0;
     temp          = (256.0-pointPosition.y)/256.0;
 

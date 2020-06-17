@@ -269,6 +269,7 @@ class body:public technology{
             bool haveAniCallback;
             float walkVelocity;
             irr::video::ITexture * texture;
+            int hp;
             std::vector<irr::scene::ISkinnedMesh*> animation;//用于混合的动画
             inline bodyConf(){
                 mesh         = NULL;
@@ -282,6 +283,7 @@ class body:public technology{
                 jump         = 10;
                 teleport     = false;
                 haveAniCallback = false;
+                hp           = 0;
             }
         };
         std::map<int,bodyConf*> bodyConfig;
@@ -476,6 +478,8 @@ class body:public technology{
                 }
             }
         }
+    private:
+        irr::video::ITexture * texture_hp;
 
 };
 

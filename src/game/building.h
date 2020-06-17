@@ -111,6 +111,7 @@ class building:public weather{
             std::string uuid;
             buildingChunk * inchunk;
             irr::scene::IMeshSceneNode * node[4];
+            irr::scene::IMeshSceneNode * shadowNode;
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
             buildingConf             * config;
@@ -120,10 +121,17 @@ class building:public weather{
             inline buildingBody(){
                 for(int i = 0;i<4;++i)
                     node[i] = NULL;
+                shadowNode = NULL;
             }
             void showVoxels();
             void getVoxels(std::function<void(const blockPosition &)> callback);
         };
+        class BuildingShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
+            public:
+                building * parent;
+                void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+        }buildingShaderCallback;
+
         void showVoxelsByRay(const vec3 & from , const vec3 & to );
         void showVoxelsByCamera();
     private:

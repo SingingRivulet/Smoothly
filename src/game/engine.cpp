@@ -20,6 +20,7 @@ engine::engine(){
     irr::SIrrlichtCreationParameters param;
     param.DriverType = irr::video::EDT_OPENGL;
     param.DeviceType = irr::EIDT_BEST;
+    param.Stencilbuffer = true;
     param.WindowSize.set(width,height);
     param.Bits = 16;
 
@@ -34,7 +35,7 @@ engine::engine(){
     driver->setAllowZWriteOnTransparent(true);
     vendor = driver->getVendorInfo();
     scene->setAmbientLight(irr::video::SColor(255,128,128,128));
-    scene->setShadowColor(irr::video::SColor(150, 0, 0, 0));
+    scene->setShadowColor(irr::video::SColor(250, 0, 0, 0));
 
     //gui
     gui::IGUISkin* newskin = gui->createSkin(gui::EGST_WINDOWS_CLASSIC);
@@ -155,6 +156,7 @@ void engine::sceneLoop(){
     water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
 
     renderSky();
+    renderShadow();
 
     driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));

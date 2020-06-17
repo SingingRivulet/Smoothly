@@ -761,6 +761,8 @@ body::body():gravity(0,-10,0){
     needUpdateUI = false;
     usingResource = false;
     bag_selectId = -1;
+
+    texture_hp = driver->getTexture("../../res/icon/hp.png");
 }
 
 body::~body(){

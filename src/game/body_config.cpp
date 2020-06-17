@@ -61,6 +61,9 @@ void body::loadBodyConfig(){
                                             }else
                                             if(strcmp(item->string,"jump")==0){
                                                 ptr->jump = item->valuedouble;
+                                            }else
+                                            if(strcmp(item->string,"hp")==0){
+                                                ptr->hp = item->valueint;
                                             }
                                         }else if(item->type==cJSON_String){
                                             if(strcmp(item->string,"aniCallback")==0){

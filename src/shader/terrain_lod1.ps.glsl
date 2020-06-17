@@ -1,4 +1,10 @@
+uniform sampler2D tex;
+uniform sampler2D shadowMap;
+uniform mat4 shadowMatrix;
+uniform mat4 modelMatrix;
+
 varying vec3 pointPosition;//坐标
+varying vec4 pointPosition4;
 varying float temp;//温度
 varying float humi;//湿度
 
@@ -180,6 +186,16 @@ void main(){
     lcolor.z +=0.1;
 
     vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
+    
+    vec4 lightView4 = shadowMatrix * pointPosition4;
+    vec3 lightView = lightView4.xyz / lightView4.w;
+    lightView = lightView * 0.5 + 0.5;
+    
+    float closestDepth = texture2D(shadowMap, lightView.xy).r; 
+    float currentDepth = lightView.z;
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    
+    scolor -= scolor*shadow*0.5;
 
     gl_FragColor = scolor;
 

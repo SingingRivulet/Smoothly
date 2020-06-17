@@ -67,6 +67,7 @@ namespace smoothly{
             RealisticWaterSceneNode * water;
             int lastFPS;
             virtual void renderSky()=0;
+            virtual void renderShadow()=0;
 
     };
 }

@@ -1,5 +1,5 @@
-#ifndef SMOOTHLY_PACKAGE_H
-#define SMOOTHLY_PACKAGE_H
+#ifndef SMOOTHLY_PACKAGE
+#define SMOOTHLY_PACKAGE
 #include "terrainDispather.h"
 namespace smoothly{
 
@@ -39,4 +39,4 @@ class package:public terrainDispather{
 };
 
 }
-#endif // SMOOTHLY_PACKAGE_H
+#endif // SMOOTHLY_PACKAGE

@@ -154,6 +154,24 @@ void body::onDraw(){
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::video::SColor(255,64,255,255));
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X-2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
             driver->draw2DLine(irr::core::vector2d<irr::s32>(p.X+2,p.Y),irr::core::vector2d<irr::s32>(p.X,p.Y+5),irr::video::SColor(255,64,255,255));
+            {
+                float hp = bd->hp;
+                float maxhp = bd->config->hp;
+                if(hp<maxhp){//不是满血的标出血量
+                    auto pr = hp/maxhp;
+                    if(pr>0.f){
+                        if(pr>1.f)
+                            pr = 1.f;
+                        int wsize = pr*16;
+                        if(wsize>0){
+                            driver->draw2DLine(
+                                        irr::core::vector2d<irr::s32>(p.X - wsize, p.Y -25),
+                                        irr::core::vector2d<irr::s32>(p.X + wsize, p.Y -25),
+                                        irr::video::SColor(255,64,255,64));
+                        }
+                    }
+                }
+            }
             if(!bd->autoWalk.empty()){
             #define dig120 (3.14159265358979323846*2)/3
             #define inr    19
@@ -215,6 +233,39 @@ void body::onDraw(){
         float prog = ((float)delta)/((float)mainControlBody->reloadNeedTime);
         drawArcProgressBar(screenCenter,128,irr::video::SColor(255,255,255,255),128,prog);
     }
+    //血条
+    if(mainControlBody){
+        float hp = mainControlBody->hp;
+        float maxhp = mainControlBody->config->hp;
+        auto pr = hp/maxhp;
+        if(pr>0.f){
+            if(pr>1.f)
+                pr = 1.f;
+            int wsize = pr*256;
+            if(wsize>0){
+                int centerw = width*0.5;
+                irr::core::rect<irr::s32> des(centerw-wsize , 0 , centerw+wsize , 64);
+                irr::core::rect<irr::s32> res(256-wsize , 0 , 256+wsize , 64);
+                driver->draw2DImage(texture_hp , des , res , 0 , 0 , true);
+            }
+        }
+    }
+
+    auto px = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(camera->getPosition()+vec3(100,0,0),camera);
+    auto py = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(camera->getPosition()+vec3(0,0,100),camera);
+    auto pl = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(light->getPosition(),camera);
+    driver->draw2DLine(
+                px,
+                px+irr::core::vector2di(0,30),
+                irr::video::SColor(255,255,0,0));
+    driver->draw2DLine(
+                py,
+                py+irr::core::vector2di(0,30),
+                irr::video::SColor(255,0,255,255));
+    driver->draw2DLine(
+                pl,
+                pl+irr::core::vector2di(0,30),
+                irr::video::SColor(255,255,255,255));
 }
 
 }
