@@ -10,6 +10,7 @@ shadow::shadow(){
                           &shadowCallback);
     shadowSpace = scene->createNewSceneManager(false);//创建光影空间
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
+    //shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(128,128,0.9f,200.f),true);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "shadowMap", video::ECF_A8R8G8B8);//创建渲染目标
 }
 

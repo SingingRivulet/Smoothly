@@ -251,6 +251,8 @@ void body::onDraw(){
         }
     }
 
+    /*
+     * 坐标轴及光源
     auto px = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(camera->getPosition()+vec3(100,0,0),camera);
     auto py = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(camera->getPosition()+vec3(0,0,100),camera);
     auto pl = scene->getSceneCollisionManager()->getScreenCoordinatesFrom3DPosition(light->getPosition(),camera);
@@ -266,6 +268,7 @@ void body::onDraw(){
                 pl,
                 pl+irr::core::vector2di(0,30),
                 irr::video::SColor(255,255,255,255));
+    */
 }
 
 }

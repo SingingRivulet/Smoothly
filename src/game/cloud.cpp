@@ -42,7 +42,6 @@ cloud::cloud(){
 
     scene->setAmbientLight(irr::video::SColor(255,80,80,80));
     light = scene->addLightSceneNode();
-    scene->addSphereSceneNode(1,16,light);
     light->setPosition(irr::core::vector3df(0,500,0));
 
     //setSnow(1);
