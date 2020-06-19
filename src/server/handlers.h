@@ -41,6 +41,7 @@ class handlers:public admin{
         void sendAddr_removeTable(const RakNet::SystemAddress & addr,
             int x,int y,
             const std::list<std::pair<int,int> > & rmt)override;
+        void sendAddr_chunkACL(const RakNet::SystemAddress & addr, const ipair & posi, chunkACL_t &)override;
 
 
         void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)override;

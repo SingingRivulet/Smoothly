@@ -135,6 +135,7 @@ void handlers::sendRemoveTable(const ipair & p , const std::string & to){
         RakNet::SystemAddress addr;
         getAddrByUUID(to,addr);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
+        sendAddr_chunkACL(addr,p,cache_chunkACL[p]);
     }catch(...){
         logError();
     }
@@ -153,6 +154,16 @@ void handlers::sendAddr_removeTable(const RakNet::SystemAddress & addr,
     }
     sendMessage(&bs,addr);
     
+}
+
+void handlers::sendAddr_chunkACL(const RakNet::SystemAddress & addr,const ipair & posi, map::chunkACL_t & acl){
+    makeHeader('G','a');
+    bs.Write((int32_t)posi.x);
+    bs.Write((int32_t)posi.y);
+    bs.Write(acl.allowBuildingWrite);
+    bs.Write(acl.allowCharacterDamage);
+    bs.Write(acl.allowTerrainItemWrite);
+    sendMessage(&bs,addr);
 }
 
 void handlers::sendAddr_bag(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & text){

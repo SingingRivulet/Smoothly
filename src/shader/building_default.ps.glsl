@@ -17,7 +17,7 @@ void main(){
 
     float closestDepth = texture2D(shadowMap, lightView.xy).r;
     float currentDepth = lightView.z;
-    float shadow = currentDepth+0.01 < closestDepth  ? 1.0 : 0.0;
+    float shadow = currentDepth+0.5 < closestDepth  ? 1.0 : 0.0;
 
     color.x*=(lcolor.x+0.2);
     color.y*=(lcolor.y+0.2);

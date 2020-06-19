@@ -423,6 +423,12 @@ void body::interactive(const std::string & uuid , const std::string & s){
 void body::HPInc(const std::string & uuid,int delta){
     try{
         auto p = getCharPosition(uuid);
+
+        chunkACL_t & acl = cache_chunkACL[p];//区块权限控制
+        if(!acl.allowCharacterDamage){//不允许受到伤害
+            return;
+        }
+
         int hp = getHP(uuid);
         hp+=delta;
         if(hp>0){

@@ -7,7 +7,9 @@
 
 #define findBody(x) \
     auto it = bodies.find(uuid); \
-    if(it!=bodies.end())
+    if(it==bodies.end()){ \
+        cmd_getBody(uuid); \
+    }else
 
 namespace smoothly{
 

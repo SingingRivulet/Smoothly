@@ -74,6 +74,20 @@ building::~building()
 }
 
 void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id, const std::string & uuid, const RakNet::SystemAddress & addr){
+
+    int cx = floor(position.X/32);
+    int cy = floor(position.Z/32);
+    chunkACL_t & acl = cache_chunkACL[ipair(cx,cy)];//区块权限控制
+
+    if(!acl.allowBuildingWrite){//禁写入
+        if(acl.owner.empty()){//禁写入且无拥有者
+            return;
+        }else{
+            if(acl.owner!=uuid)//不是拥有者
+                return;
+        }
+    }
+
     createBuilding(position,rotation,conn,id,[&](int cost,int costNum,int needTech){
         if(costNum==0){
             return (needTech==-1 || checkTech(addr,uuid,needTech));
@@ -96,8 +110,8 @@ void building::createBuilding(const vec3 & position, const vec3 & rotation, cons
     });
 }
 
-void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id,std::function<bool(int,int,int)> needBuild)
-{
+void building::createBuilding(const vec3 & position, const vec3 & rotation, const std::list<std::string> & conn, int id,std::function<bool(int,int,int)> needBuild){
+
     auto it = config.find(id);
     if(it==config.end())
         return;
@@ -108,11 +122,11 @@ void building::createBuilding(const vec3 & position, const vec3 & rotation, cons
     std::string uuid;
     getUUID(uuid);
 
-    char buf[512],buf2[512];
-    leveldb::WriteBatch batch;
-
     int cx = floor(position.X/32);
     int cy = floor(position.Z/32);
+
+    char buf[512],buf2[512];
+    leveldb::WriteBatch batch;
 
     //地图区块标识
     snprintf(buf    ,sizeof(buf)    ,"B_M_%d,%d#%s" ,   cx  ,   cy  ,   uuid.c_str());
@@ -146,15 +160,29 @@ void building::removeBuilding(const std::string & uuid)
     buildingSolver.requestRemove(uuid);//通知求解器
 }
 
-void building::damageBuilding(const std::string & uuid, int dthp)
-{
+void building::damageBuilding(const std::string & player , const std::string & uuid, int dthp){
     try{
+
+        auto position = cache_building_transform[uuid].position;//获取区块位置
+        int cx = floor(position.X/32);
+        int cy = floor(position.Z/32);
+        chunkACL_t & acl = cache_chunkACL[ipair(cx,cy)];//区块权限控制
+
+        if(!acl.allowBuildingWrite){//禁写入
+            if(acl.owner.empty()){//禁写入且无拥有者
+                return;
+            }else{
+                if(acl.owner!=player)//不是拥有者
+                    return;
+            }
+        }
+
         int & h = cache_building_hp[uuid];
         h-=dthp;
         if(h<=0){
             removeBuilding(uuid);
         }
-    }catch(std::out_of_range & ){}
+    }catch(std::out_of_range & ){}catch(...){}
 }
 
 void building::getBuildingChunk(int x, int y, std::function<void (const std::string &, const vec3 &, const vec3 &,int id)> callback)

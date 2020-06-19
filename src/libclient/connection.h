@@ -256,6 +256,13 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'G':
+                                    switch (data->data[3]) {
+                                        case 'a':
+                                            ctl_chunkACL(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -336,6 +343,12 @@ class connectionBase{
             RakNet::RakString s=ss.c_str();
             bs.Write(u);
             bs.Write(s);
+            sendMessage(&bs);
+        }
+        inline void cmd_getBody(const std::string & uuid){
+            makeHeader('B','?');
+            RakNet::RakString u=uuid.c_str();
+            bs.Write(u);
             sendMessage(&bs);
         }
         inline void cmd_login(const std::string & uuid,const std::string & pwd){
@@ -711,6 +724,17 @@ class connectionBase{
             data->Read(id);
             data->Read(status);
             msg_makeStatus(id,status);
+        }
+        inline void ctl_chunkACL(RakNet::BitStream * data){
+            int32_t x,y;
+            bool allowBuildingWrite;    //是否允许修改建筑物
+            bool allowCharacterDamage;  //是否允许单位受到伤害
+            bool allowTerrainItemWrite; //是否允许修改地形物体（如植被）
+            data->Read(x);
+            data->Read(y);
+            data->Read(allowBuildingWrite);
+            data->Read(allowCharacterDamage);
+            data->Read(allowTerrainItemWrite);
         }
 
         time_t lastHeartbeat;

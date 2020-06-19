@@ -11,10 +11,10 @@ class building:public bullet{
     public:
         building(int thnum);
         ~building();
-        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id,const std::string & uuid, const RakNet::SystemAddress & addr);
-        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id,std::function<bool(int,int,int)> needBuild);
+        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id, const std::string & uuid, const RakNet::SystemAddress & addr);
+        void createBuilding(const vec3 & position , const vec3 & rotation , const std::list<std::string> & conn , int id, std::function<bool(int,int,int)> needBuild);
         void removeBuilding(const std::string & uuid);
-        void damageBuilding(const std::string & uuid , int dthp);
+        void damageBuilding(const std::string & player , const std::string & uuid , int dthp);
         void getBuildingChunk(int x, int y,
                 std::function<void(const std::string &, const vec3 &, const vec3 &, int)> callback);
         void loop();

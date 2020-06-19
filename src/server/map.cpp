@@ -201,10 +201,12 @@ void map::buildVisualFieldArray(int x, int y, std::function<void(int, int)> ncal
 
 void map::loop(){
     cache_nodePosi.removeExpire();
+    cache_chunkACL.removeExpire();
 }
 
 void map::release(){
     cache_nodePosi.clear();
+    cache_chunkACL.clear();
 }
 
 void map::cache_nodePosi_t::onExpire(const std::string & uuid , ipair & v){
@@ -222,6 +224,71 @@ void map::cache_nodePosi_t::onLoad(const std::string & uuid, ipair & v){
         int x,y;
         sscanf(value.c_str(),"%d %d",&x,&y);
         v=ipair(x,y);
+    }
+}
+
+void map::cache_chunkACL_t::onExpire(const ipair & posi, map::chunkACL_t & d){
+    char buf[64];
+    snprintf(buf,sizeof(buf),"chunkACL:%d,%d",posi.x,posi.y);
+    std::string val;
+    d.toString(val);
+    parent->db->Put(leveldb::WriteOptions(),buf,val);
+}
+
+void map::cache_chunkACL_t::onLoad(const ipair & posi, map::chunkACL_t & d){
+    char buf[64];
+    snprintf(buf,sizeof(buf),"chunkACL:%d,%d",posi.x,posi.y);
+    std::string val;
+    parent->db->Get(leveldb::ReadOptions(), buf , &val);
+    if(!val.empty()){
+        d.loadString(val);
+    }else{
+        d = chunkACL_t();
+    }
+}
+
+void map::chunkACL_t::toString(std::string & str){
+    cJSON * json = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(json,"allowBuildingWrite"       ,allowBuildingWrite?1:0);
+    cJSON_AddNumberToObject(json,"allowCharacterDamage"     ,allowCharacterDamage?1:0);
+    cJSON_AddNumberToObject(json,"allowTerrainItemWrite"    ,allowTerrainItemWrite?1:0);
+    cJSON_AddStringToObject(json,"owner"                    ,owner.c_str());
+
+    char * pp = cJSON_PrintUnformatted(json);
+    if(pp){
+        str = pp;
+        free(pp);
+    }
+    cJSON_Delete(json);
+}
+
+void map::chunkACL_t::loadString(const std::string & str){
+    allowBuildingWrite   = true;
+    allowCharacterDamage = true;
+    allowTerrainItemWrite= true;
+    owner.clear();
+    auto json = cJSON_Parse(str.c_str());
+    if(json){
+        cJSON *c=json->child;
+        while(c){
+            if(c->type==cJSON_Number){
+                if(strcmp(c->string,"allowBuildingWrite")==0){
+                    allowBuildingWrite      = (c->valueint!=0);
+                }else if(strcmp(c->string,"allowCharacterDamage")==0){
+                    allowCharacterDamage    = (c->valueint!=0);
+                }else if(strcmp(c->string,"allowTerrainItemWrite")==0){
+                    allowTerrainItemWrite   = (c->valueint!=0);
+                }
+            }else if(c->type==cJSON_String){
+                if(strcmp(c->string,"owner")==0){
+                    owner = c->valuestring;
+                }
+            }
+            c=c->next;
+        }
+
+        cJSON_Delete(json);
     }
 }
 

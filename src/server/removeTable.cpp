@@ -2,6 +2,10 @@
 namespace smoothly{
 namespace server{
 ////////////////
+removeTable::removeTable(){
+
+}
+
 void removeTable::getRemovedItem(int x,int y,std::list<std::pair<int,int> > & o){
     o.clear();
     
@@ -59,6 +63,7 @@ void removeTable::clearRemovedChunk(int x,int y){
     delete it;
     db->Write(leveldb::WriteOptions(), &batch);
 }
+
 std::pair<int,int> removeTable::getIdFromStr(const char * s){
     int id,index;
     sscanf(s,"%d %d",&id,&index);

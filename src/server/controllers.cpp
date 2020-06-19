@@ -48,6 +48,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'i':
                     ctl_interactive(uuid,addr,data);
                 break;
+                case '?':
+                    ctl_getBody(uuid,addr,data);
+                break;
                 case '-':
                     
                 break;
@@ -119,7 +122,8 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
     }
 }
 //===========================================================================================================
-void controllers::ctl_addRemovedItem(const std::string & ,const RakNet::SystemAddress &,RakNet::BitStream * data){
+void controllers::ctl_addRemovedItem(const std::string & uuid,const RakNet::SystemAddress &,RakNet::BitStream * data){
+
     int32_t cx,cy,id,index;
     float x,y;
     data->Read(cx);
@@ -128,6 +132,19 @@ void controllers::ctl_addRemovedItem(const std::string & ,const RakNet::SystemAd
     data->Read(y);
     data->Read(id);
     data->Read(index);
+    {
+        int tcx = floor(x/32);
+        int tcy = floor(y/32);
+        chunkACL_t & acl = cache_chunkACL[ipair(tcx,tcy)];//区块权限控制
+        if(!acl.allowTerrainItemWrite){//禁写入
+            if(acl.owner.empty()){//禁写入且无拥有者
+                return;
+            }else{
+                if(acl.owner!=uuid)//不是拥有者
+                    return;
+            }
+        }
+    }
     if(addRemovedItem(cx,cy,x,y,id,index)){
         boardcast_addRemovedItem(cx,cy,id,index);
     }
@@ -247,12 +264,12 @@ void controllers::ctl_addBuilding(const std::string & uuid, const RakNet::System
     createBuilding(p,r,l,id,uuid,addr);
 }
 
-void controllers::ctl_damageBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress &, RakNet::BitStream * data){
+void controllers::ctl_damageBuilding(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
     RakNet::RakString u;
     int32_t dmg;
     data->Read(u);
     data->Read(dmg);
-    damageBuilding(u.C_String() , dmg);
+    damageBuilding(uuid , u.C_String() , dmg);
 }
 
 void controllers::ctl_getBuilding(const std::string & /*uuid*/, const RakNet::SystemAddress & addr, RakNet::BitStream * data){

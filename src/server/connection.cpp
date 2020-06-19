@@ -116,6 +116,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
         std::list<std::pair<int,int> > rmt;
         getRemovedItem(p.x,p.y, rmt);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
+        sendAddr_chunkACL(addr,p,cache_chunkACL[p]);
     }
 }
 void connection::sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid){

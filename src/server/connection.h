@@ -79,6 +79,7 @@ class connection:public building{
             const std::set<int> & wearing);
         
         void sendBodyToAddr(const RakNet::SystemAddress & addr,const std::string & uuid);
+        virtual void sendAddr_chunkACL(const RakNet::SystemAddress & addr,const ipair & posi,chunkACL_t &)=0;
         
         connection(int thnum);
 
