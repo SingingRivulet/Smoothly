@@ -102,6 +102,11 @@ void body::bodyItem::updateFromWorld(){
     }
 
     coll_rigidBody->getMotionState()->setWorldTransform(transform);
+
+    irrPos.Y = 1;
+    if(minimap_element){
+        minimap_element->setPosition(irrPos);
+    }
 }
 
 void body::bodyItem::doAnimation(float speed, int start, int end,float frame, bool loop){
@@ -642,6 +647,11 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->coll_rigidBodyInfo.type = BODY_BODY_PART;
     p->coll_rigidBodyInfo.ptr  = &p->m_character;
 
+    p->minimap_element = NULL;
+    if(owner==myUUID && (!myUUID.empty())){
+        p->minimap_element = mapScene->addBillboardSceneNode();
+    }
+
     p->updateFromWorld();
     p->updateStatus();
 
@@ -654,8 +664,9 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     }
 
     bodies[uuid] = p;
-    if(owner==myUUID && (!myUUID.empty()))
+    if(owner==myUUID && (!myUUID.empty())){
         myBodies[uuid] = p;
+    }
 
     if(uuid==mainControl){
         mainControlBody = p;
@@ -945,6 +956,10 @@ void body::releaseBody(bodyItem * b){
     if(!mainControl.empty() && mainControl==b->uuid){//是视角物体
         mainControl.clear();
         mainControlBody=NULL;
+    }
+
+    if(b->minimap_element){
+        b->minimap_element->remove();
     }
     delete b;
 }

@@ -42,6 +42,8 @@ class controllers:public handlers{
         void ctl_setTechTarget(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
 
         void ctl_making(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+
+        void ctl_getChunkACL(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
 };
 /////////////////
 }//////server

@@ -28,7 +28,7 @@ class building:public weather{
         void buildingAdd(const vec3 & p,const vec3 & r,int id,const std::string & uuid);
         void buildingChunkRelease(int x, int y);
 
-        virtual void loop();
+        virtual void loop()=0;
 
         void msg_addBuilding(const char * uuid, int id, float px, float py, float pz, float rx, float ry, float rz)override;
         void msg_removeBuilding(const char * uuid)override;

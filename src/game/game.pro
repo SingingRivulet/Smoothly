@@ -57,7 +57,8 @@ HEADERS += \
     pathfinding.h \
     package.h \
     technology.h \
-    shadow.h
+    shadow.h \
+    carto.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -100,7 +101,8 @@ SOURCES += \
     package.cpp \
     body_bag.cpp \
     technology.cpp \
-    shadow.cpp
+    shadow.cpp \
+    carto.cpp
 
 FORMS += \
     ui/login.ui

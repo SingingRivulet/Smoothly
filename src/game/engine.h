@@ -68,6 +68,7 @@ namespace smoothly{
             int lastFPS;
             virtual void renderSky()=0;
             virtual void renderShadow()=0;
+            virtual void renderMiniMap()=0;
 
     };
 }

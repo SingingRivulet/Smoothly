@@ -135,7 +135,7 @@ void handlers::sendRemoveTable(const ipair & p , const std::string & to){
         RakNet::SystemAddress addr;
         getAddrByUUID(to,addr);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
-        sendAddr_chunkACL(addr,p,cache_chunkACL[p]);
+        //sendAddr_chunkACL(addr,p,cache_chunkACL[p]);
     }catch(...){
         logError();
     }

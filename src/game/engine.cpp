@@ -157,6 +157,7 @@ void engine::sceneLoop(){
 
     renderSky();
     renderShadow();
+    renderMiniMap();
 
     driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));

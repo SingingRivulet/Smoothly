@@ -455,6 +455,12 @@ class connectionBase{
             bs.Write(target);
             sendMessage(&bs);
         }
+        inline void cmd_getChunkACL(int32_t x,int32_t y){
+            makeHeader('G','g');
+            bs.Write(x);
+            bs.Write(y);
+            sendMessage(&bs);
+        }
     private:
         //controllers
         inline void ctl_setVisualRange(RakNet::BitStream * data){
@@ -735,6 +741,7 @@ class connectionBase{
             data->Read(allowBuildingWrite);
             data->Read(allowCharacterDamage);
             data->Read(allowTerrainItemWrite);
+            msg_chunkACL(x,y,allowBuildingWrite,allowCharacterDamage,allowTerrainItemWrite);
         }
 
         time_t lastHeartbeat;
@@ -772,6 +779,7 @@ class connectionBase{
         virtual void msg_unlockTech(bool newtech,int32_t id)=0;
         virtual void msg_techTarget(bool newtarget,int32_t target)=0;
         virtual void msg_makeStatus(int32_t id,bool status)=0;
+        virtual void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t)=0;
 };
 ///////////////////////
 }//////client

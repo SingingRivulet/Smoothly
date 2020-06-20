@@ -53,6 +53,16 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
             }
         }
     }
+    {
+        ptr->minimap_element = NULL;
+        cmd_getChunkACL(x,y);
+        //auto cr = mapScene->getGeometryCreator();
+        //auto m = cr->createPlaneMesh(irr::core::dimension2df(32,32));
+        //auto n = mapScene->addMeshSceneNode(m,0,-1,vec3(x*32,0,y*32));
+        //n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+        //ptr->minimap_element = n;
+        //m->drop();
+    }
 }
 
 void terrain_item::pushRemoveTable(int x, int y, const std::set<mapItem> &r){
@@ -122,6 +132,10 @@ void terrain_item::releaseAllChunk(){
     chunks.clear();
 }
 void terrain_item::releaseChildren(chunk * ch){
+    if(ch->minimap_element){
+        ch->minimap_element->remove();
+        ch->minimap_element = NULL;
+    }
     for(auto it:ch->children){
         releaseTerrainItem(it.second);
     }
@@ -373,10 +387,58 @@ void terrain_item::releaseTerrainItem(item * p){
     }
     delete p;
 }
+irr::scene::IMesh * createMapMesh(const irr::video::SColor & color){
+    auto buffer = new irr::scene::SMeshBuffer();
+    irr::video::S3DVertex v;
+    v.Color = color;
+    v.Normal.set(0,1,0);
+
+    v.Pos.set(0,0,0);
+    buffer->Vertices.push_back(v);
+    v.Pos.set(0,0,32);
+    buffer->Vertices.push_back(v);
+    v.Pos.set(32,0,32);
+    buffer->Vertices.push_back(v);
+    v.Pos.set(32,0,0);
+    buffer->Vertices.push_back(v);
+
+    buffer->Indices.push_back(0);
+    buffer->Indices.push_back(1);
+    buffer->Indices.push_back(3);
+    buffer->Indices.push_back(1);
+    buffer->Indices.push_back(2);
+    buffer->Indices.push_back(3);
+
+    buffer->recalculateBoundingBox();
+
+    auto mesh = new irr::scene::SMesh();
+    mesh->addMeshBuffer(buffer);
+    mesh->setHardwareMappingHint(irr::scene::EHM_STATIC);
+    mesh->recalculateBoundingBox();
+    mesh->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    buffer->drop();
+
+    return mesh;
+}
 terrain_item::terrain_item(){
     chunkLeft = 0;
     chunkLeft_text = NULL;
     loadConfig();
+
+    {
+        minimap_terrain_mesh[0][0][0] = createMapMesh(irr::video::SColor(128,255,255,64));
+        minimap_terrain_mesh[0][0][1] = createMapMesh(irr::video::SColor(128,255,255,255));
+        minimap_terrain_mesh[0][1][0] = createMapMesh(irr::video::SColor(128,255,64,64));
+        minimap_terrain_mesh[0][1][1] = createMapMesh(irr::video::SColor(128,255,64,255));
+        minimap_terrain_mesh[1][0][0] = createMapMesh(irr::video::SColor(128,64,255,64));
+        minimap_terrain_mesh[1][0][1] = createMapMesh(irr::video::SColor(128,64,255,255));
+        minimap_terrain_mesh[1][1][0] = createMapMesh(irr::video::SColor(128,64,64,64));
+        minimap_terrain_mesh[1][1][1] = createMapMesh(irr::video::SColor(128,64,64,255));
+        minimap_terrain_shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                     "../shader/minimap_terrain.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                                     "../shader/minimap_terrain.ps.glsl", "main", irr::video::EPST_PS_1_1);
+    }
+
     //树纹理
     texture_treeTrunk = driver->getTexture("../../res/tree_trunk.tga");
     texture_treeLeaves = driver->getTexture("../../res/tree_leaves.tga");
@@ -545,6 +607,18 @@ void terrain_item::msg_addRemovedItem(int x,int y,int id,int index){
 }
 void terrain_item::msg_setRemovedItem(int x,int y,const std::set<mapItem> & rmt){
     pushRemoveTable(x,y,rmt);
+}
+
+void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t){
+    findChunk(x,y){
+        auto ptr = it->second;
+        if(ptr){
+            auto n = mapScene->addMeshSceneNode(minimap_terrain_mesh[b?1:0][c?1:0][t?1:0],0,-1,vec3(x*32,0,y*32));
+            n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+            n->setMaterialType((video::E_MATERIAL_TYPE)minimap_terrain_shader);
+            ptr->minimap_element = n;
+        }
+    }
 }
 
 void terrain_item::chunk::unlink(){

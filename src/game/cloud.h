@@ -1,9 +1,9 @@
 #ifndef SMOOTHLY_CLOUD
 #define SMOOTHLY_CLOUD
-#include "engine.h"
+#include "carto.h"
 namespace smoothly{
 
-class cloud:public engine{
+class cloud:public carto{
     public:
         cloud();
         irr::f32 cloudThre, // 云量，越大云越少

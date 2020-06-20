@@ -168,6 +168,8 @@ class body:public technology{
                 btMotionState    * coll_bodyState;
                 bodyInfo           coll_rigidBodyInfo;
 
+                irr::scene::ISceneNode * minimap_element;
+
                 bool firing;
                 int firingWearingId;
                 int fireId;

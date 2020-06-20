@@ -91,6 +91,7 @@ void building::buildingChunkRelease(int x, int y){
 }
 
 void building::loop(){
+    //weather::loop();
     buildingUpdate();
 }
 

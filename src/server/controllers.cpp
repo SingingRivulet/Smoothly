@@ -119,6 +119,13 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'G':
+            switch (a) {
+                case 'g':
+                    ctl_getChunkACL(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -393,6 +400,13 @@ void controllers::ctl_making(const std::string & uuid, const RakNet::SystemAddre
         bs.Write(status);
         sendMessage(&bs,addr);
     }
+}
+
+void controllers::ctl_getChunkACL(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t x,y;
+    data->Read(x);
+    data->Read(y);
+    sendAddr_chunkACL(addr,ipair(x,y),cache_chunkACL[ipair(x,y)]);
 }
 /////////////////
 }//////server
