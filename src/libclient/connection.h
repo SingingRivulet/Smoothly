@@ -12,6 +12,7 @@
 #include <set>
 #include <time.h>
 #include <functional>
+#include <vector>
 
 namespace smoothly{
 namespace client{
@@ -263,6 +264,22 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'I':
+                                    switch (data->data[3]) {
+                                        case 'm':
+                                            ctl_setMission(&bs);
+                                        break;
+                                        case 'c':
+                                            ctl_addMission(&bs);
+                                        break;
+                                        case 's':
+                                            ctl_submitMissionStatus(&bs);
+                                        break;
+                                        case 'L':
+                                            ctl_missionList(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -459,6 +476,27 @@ class connectionBase{
             makeHeader('G','g');
             bs.Write(x);
             bs.Write(y);
+            sendMessage(&bs);
+        }
+        inline void cmd_getMission(const char * muuid){
+            makeHeader('I','g');
+            bs.Write(RakNet::RakString(muuid));
+            sendMessage(&bs);
+        }
+        inline void cmd_getChunkMission(int32_t x,int32_t y){
+            makeHeader('I','c');
+            bs.Write(x);
+            bs.Write(y);
+            sendMessage(&bs);
+        }
+        inline void cmd_submitMission(const char * muuid,const char * body){
+            makeHeader('I','s');
+            bs.Write(RakNet::RakString(muuid));
+            bs.Write(RakNet::RakString(body));
+            sendMessage(&bs);
+        }
+        inline void cmd_giveUpMission(){
+            makeHeader('I','u');
             sendMessage(&bs);
         }
     private:
@@ -742,6 +780,36 @@ class connectionBase{
             data->Read(allowCharacterDamage);
             data->Read(allowTerrainItemWrite);
             msg_chunkACL(x,y,allowBuildingWrite,allowCharacterDamage,allowTerrainItemWrite);
+        }
+        inline void ctl_addMission(RakNet::BitStream * data){
+            RakNet::RakString uuid;
+            float x,y,z;
+            data->Read(uuid);
+            data->ReadVector(x,y,z);
+        }
+        inline void ctl_setMission(RakNet::BitStream * data){
+            RakNet::RakString uuid,text;
+            data->Read(uuid);
+            data->Read(text);
+        }
+        inline void ctl_submitMissionStatus(RakNet::BitStream * data){
+            RakNet::RakString uuid;
+            bool status;
+            data->Read(uuid);
+            data->Read(status);
+        }
+        inline void ctl_missionList(RakNet::BitStream * data){
+            int32_t len;
+            std::vector<std::string> missions;
+            data->Read(len);
+            RakNet::RakString uuid;
+            for(auto i=0;i<len;++i){
+                if(data->Read(uuid)){
+                    missions.push_back(uuid.C_String());
+                }else{
+                    break;
+                }
+            }
         }
 
         time_t lastHeartbeat;
