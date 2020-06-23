@@ -650,6 +650,10 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->minimap_element = NULL;
     if(owner==myUUID && (!myUUID.empty())){
         p->minimap_element = mapScene->addBillboardSceneNode();
+        p->minimap_element->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+        //p->minimap_element->setMaterialType((video::E_MATERIAL_TYPE)minimap_body_shader);
+        p->minimap_element->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+        p->minimap_element->setMaterialTexture(0,texture_minimap_body);
     }
 
     p->updateFromWorld();
@@ -774,6 +778,7 @@ body::body():gravity(0,-10,0){
     bag_selectId = -1;
 
     texture_hp = driver->getTexture("../../res/icon/hp.png");
+    texture_minimap_body = driver->getTexture("../../res/icon/texture_minimap_body.png");
 }
 
 body::~body(){

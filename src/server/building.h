@@ -1,5 +1,5 @@
-#ifndef SMOOTHLY_BUILDING
-#define SMOOTHLY_BUILDING
+#ifndef SMOOTHLY_SERVER_BUILDING
+#define SMOOTHLY_SERVER_BUILDING
 
 #include "bullet.h"
 #include "buildinggraph.h"

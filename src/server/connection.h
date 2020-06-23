@@ -1,7 +1,7 @@
 #ifndef SMOOTHLY_SERVER_CONNECTION
 #define SMOOTHLY_SERVER_CONNECTION
 
-#include "building.h"
+#include "mission.h"
 #include "heartbeat.h"
 #include "../utils/dbvt2d.h"
 
@@ -16,7 +16,7 @@
 namespace smoothly{
 namespace server{
 
-class connection:public building{
+class connection:public mission{
     public:
         virtual void start(unsigned short port,int maxcl,int vf);
         void release()override;

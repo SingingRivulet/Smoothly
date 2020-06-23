@@ -126,6 +126,22 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'I':
+            switch (a) {
+                case 'g':
+                    ctl_getMission(uuid,addr,data);
+                break;
+                case 's':
+                    ctl_submitMission(uuid,addr,data);
+                break;
+                case 'c':
+                    ctl_getChunkMission(uuid,addr,data);
+                break;
+                case 'u':
+                    ctl_giveUpMission(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
@@ -402,11 +418,58 @@ void controllers::ctl_making(const std::string & uuid, const RakNet::SystemAddre
     }
 }
 
-void controllers::ctl_getChunkACL(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+void controllers::ctl_getChunkACL(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     int32_t x,y;
     data->Read(x);
     data->Read(y);
     sendAddr_chunkACL(addr,ipair(x,y),cache_chunkACL[ipair(x,y)]);
+}
+
+void controllers::ctl_getMission(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString muuid;
+    makeHeader('I','m');
+    if(!data->Read(muuid))
+        return;
+    bs.Write(muuid);
+    try{
+        if(muuid.IsEmpty()){
+            bs.Write(RakNet::RakString(""));
+        }else{
+            mission_node_t & node = cache_mission_node[muuid.C_String()];
+            std::string val;
+            node.toString(val);
+            bs.Write(RakNet::RakString(val.c_str()));
+        }
+    }catch(...){
+        bs.Write(RakNet::RakString(""));
+    }
+    sendMessage(&bs,addr);
+}
+
+void controllers::ctl_getChunkMission(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    int32_t x,y;
+    if(data->Read(x) && data->Read(y)){
+        getChunkMissions(x,y,[&](const std::string & muuid,const vec3 & posi){
+            makeHeader('I','c');
+            bs.Write(RakNet::RakString(muuid.c_str()));
+            bs.WriteVector(posi.X , posi.Y , posi.Z);
+            sendMessage(&bs,addr);
+        });
+    }
+}
+
+void controllers::ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString muuid,body;
+    if(data->Read(muuid) && data->Read(body)){
+        makeHeader('I','s');
+        bs.Write(muuid);
+        bs.Write(submitMission(addr,uuid,body.C_String(),muuid.C_String()));
+        sendMessage(&bs,addr);
+    }
+}
+
+void controllers::ctl_giveUpMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * ){
+    giveUpMission(addr,uuid);
 }
 /////////////////
 }//////server

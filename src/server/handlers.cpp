@@ -324,6 +324,15 @@ void handlers::sendAddr_techTarget(const RakNet::SystemAddress & addr, bool newT
     sendMessage(&bs,addr);
 }
 
+void handlers::sendAddr_missionList(const RakNet::SystemAddress & addr, const std::vector<std::string> & s){
+    makeHeader('I','L');
+    bs.Write((int32_t)s.size());
+    for(auto it:s){
+        bs.Write(RakNet::RakString(it.c_str()));
+    }
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

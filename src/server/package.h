@@ -10,25 +10,27 @@ class package:public bag{
     //背包中的物品被丢了出来，变成了可以拾取的包裹
     public:
         package();
+
+        struct resource_t{
+                int id,num;
+                resource_t(){
+                    id = 0;
+                    num = 0;
+                }
+                resource_t(const resource_t & i){
+                    id = i.id;
+                    num = i.num;
+                }
+                resource_t(int i,int n){
+                    id = i;
+                    num = n;
+                }
+        };
+
         struct package_item{
                 int skin;//显示时使用的皮肤
                 std::string uuid;
                 vec3 position;
-                struct resource_t{
-                        int id,num;
-                        resource_t(){
-                            id = 0;
-                            num = 0;
-                        }
-                        resource_t(const resource_t & i){
-                            id = i.id;
-                            num = i.num;
-                        }
-                        resource_t(int i,int n){
-                            id = i;
-                            num = n;
-                        }
-                };
                 std::vector<resource_t> resource;
                 std::unordered_set<std::string> tool;
                 void toString(std::string & s);

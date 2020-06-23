@@ -173,6 +173,12 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->selectBodyEnd();
                         }
                         break;
+                    case irr::KEY_KEY_M:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFullMapMode();
+                            parent->setGUIMode(true);
+                        }
+                        break;
                     case irr::KEY_OEM_3://取消
                         parent->cancle();
                         break;
@@ -267,110 +273,145 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
         }
         parent->camera->OnEvent(event);
         return false;
-    }else{
+    }else if(parent->tech_tree_view->isVisible()){//科技树模式
+        switch(event.EventType){
 
-        if(parent->tech_tree_view->isVisible()){//科技树模式
-            switch(event.EventType){
-
-                case irr::EET_KEY_INPUT_EVENT:
-                    switch(event.KeyInput.Key){
-                        case irr::KEY_OEM_1:
-                            if(!event.KeyInput.PressedDown){
-                                {
-                                    bool mode = !parent->tech_tree_view->isVisible();
-                                    parent->tech_tree_view->setVisible(mode);
-                                    parent->setGUIMode(mode);
-                                }
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    case irr::KEY_OEM_1:
+                        if(!event.KeyInput.PressedDown){
+                            {
+                                bool mode = !parent->tech_tree_view->isVisible();
+                                parent->tech_tree_view->setVisible(mode);
+                                parent->setGUIMode(mode);
                             }
-                            break;
-                        default:break;
-                    }
-                    break;
-                case irr::EET_GUI_EVENT:
-                    switch (event.GUIEvent.EventType) {
-                        case irr::gui::EGET_TREEVIEW_NODE_SELECT:
-                            if(event.GUIEvent.Caller && event.GUIEvent.Caller->getType()==irr::gui::EGUIET_TREE_VIEW){
-                                auto elm = (irr::gui::IGUITreeView*)event.GUIEvent.Caller;
-                                auto node = elm->getSelected();
-                                if(node){
-                                    parent->selectTech(node);
-                                }
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+            case irr::EET_GUI_EVENT:
+                switch (event.GUIEvent.EventType) {
+                    case irr::gui::EGET_TREEVIEW_NODE_SELECT:
+                        if(event.GUIEvent.Caller && event.GUIEvent.Caller->getType()==irr::gui::EGUIET_TREE_VIEW){
+                            auto elm = (irr::gui::IGUITreeView*)event.GUIEvent.Caller;
+                            auto node = elm->getSelected();
+                            if(node){
+                                parent->selectTech(node);
                             }
-                            break;
-                        case irr::gui::EGET_BUTTON_CLICKED:
-                            if(event.GUIEvent.Caller && event.GUIEvent.Caller==parent->tech_button){
-                                parent->techActive();
-                            }
-                            break;
-                        default:break;
-                    }
-                    break;
-                default:break;
-            }
-        }else
-        if(parent->body_bag_resource->isVisible()){//背包模式
-
-            switch(event.EventType){
-
-                case irr::EET_KEY_INPUT_EVENT:
-                    switch(event.KeyInput.Key){
-                        case irr::KEY_TAB:
-                            if(event.KeyInput.PressedDown){
-                                parent->body_bag_resource->setVisible(true);
-                                parent->setGUIMode(true);
-                            }else{
-                                parent->body_bag_resource->setVisible(false);
-                                parent->setGUIMode(false);
-                            }
-                            return true;
-
-                        case irr::KEY_PRIOR:
-                            if(event.KeyInput.PressedDown){
-                                if(parent->body_bag_resource->isVisible()){
-                                    --parent->bagPage;
-                                    if(parent->bagPage<0)
-                                        parent->bagPage=0;
-                                    parent->needUpdateUI = true;
-                                }
-                            }
-                            return true;
-                        case irr::KEY_NEXT:
-                            if(event.KeyInput.PressedDown){
-                                if(parent->body_bag_resource->isVisible()){
-                                    ++parent->bagPage;
-                                    parent->needUpdateUI = true;
-                                }
-                            }
-                            return true;
-                        default:break;
-                    }
-                    break;
-
-                case irr::EET_MOUSE_INPUT_EVENT:
-                    switch(event.MouseInput.Event){
-                        case irr::EMIE_MOUSE_WHEEL:
-                            if(event.MouseInput.Wheel>0){
-                                parent->bag_selectLast();
-                            }else if(event.MouseInput.Wheel<0){
-                                parent->bag_selectNext();
-                            }
-                            return true;
-                        default:break;
-                    }
-                    break;
-                case irr::EET_GUI_EVENT:
-                    switch (event.GUIEvent.EventType) {
-                        case irr::gui::EGET_LISTBOX_SELECTED_AGAIN:
-                            parent->useTool(parent->body_bag_resource->getSelected());
-                            break;
-                        default:break;
-                    }
-                    break;
-                default:break;
-            }
+                        }
+                        break;
+                    case irr::gui::EGET_BUTTON_CLICKED:
+                        if(event.GUIEvent.Caller && event.GUIEvent.Caller==parent->tech_button){
+                            parent->techActive();
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+            default:break;
         }
-        return false;
+    }else if(parent->body_bag_resource->isVisible()){//背包模式
+
+        switch(event.EventType){
+
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    case irr::KEY_TAB:
+                        if(event.KeyInput.PressedDown){
+                            parent->body_bag_resource->setVisible(true);
+                            parent->setGUIMode(true);
+                        }else{
+                            parent->body_bag_resource->setVisible(false);
+                            parent->setGUIMode(false);
+                        }
+                        return true;
+
+                    case irr::KEY_PRIOR:
+                        if(event.KeyInput.PressedDown){
+                            if(parent->body_bag_resource->isVisible()){
+                                --parent->bagPage;
+                                if(parent->bagPage<0)
+                                    parent->bagPage=0;
+                                parent->needUpdateUI = true;
+                            }
+                        }
+                        return true;
+                    case irr::KEY_NEXT:
+                        if(event.KeyInput.PressedDown){
+                            if(parent->body_bag_resource->isVisible()){
+                                ++parent->bagPage;
+                                parent->needUpdateUI = true;
+                            }
+                        }
+                        return true;
+                    default:break;
+                }
+                break;
+
+            case irr::EET_MOUSE_INPUT_EVENT:
+                switch(event.MouseInput.Event){
+                    case irr::EMIE_MOUSE_WHEEL:
+                        if(event.MouseInput.Wheel>0){
+                            parent->bag_selectLast();
+                        }else if(event.MouseInput.Wheel<0){
+                            parent->bag_selectNext();
+                        }
+                        return true;
+                    default:break;
+                }
+                break;
+            case irr::EET_GUI_EVENT:
+                switch (event.GUIEvent.EventType) {
+                    case irr::gui::EGET_LISTBOX_SELECTED_AGAIN:
+                        parent->useTool(parent->body_bag_resource->getSelected());
+                        break;
+                    default:break;
+                }
+                break;
+            default:break;
+        }
+    }else if(parent->fullmap_gui->isVisible()){//地图模式
+
+        switch(event.EventType){
+
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    case irr::KEY_KEY_M:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFullMapMode();
+                            parent->setGUIMode(false);
+                        }
+                        return true;
+                    case irr::KEY_KEY_L:
+                        if(!event.KeyInput.PressedDown){
+                            parent->controlSelectedBody();
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+
+            case irr::EET_MOUSE_INPUT_EVENT:
+                switch(event.MouseInput.Event){
+                    case irr::EMIE_MOUSE_WHEEL:
+                        if(event.MouseInput.Wheel>0){
+                            parent->mapCamera_height+=16;
+                        }else if(event.MouseInput.Wheel<0){
+                            parent->mapCamera_height-=16;
+                        }
+                        if(parent->mapCamera_height<128)
+                            parent->mapCamera_height = 128;
+                        else if(parent->mapCamera_height>1024)
+                            parent->mapCamera_height = 1024;
+                        return true;
+                    default:break;
+                }
+                break;
+            default:break;
+        }
     }
+    return false;
 }
 
 }

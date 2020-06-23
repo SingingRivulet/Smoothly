@@ -90,7 +90,7 @@ void package::putPackage_resource(const RakNet::SystemAddress & addr, const std:
     package_item p;
     p.skin = skin;
     p.position = position;
-    p.resource.push_back(package_item::resource_t(id,num));
+    p.resource.push_back(resource_t(id,num));
     putPackage(addr,p,bag);
 }
 
@@ -202,7 +202,7 @@ void package::destroyTerrainItem(float x, float y, int id){
             }else{
                 resnum = resnumm_min;
             }
-            p.resource.push_back(package_item::resource_t(resid,resnum));
+            p.resource.push_back(resource_t(resid,resnum));
         }
         auto skit = collection_skin.find(id);
         if(skit!=collection_skin.end()){

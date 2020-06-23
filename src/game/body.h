@@ -482,6 +482,8 @@ class body:public technology{
         }
     private:
         irr::video::ITexture * texture_hp;
+        irr::video::ITexture * texture_minimap_body;
+        //irr::s32 minimap_body_shader;
 
 };
 

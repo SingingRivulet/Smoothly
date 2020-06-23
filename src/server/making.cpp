@@ -98,7 +98,7 @@ bool making::make(const RakNet::SystemAddress & addr, const std::string & user, 
                 auto tuuid = createTool(conf.outId);
                 pkg.tool.insert(tuuid);
             }else{
-                pkg.resource.push_back(package_item::resource_t(conf.outId,1));
+                pkg.resource.push_back(resource_t(conf.outId,1));
             }
             pkg.skin = 0;
             pkg.position = outPosition;
