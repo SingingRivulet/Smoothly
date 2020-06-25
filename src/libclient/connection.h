@@ -786,17 +786,20 @@ class connectionBase{
             float x,y,z;
             data->Read(uuid);
             data->ReadVector(x,y,z);
+            msg_addMission(uuid.C_String() , x,y,z);
         }
         inline void ctl_setMission(RakNet::BitStream * data){
             RakNet::RakString uuid,text;
             data->Read(uuid);
             data->Read(text);
+            msg_setMission(uuid.C_String() , text.C_String());
         }
         inline void ctl_submitMissionStatus(RakNet::BitStream * data){
             RakNet::RakString uuid;
             bool status;
             data->Read(uuid);
             data->Read(status);
+            msg_submitMissionStatus(uuid.C_String() , status);
         }
         inline void ctl_missionList(RakNet::BitStream * data){
             int32_t len;
@@ -810,6 +813,7 @@ class connectionBase{
                     break;
                 }
             }
+            msg_missionList(len,missions);
         }
 
         time_t lastHeartbeat;
@@ -848,6 +852,10 @@ class connectionBase{
         virtual void msg_techTarget(bool newtarget,int32_t target)=0;
         virtual void msg_makeStatus(int32_t id,bool status)=0;
         virtual void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t)=0;
+        virtual void msg_addMission(const char * uuid , float x,float y,float z)=0;
+        virtual void msg_setMission(const char * uuid , const char * text)=0;
+        virtual void msg_submitMissionStatus(const char * uuid , bool status)=0;
+        virtual void msg_missionList(int len,const std::vector<std::string> & missions)=0;
 };
 ///////////////////////
 }//////client

@@ -1,6 +1,6 @@
 #ifndef SMOOTHLY_BODY
 #define SMOOTHLY_BODY
-#include "technology.h"
+#include "mission.h"
 #include "bone.h"
 #include <unordered_map>
 #include <functional>
@@ -10,7 +10,7 @@
 #include <unordered_map>
 namespace smoothly{
 
-class body:public technology{
+class body:public mission{
     public:
         body();
         ~body();

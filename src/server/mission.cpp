@@ -24,14 +24,14 @@ void mission::release(){
 bool mission::isDone(const std::string & user, const std::string & mission_uuid){
     char key[256];
     std::string value;
-    snprintf(key,sizeof(key),"missionDone:%s:%s",mission_uuid.c_str(),user.c_str());
+    snprintf(key,sizeof(key),"missionDone:%s:%s",user.c_str(),mission_uuid.c_str());
     db->Get(leveldb::ReadOptions(), key , &value);
     return !value.empty();
 }
 
 void mission::setDone(const std::string & user, const std::string & mission_uuid){
     char key[256];
-    snprintf(key,sizeof(key),"missionDone:%s:%s",mission_uuid.c_str(),user.c_str());
+    snprintf(key,sizeof(key),"missionDone:%s:%s",user.c_str(),mission_uuid.c_str());
     db->Put(leveldb::WriteOptions(), key , user);
 }
 
@@ -55,6 +55,8 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
                 return false;
             }
         }
+        if(isDone(user,mission_uuid))
+            return false;
 
         if(getHP(body)<=0)//单位不存在或已死亡
             return false;

@@ -136,8 +136,15 @@ engine::engine(){
     f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     m->drop();
 
+    ttf = new irr::gui::CGUITTFont(driver);
+    auto face = new irr::gui::CGUITTFace;
+    face->load("../../res/font.ttf");
+    ttf->attach(face,16);
+    face->drop();
+
 }
 engine::~engine(){
+    ttf->drop();
     device->drop();
     delete dynamicsWorld;
     delete solver;

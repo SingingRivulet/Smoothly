@@ -22,10 +22,10 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += ../../dep/ /usr/local/include/bullet/ ../../dep/irrlicht/include
+INCLUDEPATH += ../../dep/ /usr/local/include/bullet/ ../../dep/irrlicht/include ../../dep/freetype2/include/
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl ../../dep/irrlicht/source/Irrlicht/libIrrlicht.a -lBulletDynamics -lBulletCollision -lLinearMath
-LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux -lIrrlicht -lGL -lXxf86vm -lXext -lX11
+LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lSDL2 -lSDL2_ttf -lfreetype
 HEADERS += \
     engine.h \
     myCharacter.h \
@@ -58,7 +58,9 @@ HEADERS += \
     package.h \
     technology.h \
     shadow.h \
-    carto.h
+    carto.h \
+    mission.h \
+    CGUITTFont.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -102,7 +104,9 @@ SOURCES += \
     body_bag.cpp \
     technology.cpp \
     shadow.cpp \
-    carto.cpp
+    carto.cpp \
+    mission.cpp \
+    CGUITTFont.cpp
 
 FORMS += \
     ui/login.ui

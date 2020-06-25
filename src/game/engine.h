@@ -3,6 +3,7 @@
 #include "physical.h"
 #include "../libclient/terrainGen.h"
 #include "RealisticWater.h"
+#include "CGUITTFont.h"
 #include <vector>
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
@@ -20,6 +21,7 @@ namespace smoothly{
     }
     class engine:public physical,public smoothly::world::terrain::terrainGen{
         public:
+            irr::gui::CGUITTFont * ttf;
             irr::IrrlichtDevice       * device;
             irr::scene::ISceneManager * scene;//场景
             irr::gui::IGUIEnvironment * gui;
