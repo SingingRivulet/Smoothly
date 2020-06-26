@@ -1,9 +1,16 @@
 #include "mission.h"
+#include <QString>
+#include <QStringList>
 
 namespace smoothly{
 
-void mission::msg_addMission(const char * uuid, float x, float y, float z){
-
+void mission::msg_addMission(const char * uuid, float , float , float ){
+    mission_node_t *& m = missions[uuid];
+    if(m){
+        releaseMission(m);
+        m = NULL;
+    }
+    cmd_getMission(uuid);
 }
 
 void mission::msg_setMission(const char * uuid, const char * text){
@@ -29,7 +36,7 @@ void mission::msg_submitMissionStatus(const char * uuid, bool status){
 
 }
 
-void mission::msg_missionList(int len, const std::vector<std::string> & new_missions){
+void mission::msg_missionList(const std::vector<std::string> & new_missions){
     for(auto it:missions){
         releaseMission(it.second);
     }
@@ -40,6 +47,24 @@ void mission::msg_missionList(int len, const std::vector<std::string> & new_miss
     }
 }
 
+void mission::msg_missionText(const char * , const char * text){
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    QStringList list = QString(text).split("\n");
+    missionText_buffer.clear();
+    for(int i = 0; i< list.size();++i){
+        missionText_buffer.push_back(conv.from_bytes(list.at(i).toStdString()));
+    }
+}
+
+
+void mission::mission_node_t::updateBuffer(){
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    QStringList list = QString(description.c_str()).split("\n");
+    description_buffer.clear();
+    for(int i = 0; i< list.size();++i){
+        description_buffer.push_back(conv.from_bytes(list.at(i).toStdString()));
+    }
+}
 
 void mission::mission_node_t::loadString(const std::string & s){
     position = vec3(0,0,0);
@@ -72,6 +97,7 @@ void mission::mission_node_t::loadString(const std::string & s){
                     parent = c->valuestring;
                 }else if(strcmp(c->string,"description")==0){
                     description = c->valuestring;
+                    updateBuffer();
                 }
             }else if(c->type==cJSON_Object){
                 if(strcmp(c->string,"need")==0){
@@ -144,7 +170,17 @@ void mission::mission_node_t::toString(std::string & str){
 }
 
 mission::mission(){
+    showMissions = false;
+    submitShowingMissions = false;
+    showMissionText = false;
+    lastSubmitMissionsTime = 0;
+}
 
+mission::~mission(){
+    for(auto it:missions){
+        releaseMission(it.second);
+    }
+    missions.clear();;
 }
 
 void mission::getMission(const vec3 & posi,std::vector<mission_node_t*> & m){
@@ -164,6 +200,42 @@ void mission::getMission(const vec3 & posi,std::vector<mission_node_t*> & m){
         }
     },&subm);
 
+}
+
+void mission::printString(const std::vector<std::wstring> & str){
+    int h=64;
+    for(auto it:str){
+        if(h>=height)
+            break;
+        ttf->draw(it.c_str() , core::rect<s32>(64,h,width,height),video::SColor(255,255,255,255));
+        h+=20;
+    }
+}
+
+void mission::drawNearMission(){
+    mession_result.clear();
+    getMission(camera->getPosition() , mession_result);
+    if(mession_result.size()>0){
+        printString(mession_result[0]->description_buffer);
+        auto tm = time(0);
+        if(submitShowingMissions && tm-lastSubmitMissionsTime>1){
+            lastSubmitMissionsTime = tm;
+            auto acc = getMissionAccepter();
+            if(!acc.empty())
+                cmd_submitMission(mession_result[0]->uuid.c_str() , acc.c_str());
+        }
+    }
+}
+
+void mission::onDraw(){
+    technology::onDraw();
+    if(showMissions){
+        drawNearMission();
+    }else{
+        if(showMissionText){
+            printString(missionText_buffer);
+        }
+    }
 }
 
 void mission::releaseMission(mission::mission_node_t * t){

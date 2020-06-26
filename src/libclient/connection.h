@@ -278,6 +278,9 @@ class connectionBase{
                                         case 'L':
                                             ctl_missionList(&bs);
                                         break;
+                                        case 't':
+                                            ctl_missionText(&bs);
+                                        break;
                                     }
                                 break;
                             }
@@ -813,7 +816,13 @@ class connectionBase{
                     break;
                 }
             }
-            msg_missionList(len,missions);
+            msg_missionList(missions);
+        }
+        inline void ctl_missionText(RakNet::BitStream * data){
+            RakNet::RakString uuid,text;
+            data->Read(uuid);
+            data->Read(text);
+            msg_missionText(uuid.C_String() , text.C_String());
         }
 
         time_t lastHeartbeat;
@@ -855,7 +864,8 @@ class connectionBase{
         virtual void msg_addMission(const char * uuid , float x,float y,float z)=0;
         virtual void msg_setMission(const char * uuid , const char * text)=0;
         virtual void msg_submitMissionStatus(const char * uuid , bool status)=0;
-        virtual void msg_missionList(int len,const std::vector<std::string> & missions)=0;
+        virtual void msg_missionList(const std::vector<std::string> & missions)=0;
+        virtual void msg_missionText(const char * uuid , const char * text)=0;
 };
 ///////////////////////
 }//////client

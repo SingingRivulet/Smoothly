@@ -333,6 +333,13 @@ void handlers::sendAddr_missionList(const RakNet::SystemAddress & addr, const st
     sendMessage(&bs,addr);
 }
 
+void handlers::sendAddr_missionText(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & text){
+    makeHeader('I','t');
+    bs.Write(RakNet::RakString(uuid.c_str()));
+    bs.Write(RakNet::RakString(text.c_str()));
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

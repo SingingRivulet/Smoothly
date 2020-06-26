@@ -67,6 +67,7 @@ class handlers:public admin{
         void sendAddr_techTarget(const RakNet::SystemAddress & addr,bool newTarget,int id);
 
         void sendAddr_missionList(const RakNet::SystemAddress & addr,const std::vector<std::string> & );
+        void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text);
 
         void boardcast(int x,int y,RakNet::BitStream * data);
         

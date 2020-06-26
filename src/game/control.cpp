@@ -138,8 +138,10 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         break;
                     case irr::KEY_KEY_E://拾取
                         if(event.KeyInput.PressedDown){
+                            parent->showMissions = true;
                             parent->autoPickup = true;
                         }else{
+                            parent->showMissions = false;
                             parent->autoPickup = false;
                         }
                         break;
@@ -189,6 +191,25 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         }else{
                             parent->body_bag_resource->setVisible(false);
                             parent->setGUIMode(false);
+                        }
+                        break;
+                    case irr::KEY_RETURN:
+                        if(event.KeyInput.PressedDown){
+                            parent->submitShowingMissions = true;
+                        }else{
+                            parent->submitShowingMissions = false;
+                        }
+                        break;
+                    case irr::KEY_KEY_K:
+                        if(event.KeyInput.PressedDown){
+                            parent->showMissionText = true;
+                        }else{
+                            parent->showMissionText = false;
+                        }
+                        break;
+                    case irr::KEY_KEY_P:
+                        if(!event.KeyInput.PressedDown){
+                            parent->getChunkMission();
                         }
                         break;
                     case irr::KEY_OEM_1:

@@ -1,6 +1,8 @@
 #ifndef SMOOTHLY_MISSION
 #define SMOOTHLY_MISSION
 #include "technology.h"
+#include <codecvt>
+#include <locale>
 namespace smoothly{
 
 class mission:public technology{
@@ -9,9 +11,11 @@ class mission:public technology{
         void msg_addMission(const char * uuid , float x,float y,float z)override;
         void msg_setMission(const char * uuid , const char * text)override;
         void msg_submitMissionStatus(const char * uuid , bool status)override;
-        void msg_missionList(int len,const std::vector<std::string> & missions)override;
+        void msg_missionList(const std::vector<std::string> & missions)override;
+        void msg_missionText(const char * uuid , const char * text)override;
 
         mission();
+        ~mission();
 
         struct resource_t{
                 int id,num;
@@ -35,6 +39,8 @@ class mission:public technology{
                 std::vector<resource_t> need,  //需要提交物品
                                         reward;//奖励
                 std::string description;
+                std::vector<std::wstring> description_buffer;
+                void updateBuffer();
                 std::string uuid;
                 std::string parent;//父节点
                 //任务完成的条件：
@@ -79,6 +85,19 @@ class mission:public technology{
         void releaseMission(mission_node_t*);
         void getMission(const vec3 & posi, std::vector<mission_node_t *> & m);
 
+        void printString(const std::vector<std::wstring> & str);
+        void drawNearMission();
+        std::vector<mission_node_t*> mession_result;
+
+        std::vector<std::wstring> missionText_buffer;
+
+        void onDraw()override;
+        bool showMissions;
+        bool showMissionText;
+        bool submitShowingMissions;
+        time_t lastSubmitMissionsTime;
+
+        virtual std::string getMissionAccepter()=0;
 };
 
 }

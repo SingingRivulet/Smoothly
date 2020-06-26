@@ -186,4 +186,8 @@ void body::msg_bag_tool_use(const char * uuid, const char * tuuid){
     }
 }
 
+std::string body::getMissionAccepter(){
+    return mainControl;
+}
+
 }

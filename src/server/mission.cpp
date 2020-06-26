@@ -55,8 +55,6 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
                 return false;
             }
         }
-        if(isDone(user,mission_uuid))
-            return false;
 
         if(getHP(body)<=0)//单位不存在或已死亡
             return false;
@@ -86,15 +84,22 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
         //接受
         mission_children_t & ch = cache_mission_children[mission_uuid];
         setNowMissionParent(user,mission_uuid);//把已经完成的任务设置为父节点
+        sendMissionText(addr,mission_uuid);
         sendAddr_missionList(addr,ch.children);//发送到客户端
 
-        setDone(user,mission_uuid);//设置任务已完成
 
         //消耗资源
         for(auto need:node.need){
             addResource(addr , body , need.id , -abs(need.num));
         }
-        //发放奖励
+
+
+        if(isDone(user,mission_uuid)){
+            //做过的任务不再发奖励
+        }else{
+            //发放奖励
+            setDone(user,mission_uuid);//设置任务已完成
+        }
 
         return true;
     }catch(...){}
@@ -136,6 +141,18 @@ void mission::setChunkMissions(const std::string & uuid, const vec3 & posi){
     snprintf(key,sizeof(key),"missionChunk:%d,%d:%s",x,y,uuid.c_str());
     snprintf(val,sizeof(val),"%s %f %f %f",uuid.c_str(),posi.X,posi.Y,posi.Z);
     db->Put(leveldb::WriteOptions(), key , val);
+}
+
+void mission::getMissionText(const std::string & uuid, std::string & text){
+    char key[128];
+    snprintf(key,sizeof(key),"missionText:%s",uuid.c_str());
+    db->Get(leveldb::ReadOptions(), key , &text);
+}
+
+void mission::setMissionText(const std::string & uuid, const std::string & text){
+    char key[128];
+    snprintf(key,sizeof(key),"missionText:%s",uuid.c_str());
+    db->Put(leveldb::WriteOptions(), key , text);
 }
 
 void mission::addMission(const std::string & uuid, mission::mission_node_t & m){

@@ -37,6 +37,7 @@ class body:public mission{
         void msg_bag_tool_add(const char *,const char *)override;
         void msg_bag_tool_remove(const char *,const char *)override;
         void msg_bag_tool_use(const char *,const char *)override;
+        std::string getMissionAccepter()override;
 
     public:
         typedef enum:int32_t{//身体姿势掩码
@@ -484,6 +485,14 @@ class body:public mission{
         irr::video::ITexture * texture_hp;
         irr::video::ITexture * texture_minimap_body;
         //irr::s32 minimap_body_shader;
+
+    public:
+        inline void getChunkMission(){
+            if(mainControlBody){
+                auto p = mainControlBody->node->getPosition();
+                cmd_getChunkMission(floor(p.X/32) , floor(p.Z/32));
+            }
+        }
 
 };
 

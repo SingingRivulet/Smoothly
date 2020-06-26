@@ -143,7 +143,7 @@ void body::loop(){
 }
 
 void body::onDraw(){
-    technology::onDraw();
+    mission::onDraw();
     for(auto it:myBodies){//在屏幕上标出自己拥有的单位
         bodyItem * bd = it.second;
         if(bd!=mainControlBody){

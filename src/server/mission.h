@@ -86,6 +86,7 @@ class mission:public building{
         void getNowMissionParent(const std::string & user,std::string & mission_uuid);
         inline void giveUpMission(const RakNet::SystemAddress & addr,const std::string & user){//放弃任务
             setNowMissionParent(user,"");
+            sendAddr_missionText(addr,"","");
             sendAddr_missionList(addr,std::vector<std::string>());
         }
         inline void sendNowMission(const RakNet::SystemAddress & addr,const std::string & user){
@@ -93,11 +94,14 @@ class mission:public building{
                 std::string uuid;
                 getNowMissionParent(user,uuid);
                 if(uuid.empty()){
+                    sendAddr_missionText(addr,"","");
                     sendAddr_missionList(addr,std::vector<std::string>());
                 }else{
+                    sendMissionText(addr,uuid);
                     sendAddr_missionList(addr,cache_mission_children[uuid].children);
                 }
             }catch(...){
+                sendAddr_missionText(addr,"","");
                 sendAddr_missionList(addr,std::vector<std::string>());
             }
         }
@@ -113,6 +117,14 @@ class mission:public building{
         void getChunkMissions(int x,int y,std::function<void(const std::string & ,const vec3 &)> callback);
         void setChunkMissions(const std::string & uuid,const vec3 & posi);
 
+        void getMissionText(const std::string & uuid,std::string & text);
+        void setMissionText(const std::string & uuid,const std::string & text);
+        inline void sendMissionText(const RakNet::SystemAddress & addr,const std::string & uuid){
+            std::string text;
+            getMissionText(uuid,text);
+            sendAddr_missionText(addr,uuid,text);
+        }
+
         void addMission(const std::string &uuid,mission_node_t & m);
         inline void addMission(mission_node_t & m){
             std::string uuid;
@@ -121,6 +133,7 @@ class mission:public building{
         }
 
         virtual void sendAddr_missionList(const RakNet::SystemAddress & addr,const std::vector<std::string> & )=0;
+        virtual void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
 };
 
 }
