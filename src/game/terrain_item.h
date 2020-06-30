@@ -21,7 +21,7 @@ namespace smoothly{
             };
             void msg_addRemovedItem(int x,int y,int,int)override;
             void msg_setRemovedItem(int x,int y,const std::set<mapItem> &)override;
-            void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t)override;
+            void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t,const char * owner)override;
             virtual void releaseChunk(int x,int y);
 
             void loop()override;
@@ -52,6 +52,7 @@ namespace smoothly{
                 int x,y;
                 chunk *nearx0,*nearx1,*neary0,*neary1;//所有chunk构成一张二维链表，方便查询
                 irr::scene::ISceneNode * minimap_element;
+                std::string owner;
                 std::map<mapItem,item*> children;
                 void unlink();
             };

@@ -97,7 +97,11 @@ class mission:public technology{
         bool submitShowingMissions;
         time_t lastSubmitMissionsTime;
 
+        void addMissionWindow();
+
         virtual std::string getMissionAccepter()=0;
+
+        std::string missionParentUUID;
 };
 
 }

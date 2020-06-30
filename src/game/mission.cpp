@@ -47,7 +47,8 @@ void mission::msg_missionList(const std::vector<std::string> & new_missions){
     }
 }
 
-void mission::msg_missionText(const char * , const char * text){
+void mission::msg_missionText(const char * uuid, const char * text){
+    missionParentUUID = uuid;
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     QStringList list = QString(text).split("\n");
     missionText_buffer.clear();
@@ -236,6 +237,10 @@ void mission::onDraw(){
             printString(missionText_buffer);
         }
     }
+}
+
+void mission::addMissionWindow(){
+
 }
 
 void mission::releaseMission(mission::mission_node_t * t){

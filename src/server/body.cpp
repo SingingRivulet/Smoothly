@@ -100,6 +100,16 @@ void body::loop(){
     cache_lookat.removeExpire();
     cache_bodyRota.removeExpire();
 }
+
+void body::setChunkOwnerByBody(const std::string & user,const std::string & buuid){
+    try{
+        auto ow = getOwner(buuid);
+        if(user!=ow)
+            return;
+        auto posi = cache_nodePosi[buuid];
+        setChunkOwner(posi.x , posi.y , ow);
+    }catch(...){}
+}
 void body::updateBody(const std::string & uuid , int x , int y){
     leveldb::WriteBatch batch;
     char buf[256];

@@ -124,6 +124,12 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'g':
                     ctl_getChunkACL(uuid,addr,data);
                 break;
+                case '+':
+                    ctl_setChunkOwner(uuid,addr,data);
+                break;
+                case '-':
+                    ctl_giveUpChunk(uuid,addr,data);
+                break;
             }
         break;
         case 'I':
@@ -425,6 +431,19 @@ void controllers::ctl_getChunkACL(const std::string & , const RakNet::SystemAddr
     sendAddr_chunkACL(addr,ipair(x,y),cache_chunkACL[ipair(x,y)]);
 }
 
+void controllers::ctl_setChunkOwner(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
+    RakNet::RakString buuid;
+    if(data->Read(buuid)){
+        setChunkOwnerByBody(uuid , buuid.C_String());
+    }
+}
+
+void controllers::ctl_giveUpChunk(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
+    int32_t x,y;
+    if(data->Read(x) && data->Read(y))
+        giveUpChunk(uuid,x,y);
+}
+
 void controllers::ctl_getMission(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     RakNet::RakString muuid;
     makeHeader('I','m');
@@ -435,10 +454,9 @@ void controllers::ctl_getMission(const std::string & , const RakNet::SystemAddre
         if(muuid.IsEmpty()){
             bs.Write(RakNet::RakString(""));
         }else{
-            mission_node_t & node = cache_mission_node[muuid.C_String()];
-            std::string val;
-            node.toString(val);
-            bs.Write(RakNet::RakString(val.c_str()));
+            std::string m;
+            getMission(muuid.C_String() , m);
+            bs.Write(RakNet::RakString(m.c_str()));
         }
     }catch(...){
         bs.Write(RakNet::RakString(""));

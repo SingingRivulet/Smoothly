@@ -5,20 +5,30 @@ namespace smoothly{
 namespace server{
 
 mission::mission(int thnum):building(thnum){
-    cache_mission_children.parent = this;
-    cache_mission_node.parent = this;
 }
 
 void mission::loop(){
     building::loop();
-    cache_mission_children.removeExpire();
-    cache_mission_node.removeExpire();
 }
 
 void mission::release(){
     building::release();
-    cache_mission_children.clear();
-    cache_mission_node.clear();
+}
+
+bool mission::getMission(const std::string & uuid, mission::mission_node_t & n){
+    std::string value;
+    getMission(uuid,value);
+    if(value.empty()){
+        return false;
+    }
+    n.loadString(value);
+    return true;
+}
+
+void mission::getMission(const std::string & uuid, std::string & s){
+    char key[256];
+    snprintf(key,sizeof(key),"missionNode:%s",uuid.c_str());
+    db->Get(leveldb::ReadOptions(), key , &s);
 }
 
 bool mission::isDone(const std::string & user, const std::string & mission_uuid){
@@ -35,6 +45,30 @@ void mission::setDone(const std::string & user, const std::string & mission_uuid
     db->Put(leveldb::WriteOptions(), key , user);
 }
 
+void mission::getMissionChildren(const std::string & uuid, std::function<void (const std::string &)> callback){
+    std::string prefix = std::string("missionChild:")+uuid+":";
+
+    leveldb::Iterator * it = db->NewIterator(leveldb::ReadOptions());
+
+    for(it->Seek(prefix); it->Valid(); it->Next()) {
+
+        auto k = it->key().ToString();
+        auto v = it->value().ToString();
+
+        if(!isPrefix(prefix,k))
+            break;//前缀不匹配，说明搜索完了
+        {
+            callback(v);
+        }
+    }
+    delete it;
+}
+
+void mission::putMissionChildren(const std::string & puuid, const std::string & uuid){
+    std::string key = std::string("missionChild:")+puuid+":"+uuid;
+    db->Put(leveldb::WriteOptions(), key , uuid);
+}
+
 void mission::setNowMissionParent(const std::string & user, const std::string & mission_uuid){
     char key[256];
     snprintf(key,sizeof(key),"nowMission:%s",user.c_str());
@@ -49,7 +83,11 @@ void mission::getNowMissionParent(const std::string & user, std::string & missio
 
 bool mission::submitMission(const RakNet::SystemAddress & addr, const std::string & user, const std::string & body, const std::string & mission_uuid){
     try{
-        mission_node_t & node = cache_mission_node[mission_uuid];
+        mission_node_t node;
+
+        if(!getMission(mission_uuid,node))
+            throw std::runtime_error("mission::submitMission");
+
         if(!node.parent.empty()){
             if(!isDone(user , node.parent)){
                 return false;
@@ -82,10 +120,11 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
         }
 
         //接受
-        mission_children_t & ch = cache_mission_children[mission_uuid];
         setNowMissionParent(user,mission_uuid);//把已经完成的任务设置为父节点
         sendMissionText(addr,mission_uuid);
-        sendAddr_missionList(addr,ch.children);//发送到客户端
+        std::vector<std::string> v;
+        getMissionChildren(mission_uuid,v);
+        sendAddr_missionList(addr,v);//发送到客户端
 
 
         //消耗资源
@@ -163,37 +202,10 @@ void mission::addMission(const std::string & uuid, mission::mission_node_t & m){
     db->Put(leveldb::WriteOptions(), key , val);
     if(m.parent.empty()){
         setChunkMissions(uuid,m.position);
+    }else{
+        putMissionChildren(m.parent,uuid);
     }
-}
-
-void mission::cache_mission_node_t::onExpire(const std::string & , mission::mission_node_t & ){
-    //无需设置
-}
-
-void mission::cache_mission_node_t::onLoad(const std::string & uuid, mission::mission_node_t & n){
-    char key[256];
-    std::string value;
-    snprintf(key,sizeof(key),"missionNode:%s",uuid.c_str());
-    parent->db->Get(leveldb::ReadOptions(), key , &value);
-    if(value.empty()){
-        throw std::runtime_error("mission::cache_mission_node_t::onLoad");
-    }
-    n.loadString(value);
-}
-
-void mission::cache_mission_children_t::onExpire(const std::string & , mission::mission_children_t & ){
-    //无需设置
-}
-
-void mission::cache_mission_children_t::onLoad(const std::string & uuid, mission::mission_children_t & n){
-    char key[256];
-    std::string value;
-    snprintf(key,sizeof(key),"missionChildren:%s",uuid.c_str());
-    parent->db->Get(leveldb::ReadOptions(), key , &value);
-    if(value.empty()){
-        throw std::runtime_error("mission::cache_mission_children_t::onLoad");
-    }
-    n.loadString(value);
+    boardcast_mission(m.position,uuid);
 }
 
 void mission::mission_node_t::loadString(const std::string & s){
@@ -287,51 +299,6 @@ void mission::mission_node_t::toString(std::string & str){
         for(auto it:reward){
             snprintf(buf,sizeof(buf),"%d",it.id);
             cJSON_AddNumberToObject(res,buf,it.num);
-        }
-    }
-
-    char * pp = cJSON_PrintUnformatted(json);
-    if(pp){
-        str = pp;
-        free(pp);
-    }
-    cJSON_Delete(json);
-}
-
-void mission::mission_children_t::loadString(const std::string & s){
-    children.clear();
-    auto json = cJSON_Parse(s.c_str());
-
-    if(json){
-
-        cJSON *c=json->child;
-        while(c){
-            if(c->type==cJSON_Array){
-                if(strcmp(c->string,"children")==0){
-                    auto line = c->child;
-                    while(line){
-                        if(line->type == cJSON_String){
-                            children.push_back(line->valuestring);
-                        }
-                        line = line->next;
-                    }
-                }
-            }
-            c = c->next;
-        }
-
-        cJSON_Delete(json);
-    }
-}
-
-void mission::mission_children_t::toString(std::string & str){
-    cJSON * json = cJSON_CreateObject();
-
-    cJSON * ch = cJSON_CreateArray();//资源
-    cJSON_AddItemToObject(json,"children",ch);//加入对象
-    {
-        for(auto it:children){
-            cJSON_AddItemToArray(ch,cJSON_CreateString(it.c_str()));
         }
     }
 

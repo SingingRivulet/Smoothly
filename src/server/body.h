@@ -118,6 +118,7 @@ class body:public removeTable{
             public:
                 body * parent;
         }cache_lookat;
+        void setChunkOwnerByBody(const std::string & user, const std::string & buuid);
     private:
         struct bconf{
             int hp;

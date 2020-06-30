@@ -163,7 +163,21 @@ void handlers::sendAddr_chunkACL(const RakNet::SystemAddress & addr,const ipair 
     bs.Write(acl.allowBuildingWrite);
     bs.Write(acl.allowCharacterDamage);
     bs.Write(acl.allowTerrainItemWrite);
+    bs.Write(RakNet::RakString(acl.owner.c_str()));
     sendMessage(&bs,addr);
+}
+
+void handlers::boardcast_chunkACL(const ipair & posi, map::chunkACL_t & acl){
+    makeHeader('G','a');
+    int32_t x = posi.x;
+    int32_t y = posi.y;
+    bs.Write(x);
+    bs.Write(y);
+    bs.Write(acl.allowBuildingWrite);
+    bs.Write(acl.allowCharacterDamage);
+    bs.Write(acl.allowTerrainItemWrite);
+    bs.Write(RakNet::RakString(acl.owner.c_str()));
+    boardcast(x,y,&bs);
 }
 
 void handlers::sendAddr_bag(const RakNet::SystemAddress & addr, const std::string & uuid, const std::string & text){
@@ -338,6 +352,14 @@ void handlers::sendAddr_missionText(const RakNet::SystemAddress & addr, const st
     bs.Write(RakNet::RakString(uuid.c_str()));
     bs.Write(RakNet::RakString(text.c_str()));
     sendMessage(&bs,addr);
+}
+void handlers::boardcast_mission(const vec3 & posi, const std::string & muuid){
+    makeHeader('I','c');
+    bs.Write(RakNet::RakString(muuid.c_str()));
+    bs.WriteVector(posi.X , posi.Y , posi.Z);
+    int x = floor(posi.X);
+    int y = floor(posi.Z);
+    boardcast(x,y,&bs);
 }
 
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){

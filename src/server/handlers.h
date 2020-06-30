@@ -42,7 +42,7 @@ class handlers:public admin{
             int x,int y,
             const std::list<std::pair<int,int> > & rmt)override;
         void sendAddr_chunkACL(const RakNet::SystemAddress & addr, const ipair & posi, chunkACL_t &)override;
-
+        void boardcast_chunkACL(const ipair & posi, map::chunkACL_t & acl);
 
         void sendAddr_bag(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)override;
         void sendAddr_bag_resourceNum(const RakNet::SystemAddress & addr,const std::string & uuid,int id,int num)override;
@@ -68,6 +68,7 @@ class handlers:public admin{
 
         void sendAddr_missionList(const RakNet::SystemAddress & addr,const std::vector<std::string> & );
         void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text);
+        void boardcast_mission(const vec3 & posi, const std::string & muuid);
 
         void boardcast(int x,int y,RakNet::BitStream * data);
         

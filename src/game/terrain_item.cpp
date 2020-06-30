@@ -609,10 +609,13 @@ void terrain_item::msg_setRemovedItem(int x,int y,const std::set<mapItem> & rmt)
     pushRemoveTable(x,y,rmt);
 }
 
-void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t){
+void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t,const char * owner){
     findChunk(x,y){
         auto ptr = it->second;
         if(ptr){
+            if(ptr->minimap_element)
+                ptr->minimap_element->remove();
+            ptr->owner = owner;
             auto n = mapScene->addMeshSceneNode(minimap_terrain_mesh[b?1:0][c?1:0][t?1:0],0,-1,vec3(x*32,0,y*32));
             n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
             n->setMaterialType((video::E_MATERIAL_TYPE)minimap_terrain_shader);

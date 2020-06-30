@@ -44,6 +44,8 @@ class controllers:public handlers{
         void ctl_making(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
 
         void ctl_getChunkACL(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+        void ctl_setChunkOwner(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+        void ctl_giveUpChunk(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
 
         void ctl_getMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_getChunkMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);

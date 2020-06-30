@@ -249,6 +249,11 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->showVoxelsByCamera();
                         }
                         break;
+                    case irr::KEY_F10:
+                        if(!event.KeyInput.PressedDown){
+                            parent->addMissionWindow();
+                        }
+                        break;
                     default:
                         break;
                 }

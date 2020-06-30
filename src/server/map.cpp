@@ -199,6 +199,83 @@ void map::buildVisualFieldArray(int x, int y, std::function<void(int, int)> ncal
     }
 }
 
+void map::setChunkACL(int x, int y, bool b, bool c, bool t){
+    ipair posi(x,y);
+    chunkACL_t & o = cache_chunkACL[posi];
+    o.set(b,c,t);
+    boardcast_chunkACL(posi,o);
+}
+
+void map::setChunkACL(const std::string & user, int x, int y, bool b, bool c, bool t){
+    ipair posi(x,y);
+    chunkACL_t & o = cache_chunkACL[posi];
+    auto tm = time(NULL);//每CHUNKACL_UPDATE_TIME_OUT秒能改一次
+    if(o.owner == user && abs(tm - o.lastUpdateTiem)>CHUNKACL_UPDATE_TIME_OUT){
+        o.set(b,c,t);
+        o.lastUpdateTiem = tm;
+        boardcast_chunkACL(posi,o);
+    }
+}
+
+void map::setChunkOwner(int x, int y, const std::string & user){
+    //圈地的条件：
+    //1.已经拥有chunk的情况下，圈的地必须与已有地相邻
+    //2.没有chunk时，可以任意选择无主的chunk
+    ipair posi(x,y);
+    chunkACL_t & o = cache_chunkACL[posi];
+    auto tm = time(NULL);//每CHUNKACL_UPDATE_TIME_OUT秒能改一次
+    if(o.owner.empty() && abs(tm - o.lastUpdateTiem)>CHUNKACL_UPDATE_TIME_OUT){
+
+        int num = getUserChunkNum(user);
+        int nn = num+1;
+        if(nn>userMaxChunk){
+            //拥有数量达到上限
+            return;
+        }
+
+        if(num>0){
+            //检查周围四块
+            if(cache_chunkACL[ipair(x-1,y)].owner != user &&
+               cache_chunkACL[ipair(x+1,y)].owner != user &&
+               cache_chunkACL[ipair(x,y-1)].owner != user &&
+               cache_chunkACL[ipair(x,y+1)].owner != user)
+                return;
+        }
+
+        setUserChunkNum(user,nn);
+        o.lastUpdateTiem = tm;
+        o.owner = user;
+        boardcast_chunkACL(posi,o);
+    }
+}
+
+void map::giveUpChunk(const std::string & user, int x, int y){
+    ipair posi(x,y);
+    chunkACL_t & o = cache_chunkACL[posi];
+    auto tm = time(NULL);//每CHUNKACL_UPDATE_TIME_OUT秒能改一次
+    if(o.owner == user && abs(tm - o.lastUpdateTiem)>CHUNKACL_UPDATE_TIME_OUT){
+        setUserChunkNum(user,getUserChunkNum(user)-1);
+        o.owner.clear();
+        o.lastUpdateTiem = tm;
+        boardcast_chunkACL(posi,o);
+    }
+}
+
+int map::getUserChunkNum(const std::string & user){
+    std::string val;
+    db->Get(leveldb::ReadOptions() , std::string("ownedNum:")+user , &val);
+    if(val.empty())
+        return 0;
+    else
+        return atoi(val.c_str());
+}
+
+void map::setUserChunkNum(const std::string & user, int num){
+    char val[64];
+    snprintf(val,sizeof(val),"%d",num);
+    db->Put(leveldb::WriteOptions() , std::string("ownedNum:")+user , val);
+}
+
 void map::loop(){
     cache_nodePosi.removeExpire();
     cache_chunkACL.removeExpire();
@@ -253,6 +330,7 @@ void map::chunkACL_t::toString(std::string & str){
     cJSON_AddNumberToObject(json,"allowBuildingWrite"       ,allowBuildingWrite?1:0);
     cJSON_AddNumberToObject(json,"allowCharacterDamage"     ,allowCharacterDamage?1:0);
     cJSON_AddNumberToObject(json,"allowTerrainItemWrite"    ,allowTerrainItemWrite?1:0);
+    cJSON_AddNumberToObject(json,"lastUpdateTiem"           ,lastUpdateTiem);
     cJSON_AddStringToObject(json,"owner"                    ,owner.c_str());
 
     char * pp = cJSON_PrintUnformatted(json);
@@ -279,6 +357,8 @@ void map::chunkACL_t::loadString(const std::string & str){
                     allowCharacterDamage    = (c->valueint!=0);
                 }else if(strcmp(c->string,"allowTerrainItemWrite")==0){
                     allowTerrainItemWrite   = (c->valueint!=0);
+                }else if(strcmp(c->string,"lastUpdateTiem")==0){
+                    lastUpdateTiem          = c->valueint;
                 }
             }else if(c->type==cJSON_String){
                 if(strcmp(c->string,"owner")==0){

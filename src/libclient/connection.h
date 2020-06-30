@@ -777,12 +777,14 @@ class connectionBase{
             bool allowBuildingWrite;    //是否允许修改建筑物
             bool allowCharacterDamage;  //是否允许单位受到伤害
             bool allowTerrainItemWrite; //是否允许修改地形物体（如植被）
+            RakNet::RakString owner;
             data->Read(x);
             data->Read(y);
             data->Read(allowBuildingWrite);
             data->Read(allowCharacterDamage);
             data->Read(allowTerrainItemWrite);
-            msg_chunkACL(x,y,allowBuildingWrite,allowCharacterDamage,allowTerrainItemWrite);
+            data->Read(owner);
+            msg_chunkACL(x,y,allowBuildingWrite,allowCharacterDamage,allowTerrainItemWrite,owner.C_String());
         }
         inline void ctl_addMission(RakNet::BitStream * data){
             RakNet::RakString uuid;
@@ -860,7 +862,7 @@ class connectionBase{
         virtual void msg_unlockTech(bool newtech,int32_t id)=0;
         virtual void msg_techTarget(bool newtarget,int32_t target)=0;
         virtual void msg_makeStatus(int32_t id,bool status)=0;
-        virtual void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t)=0;
+        virtual void msg_chunkACL(int32_t x,int32_t y,bool b,bool c,bool t,const char * owner)=0;
         virtual void msg_addMission(const char * uuid , float x,float y,float z)=0;
         virtual void msg_setMission(const char * uuid , const char * text)=0;
         virtual void msg_submitMissionStatus(const char * uuid , bool status)=0;

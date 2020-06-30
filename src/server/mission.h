@@ -50,37 +50,20 @@ class mission:public building{
                 void loadString(const std::string & );
                 void toString(std::string &);
         };
-        class cache_mission_node_t:public cache<mission_node_t>{
-                void onExpire(const std::string &,mission_node_t & )override;
-                void onLoad(const std::string &, mission_node_t & )override;
-            public:
-                mission * parent;
-        }cache_mission_node;
 
-
-        struct mission_children_t{
-                std::vector<std::string> children;//子节点
-                void loadString(const std::string & );
-                void toString(std::string &);
-                mission_children_t(){}
-                mission_children_t(const mission_children_t & i){
-                    children = i.children;
-                }
-                const mission_children_t & operator=(const mission_children_t & i){
-                    children = i.children;
-                    return *this;
-                }
-        };
-        class cache_mission_children_t:public cache<mission_children_t>{
-                void onExpire(const std::string &,mission_children_t & )override;
-                void onLoad(const std::string &, mission_children_t & )override;
-            public:
-                mission * parent;
-        }cache_mission_children;
-
+        bool getMission(const std::string & uuid , mission_node_t & m);
+        void getMission(const std::string & uuid , std::string & s);
 
         bool isDone(const std::string & user,const std::string & mission_uuid);//检查任务是否完成过
         void setDone(const std::string & user,const std::string & mission_uuid);
+
+        void getMissionChildren(const std::string & uuid,std::function<void(const std::string &)> callback);
+        void getMissionChildren(const std::string & uuid,std::vector<std::string> & v){
+            getMissionChildren(uuid,[&](const std::string & u){
+                v.push_back(u);
+            });
+        }
+        void putMissionChildren(const std::string & puuid,const std::string & uuid);
 
         void setNowMissionParent(const std::string & user,const std::string & mission_uuid);//当前选择的剧情树的父节点
         void getNowMissionParent(const std::string & user,std::string & mission_uuid);
@@ -98,7 +81,9 @@ class mission:public building{
                     sendAddr_missionList(addr,std::vector<std::string>());
                 }else{
                     sendMissionText(addr,uuid);
-                    sendAddr_missionList(addr,cache_mission_children[uuid].children);
+                    std::vector<std::string> v;
+                    getMissionChildren(uuid,v);
+                    sendAddr_missionList(addr,v);
                 }
             }catch(...){
                 sendAddr_missionText(addr,"","");
@@ -132,8 +117,11 @@ class mission:public building{
             addMission(uuid,m);
         }
 
+        //void removeMission();
+
         virtual void sendAddr_missionList(const RakNet::SystemAddress & addr,const std::vector<std::string> & )=0;
         virtual void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;
+        virtual void boardcast_mission(const vec3 & posi, const std::string & muuid)=0;
 };
 
 }
