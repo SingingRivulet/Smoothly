@@ -111,10 +111,11 @@ class mission:public building{
         }
 
         void addMission(const std::string &uuid,mission_node_t & m);
-        inline void addMission(mission_node_t & m){
+        inline std::string addMission(mission_node_t & m){
             std::string uuid;
             getUUID(uuid);
             addMission(uuid,m);
+            return uuid;
         }
 
         //void removeMission();

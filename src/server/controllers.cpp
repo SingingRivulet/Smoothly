@@ -146,6 +146,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'u':
                     ctl_giveUpMission(uuid,addr,data);
                 break;
+                case 'a':
+                    ctl_addMission(uuid,addr,data);
+                break;
             }
         break;
     }
@@ -474,6 +477,33 @@ void controllers::ctl_getChunkMission(const std::string & , const RakNet::System
             sendMessage(&bs,addr);
         });
     }
+}
+
+void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
+    mission_node_t m;
+    RakNet::RakString buf,text;
+
+    if(!data->ReadVector(m.position.X , m.position.Y , m.position.Z))return;
+
+    if(!data->Read(m.needArrive))return;
+    if(!data->Read(m.showPosition))return;
+
+    if(!data->Read(text))return;
+
+    if(!data->Read(buf))return;
+    m.description = buf.C_String();
+
+    //检查坐标的所有者
+    int cx = floor(m.position.X / 32);
+    int cy = floor(m.position.Z / 32);
+    try{
+        if(cache_chunkACL[ipair(cx,cy)].owner!=uuid)
+            return;
+    }catch(...){
+        return;
+    }
+
+    setMissionText(addMission(m) , text.C_String());
 }
 
 void controllers::ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
