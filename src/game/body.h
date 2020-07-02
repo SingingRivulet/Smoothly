@@ -494,6 +494,9 @@ class body:public mission{
             }
         }
 
+    private:
+        void occupyChunk()override;
+
 };
 
 }

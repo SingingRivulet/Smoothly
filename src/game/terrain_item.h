@@ -25,7 +25,15 @@ namespace smoothly{
             virtual void releaseChunk(int x,int y);
 
             void loop()override;
+            void onDraw()override;
             bool chunkCreated(int x,int y)override;
+            void occupy(){
+                auto posi = camera->getPosition();
+                int cx = floor(posi.X / 32);
+                int cy = floor(posi.Z / 32);
+                occupy(cx,cy);
+            }
+            void occupy(int x,int y);
         private:
             struct chunk;
             struct item{
@@ -53,6 +61,7 @@ namespace smoothly{
                 chunk *nearx0,*nearx1,*neary0,*neary1;//所有chunk构成一张二维链表，方便查询
                 irr::scene::ISceneNode * minimap_element;
                 std::string owner;
+                bool allowBuilding,allowColl,allowAttack;
                 std::map<mapItem,item*> children;
                 void unlink();
             };
@@ -108,8 +117,22 @@ namespace smoothly{
             int chunkLeft;
             irr::gui::IGUIStaticText * chunkLeft_text;
 
-            irr::scene::IMesh * minimap_terrain_mesh[2][2][2];
+            irr::scene::IMesh * minimap_terrain_mesh[2][2][2] , * minimap_terrain_mesh_owned;
             irr::s32 minimap_terrain_shader;
+
+            std::wstring showingText;
+            time_t showText_time;
+
+            virtual void occupyChunk()=0;
+        public:
+            inline void setTerrainMapMessage(const std::wstring & w){
+                showingText = w;
+                showText_time = time(0);
+            }
+            void uploadChunkACL();
+            void setFullMapMode(bool m)override;
+            irr::gui::IGUICheckBox * terrmapacl_1,* terrmapacl_2,* terrmapacl_3;
+            irr::gui::IGUIButton * terrmapacl_save;
     };
 }
 #endif

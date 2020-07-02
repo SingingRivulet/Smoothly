@@ -12,11 +12,8 @@ class carto:public engine{
         irr::gui::IGUIImage * fullmap_gui;
         irr::gui::IGUIImage * minimap_gui;
         void updateMiniMap();
-        inline void setFullMapMode(bool m){
-            fullmap_gui->setVisible(m);
-            minimap_gui->setVisible(!m);
-        }
-        inline void setFullMapMode(){
+        virtual void setFullMapMode(bool m);
+        inline void setFullMapMode_auto(){
             auto m = minimap_gui->isVisible();
             setFullMapMode(m);
         }

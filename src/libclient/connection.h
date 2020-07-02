@@ -481,6 +481,15 @@ class connectionBase{
             bs.Write(y);
             sendMessage(&bs);
         }
+        inline void cmd_setChunkACL(int32_t x,int32_t y,bool b,bool c,bool t){
+            makeHeader('G','s');
+            bs.Write(x);
+            bs.Write(y);
+            bs.Write(b);
+            bs.Write(c);
+            bs.Write(t);
+            sendMessage(&bs);
+        }
         inline void cmd_getMission(const char * muuid){
             makeHeader('I','g');
             bs.Write(RakNet::RakString(muuid));
@@ -500,6 +509,18 @@ class connectionBase{
         }
         inline void cmd_giveUpMission(){
             makeHeader('I','u');
+            sendMessage(&bs);
+        }
+
+        inline void cmd_setChunkOwner(const char * buuid){
+            makeHeader('G','+');
+            bs.Write(RakNet::RakString(buuid));
+            sendMessage(&bs);
+        }
+        inline void cmd_giveUpChunk(int32_t x , int32_t y){
+            makeHeader('G','-');
+            bs.Write(x);
+            bs.Write(y);
             sendMessage(&bs);
         }
     private:

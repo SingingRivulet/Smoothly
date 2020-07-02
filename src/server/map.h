@@ -12,7 +12,7 @@
 #include "cache.h"
 #include "../utils/cJSON.h"
 
-#define CHUNKACL_UPDATE_TIME_OUT 3600
+#define CHUNKACL_UPDATE_TIME_OUT 30
 
 namespace smoothly{
 namespace server{

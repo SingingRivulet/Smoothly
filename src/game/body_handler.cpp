@@ -126,6 +126,12 @@ void body::setMainControl(const std::string & uuid){
     }
 }
 
+void body::occupyChunk(){
+    if(!mainControl.empty()){
+        cmd_setChunkOwner(mainControl.c_str());
+    }
+}
+
 void body::msg_setBag(const char * uuid, const char * text){
     findBody(uuid){
         it->second->loadBag(text);

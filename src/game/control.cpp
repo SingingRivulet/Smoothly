@@ -177,7 +177,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         break;
                     case irr::KEY_KEY_M:
                         if(!event.KeyInput.PressedDown){
-                            parent->setFullMapMode();
+                            parent->setFullMapMode_auto();
                             parent->setGUIMode(true);
                         }
                         break;
@@ -247,11 +247,6 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     case irr::KEY_F11:
                         if(!event.KeyInput.PressedDown){
                             parent->showVoxelsByCamera();
-                        }
-                        break;
-                    case irr::KEY_F10:
-                        if(!event.KeyInput.PressedDown){
-                            parent->addMissionWindow();
                         }
                         break;
                     default:
@@ -405,7 +400,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 switch(event.KeyInput.Key){
                     case irr::KEY_KEY_M:
                         if(!event.KeyInput.PressedDown){
-                            parent->setFullMapMode();
+                            parent->setFullMapMode_auto();
                             parent->setGUIMode(false);
                         }
                         return true;
@@ -415,6 +410,16 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         }
                         break;
                     default:break;
+                    case irr::KEY_F10:
+                        if(!event.KeyInput.PressedDown){
+                            parent->addMissionWindow();
+                        }
+                        break;
+                    case irr::KEY_F9:
+                        if(!event.KeyInput.PressedDown){
+                            parent->occupy();
+                        }
+                        break;
                 }
                 break;
 
@@ -431,6 +436,16 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         else if(parent->mapCamera_height>1024)
                             parent->mapCamera_height = 1024;
                         return true;
+                    default:break;
+                }
+                break;
+            case irr::EET_GUI_EVENT:
+                switch (event.GUIEvent.EventType) {
+                    case irr::gui::EGET_BUTTON_CLICKED:
+                        if(event.GUIEvent.Caller==parent->terrmapacl_save){
+                            parent->uploadChunkACL();
+                        }
+                        break;
                     default:break;
                 }
                 break;

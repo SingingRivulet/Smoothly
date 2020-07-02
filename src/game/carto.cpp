@@ -14,6 +14,11 @@ carto::carto(){
     mapCamera_height = 128;
 }
 
+void carto::setFullMapMode(bool m){
+    fullmap_gui->setVisible(m);
+    minimap_gui->setVisible(!m);
+}
+
 
 void carto::renderMiniMap(){
     auto cmpos = camera->getPosition();

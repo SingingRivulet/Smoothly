@@ -118,6 +118,69 @@ void terrain_item::loop(){
         }
     }
 }
+
+void terrain_item::onDraw(){
+    terrain::onDraw();
+    if(fullmap_gui->isVisible()){
+
+        auto posi = camera->getPosition();
+        wchar_t buf[256];
+        swprintf(buf,256,L"位置：（%d , %d , %d）",(int)posi.X,(int)posi.Y,(int)posi.Z);
+        ttf->draw(buf,irr::core::rect<irr::s32>(width-256,64,width,64+32),irr::video::SColor(255,255,255,255));
+
+        int cx = floor(posi.X / 32);
+        int cy = floor(posi.Z / 32);
+        swprintf(buf,256,L"chunk：（%d , %d）",cx,cy);
+        ttf->draw(buf,irr::core::rect<irr::s32>(width-256,64+32,width,64+64),irr::video::SColor(255,255,255,255));
+
+        findChunk(cx,cy){
+            if(!it->second->owner.empty()){
+                if(it->second->owner==myUUID){
+                    swprintf(buf,256,L"已占领（按F9放弃）");
+                    ttf->draw(buf,irr::core::rect<irr::s32>(width-256,128,width,128+32),irr::video::SColor(255,255,255,255));
+                }else{
+                    swprintf(buf,256,L"拥有者：%s",it->second->owner.c_str());
+                    ttf->draw(buf,irr::core::rect<irr::s32>(width-256,128,width,128+32),irr::video::SColor(255,255,255,255));
+                }
+            }else{
+                swprintf(buf,256,L"当前位置无人占领（按F9占领）");
+                ttf->draw(buf,irr::core::rect<irr::s32>(width-256,128,width,128+32),irr::video::SColor(255,255,255,255));
+            }
+
+            if(it->second->allowBuilding){
+                swprintf(buf,256,L"允许建造");
+            }else{
+                swprintf(buf,256,L"禁止建造");
+            }
+            ttf->draw(buf,irr::core::rect<irr::s32>(width-256,160,width,160+32),irr::video::SColor(255,255,255,255));
+
+            if(it->second->allowColl){
+                swprintf(buf,256,L"允许采集");
+            }else{
+                swprintf(buf,256,L"禁止采集");
+            }
+            ttf->draw(buf,irr::core::rect<irr::s32>(width-256,192,width,192+32),irr::video::SColor(255,255,255,255));
+
+            if(it->second->allowAttack){
+                swprintf(buf,256,L"允许攻击");
+            }else{
+                swprintf(buf,256,L"禁止攻击");
+            }
+            ttf->draw(buf,irr::core::rect<irr::s32>(width-256,224,width,224+32),irr::video::SColor(255,255,255,255));
+
+            terrmapacl_1->setVisible(true);
+            terrmapacl_2->setVisible(true);
+            terrmapacl_3->setVisible(true);
+
+        }else{
+            swprintf(buf,256,L"找不到坐标信息");
+            ttf->draw(buf,irr::core::rect<irr::s32>(width-256,128,width,128+32),irr::video::SColor(255,255,255,255));
+        }
+        if(time(0)-showText_time<3){
+            ttf->draw(showingText.c_str(),irr::core::rect<irr::s32>(width-256,height-128-32,width,height-128),irr::video::SColor(255,255,255,255));
+        }
+    }
+}
 void terrain_item::releaseChunk(chunk * ch){
     ch->unlink();
     releaseChildren(ch);
@@ -301,6 +364,22 @@ bool terrain_item::chunkCreated(int x, int y){
     return terrain::chunkCreated(x,y);
 }
 
+void terrain_item::occupy(int x, int y){
+    findChunk(x,y){
+        if(it->second->owner.empty()){//占领
+            wchar_t buf[256];
+            swprintf(buf,256,L"尝试占领：（%d , %d）",x,y);
+            setTerrainMapMessage(buf);
+            occupyChunk();
+        }else if(it->second->owner == myUUID){//放弃
+            wchar_t buf[256];
+            swprintf(buf,256,L"尝试放弃：（%d , %d）",x,y);
+            setTerrainMapMessage(buf);
+            cmd_giveUpChunk(x,y);
+        }
+    }
+}
+
 void terrain_item::updateLOD(int x, int y, int lv){
     terrain::updateLOD(x,y,lv);
     findChunk(x,y){
@@ -423,9 +502,11 @@ irr::scene::IMesh * createMapMesh(const irr::video::SColor & color){
 terrain_item::terrain_item(){
     chunkLeft = 0;
     chunkLeft_text = NULL;
+    showText_time = 0;
     loadConfig();
 
     {
+        minimap_terrain_mesh_owned = createMapMesh(irr::video::SColor(128,16,64,32));
         minimap_terrain_mesh[0][0][0] = createMapMesh(irr::video::SColor(128,255,255,64));
         minimap_terrain_mesh[0][0][1] = createMapMesh(irr::video::SColor(128,255,255,255));
         minimap_terrain_mesh[0][1][0] = createMapMesh(irr::video::SColor(128,255,64,64));
@@ -462,6 +543,58 @@ terrain_item::terrain_item(){
     }
     //草模型
     genGrassMesh();
+    //权限设置
+    {
+        terrmapacl_1 = gui->addCheckBox(true,irr::core::rect<irr::s32>(width-190,160,width-190+30,160+30));
+        terrmapacl_1->setVisible(false);
+        terrmapacl_1->setEnabled(false);
+        terrmapacl_2 = gui->addCheckBox(true,irr::core::rect<irr::s32>(width-190,192,width-190+30,192+30));
+        terrmapacl_2->setVisible(false);
+        terrmapacl_2->setEnabled(false);
+        terrmapacl_3 = gui->addCheckBox(true,irr::core::rect<irr::s32>(width-190,224,width-190+30,224+30));
+        terrmapacl_3->setVisible(false);
+        terrmapacl_3->setEnabled(false);
+        terrmapacl_save = gui->addButton(irr::core::rect<irr::s32>(width-160,224,width-100,224+30),0,-1,L"SAVE");
+        terrmapacl_save->setVisible(false);
+        terrmapacl_save->setOverrideColor(video::SColor(255,0,0,0));
+    }
+}
+
+void terrain_item::setFullMapMode(bool m){
+    terrain::setFullMapMode(m);
+    if(m){
+        auto posi = camera->getPosition();
+        int cx = floor(posi.X / 32);
+        int cy = floor(posi.Z / 32);
+        findChunk(cx,cy){
+            terrmapacl_1->setChecked(it->second->allowBuilding);
+            terrmapacl_2->setChecked(it->second->allowColl);
+            terrmapacl_3->setChecked(it->second->allowAttack);
+
+            bool enable = (it->second->owner==myUUID);
+            terrmapacl_1->setEnabled(enable);
+            terrmapacl_2->setEnabled(enable);
+            terrmapacl_3->setEnabled(enable);
+            if(enable){
+                terrmapacl_save->setVisible(true);
+            }
+        }
+    }else{
+        terrmapacl_1->setVisible(false);
+        terrmapacl_2->setVisible(false);
+        terrmapacl_3->setVisible(false);
+        terrmapacl_save->setVisible(false);
+    }
+}
+void terrain_item::uploadChunkACL(){
+    setTerrainMapMessage(L"上传权限配置");
+    auto posi = camera->getPosition();
+    int cx = floor(posi.X / 32);
+    int cy = floor(posi.Z / 32);
+    bool b = terrmapacl_1->isChecked();
+    bool c = terrmapacl_3->isChecked();
+    bool t = terrmapacl_2->isChecked();
+    cmd_setChunkACL(cx,cy,b,c,t);
 }
 terrain_item::~terrain_item(){
     releaseAllChunk();
@@ -616,10 +749,23 @@ void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t,con
             if(ptr->minimap_element)
                 ptr->minimap_element->remove();
             ptr->owner = owner;
+
+            ptr->allowBuilding = b;
+            ptr->allowAttack = c;
+            ptr->allowColl = t;
+
             auto n = mapScene->addMeshSceneNode(minimap_terrain_mesh[b?1:0][c?1:0][t?1:0],0,-1,vec3(x*32,0,y*32));
+            n->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
             n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
             n->setMaterialType((video::E_MATERIAL_TYPE)minimap_terrain_shader);
             ptr->minimap_element = n;
+
+            if(owner == myUUID){
+                n = mapScene->addMeshSceneNode(minimap_terrain_mesh_owned,n);
+                n->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+                n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                n->setMaterialType((video::E_MATERIAL_TYPE)minimap_terrain_shader);
+            }
         }
     }
 }

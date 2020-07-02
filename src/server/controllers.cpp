@@ -124,6 +124,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'g':
                     ctl_getChunkACL(uuid,addr,data);
                 break;
+                case 's':
+                    ctl_setChunkACL(uuid,addr,data);
+                break;
                 case '+':
                     ctl_setChunkOwner(uuid,addr,data);
                 break;
@@ -432,6 +435,14 @@ void controllers::ctl_getChunkACL(const std::string & , const RakNet::SystemAddr
     data->Read(x);
     data->Read(y);
     sendAddr_chunkACL(addr,ipair(x,y),cache_chunkACL[ipair(x,y)]);
+}
+
+void controllers::ctl_setChunkACL(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    int32_t x,y;
+    bool b,c,t;
+    if(data->Read(x) && data->Read(y) && data->Read(b) && data->Read(c) && data->Read(t)){
+        setChunkACL(uuid,x,y,b,c,t);
+    }
 }
 
 void controllers::ctl_setChunkOwner(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
