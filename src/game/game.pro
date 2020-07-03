@@ -60,7 +60,8 @@ HEADERS += \
     shadow.h \
     carto.h \
     mission.h \
-    CGUITTFont.h
+    CGUITTFont.h \
+    ui/missioneditor.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -106,10 +107,12 @@ SOURCES += \
     shadow.cpp \
     carto.cpp \
     mission.cpp \
-    CGUITTFont.cpp
+    CGUITTFont.cpp \
+    ui/missioneditor.cpp
 
 FORMS += \
-    ui/login.ui
+    ui/login.ui \
+    ui/missioneditor.ui
 
 DISTFILES += \
     ../shader/terrain.vs.glsl \

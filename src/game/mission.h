@@ -85,23 +85,33 @@ class mission:public technology{
         void releaseMission(mission_node_t*);
         void getMission(const vec3 & posi, std::vector<mission_node_t *> & m);
 
-        void printString(const std::vector<std::wstring> & str);
-        void drawNearMission();
-        std::vector<mission_node_t*> mession_result;
+        int printString(const std::vector<std::wstring> & str, int start=64);
+        void printString(const std::wstring & str, int h);
+        void drawNearMission(int h);
+        std::vector<mission_node_t*> mission_result;
 
         std::vector<std::wstring> missionText_buffer;
 
         void onDraw()override;
-        bool showMissions;
         bool showMissionText;
         bool submitShowingMissions;
         time_t lastSubmitMissionsTime;
 
         void addMissionWindow();
+        void addMission(const std::string & title,const std::string & description);
 
         virtual std::string getMissionAccepter()=0;
 
         std::string missionParentUUID;
+
+        void setFullMapMode(bool m)override;
+
+        irr::video::ITexture * texture_mission_point;
+
+        irr::gui::IGUIButton * button_mission_giveup;
+
+    public:
+        bool openMissionEditBox;
 };
 
 }

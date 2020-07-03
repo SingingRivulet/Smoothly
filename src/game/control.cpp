@@ -46,8 +46,8 @@ void control::addEventRecv(){
 bool control::eventRecv::OnEvent(const irr::SEvent &event){
     //处理按键
     //return true;
+    commond cmd;
     if(parent->camera->isInputReceiverEnabled()){
-        commond cmd;
         switch(event.EventType){
 
             case irr::EET_KEY_INPUT_EVENT:
@@ -58,51 +58,53 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
     else \
     parent->status.k=false;
 
+
+#define walkEvent \
+            case irr::KEY_KEY_W: \
+                cmd.data_int = BM_WALK_F;\
+                if(event.KeyInput.PressedDown)\
+                    cmd.cmd = CMD_STATUS_ADD;\
+                else\
+                    cmd.cmd = CMD_STATUS_REMOVE;\
+                parent->pushCommond(cmd);\
+                break;\
+            case irr::KEY_KEY_A:\
+                cmd.data_int = BM_WALK_L;\
+                if(event.KeyInput.PressedDown)\
+                    cmd.cmd = CMD_STATUS_ADD;\
+                else\
+                    cmd.cmd = CMD_STATUS_REMOVE;\
+                parent->pushCommond(cmd);\
+                break;\
+            case irr::KEY_KEY_S:\
+                cmd.data_int = BM_WALK_B;\
+                if(event.KeyInput.PressedDown)\
+                    cmd.cmd = CMD_STATUS_ADD;\
+                else\
+                    cmd.cmd = CMD_STATUS_REMOVE;\
+                parent->pushCommond(cmd);\
+                break;\
+            case irr::KEY_KEY_D:\
+                cmd.data_int = BM_WALK_R;\
+                if(event.KeyInput.PressedDown)\
+                    cmd.cmd = CMD_STATUS_ADD;\
+                else\
+                    cmd.cmd = CMD_STATUS_REMOVE;\
+                parent->pushCommond(cmd);\
+                break;\
+            case irr::KEY_LCONTROL:\
+                break;\
+            case irr::KEY_SPACE:\
+                if(event.KeyInput.PressedDown){\
+                    cmd.cmd = CMD_JUMP;\
+                    cmd.data_vec.set(0,1,0);\
+                    parent->pushCommond(cmd);\
+                }else{\
+                }\
+                break;
+
                 switch(event.KeyInput.Key){
-                    case irr::KEY_KEY_W:
-                        cmd.data_int = BM_WALK_F;
-                        if(event.KeyInput.PressedDown)
-                            cmd.cmd = CMD_STATUS_ADD;
-                        else
-                            cmd.cmd = CMD_STATUS_REMOVE;
-                        parent->pushCommond(cmd);
-                        break;
-                    case irr::KEY_KEY_A:
-                        cmd.data_int = BM_WALK_L;
-                        if(event.KeyInput.PressedDown)
-                            cmd.cmd = CMD_STATUS_ADD;
-                        else
-                            cmd.cmd = CMD_STATUS_REMOVE;
-                        parent->pushCommond(cmd);
-                        break;
-                    case irr::KEY_KEY_S:
-                        cmd.data_int = BM_WALK_B;
-                        if(event.KeyInput.PressedDown)
-                            cmd.cmd = CMD_STATUS_ADD;
-                        else
-                            cmd.cmd = CMD_STATUS_REMOVE;
-                        parent->pushCommond(cmd);
-                        break;
-                    case irr::KEY_KEY_D:
-                        cmd.data_int = BM_WALK_R;
-                        if(event.KeyInput.PressedDown)
-                            cmd.cmd = CMD_STATUS_ADD;
-                        else
-                            cmd.cmd = CMD_STATUS_REMOVE;
-                        parent->pushCommond(cmd);
-                        break;
-                    case irr::KEY_LCONTROL:
-                        //蹲
-                        break;
-                    case irr::KEY_SPACE:
-                        //跳
-                        if(event.KeyInput.PressedDown){
-                            cmd.cmd = CMD_JUMP;
-                            cmd.data_vec.set(0,1,0);
-                            parent->pushCommond(cmd);
-                        }else{
-                        }
-                        break;
+                    walkEvent;
                     case irr::KEY_KEY_Y://设置移动目标
                         if(event.KeyInput.PressedDown){
                             if(parent->pathFindingMode){
@@ -138,10 +140,8 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         break;
                     case irr::KEY_KEY_E://拾取
                         if(event.KeyInput.PressedDown){
-                            parent->showMissions = true;
                             parent->autoPickup = true;
                         }else{
-                            parent->showMissions = false;
                             parent->autoPickup = false;
                         }
                         break;
@@ -191,20 +191,6 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         }else{
                             parent->body_bag_resource->setVisible(false);
                             parent->setGUIMode(false);
-                        }
-                        break;
-                    case irr::KEY_RETURN:
-                        if(event.KeyInput.PressedDown){
-                            parent->submitShowingMissions = true;
-                        }else{
-                            parent->submitShowingMissions = false;
-                        }
-                        break;
-                    case irr::KEY_KEY_K:
-                        if(event.KeyInput.PressedDown){
-                            parent->showMissionText = true;
-                        }else{
-                            parent->showMissionText = false;
                         }
                         break;
                     case irr::KEY_KEY_P:
@@ -299,6 +285,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
 
             case irr::EET_KEY_INPUT_EVENT:
                 switch(event.KeyInput.Key){
+                    walkEvent;
                     case irr::KEY_OEM_1:
                         if(!event.KeyInput.PressedDown){
                             {
@@ -338,6 +325,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
 
             case irr::EET_KEY_INPUT_EVENT:
                 switch(event.KeyInput.Key){
+                    walkEvent;
                     case irr::KEY_TAB:
                         if(event.KeyInput.PressedDown){
                             parent->body_bag_resource->setVisible(true);
@@ -392,12 +380,13 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 break;
             default:break;
         }
-    }else if(parent->fullmap_gui->isVisible()){//地图模式
+    }else if(parent->fullmap_gui->isVisible()){//地图、任务模式
 
         switch(event.EventType){
 
             case irr::EET_KEY_INPUT_EVENT:
                 switch(event.KeyInput.Key){
+                    walkEvent;
                     case irr::KEY_KEY_M:
                         if(!event.KeyInput.PressedDown){
                             parent->setFullMapMode_auto();
@@ -418,6 +407,18 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     case irr::KEY_F9:
                         if(!event.KeyInput.PressedDown){
                             parent->occupy();
+                        }
+                        break;
+                    case irr::KEY_KEY_E:
+                        if(event.KeyInput.PressedDown){
+                            parent->submitShowingMissions = true;
+                        }else{
+                            parent->submitShowingMissions = false;
+                        }
+                        break;
+                    case irr::KEY_KEY_P:
+                        if(!event.KeyInput.PressedDown){
+                            parent->getChunkMission();
                         }
                         break;
                 }
@@ -444,6 +445,8 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     case irr::gui::EGET_BUTTON_CLICKED:
                         if(event.GUIEvent.Caller==parent->terrmapacl_save){
                             parent->uploadChunkACL();
+                        }else if(event.GUIEvent.Caller==parent->button_mission_giveup){
+                            parent->cmd_giveUpMission();
                         }
                         break;
                     default:break;

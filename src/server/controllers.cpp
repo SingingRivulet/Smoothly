@@ -492,17 +492,20 @@ void controllers::ctl_getChunkMission(const std::string & , const RakNet::System
 
 void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
     mission_node_t m;
-    RakNet::RakString buf,text;
+    RakNet::RakString buf;
 
     if(!data->ReadVector(m.position.X , m.position.Y , m.position.Z))return;
 
     if(!data->Read(m.needArrive))return;
     if(!data->Read(m.showPosition))return;
 
-    if(!data->Read(text))return;
+    if(!data->Read(buf))return;
+    m.parent = buf.C_String();
 
     if(!data->Read(buf))return;
     m.description = buf.C_String();
+
+    if(!data->Read(buf))return;
 
     //检查坐标的所有者
     int cx = floor(m.position.X / 32);
@@ -514,7 +517,7 @@ void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemA
         return;
     }
 
-    setMissionText(addMission(m) , text.C_String());
+    setMissionText(addMission(m) , buf.C_String());
 }
 
 void controllers::ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){

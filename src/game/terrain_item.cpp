@@ -136,7 +136,7 @@ void terrain_item::onDraw(){
         findChunk(cx,cy){
             if(!it->second->owner.empty()){
                 if(it->second->owner==myUUID){
-                    swprintf(buf,256,L"已占领（按F9放弃）");
+                    swprintf(buf,256,L"已占领（按F9放弃，按F10添加任务）");
                     ttf->draw(buf,irr::core::rect<irr::s32>(width-256,128,width,128+32),irr::video::SColor(255,255,255,255));
                 }else{
                     swprintf(buf,256,L"拥有者：%s",it->second->owner.c_str());
@@ -787,6 +787,13 @@ void terrain_item::chunk::unlink(){
         neary1->neary0 = NULL;
         neary1 = NULL;
     }
+}
+bool terrain_item::isMyChunk(int x, int y){
+    findChunk(x,y){
+        if(it->second->owner == myUUID)
+            return true;
+    }
+    return false;
 }
 
 }

@@ -4,13 +4,22 @@
 
 namespace smoothly{
 
-void mission::msg_addMission(const char * uuid, float , float , float ){
+void mission::msg_addMission(const char * uuid, float x, float y, float z){
     mission_node_t *& m = missions[uuid];
     if(m){
         releaseMission(m);
         m = NULL;
     }
     cmd_getMission(uuid);
+
+    auto n = scene->addBillboardSceneNode(0,irr::core::dimension2df(2,2),vec3(x,y,z));
+    n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    n->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+    n->setMaterialTexture( 0 , texture_mission_point);
+    auto t = scene->createDeleteAnimator(2000);
+    n->addAnimator(t);
+    t->drop();
 }
 
 void mission::msg_setMission(const char * uuid, const char * text){
@@ -28,15 +37,21 @@ void mission::msg_setMission(const char * uuid, const char * text){
         }else{
             t->box = NULL;
         }
+        t->uuid = uuid;
         it->second = t;
     }
 }
 
-void mission::msg_submitMissionStatus(const char * uuid, bool status){
-
+void mission::msg_submitMissionStatus(const char * , bool status){
+    if(status){
+        printString(L"提交成功",44);
+    }else{
+        printString(L"提交失败",44);
+    }
 }
 
 void mission::msg_missionList(const std::vector<std::string> & new_missions){
+    printString(L"更新任务",64);
     for(auto it:missions){
         releaseMission(it.second);
     }
@@ -52,8 +67,15 @@ void mission::msg_missionText(const char * uuid, const char * text){
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     QStringList list = QString(text).split("\n");
     missionText_buffer.clear();
-    for(int i = 0; i< list.size();++i){
-        missionText_buffer.push_back(conv.from_bytes(list.at(i).toStdString()));
+    if(strlen(text)<=0){
+        missionText_buffer.push_back(L"当前无任务，请使用P键探索任务");
+    }else{
+        wchar_t buf[128];
+        swprintf(buf,128,L"当前任务：%s",uuid);
+        missionText_buffer.push_back(buf);
+        for(int i = 0; i< list.size();++i){
+            missionText_buffer.push_back(conv.from_bytes(list.at(i).toStdString()));
+        }
     }
 }
 
@@ -171,10 +193,15 @@ void mission::mission_node_t::toString(std::string & str){
 }
 
 mission::mission(){
-    showMissions = false;
     submitShowingMissions = false;
     showMissionText = false;
     lastSubmitMissionsTime = 0;
+    openMissionEditBox = false;
+    texture_mission_point = driver->getTexture("../../res/particle/portal2.bmp");
+
+    button_mission_giveup = gui->addButton(irr::core::rect<s32>(64,height-256-32,128,height-256),0,-1,L"giveup");
+    button_mission_giveup->setOverrideColor(video::SColor(255,0,0,0));
+    button_mission_giveup->setVisible(false);
 }
 
 mission::~mission(){
@@ -194,53 +221,82 @@ void mission::getMission(const vec3 & posi,std::vector<mission_node_t*> & m){
 
     missions_indexer.fetchByPoint(posi,[](dbvt3d::AABB * b , void * arg){
         auto s = (subm_t*)arg;
-        auto mession = ((mission_node_t*)b->data);
-        auto len = (s->posi - mession->position).getLengthSQ();
+        auto mission = ((mission_node_t*)b->data);
+        auto len = (s->posi - mission->position).getLengthSQ();
         if(len<64){
-            s->m->push_back(mession);
+            s->m->push_back(mission);
         }
     },&subm);
 
 }
 
-void mission::printString(const std::vector<std::wstring> & str){
-    int h=64;
+int mission::printString(const std::vector<std::wstring> & str,int start){
+    int h=start;
     for(auto it:str){
         if(h>=height)
             break;
-        ttf->draw(it.c_str() , core::rect<s32>(64,h,width,height),video::SColor(255,255,255,255));
+        printString(it,h);
         h+=20;
     }
+    return h;
 }
 
-void mission::drawNearMission(){
-    mession_result.clear();
-    getMission(camera->getPosition() , mession_result);
-    if(mession_result.size()>0){
-        printString(mession_result[0]->description_buffer);
+void mission::printString(const std::wstring & str, int h){
+    ttf->draw(str.c_str() , core::rect<s32>(64,h,width,height),video::SColor(255,255,255,255));
+}
+
+void mission::drawNearMission(int h){
+    mission_result.clear();
+    getMission(camera->getPosition() , mission_result);
+    if(mission_result.size()>0){
         auto tm = time(0);
+
+        wchar_t buf[128];
+        swprintf(buf,128,L"任务分支：%s",mission_result[0]->uuid.c_str());
+        printString(buf,h);
+
+        int s = printString(mission_result[0]->description_buffer,h+20);
         if(submitShowingMissions && tm-lastSubmitMissionsTime>1){
             lastSubmitMissionsTime = tm;
             auto acc = getMissionAccepter();
-            if(!acc.empty())
-                cmd_submitMission(mession_result[0]->uuid.c_str() , acc.c_str());
+            if(!acc.empty()){
+                cmd_submitMission(mission_result[0]->uuid.c_str() , acc.c_str());
+                printString(L"提交……",s);
+            }
+        }else{
+            printString(L"按E选择此任务分支",s);
         }
     }
 }
 
 void mission::onDraw(){
     technology::onDraw();
-    if(showMissions){
-        drawNearMission();
-    }else{
-        if(showMissionText){
-            printString(missionText_buffer);
-        }
+    if(showMissionText){
+        auto h = printString(missionText_buffer);
+        drawNearMission(h+20);
+        button_mission_giveup->setVisible(!missionParentUUID.empty());
     }
 }
 
 void mission::addMissionWindow(){
+    auto p = camera->getPosition();
+    if(isMyChunk(floor(p.X/32),floor(p.Z/32)))
+        openMissionEditBox = true;
+}
 
+void mission::addMission(const std::string & title, const std::string & text){
+    auto p = camera->getPosition();
+    cmd_addMission(p.X,p.Y,p.Z,true,true,missionParentUUID.c_str(),title.c_str(),text.c_str());
+    wchar_t buf[128];
+    swprintf(buf,128,L"添加任务：（%d,%d,%d）",(int)p.X,(int)p.Y,(int)p.Z);
+    setTerrainMapMessage(buf);
+}
+
+void mission::setFullMapMode(bool m){
+    technology::setFullMapMode(m);
+    showMissionText = m;
+    if(!m)
+        button_mission_giveup->setVisible(false);
 }
 
 void mission::releaseMission(mission::mission_node_t * t){

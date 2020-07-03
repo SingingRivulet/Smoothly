@@ -507,6 +507,16 @@ class connectionBase{
             bs.Write(RakNet::RakString(body));
             sendMessage(&bs);
         }
+        inline void cmd_addMission(float x,float y,float z,bool needArrive,bool showPosition,const char * parent,const char * des,const char * text){
+            makeHeader('I','a');
+            bs.WriteVector(x,y,z);
+            bs.Write(needArrive);
+            bs.Write(showPosition);
+            bs.Write(RakNet::RakString(parent));
+            bs.Write(RakNet::RakString(des));
+            bs.Write(RakNet::RakString(text));
+            sendMessage(&bs);
+        }
         inline void cmd_giveUpMission(){
             makeHeader('I','u');
             sendMessage(&bs);

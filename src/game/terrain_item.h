@@ -133,6 +133,8 @@ namespace smoothly{
             void setFullMapMode(bool m)override;
             irr::gui::IGUICheckBox * terrmapacl_1,* terrmapacl_2,* terrmapacl_3;
             irr::gui::IGUIButton * terrmapacl_save;
+
+            bool isMyChunk(int x,int y);
     };
 }
 #endif
