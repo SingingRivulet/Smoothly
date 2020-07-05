@@ -4,6 +4,17 @@ namespace smoothly{
 
 control::control(){
     addEventRecv();
+    menu_window = gui->addImage(driver->getTexture("../../res/icon/menu.png"),irr::core::vector2d<s32>(width/2-128 , height/2-64));
+
+    menu_exit   = gui->addButton(irr::core::rect<s32>(16,16,230,48),menu_window,-1,L"exit");
+    menu_exit->setOverrideColor(video::SColor(255,0,0,0));
+
+    menu_cmd_line = gui->addEditBox(L"",irr::core::rect<s32>(16,60,230,80),true,menu_window);
+
+    menu_cmd    = gui->addButton(irr::core::rect<s32>(128,82,230,112),menu_window,-1,L"commond");
+    menu_cmd->setOverrideColor(video::SColor(255,0,0,0));
+
+    menu_window->setVisible(false);
 }
 
 void control::processControl(){
@@ -141,8 +152,10 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                     case irr::KEY_KEY_E://拾取
                         if(event.KeyInput.PressedDown){
                             parent->autoPickup = true;
+                            parent->submitShowingMissions = true;
                         }else{
                             parent->autoPickup = false;
+                            parent->submitShowingMissions = false;
                         }
                         break;
                     case irr::KEY_KEY_L://手动模式
@@ -228,7 +241,15 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                         }
                         break;
                     case irr::KEY_ESCAPE:
-                        parent->running = false;
+                        if(!event.KeyInput.PressedDown){
+                            {
+                                if(!parent->menu_window->isVisible()){
+                                    bool mode = !parent->menu_window->isVisible();
+                                    parent->menu_window->setVisible(mode);
+                                    parent->setGUIMode(mode);
+                                }
+                            }
+                        }
                         break;
                     case irr::KEY_F11:
                         if(!event.KeyInput.PressedDown){
@@ -447,6 +468,44 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->uploadChunkACL();
                         }else if(event.GUIEvent.Caller==parent->button_mission_giveup){
                             parent->cmd_giveUpMission();
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+            default:break;
+        }
+    }else if(parent->menu_window->isVisible()){
+
+        switch(event.EventType){
+
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    case irr::KEY_ESCAPE:
+                        if(!event.KeyInput.PressedDown){
+                            {
+                                bool mode = !parent->menu_window->isVisible();
+                                parent->menu_window->setVisible(mode);
+                                parent->setGUIMode(mode);
+                            }
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+
+            case irr::EET_MOUSE_INPUT_EVENT:
+                switch(event.MouseInput.Event){
+                    default:break;
+                }
+                break;
+            case irr::EET_GUI_EVENT:
+                switch (event.GUIEvent.EventType) {
+                    case irr::gui::EGET_BUTTON_CLICKED:
+                        if(event.GUIEvent.Caller==parent->menu_cmd){
+                            parent->processCmd();
+                        }else if(event.GUIEvent.Caller==parent->menu_exit){
+                            parent->running = false;
                         }
                         break;
                     default:break;

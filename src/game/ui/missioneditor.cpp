@@ -23,7 +23,8 @@ void missionEditor::closeEvent(QCloseEvent * event){
 void missionEditor::on_pushButton_clicked(){
     auto title = ui->lineEdit_title->text();
     auto text  = ui->textEdit->toPlainText();
-    game->addMission(title.toStdString() , text.toStdString());
+    auto showp = ui->checkBox_showPosi->isChecked();
+    game->addMission(title.toStdString() , text.toStdString(),showp);
     ui->lineEdit_title->setText("");
     ui->textEdit->setPlainText("");
     hide();

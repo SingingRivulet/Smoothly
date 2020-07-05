@@ -108,7 +108,8 @@ SOURCES += \
     carto.cpp \
     mission.cpp \
     CGUITTFont.cpp \
-    ui/missioneditor.cpp
+    ui/missioneditor.cpp \
+    control_cmd.cpp
 
 FORMS += \
     ui/login.ui \

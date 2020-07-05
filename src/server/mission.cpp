@@ -81,6 +81,19 @@ void mission::getNowMissionParent(const std::string & user, std::string & missio
     db->Get(leveldb::ReadOptions(), key , &mission_uuid);
 }
 
+void mission::goParentMission(const std::string & user){
+    try{
+        std::string uuid;
+        getNowMissionParent(user,uuid);
+        if(!uuid.empty()){
+            mission_node_t node;
+            if(getMission(uuid,node)){
+                setNowMissionParent(user,node.parent);
+            }
+        }
+    }catch(...){}
+}
+
 bool mission::submitMission(const RakNet::SystemAddress & addr, const std::string & user, const std::string & body, const std::string & mission_uuid){
     try{
         mission_node_t node;

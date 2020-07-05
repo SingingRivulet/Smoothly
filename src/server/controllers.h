@@ -53,6 +53,7 @@ class controllers:public handlers{
         void ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_giveUpMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_addMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
+        void ctl_goParentMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
 };
 /////////////////
 }//////server

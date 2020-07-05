@@ -491,6 +491,7 @@ class body:public mission{
             if(mainControlBody){
                 auto p = mainControlBody->node->getPosition();
                 cmd_getChunkMission(floor(p.X/32) , floor(p.Z/32));
+                scanAnimate();
             }
         }
 

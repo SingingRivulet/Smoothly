@@ -35,7 +35,7 @@ class map:public datas{
         inline map(){
             cache_nodePosi.parent = this;
             cache_chunkACL.parent = this;
-            userMaxChunk = 32;
+            userMaxChunk = 128;
         }
     private:
         static std::string getNodePrefix(int x,int y);

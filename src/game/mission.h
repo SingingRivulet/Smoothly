@@ -51,6 +51,7 @@ class mission:public technology{
                     showPosition = false;
                     needArrive = true;
                     box = NULL;
+                    node = NULL;
                     uuid.clear();
                 }
                 mission_node_t(const mission_node_t & i) {
@@ -63,6 +64,7 @@ class mission:public technology{
                     showPosition = i.showPosition;
                     box         = i.box;
                     uuid        = i.uuid;
+                    node        = i.node;
                 }
                 const mission_node_t & operator=(const mission_node_t & i) {
                     needArrive  = i.needArrive;
@@ -74,11 +76,13 @@ class mission:public technology{
                     showPosition = i.showPosition;
                     box         = i.box;
                     uuid        = i.uuid;
+                    node        = i.node;
                     return *this;
                 }
                 void loadString(const std::string & );
                 void toString(std::string &);
                 dbvt3d::AABB * box;
+                irr::scene::ISceneNode * node;
         };
         std::unordered_map<std::string,mission_node_t *> missions;
         dbvt3d missions_indexer;
@@ -93,25 +97,40 @@ class mission:public technology{
         std::vector<std::wstring> missionText_buffer;
 
         void onDraw()override;
+        void loop()override;
+
         bool showMissionText;
         bool submitShowingMissions;
         time_t lastSubmitMissionsTime;
 
         void addMissionWindow();
-        void addMission(const std::string & title,const std::string & description);
+        void addMission(const std::string & title, const std::string & description, bool showPosi);
+        void goParentMission();
 
         virtual std::string getMissionAccepter()=0;
 
         std::string missionParentUUID;
+        mission_node_t * missionParent;
 
         void setFullMapMode(bool m)override;
 
         irr::video::ITexture * texture_mission_point;
+        irr::video::ITexture * texture_mission_target;
 
         irr::gui::IGUIButton * button_mission_giveup;
 
     public:
         bool openMissionEditBox;
+
+    private:
+        irr::scene::ISceneNode * scan_animation;
+        irr::u32 scan_animation_time;
+        bool scan_animation_showing;
+    public:
+        void scanAnimate(){
+            scan_animation_time = timer->getTime();
+            scan_animation_showing = true;
+        }
 };
 
 }

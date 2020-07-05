@@ -17,6 +17,13 @@ class control:public fire{
         struct{
         }status;
         void addEventRecv();
+
+    private:
+        irr::gui::IGUIImage * menu_window;
+        irr::gui::IGUIButton * menu_exit,* menu_cmd;
+        irr::gui::IGUIEditBox * menu_cmd_line;
+        void processCmd();
+        void processCmd_mission(std::istringstream & iss);
 };
 
 }

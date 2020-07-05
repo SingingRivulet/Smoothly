@@ -87,6 +87,7 @@ void connection::login(const RakNet::SystemAddress & addr,const std::string & uu
     linkUUID(uuid,addr);
     sendAddr_visualrange(addr);
     sendAddr_unlockedTech(addr,uuid);
+    //发送任务
     sendNowMission(addr,uuid);
     //sendMapToUser(uuid);
     //直接发address效率更高

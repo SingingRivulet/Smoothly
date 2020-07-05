@@ -152,6 +152,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'a':
                     ctl_addMission(uuid,addr,data);
                 break;
+                case '<':
+                    ctl_goParentMission(uuid,addr,data);
+                break;
             }
         break;
     }
@@ -490,7 +493,7 @@ void controllers::ctl_getChunkMission(const std::string & , const RakNet::System
     }
 }
 
-void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemAddress & , RakNet::BitStream * data){
+void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     mission_node_t m;
     RakNet::RakString buf;
 
@@ -518,6 +521,13 @@ void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemA
     }
 
     setMissionText(addMission(m) , buf.C_String());
+
+    sendNowMission(addr,uuid);
+}
+
+void controllers::ctl_goParentMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * ){
+    goParentMission(uuid);
+    sendNowMission(addr,uuid);
 }
 
 void controllers::ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * data){

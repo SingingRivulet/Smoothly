@@ -12,6 +12,7 @@ void mission::msg_addMission(const char * uuid, float x, float y, float z){
     }
     cmd_getMission(uuid);
 
+    /*
     auto n = scene->addBillboardSceneNode(0,irr::core::dimension2df(2,2),vec3(x,y,z));
     n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
@@ -20,25 +21,54 @@ void mission::msg_addMission(const char * uuid, float x, float y, float z){
     auto t = scene->createDeleteAnimator(2000);
     n->addAnimator(t);
     t->drop();
+    */
 }
 
 void mission::msg_setMission(const char * uuid, const char * text){
-    auto it = missions.find(uuid);
-    if(it!=missions.end()){
-        if(it->second){
-            releaseMission(it->second);
+
+    if(missionParentUUID == uuid){
+        //是父节点
+        if(missionParent){
+            delete missionParent;
         }
+
         mission_node_t * t = new mission_node_t;
         t->loadString(text);
-        if(t->needArrive){
-            t->box = missions_indexer.add(
-                        t->position - vec3(2.5,2.5,2.5),
-                        t->position + vec3(2.5,2.5,2.5),t);
-        }else{
-            t->box = NULL;
-        }
+        t->box = NULL;
         t->uuid = uuid;
-        it->second = t;
+        missionParent = t;
+
+    }else{
+        auto it = missions.find(uuid);
+        if(it!=missions.end()){
+            if(it->second){
+                releaseMission(it->second);
+            }
+
+            mission_node_t * t = new mission_node_t;
+            t->loadString(text);
+            if(t->needArrive){
+                t->box = missions_indexer.add(
+                            t->position - vec3(2.5,2.5,2.5),
+                            t->position + vec3(2.5,2.5,2.5),t);
+            }else{
+                t->box = NULL;
+            }
+            if(t->showPosition){
+                auto n = scene->addBillboardSceneNode(0,irr::core::dimension2df(2,2),t->position);
+                n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+                n->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+                if(t->parent.empty())
+                    n->setMaterialTexture( 0 , texture_mission_point);
+                else
+                    n->setMaterialTexture( 0 , texture_mission_target);
+                t->node = n;
+            }
+            t->uuid = uuid;
+
+            it->second = t;
+        }
     }
 }
 
@@ -53,7 +83,8 @@ void mission::msg_submitMissionStatus(const char * , bool status){
 void mission::msg_missionList(const std::vector<std::string> & new_missions){
     printString(L"更新任务",64);
     for(auto it:missions){
-        releaseMission(it.second);
+        if(it.second)
+            releaseMission(it.second);
     }
     missions.clear();
     for(auto it:new_missions){
@@ -63,7 +94,12 @@ void mission::msg_missionList(const std::vector<std::string> & new_missions){
 }
 
 void mission::msg_missionText(const char * uuid, const char * text){
+    if(missionParent){
+        delete missionParent;
+        missionParent = NULL;
+    }
     missionParentUUID = uuid;
+    cmd_getMission(uuid);
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     QStringList list = QString(text).split("\n");
     missionText_buffer.clear();
@@ -197,11 +233,28 @@ mission::mission(){
     showMissionText = false;
     lastSubmitMissionsTime = 0;
     openMissionEditBox = false;
-    texture_mission_point = driver->getTexture("../../res/particle/portal2.bmp");
+    texture_mission_point = driver->getTexture("../../res/icon/mission.png");
+    texture_mission_target = driver->getTexture("../../res/icon/mission_target.png");
 
+    //放弃按钮
     button_mission_giveup = gui->addButton(irr::core::rect<s32>(64,height-256-32,128,height-256),0,-1,L"giveup");
     button_mission_giveup->setOverrideColor(video::SColor(255,0,0,0));
     button_mission_giveup->setVisible(false);
+
+    missionParent = NULL;
+
+    //扫描动画
+    scan_animation = scene->addSphereSceneNode(1);
+    irr::video::SMaterial & m = scan_animation->getMaterial(0);
+    m.BlendOperation = irr::video::EBO_ADD;
+    m.BackfaceCulling = false;
+    scan_animation->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+    scan_animation->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    scan_animation->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    scan_animation->setMaterialTexture(0,driver->getTexture("../../res/texture/scan/1.png"));
+    scan_animation->setVisible(false);
+    scan_animation_time = 0;
+    scan_animation_showing = false;
 }
 
 mission::~mission(){
@@ -275,6 +328,32 @@ void mission::onDraw(){
         auto h = printString(missionText_buffer);
         drawNearMission(h+20);
         button_mission_giveup->setVisible(!missionParentUUID.empty());
+    }else{
+        drawNearMission(64);
+    }
+}
+
+void mission::loop(){
+    technology::loop();
+
+    if(scan_animation_showing){
+        auto t = timer->getTime();
+        auto delta = t-scan_animation_time;
+        if(delta < 5000 && delta > 1){
+
+            scan_animation->setVisible(true);
+            scan_animation->setPosition(camera->getPosition());
+            float sc = delta*0.1;
+            scan_animation->setScale(vec3(sc,sc,sc));
+
+        }else{
+
+            scan_animation->setVisible(false);
+
+        }
+        if(delta>5000){
+            scan_animation_showing = false;
+        }
     }
 }
 
@@ -284,12 +363,17 @@ void mission::addMissionWindow(){
         openMissionEditBox = true;
 }
 
-void mission::addMission(const std::string & title, const std::string & text){
+void mission::addMission(const std::string & title, const std::string & text, bool showPosi){
     auto p = camera->getPosition();
-    cmd_addMission(p.X,p.Y,p.Z,true,true,missionParentUUID.c_str(),title.c_str(),text.c_str());
+    cmd_addMission(p.X,p.Y,p.Z,true,showPosi,missionParentUUID.c_str(),title.c_str(),text.c_str());
     wchar_t buf[128];
     swprintf(buf,128,L"添加任务：（%d,%d,%d）",(int)p.X,(int)p.Y,(int)p.Z);
     setTerrainMapMessage(buf);
+}
+
+void mission::goParentMission(){
+    printf("goParentMission\n");
+    cmd_goParentMission();
 }
 
 void mission::setFullMapMode(bool m){
@@ -300,7 +384,10 @@ void mission::setFullMapMode(bool m){
 }
 
 void mission::releaseMission(mission::mission_node_t * t){
-    t->box->autodrop();
+    if(t->box)
+        t->box->autodrop();
+    if(t->node)
+        t->node->remove();
     delete t;
 }
 

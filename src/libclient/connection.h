@@ -517,6 +517,10 @@ class connectionBase{
             bs.Write(RakNet::RakString(text));
             sendMessage(&bs);
         }
+        inline void cmd_goParentMission(){
+            makeHeader('I','<');
+            sendMessage(&bs);
+        }
         inline void cmd_giveUpMission(){
             makeHeader('I','u');
             sendMessage(&bs);

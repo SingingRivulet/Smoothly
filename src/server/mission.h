@@ -90,6 +90,7 @@ class mission:public building{
                 sendAddr_missionList(addr,std::vector<std::string>());
             }
         }
+        void goParentMission(const std::string & user);
 
         //提交任务
         //要求：

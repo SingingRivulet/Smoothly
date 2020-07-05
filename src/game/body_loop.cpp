@@ -2,7 +2,7 @@
 namespace smoothly{
 
 void body::loop(){
-    technology::loop();
+    mission::loop();
     for(auto it:bodies){
         bodyItem * b = it.second;
         auto p = b->node->getPosition();
