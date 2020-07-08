@@ -487,13 +487,7 @@ class body:public mission{
         //irr::s32 minimap_body_shader;
 
     public:
-        inline void getChunkMission(){
-            if(mainControlBody){
-                auto p = mainControlBody->node->getPosition();
-                cmd_getChunkMission(floor(p.X/32) , floor(p.Z/32));
-                scanAnimate();
-            }
-        }
+        void getChunkMission();
 
     private:
         void occupyChunk()override;

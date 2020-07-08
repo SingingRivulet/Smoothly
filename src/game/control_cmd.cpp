@@ -13,6 +13,8 @@ void control::processCmd(){
 
     if(key=="mission"){
         processCmd_mission(iss);
+    }else if(key=="mail"){
+        processCmd_mail(iss);
     }
 
     menu_cmd_line->setText(L"");
@@ -23,6 +25,16 @@ void control::processCmd_mission(std::istringstream & iss){
     iss>>method;
     if(method=="goParent"){
         goParentMission();
+    }
+}
+
+void control::processCmd_mail(std::istringstream & iss){
+    std::string method;
+    iss>>method;
+    if(method=="pickup"){
+        std::string uuid;
+        iss>>uuid;
+        cmd_pickupMailPackage(mainControl.c_str() , uuid.c_str());
     }
 }
 

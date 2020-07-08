@@ -362,6 +362,26 @@ void handlers::boardcast_mission(const vec3 & posi, const std::string & muuid){
     boardcast(x,y,&bs);
 }
 
+void handlers::sendUser_newMail(const std::string & user){
+    try{
+        RakNet::SystemAddress addr;
+        getAddrByUUID(user,addr);
+        makeHeader('L','n');
+        sendMessage(&bs,addr);
+    }catch(...){}
+}
+
+void handlers::sendAddr_mail(const RakNet::SystemAddress & addr, const std::string & text){
+    makeHeader('L','m');
+    bs.Write(RakNet::RakString(text.c_str()));
+    sendMessage(&bs,addr);
+}
+
+void handlers::sendAddr_mailPackagePickedUp(const RakNet::SystemAddress & addr){
+    makeHeader('L','u');
+    sendMessage(&bs,addr);
+}
+
 void handlers::boardcast(int x,int y,RakNet::BitStream * data){
     fetchUserByDBVT(x,y,[&](const std::string &,const RakNet::SystemAddress &addr){
         sendMessage(data,addr);

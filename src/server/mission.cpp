@@ -150,6 +150,14 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
             //做过的任务不再发奖励
         }else{
             //发放奖励
+            if(!node.reward.empty()){
+                mailPackage_t mp;
+                for(auto it:node.reward){
+                    mp.resource.push_back(it);
+                }
+                auto mpuuid = putMailPackage(mp);
+                addMail(user , "任务奖励" , "" , mpuuid);
+            }
             setDone(user,mission_uuid);//设置任务已完成
         }
 

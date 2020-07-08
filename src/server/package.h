@@ -27,12 +27,17 @@ class package:public bag{
                 }
         };
 
-        struct package_item{
+        struct package_base{
+                std::vector<resource_t> resource;
+                std::unordered_set<std::string> tool;
+                inline package_base():resource(),tool(){}
+                inline package_base(const std::vector<resource_t> & r , const std::unordered_set<std::string> & t):resource(r),tool(t){}
+        };
+
+        struct package_item:package_base{
                 int skin;//显示时使用的皮肤
                 std::string uuid;
                 vec3 position;
-                std::vector<resource_t> resource;
-                std::unordered_set<std::string> tool;
                 void toString(std::string & s);
                 void loadString(const std::string & s);
                 inline void clear(){
@@ -42,10 +47,10 @@ class package:public bag{
                     resource.clear();
                     tool.clear();
                 }
-                inline package_item():uuid(),position(),resource(),tool(){
+                inline package_item():package_base(),uuid(),position(){
                     skin = 0;
                 }
-                inline package_item(const package_item & i):uuid(i.uuid),position(i.position),resource(i.resource),tool(i.tool){
+                inline package_item(const package_item & i):package_base(i.resource,i.tool),uuid(i.uuid),position(i.position){
                     skin = i.skin;
                 }
                 inline const package_item & operator=(const package_item & i){

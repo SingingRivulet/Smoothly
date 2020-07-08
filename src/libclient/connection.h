@@ -283,6 +283,19 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'L':
+                                    switch (data->data[3]) {
+                                        case 'n':
+                                            ctl_newMail(&bs);
+                                        break;
+                                        case 'm':
+                                            ctl_mail(&bs);
+                                        break;
+                                        case 'u':
+                                            ctl_mailPackagePickedUp(&bs);
+                                        break;
+                                    }
+                                break;
                             }
                             
                         break;
@@ -535,6 +548,16 @@ class connectionBase{
             makeHeader('G','-');
             bs.Write(x);
             bs.Write(y);
+            sendMessage(&bs);
+        }
+        inline void cmd_getMail(){
+            makeHeader('L','g');
+            sendMessage(&bs);
+        }
+        inline void cmd_pickupMailPackage(const char * buuid , const char * mpuuid){
+            makeHeader('L','p');
+            bs.Write(RakNet::RakString(buuid));
+            bs.Write(RakNet::RakString(mpuuid));
             sendMessage(&bs);
         }
     private:
@@ -861,6 +884,17 @@ class connectionBase{
             data->Read(text);
             msg_missionText(uuid.C_String() , text.C_String());
         }
+        inline void ctl_newMail(RakNet::BitStream * ){
+            msg_newMail();
+        }
+        inline void ctl_mail(RakNet::BitStream * data){
+            RakNet::RakString text;
+            data->Read(text);
+            msg_mail(text.C_String());
+        }
+        inline void ctl_mailPackagePickedUp(RakNet::BitStream * data){
+            msg_mailPackagePickedUp();
+        }
 
         time_t lastHeartbeat;
 
@@ -903,6 +937,9 @@ class connectionBase{
         virtual void msg_submitMissionStatus(const char * uuid , bool status)=0;
         virtual void msg_missionList(const std::vector<std::string> & missions)=0;
         virtual void msg_missionText(const char * uuid , const char * text)=0;
+        virtual void msg_newMail()=0;
+        virtual void msg_mail(const char * text)=0;
+        virtual void msg_mailPackagePickedUp()=0;
 };
 ///////////////////////
 }//////client

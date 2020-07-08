@@ -1,9 +1,9 @@
 #ifndef SMOOTHLY_CONTROL
 #define SMOOTHLY_CONTROL
-#include "fire.h"
+#include "mail.h"
 namespace smoothly{
 
-class control:public fire{
+class control:public mail{
     public:
         control();
         void processControl();
@@ -24,6 +24,7 @@ class control:public fire{
         irr::gui::IGUIEditBox * menu_cmd_line;
         void processCmd();
         void processCmd_mission(std::istringstream & iss);
+        void processCmd_mail(std::istringstream & iss);
 };
 
 }

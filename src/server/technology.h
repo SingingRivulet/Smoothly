@@ -1,12 +1,12 @@
 ﻿#ifndef SMOOTHLY_SERVER_TECHNOLOGY
 #define SMOOTHLY_SERVER_TECHNOLOGY
 
-#include "package.h"
+#include "mailpackage.h"
 
 namespace smoothly{
 namespace server{
 
-class technology:public package{
+class technology:public mailPackage{
     public:
 
         struct tech_conf_t{

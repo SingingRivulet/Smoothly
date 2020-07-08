@@ -211,6 +211,16 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->getChunkMission();
                         }
                         break;
+                    case irr::KEY_KEY_N:
+                        if(!event.KeyInput.PressedDown){
+                            {
+                                parent->showMails = true;
+                                parent->showMailText = false;
+                                //parent->getMail();
+                                parent->setGUIMode(true);
+                            }
+                        }
+                        break;
                     case irr::KEY_OEM_1:
                         if(!event.KeyInput.PressedDown){
                             {
@@ -512,6 +522,63 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 }
                 break;
             default:break;
+        }
+    }else if(parent->showMails){
+
+        switch(event.EventType){
+
+            case irr::EET_MOUSE_INPUT_EVENT:
+                if(!parent->showMailText){
+                    parent->setMailFocusByScreen(event.MouseInput.X,event.MouseInput.Y);
+                    switch(event.MouseInput.Event){
+                        case irr::EMIE_LMOUSE_PRESSED_DOWN:
+                            if(parent->mailLastPage.isPointInside(irr::core::vector2d<irr::s32>(event.MouseInput.X,event.MouseInput.Y))){
+                                parent->mail_page-=1;
+                                if(parent->mail_page<1)
+                                    parent->mail_page = 1;
+                            }else if(parent->mailNextPage.isPointInside(irr::core::vector2d<irr::s32>(event.MouseInput.X,event.MouseInput.Y))){
+                                parent->mail_page+=1;
+                            }else if(parent->mail_focus!=-1){
+                                parent->mailPackagePickingup = false;
+                                parent->showMailText = true;
+                            }
+                            break;
+                        default:break;
+                    }
+                }else{
+                    switch(event.MouseInput.Event){
+                        case irr::EMIE_LMOUSE_PRESSED_DOWN:
+                            if(event.MouseInput.X<64 || event.MouseInput.Y<64){
+                                parent->showMailText = false;
+                            }else if(parent->mailPackage_button>0 &&
+                                     event.MouseInput.Y>parent->mailPackage_button &&
+                                     event.MouseInput.Y<parent->mailPackage_button+20){
+                                parent->pickupFocusMailPackage();
+                            }
+                            break;
+                        default:break;
+                    }
+                }
+                break;
+
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    walkEvent;
+                    case irr::KEY_KEY_N:
+                        if(!event.KeyInput.PressedDown){
+                            {
+                                parent->showMails = false;
+                                parent->showMailText = false;
+                                parent->setGUIMode(false);
+                            }
+                        }
+                        break;
+                    default:break;
+                }
+                break;
+
+            default:break;
+
         }
     }
     return false;

@@ -61,7 +61,8 @@ HEADERS += \
     carto.h \
     mission.h \
     CGUITTFont.h \
-    ui/missioneditor.h
+    ui/missioneditor.h \
+    mail.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -109,7 +110,8 @@ SOURCES += \
     mission.cpp \
     CGUITTFont.cpp \
     ui/missioneditor.cpp \
-    control_cmd.cpp
+    control_cmd.cpp \
+    mail.cpp
 
 FORMS += \
     ui/login.ui \

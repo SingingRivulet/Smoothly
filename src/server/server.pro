@@ -37,7 +37,8 @@ SOURCES += main.cpp \
     package.cpp \
     technology.cpp \
     making.cpp \
-    mission.cpp
+    mission.cpp \
+    mailpackage.cpp
 
 HEADERS += \
     body.h \
@@ -66,7 +67,8 @@ HEADERS += \
     package.h \
     technology.h \
     making.h \
-    mission.h
+    mission.h \
+    mailpackage.h
 
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/
 

@@ -70,6 +70,10 @@ class handlers:public admin{
         void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text);
         void boardcast_mission(const vec3 & posi, const std::string & muuid);
 
+        void sendUser_newMail(const std::string & user);
+        void sendAddr_mail(const RakNet::SystemAddress & addr , const std::string & text);
+        void sendAddr_mailPackagePickedUp(const RakNet::SystemAddress & addr);
+
         void boardcast(int x,int y,RakNet::BitStream * data);
         
 };

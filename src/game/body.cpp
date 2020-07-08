@@ -1034,6 +1034,41 @@ void body::selectBodyUpdate(){
     }
 }
 
+void body::getChunkMission(){
+    if(mainControlBody){
+        auto p = mainControlBody->node->getPosition();
+        int cx = floor(p.X/32);
+        int cy = floor(p.Z/32);
+
+        cmd_getChunkMission(cx , cy);
+
+        bool cxl = ((cx*32+16) > p.X);
+        bool cyl = ((cy*32+16) > p.Y);
+
+        if(cxl){
+            cmd_getChunkMission(cx-1 , cy);
+            if(cyl){
+                cmd_getChunkMission(cx   , cy-1);
+                cmd_getChunkMission(cx-1 , cy-1);
+            }else{
+                cmd_getChunkMission(cx   , cy+1);
+                cmd_getChunkMission(cx-1 , cy+1);
+            }
+        }else{
+            cmd_getChunkMission(cx+1 , cy);
+            if(cyl){
+                cmd_getChunkMission(cx   , cy-1);
+                cmd_getChunkMission(cx+1 , cy-1);
+            }else{
+                cmd_getChunkMission(cx   , cy+1);
+                cmd_getChunkMission(cx+1 , cy+1);
+            }
+        }
+
+        scanAnimate();
+    }
+}
+
 bool body::bodyItem::JointCallback::getFrameData(f32 frame, scene::ISkinnedMesh::SJoint * joint, core::vector3df & position, s32 & positionHint, core::vector3df & scale, s32 & scaleHint, core::quaternion & rotation, s32 & rotationHint){
     return false;
 }

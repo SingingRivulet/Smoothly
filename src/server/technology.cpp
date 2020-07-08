@@ -34,13 +34,13 @@ void technology::setTechTarget(const RakNet::SystemAddress & addr, const std::st
 }
 
 void technology::loop(){
-    package::loop();
+    mailPackage::loop();
     cache_tech_user.removeExpire();
 }
 
 void technology::release(){
     cache_tech_user.clear();
-    package::release();
+    mailPackage::release();
 }
 
 technology::technology(){
