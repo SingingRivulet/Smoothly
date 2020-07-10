@@ -111,6 +111,28 @@ static void getNearUsers(admin * self, RakNet::BitStream *data, const RakNet::Sy
     }
 }
 
+static void setMission(admin * self, RakNet::BitStream *data, const RakNet::SystemAddress & addr){
+    RakNet::RakString uuid,text;
+    data->Read(uuid);
+    data->Read(text);
+    self->setMission(uuid.C_String() , text.C_String());
+    sendOK(uuid,"setMission");
+}
+
+static void removeMission(admin * self, RakNet::BitStream *data, const RakNet::SystemAddress & addr){
+    RakNet::RakString uuid;
+    data->Read(uuid);
+    self->removeMission(uuid.C_String() , std::string() , true);
+    sendOK(uuid,"removeMission");
+}
+static void setMissionText(admin * self, RakNet::BitStream *data, const RakNet::SystemAddress & addr){
+    RakNet::RakString uuid,text;
+    data->Read(uuid);
+    data->Read(text);
+    self->setMissionText(uuid.C_String() , text.C_String());
+    sendOK(uuid,"setMissionText");
+}
+
 ////////////////////////////////////////////////////
 
 void admin::adminMap_init(){
@@ -127,6 +149,9 @@ void admin::adminMap_init(){
         adminMap["removeCharacter"] = smoothly::server::removeCharacter;
         adminMap["setPwd"]          = smoothly::server::setPwd;
         adminMap["getNearUsers"]    = smoothly::server::getNearUsers;
+        adminMap["setMission"]      = smoothly::server::setMission;
+        adminMap["removeMission"]   = smoothly::server::removeMission;
+        adminMap["setMissionText"]  = smoothly::server::setMissionText;
 
     }
     inited = true;

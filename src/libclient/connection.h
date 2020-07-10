@@ -530,6 +530,11 @@ class connectionBase{
             bs.Write(RakNet::RakString(text));
             sendMessage(&bs);
         }
+        inline void cmd_removeMission(const char * muuid){
+            makeHeader('I','-');
+            bs.Write(RakNet::RakString(muuid));
+            sendMessage(&bs);
+        }
         inline void cmd_goParentMission(){
             makeHeader('I','<');
             sendMessage(&bs);
@@ -558,6 +563,11 @@ class connectionBase{
             makeHeader('L','p');
             bs.Write(RakNet::RakString(buuid));
             bs.Write(RakNet::RakString(mpuuid));
+            sendMessage(&bs);
+        }
+        inline void cmd_deleteMail(const char * muuid){
+            makeHeader('L','d');
+            bs.Write(RakNet::RakString(muuid));
             sendMessage(&bs);
         }
     private:

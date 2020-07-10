@@ -33,7 +33,9 @@ SOURCES += \
     removecharacter.cpp \
     setdata.cpp \
     setposition.cpp \
-    vlogin.cpp
+    vlogin.cpp \
+    mission.cpp \
+    ../utils/cJSON.c
 
 HEADERS += \
         mainwindow.h \
@@ -44,7 +46,9 @@ HEADERS += \
     removecharacter.h \
     setdata.h \
     setposition.h \
-    vlogin.h
+    vlogin.h \
+    mission.h \
+    ../utils/cJSON.h
 
 FORMS += \
         mainwindow.ui \
@@ -55,6 +59,7 @@ FORMS += \
     removecharacter.ui \
     setdata.ui \
     setposition.ui \
-    vlogin.ui
+    vlogin.ui \
+    mission.ui
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl

@@ -143,8 +143,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>344</width>
-      <height>230</height>
+      <width>353</width>
+      <height>271</height>
      </rect>
     </property>
     <property name="cursor">
@@ -228,6 +228,13 @@
        </property>
        <property name="text">
         <string>模拟用户</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QCommandLinkButton" name="commandLinkButton_mission">
+       <property name="text">
+        <string>任务编辑器</string>
        </property>
       </widget>
      </item>

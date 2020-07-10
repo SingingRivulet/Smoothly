@@ -25,6 +25,10 @@ void control::processCmd_mission(std::istringstream & iss){
     iss>>method;
     if(method=="goParent"){
         goParentMission();
+    }else if(method=="remove"){
+        std::string uuid;
+        iss>>uuid;
+        cmd_removeMission(uuid.c_str());
     }
 }
 

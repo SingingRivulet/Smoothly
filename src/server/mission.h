@@ -19,6 +19,7 @@ class mission:public building{
                 std::vector<resource_t> need,  //需要提交物品
                                         reward;//奖励
                 std::string description;
+                std::string author;//作者
                 std::string parent;//父节点
                 //任务完成的条件：
                 //1.到达目的地
@@ -35,6 +36,7 @@ class mission:public building{
                     reward      = i.reward;
                     description = i.description;
                     parent      = i.parent;
+                    author      = i.author;
                     showPosition = i.showPosition;
                 }
                 const mission_node_t & operator=(const mission_node_t & i) {
@@ -44,10 +46,12 @@ class mission:public building{
                     reward      = i.reward;
                     description = i.description;
                     parent      = i.parent;
+                    author      = i.author;
                     showPosition = i.showPosition;
                     return *this;
                 }
                 void loadString(const std::string & );
+                void replace(const std::string & );
                 void toString(std::string &);
         };
 
@@ -119,7 +123,9 @@ class mission:public building{
             return uuid;
         }
 
-        //void removeMission();
+        void removeMission(const std::string & uuid , const std::string & user , bool noCheck = false);
+
+        void setMission(const std::string & uuid , const std::string & text);//设置任务（危险操作，只应该由管理员调用）
 
         virtual void sendAddr_missionList(const RakNet::SystemAddress & addr,const std::vector<std::string> & )=0;
         virtual void sendAddr_missionText(const RakNet::SystemAddress & addr,const std::string & uuid,const std::string & text)=0;

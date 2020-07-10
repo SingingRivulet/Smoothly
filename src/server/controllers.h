@@ -49,14 +49,18 @@ class controllers:public handlers{
         void ctl_giveUpChunk(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
 
         void ctl_getMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
+        void ctl_getMissionText(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_getChunkMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_submitMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_giveUpMission(const std::string & uuid, const RakNet::SystemAddress &addr, RakNet::BitStream * data);
         void ctl_addMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
         void ctl_goParentMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
+        void ctl_removeMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
+        void ctl_sendMissionChildren(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
 
         void ctl_getMails(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
         void ctl_pickupMailPackage(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
+        void ctl_deleteMails(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
 };
 /////////////////
 }//////server

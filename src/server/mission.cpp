@@ -139,16 +139,15 @@ bool mission::submitMission(const RakNet::SystemAddress & addr, const std::strin
         getMissionChildren(mission_uuid,v);
         sendAddr_missionList(addr,v);//发送到客户端
 
-
-        //消耗资源
-        for(auto need:node.need){
-            addResource(addr , body , need.id , -abs(need.num));
-        }
-
-
         if(isDone(user,mission_uuid)){
             //做过的任务不再发奖励
         }else{
+
+            //消耗资源
+            for(auto need:node.need){
+                addResource(addr , body , need.id , -abs(need.num));
+            }
+
             //发放奖励
             if(!node.reward.empty()){
                 mailPackage_t mp;
@@ -216,17 +215,61 @@ void mission::setMissionText(const std::string & uuid, const std::string & text)
 }
 
 void mission::addMission(const std::string & uuid, mission::mission_node_t & m){
-    std::string val;
-    m.toString(val);
+    std::string missionStr;
+    m.toString(missionStr);
     char key[256];
+    leveldb::WriteBatch batch;
+
     snprintf(key,sizeof(key),"missionNode:%s",uuid.c_str());
-    db->Put(leveldb::WriteOptions(), key , val);
+    batch.Put(key , missionStr);
+
     if(m.parent.empty()){
-        setChunkMissions(uuid,m.position);
+        //setChunkMissions(uuid,m.position);
+        int x = floor(m.position.X/32);
+        int y = floor(m.position.Z/32);
+        char chunkInfo[1024];
+        snprintf(key,sizeof(key),"missionChunk:%d,%d:%s",x,y,uuid.c_str());
+        snprintf(chunkInfo,sizeof(chunkInfo),"%s %f %f %f",uuid.c_str(),m.position.X,m.position.Y,m.position.Z);
+        batch.Put(key , chunkInfo);
     }else{
-        putMissionChildren(m.parent,uuid);
+        //putMissionChildren(m.parent,uuid);
+        batch.Put(std::string("missionChild:")+m.parent+":"+uuid , uuid);
     }
+
+    db->Write(leveldb::WriteOptions(), &batch);
+
     boardcast_mission(m.position,uuid);
+}
+
+void mission::removeMission(const std::string & uuid, const std::string & user, bool noCheck){
+    mission_node_t m;
+    if(getMission(uuid,m)){
+        if(noCheck || m.author==user){
+            char key[128];
+            if(m.parent.empty()){
+                int x = floor(m.position.X/32);
+                int y = floor(m.position.Z/32);
+                snprintf(key,sizeof(key),"missionChunk:%d,%d:%s",x,y,uuid.c_str());
+            }else{
+                snprintf(key,sizeof(key),"missionChild:%s:%s" , m.parent.c_str() , uuid.c_str());
+            }
+            db->Delete(leveldb::WriteOptions() , key);
+        }
+    }
+}
+
+void mission::setMission(const std::string & uuid, const std::string & text){
+    mission_node_t m;
+    std::string str;
+    if(getMission(uuid,m)){
+        m.replace(text);
+        m.toString(str);
+
+        char key[256];
+        snprintf(key,sizeof(key),"missionNode:%s",uuid.c_str());
+
+        db->Put(leveldb::WriteOptions() , key , str);
+    }
 }
 
 void mission::mission_node_t::loadString(const std::string & s){
@@ -237,6 +280,10 @@ void mission::mission_node_t::loadString(const std::string & s){
     need.clear();
     reward.clear();
 
+    replace(s);
+}
+
+void mission::mission_node_t::replace(const std::string & s){
     auto json = cJSON_Parse(s.c_str());
 
     if(json){
@@ -260,10 +307,13 @@ void mission::mission_node_t::loadString(const std::string & s){
                     parent = c->valuestring;
                 }else if(strcmp(c->string,"description")==0){
                     description = c->valuestring;
+                }else if(strcmp(c->string,"author")==0){
+                    author = c->valuestring;
                 }
             }else if(c->type==cJSON_Object){
                 if(strcmp(c->string,"need")==0){
                     auto line = c->child;
+                    need.clear();
                     while(line){
                         if(line->type == cJSON_Number){
                             int id = atoi(line->string);
@@ -274,6 +324,7 @@ void mission::mission_node_t::loadString(const std::string & s){
                     }
                 }else if(strcmp(c->string,"reward")==0){
                     auto line = c->child;
+                    reward.clear();
                     while(line){
                         if(line->type == cJSON_Number){
                             int id = atoi(line->string);
@@ -296,6 +347,7 @@ void mission::mission_node_t::toString(std::string & str){
 
     cJSON_AddStringToObject(json,"parent",parent.c_str());
     cJSON_AddStringToObject(json,"description",description.c_str());
+    cJSON_AddStringToObject(json,"author",author.c_str());
 
     cJSON_AddNumberToObject(json,"needArrive",needArrive?1:0);
     cJSON_AddNumberToObject(json,"showPosition",showPosition?1:0);

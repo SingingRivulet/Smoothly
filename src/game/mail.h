@@ -38,6 +38,16 @@ class mail:public fire{
         std::vector<mail_t> mails;
         bool haveNewMail;
         void getMail();
+        inline void deleteMail(const std::string & uuid){
+            cmd_deleteMail(uuid.c_str());
+            showMailText = false;
+            getMail();
+        }
+        inline void deleteMail(){
+            try{
+                deleteMail(mails.at(mail_focus).uuid);
+            }catch(...){}
+        }
 
         void onDraw()override;
         int mail_page,mail_focus,mail_focus_line,mailPackage_button;

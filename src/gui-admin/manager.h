@@ -16,6 +16,7 @@
 #include "setposition.h"
 #include "setdata.h"
 #include "vlogin.h"
+#include "mission.h"
 
 namespace Ui {
 class manager;
@@ -53,10 +54,14 @@ private slots:
 
     void on_commandLinkButton_vlogin_clicked();
 
-private:
+    void on_commandLinkButton_mission_clicked();
+
+    private:
     Ui::manager *ui;
     RakNet::RakPeerInterface * connection;
     RakNet::RakString adminKey;
+
+    mission missionEditor;
 
     QTimer * recvTimer;
     void recvMessage();

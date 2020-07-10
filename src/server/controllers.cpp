@@ -140,6 +140,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case 'g':
                     ctl_getMission(uuid,addr,data);
                 break;
+                case 't':
+                    ctl_getMissionText(uuid,addr,data);
+                break;
                 case 's':
                     ctl_submitMission(uuid,addr,data);
                 break;
@@ -155,6 +158,12 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 case '<':
                     ctl_goParentMission(uuid,addr,data);
                 break;
+                case '-':
+                    ctl_removeMission(uuid,addr,data);
+                break;
+                case 'n':
+                    ctl_sendMissionChildren(uuid,addr,data);
+                break;
             }
         break;
         case 'L':
@@ -164,6 +173,9 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
                 case 'p':
                     ctl_pickupMailPackage(uuid,addr,data);
+                break;
+                case 'd':
+                    ctl_deleteMails(uuid,addr,data);
                 break;
             }
         break;
@@ -491,6 +503,13 @@ void controllers::ctl_getMission(const std::string & , const RakNet::SystemAddre
     sendMessage(&bs,addr);
 }
 
+void controllers::ctl_getMissionText(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString muuid;
+    if(data->Read(muuid)){
+        sendMissionText(addr,muuid.C_String());
+    }
+}
+
 void controllers::ctl_getChunkMission(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
     int32_t x,y;
     if(data->Read(x) && data->Read(y)){
@@ -511,6 +530,8 @@ void controllers::ctl_addMission(const std::string & uuid, const RakNet::SystemA
 
     if(!data->Read(m.needArrive))return;
     if(!data->Read(m.showPosition))return;
+
+    m.author = uuid;
 
     if(!data->Read(buf))return;
     m.parent = buf.C_String();
@@ -540,6 +561,22 @@ void controllers::ctl_goParentMission(const std::string & uuid, const RakNet::Sy
     sendNowMission(addr,uuid);
 }
 
+void controllers::ctl_removeMission(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    RakNet::RakString muuid;
+    if(data->Read(muuid)){
+        removeMission(muuid.C_String() , uuid);
+    }
+}
+
+void controllers::ctl_sendMissionChildren(const std::string & , const RakNet::SystemAddress & addr, RakNet::BitStream * data){
+    RakNet::RakString muuid;
+    if(data->Read(muuid)){
+        std::vector<std::string> v;
+        getMissionChildren(muuid.C_String(),v);
+        sendAddr_missionList(addr,v);
+    }
+}
+
 void controllers::ctl_getMails(const std::string & uuid, const RakNet::SystemAddress & addr, RakNet::BitStream * ){
     sendMails(addr,uuid);
 }
@@ -552,6 +589,13 @@ void controllers::ctl_pickupMailPackage(const std::string & uuid, const RakNet::
             return;
         pickupMailPackage(buuid.C_String() , mpuuid.C_String());
         sendAddr_mailPackagePickedUp(addr);
+    }
+}
+
+void controllers::ctl_deleteMails(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    RakNet::RakString muuid;
+    if(data->Read(muuid)){
+        deleteMail(uuid , muuid.C_String());
     }
 }
 

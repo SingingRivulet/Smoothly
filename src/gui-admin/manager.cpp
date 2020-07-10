@@ -3,7 +3,8 @@
 
 manager::manager(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::manager)
+    ui(new Ui::manager),
+    missionEditor(this)
 {
     ui->setupUi(this);
     setWindowTitle("管理");
@@ -19,6 +20,9 @@ void manager::connectServer(const char *host, unsigned short port, const std::st
     }
     RakSleep(30);//sleep 30微秒后才能正常发送，原因未知
     adminKey = key.c_str();
+
+    missionEditor.connection = connection;
+    missionEditor.adminKey = adminKey;
 
     char buf[256];
     snprintf(buf,sizeof(buf),"[连接]%s %u",host,port);
@@ -158,6 +162,12 @@ void manager::on_pushButton_db_put_clicked()
     connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
     printStatus("[执行]插入数据库");
 }
+
+void manager::on_commandLinkButton_mission_clicked()
+{
+    missionEditor.exec();
+}
+
 
 void manager::on_pushButton_getNearUser_clicked()
 {
@@ -478,6 +488,51 @@ void manager::onRecvMessage(RakNet::Packet *data)
                                             bs.ReadVector(dX ,dY ,dZ);
                                         }
                                         //ctl_fire(&bs);
+                                        break;
+                                }
+                                break;
+                            case 'I':
+                                switch(data->data[3]){
+                                    case 'm':
+                                        {
+                                            RakNet::RakString uuid,text;
+                                            bs.Read(uuid);
+                                            bs.Read(text);
+                                            missionEditor.setUUID(uuid.C_String());
+                                            missionEditor.loadString(text.C_String());
+                                        }
+                                        break;
+                                    case 'L':
+                                        {
+                                            int32_t len;
+                                            bs.Read(len);
+                                            RakNet::RakString uuid;
+                                            missionEditor.clearChildren();
+                                            for(auto i=0;i<len;++i){
+                                                if(bs.Read(uuid)){
+                                                    missionEditor.addMission(uuid.C_String());
+                                                }else{
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    case 't':
+                                        {
+                                            RakNet::RakString uuid,text;
+                                            bs.Read(uuid);
+                                            bs.Read(text);
+                                            missionEditor.setText(text.C_String());
+                                        }
+                                        break;
+                                    case 'c':
+                                        {
+                                            RakNet::RakString uuid;
+                                            float x,y,z;
+                                            bs.Read(uuid);
+                                            bs.ReadVector(x,y,z);
+                                            missionEditor.addMission(uuid.C_String());
+                                        }
                                         break;
                                 }
                                 break;

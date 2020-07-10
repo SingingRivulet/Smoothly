@@ -216,7 +216,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             {
                                 parent->showMails = true;
                                 parent->showMailText = false;
-                                //parent->getMail();
+                                parent->getMail();
                                 parent->setGUIMode(true);
                             }
                         }
@@ -523,7 +523,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                 break;
             default:break;
         }
-    }else if(parent->showMails){
+    }else if(parent->showMails){//邮件
 
         switch(event.EventType){
 
@@ -571,6 +571,12 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                                 parent->showMailText = false;
                                 parent->setGUIMode(false);
                             }
+                        }
+                        break;
+                    case irr::KEY_DELETE:
+                        if(!event.KeyInput.PressedDown){
+                            if(parent->showMailText)
+                                parent->deleteMail();
                         }
                         break;
                     default:break;
