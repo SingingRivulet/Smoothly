@@ -77,6 +77,17 @@ void body::loadBodyConfig(){
                                                 lua_settop(L,0);
 
                                             }else
+                                            if(strcmp(item->string,"AILoop")==0){
+
+                                                lua_settop(L,0);
+                                                lua_getglobal(L,item->valuestring);//获取函数
+                                                if(lua_isfunction(L,-1)){//检查
+                                                    ptr->AILoop = luaL_ref(L,LUA_REGISTRYINDEX);
+                                                    ptr->haveAILoop = true;
+                                                }
+                                                lua_settop(L,0);
+
+                                            }else
                                             if(strcmp(item->string,"script")==0){
                                                 luaL_dofile(L, item->valuestring);
                                             }else

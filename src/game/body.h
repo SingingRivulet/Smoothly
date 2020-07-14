@@ -40,6 +40,30 @@ class body:public mission{
         std::string getMissionAccepter()override;
 
     public:
+        struct behaviorStatus_t{
+                bool onFloor;
+                bool hitTerrainItem;
+                bool hitBuilding;
+                bool hitBody;
+                bool haveFollow;
+                bool pathFindingMode;
+                vec3 position,pathFindingTarget,followTarget;
+                behaviorStatus_t() {
+                    statusInit();
+                }
+                void statusInit(){
+                    onFloor        = false;
+                    hitTerrainItem = false;
+                    hitBuilding    = false;
+                    hitBody        = false;
+                    haveFollow     = false;
+                    pathFindingMode= false;
+                }
+        };
+    private:
+        void loadBodyLuaAPI(lua_State * L);
+
+    public:
         typedef enum:int32_t{//身体姿势掩码
 
             BM_VANISH       = 1,
@@ -171,6 +195,8 @@ class body:public mission{
 
                 irr::scene::ISceneNode * minimap_element;
 
+                behaviorStatus_t behaviorStatus;
+
                 bool firing;
                 int firingWearingId;
                 int fireId;
@@ -185,6 +211,8 @@ class body:public mission{
                 irr::u32 reloadStartTime;
                 irr::u32 reloadNeedTime;
                 int reloading;
+
+                void AIExec();
 
                 void ghostTest(const btTransform &,std::function<void(bodyInfo*)> callback);//假如此角色在哪个位置，会碰撞哪些物体
 
@@ -268,8 +296,13 @@ class body:public mission{
             bool walkInSky,jumpInSky;
             bool teleport;//传送功能(通过指挥功能使用)
             irr::scene::IAnimatedMesh * mesh;
+
             int aniCallback;
             bool haveAniCallback;
+
+            int AILoop;
+            bool haveAILoop;
+
             float walkVelocity;
             irr::video::ITexture * texture;
             int hp;
@@ -286,6 +319,7 @@ class body:public mission{
                 jump         = 10;
                 teleport     = false;
                 haveAniCallback = false;
+                haveAILoop   = false;
                 hp           = 0;
             }
         };

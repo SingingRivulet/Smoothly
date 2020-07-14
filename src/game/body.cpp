@@ -361,10 +361,10 @@ void body::bodyItem::updateStatus(bool finish){
     lua_rawgeti(parent->L,LUA_REGISTRYINDEX,config->aniCallback);
     if(lua_isfunction(parent->L,-1)){
 
-        lua_newtable(parent->L);//创建主数组
+        lua_createtable(parent->L,0,3);//创建主数组
 
         lua_pushstring(parent->L,"status");
-        lua_newtable(parent->L);
+        lua_createtable(parent->L,0,7);
         {
 
             lua_pushstring(parent->L,"pitchAngle");
@@ -372,7 +372,7 @@ void body::bodyItem::updateStatus(bool finish){
             lua_settable(parent->L, -3);
 
             lua_pushstring(parent->L,"walk");
-            lua_newtable(parent->L);
+            lua_createtable(parent->L,0,2);
             {
                 lua_pushstring(parent->L,"forward");
                 lua_pushinteger(parent->L, status.walk_forward);
@@ -747,9 +747,11 @@ body::body():gravity(0,-10,0){
     mainControlBody = NULL;
     L = luaL_newstate();
     luaL_openlibs(L);
+    loadBodyLuaAPI(L);
     if(luaL_dofile(L, "../script/body.lua")){
         printf("[body]%s \n",lua_tostring(L, -1));
     }
+
     loadBodyConfig();
     loadWearingConfig();
     loadFireCost();

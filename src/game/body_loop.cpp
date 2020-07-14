@@ -65,71 +65,61 @@ void body::loop(){
             if(mainControlBody!=b){
                 commond cmd;//命令结构体
                 cmd.uuid = b->uuid;
+
                 vec3 posi(btPos.x(), btPos.y(), btPos.z());
-                if(b->follow != NULL && b->autoWalk.empty()){
-                    //跟随模式
-                    bodyItem * bd = b->follow;
-                    auto target  = bd->node->getPosition();
-
-                    irr::core::vector2df a(posi.X,posi.Z),b(target.X,target.Z);
-
-                    if((a-b).getLengthSQ()>5*5){
-                        vec3 dir = target-posi;
-                        //行走
-                        cmd.data_int = BM_WALK_F;
-                        cmd.cmd = CMD_STATUS_ADD;
-                        pushCommond(cmd);
-
-                        //更新旋转
-                        cmd.cmd = CMD_SET_LOOKAT;
-                        cmd.data_vec = dir;
-                        pushCommond(cmd);
-
-                        if(dir.Y>2){//目标点高于现在，跳跃
-                            cmd.cmd = CMD_JUMP;
-                            cmd.data_vec.set(vec3(0,1,0));
-                            pushCommond(cmd);
+                {
+                    //获取碰撞列表
+                    b->behaviorStatus.statusInit();
+                    try{
+                        auto & overlap = b->m_character.m_ghostObject->getOverlappingPairs();
+                        auto len = overlap.size();
+                        for(int i = 0;i<len;++i){
+                            auto op = ((bodyInfo*)(overlap.at(i)->getUserPointer()));
+                            if(op->type==BODY_BODY){
+                                b->behaviorStatus.hitBody = true;
+                            }else if(op->type==BODY_BUILDING){
+                                b->behaviorStatus.hitBuilding = true;
+                            }else if(op->type==BODY_TERRAIN){
+                                b->behaviorStatus.onFloor = true;
+                            }else if(op->type==BODY_TERRAIN_ITEM){
+                                b->behaviorStatus.hitTerrainItem = true;
+                            }
                         }
-                    }else{
-                        cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
-                        cmd.cmd = CMD_STATUS_REMOVE;
-                        pushCommond(cmd);
-                    }
+                    }catch(...){}
+                    b->behaviorStatus.position = posi;
+                }
+                {
+                    if(b->follow != NULL){
+                        //跟随模式
+                        bodyItem * bd = b->follow;
+                        auto target  = bd->node->getPosition();
 
-                }else{
+                        irr::core::vector2df ap(posi.X,posi.Z),bp(target.X,target.Z);
+
+                        if((ap-bp).getLengthSQ()>5*5){
+                            b->behaviorStatus.followTarget = target;
+                            b->behaviorStatus.haveFollow = true;
+                        }
+                    }
+                }
+                {
                     while(!b->autoWalk.empty()){
                         auto target = b->autoWalk.front();
+
                         vec3 dir = target-posi;
 
                         irr::core::vector2df tdir(dir.X,dir.Z);
                         if(tdir.getLengthSQ()<1){
                             b->autoWalk.pop_front();//到达目标，删除任务
                         }else{
-
-                            //行走
-                            cmd.data_int = BM_WALK_F;
-                            cmd.cmd = CMD_STATUS_ADD;
-                            pushCommond(cmd);
-
-                            //更新旋转
-                            cmd.cmd = CMD_SET_LOOKAT;
-                            cmd.data_vec = dir;
-                            pushCommond(cmd);
-
-                            if(dir.Y>2){//目标点高于现在，跳跃
-                                cmd.cmd = CMD_JUMP;
-                                cmd.data_vec.set(vec3(0,1,0));
-                                pushCommond(cmd);
-                            }
+                            b->behaviorStatus.pathFindingTarget = target;
+                            b->behaviorStatus.pathFindingMode = true;
                             break;
                         }
                     }
-                    if(b->autoWalk.empty()){//停止自动行走
-                        cmd.data_int = BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R;
-                        cmd.cmd = CMD_STATUS_REMOVE;
-                        pushCommond(cmd);
-                    }
                 }
+                //调用AI脚本
+                b->AIExec();
             }
         }
     }

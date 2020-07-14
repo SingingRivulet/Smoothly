@@ -111,7 +111,9 @@ SOURCES += \
     CGUITTFont.cpp \
     ui/missioneditor.cpp \
     control_cmd.cpp \
-    mail.cpp
+    mail.cpp \
+    body_ai.cpp \
+    body_api.cpp
 
 FORMS += \
     ui/login.ui \

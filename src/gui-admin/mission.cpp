@@ -146,19 +146,13 @@ void mission::clearChildren()
 
 void mission::on_pushButton_remove_clicked()
 {
-    QMessageBox msgBox;
-    msgBox.setInformativeText("确实要删除吗?");
-    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    int ret = msgBox.exec();
-    if(ret == QMessageBox::Ok){
+
+    if(QMessageBox::information(this, "删除", "确实要删除吗?",QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes){
         makeHeader("removeMission");
         bs.Write(RakNet::RakString(ui->lineEdit_uuid->text().toStdString().c_str()));
         clear();
         connection->Send( &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
-        QMessageBox res;
-        res.setInformativeText("已删除");
-        res.exec();
+        QMessageBox::information(this, "成功", "删除成功");
     }
 }
 
