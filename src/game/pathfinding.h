@@ -2,6 +2,7 @@
 #define SMOOTHLY_PATHFINDING
 #include "body.h"
 #include <unordered_set>
+#include <algorithm>
 namespace smoothly{
 
 class pathFinding:public body{
@@ -57,6 +58,7 @@ class pathFinding:public body{
         bool findPath(const irr::core::vector3df & A,const irr::core::vector3df & B,std::list<irr::core::vector3df> & r);
 
         void findPathByRay(const vec3 & start,const vec3 & end);
+        void navigation(bodyItem * body,const vec3 & target)override;
 
         void followMainControl();//跟随主角
 

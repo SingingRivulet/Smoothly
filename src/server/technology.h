@@ -12,6 +12,7 @@ class technology:public mailPackage{
         struct tech_conf_t{
                 int need;
                 int probability;//确定目标后解锁科技的概率
+                std::vector<int> mut;//互斥，解锁该科技后无法解锁此科技
         };
         std::map<int,tech_conf_t> tech_conf;//科技配置表
 

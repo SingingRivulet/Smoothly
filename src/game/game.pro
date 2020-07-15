@@ -141,4 +141,5 @@ DISTFILES += \
     ../script/utils/print_r.lua \
     ../script/fire.lua \
     ../shader/shadow.ps.glsl \
-    ../shader/shadow.vs.glsl
+    ../shader/shadow.vs.glsl \
+    ../script/body_ai.lua

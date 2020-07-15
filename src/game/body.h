@@ -47,7 +47,8 @@ class body:public mission{
                 bool hitBody;
                 bool haveFollow;
                 bool pathFindingMode;
-                vec3 position,pathFindingTarget,followTarget;
+                vec3 position,pathFindingTarget,followTarget,pathFindingEnd;
+                std::unordered_map<std::string,std::string> session;
                 behaviorStatus_t() {
                     statusInit();
                 }
@@ -221,6 +222,7 @@ class body:public mission{
                 irr::core::vector2d<s32> screenPosition;
 
                 void setFollow(bodyItem *);//设置跟随
+                void clearFollowers();
 
                 float getPitchAngle();
 
@@ -261,6 +263,8 @@ class body:public mission{
                 void setLookAt(const vec3 &);
 
                 void HP_inc_c(int d);//设置body血量
+
+                float tmpBuffer;
         };
 
     protected:
@@ -382,6 +386,7 @@ class body:public mission{
             commond(const commond &);
         };
         void pushCommond(const commond &);
+        virtual void navigation(bodyItem * body,const vec3 & target)=0;
     private:
         void doCommond(const commond &);
         std::mutex cmdQueue_locker;

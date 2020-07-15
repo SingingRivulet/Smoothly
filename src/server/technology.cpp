@@ -66,16 +66,25 @@ technology::technology(){
                     cJSON * node_id = cJSON_GetObjectItem(c,"id");
                     cJSON * node_parent = cJSON_GetObjectItem(c,"parent");
                     cJSON * node_probability = cJSON_GetObjectItem(c,"probability");
+                    cJSON * node_mut = cJSON_GetObjectItem(c,"mut");
 
                     if(node_id && node_parent && node_probability &&
                        node_id->type==cJSON_Number && node_parent->type==cJSON_Number && node_probability->type==cJSON_Number){
 
                         int id = node_id->valueint;
 
-                        tech_conf_t c;
-                        c.need = node_parent->valueint;
-                        c.probability = node_probability->valueint;
-                        tech_conf[id] = c;
+                        tech_conf_t & t = tech_conf[id];
+                        t.need = node_parent->valueint;
+                        t.probability = node_probability->valueint;
+                        if(node_mut && node_mut->type==cJSON_Array){
+                            auto line = node_mut->child;
+                            while(line){
+                                if(line->type==cJSON_Number){
+                                    t.mut.push_back(line->valueint);
+                                }
+                                line = line->next;
+                            }
+                        }
                     }
 
                 }
@@ -207,6 +216,10 @@ void technology::tech_user_t::tryUnlockTech(const RakNet::SystemAddress & addr,i
 void technology::tech_user_t::setUnlockTarget(const RakNet::SystemAddress & addr, int id){
     auto it = parent->tech_conf.find(id);
     if(it!=parent->tech_conf.end() && unlocked.find(it->second.need)!=unlocked.end()){
+        for(auto mut:it->second.mut){
+            if(unlocked.find(mut)!=unlocked.end())//互斥
+                goto end;
+        }
         target = id;
         target_need = it->second.need;
         target_prob = it->second.probability;
@@ -215,6 +228,7 @@ void technology::tech_user_t::setUnlockTarget(const RakNet::SystemAddress & addr
         target_need = -1;
         target_prob = -1;
     }
+    end:
     parent->sendAddr_techTarget(addr,true,target);
 }
 

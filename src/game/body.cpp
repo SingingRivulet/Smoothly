@@ -317,6 +317,14 @@ void body::bodyItem::setFollow(body::bodyItem * p){
     followers.clear();
 }
 
+void body::bodyItem::clearFollowers(){
+    for(auto it:followers){
+        it->follow = NULL;
+        it->setFollow(follow);
+    }
+    followers.clear();
+}
+
 float body::bodyItem::getPitchAngle(){
     auto dir = lookAt;
     dir.normalize();
@@ -756,6 +764,7 @@ body::body():gravity(0,-10,0){
     loadWearingConfig();
     loadFireCost();
     selecting = false;
+    selectBodyStartTime = 0;
 
     int cx = width/2;
     int cy = height/2;
@@ -947,10 +956,7 @@ void body::releaseBody(bodyItem * b){
     b->node->remove();
 
     //清除跟随
-    for(auto it:b->followers){
-        it->follow = NULL;
-    }
-    b->followers.clear();
+    b->clearFollowers();
     if(b->follow){
         b->follow->followers.erase(b);
         b->follow=NULL;
@@ -1013,9 +1019,14 @@ void body::selectBodyByScreenPoint(const irr::core::vector2d<s32> & sp, int rang
 void body::selectBodyStart(){
     if(selecting)
         return;
-    selectBodyStartTime = timer->getTime();
+    auto tm = timer->getTime();
+    if(tm-selectBodyStartTime < 300){
+        selectAllBodies = true;
+    }else{
+        selectAllBodies = false;
+    }
+    selectBodyStartTime = tm;
     selecting = true;
-    selectAllBodies = false;
     selectBodyRange = 0;
 }
 

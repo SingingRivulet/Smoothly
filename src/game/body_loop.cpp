@@ -96,10 +96,8 @@ void body::loop(){
 
                         irr::core::vector2df ap(posi.X,posi.Z),bp(target.X,target.Z);
 
-                        if((ap-bp).getLengthSQ()>5*5){
-                            b->behaviorStatus.followTarget = target;
-                            b->behaviorStatus.haveFollow = true;
-                        }
+                        b->behaviorStatus.followTarget = target;
+                        b->behaviorStatus.haveFollow = true;
                     }
                 }
                 {

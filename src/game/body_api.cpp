@@ -98,8 +98,96 @@ static int luafunc_addStatus(lua_State * L){
     return 1;
 }
 
+static int luafunc_session_get(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    auto s = luaL_checkstring(L,2);
+
+    auto it = self->behaviorStatus.session.find(s);
+    if(it==self->behaviorStatus.session.end()){
+        lua_pushnil(L);
+        return 1;
+    }else{
+        lua_pushstring(L,it->second.c_str());
+        return 1;
+    }
+}
+
+static int luafunc_session_set(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    auto k = luaL_checkstring(L,2);
+    auto v = luaL_checkstring(L,3);
+
+    self->behaviorStatus.session[k] = v;
+
+    return 0;
+}
+
+static int luafunc_session_del(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    auto s = luaL_checkstring(L,2);
+
+    self->behaviorStatus.session.erase(s);
+
+    return 0;
+}
+
+static int luafunc_navigation(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    vec3 target;
+
+    if(lua_istable(L,-1)){
+        if(luaL_len(L,-1)>=3){
+
+            lua_geti(L,-1,1);
+            if(lua_isnumber(L,-1)){
+                target.X = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,-1,2);
+            if(lua_isnumber(L,-1)){
+                target.Y = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,-1,3);
+            if(lua_isnumber(L,-1)){
+                target.Z = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            self->parent->navigation(self,target);
+        }
+    }
+    return 0;
+}
+
 void body::loadBodyLuaAPI(lua_State * L){
-    lua_createtable(L,0,3);
+    lua_createtable(L,0,5);
     {
         lua_pushstring(L,"pushCommond");
         lua_pushcfunction(L,luafunc_pushCommond);
@@ -107,6 +195,10 @@ void body::loadBodyLuaAPI(lua_State * L){
 
         lua_pushstring(L,"addStatus");
         lua_pushcfunction(L,luafunc_addStatus);
+        lua_settable(L,-3);
+
+        lua_pushstring(L,"navigation");
+        lua_pushcfunction(L,luafunc_navigation);
         lua_settable(L,-3);
 
         lua_pushstring(L,"status");
@@ -142,6 +234,23 @@ void body::loadBodyLuaAPI(lua_State * L){
             addConst(BM_WALK_R);
             lua_pushstring(L,"BM_WALK");
             lua_pushinteger(L,BM_WALK_F|BM_WALK_B|BM_WALK_L|BM_WALK_R);
+            lua_settable(L,-3);
+        }
+        lua_settable(L,-3);
+
+        lua_pushstring(L,"session");
+        lua_createtable(L,0,3);
+        {
+            lua_pushstring(L,"del");
+            lua_pushcfunction(L,luafunc_session_del);
+            lua_settable(L,-3);
+
+            lua_pushstring(L,"get");
+            lua_pushcfunction(L,luafunc_session_get);
+            lua_settable(L,-3);
+
+            lua_pushstring(L,"set");
+            lua_pushcfunction(L,luafunc_session_set);
             lua_settable(L,-3);
         }
         lua_settable(L,-3);

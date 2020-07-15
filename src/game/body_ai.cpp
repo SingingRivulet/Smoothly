@@ -60,6 +60,21 @@ void body::bodyItem::AIExec(){
             }
             lua_settable(parent->L, -3);
 
+
+            lua_pushstring(parent->L,"pathFindingEnd");
+            lua_createtable(parent->L,3,0);
+            {
+                lua_pushnumber(parent->L, behaviorStatus.pathFindingEnd.X);
+                lua_seti(parent->L,-2,1);
+
+                lua_pushnumber(parent->L, behaviorStatus.pathFindingEnd.Y);
+                lua_seti(parent->L,-2,2);
+
+                lua_pushnumber(parent->L, behaviorStatus.pathFindingEnd.Z);
+                lua_seti(parent->L,-2,3);
+            }
+            lua_settable(parent->L, -3);
+
             lua_pushstring(parent->L,"followTarget");
             lua_createtable(parent->L,3,0);
             {

@@ -223,9 +223,20 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
 
         bodyItem * follow = NULL;
 
+        std::vector<bodyItem*> fbodies;
+
         for(auto bd:selectedBodies){
+            bd->tmpBuffer = (bd->node->getPosition()-p).getLengthSQ();
+            bd->behaviorStatus.session.erase("P");
+            fbodies.push_back(bd);
+        }
+        std::sort(fbodies.begin(),fbodies.end(),[](const bodyItem * p1,const bodyItem * p2)->bool{
+            return p1->tmpBuffer < p2->tmpBuffer;
+        });
+        for(auto bd:fbodies){
             if(bd){
                 bd->autoWalk.clear();
+                bd->clearFollowers();
                 if(bd->uncreatedChunk)
                     continue;
                 if(bd->config->teleport){//传送
@@ -237,12 +248,15 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
                 }else{
                     if(follow!=NULL){
                         bd->setFollow(follow);
+                        bd->autoWalk = follow->autoWalk;
+                        bd->behaviorStatus.pathFindingEnd = p;
                         follow = bd;
                     }else{
                         if(useAIPathingFinding){
                             if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
                                 bool first = true;
                                 vec3 lastp;
+                                bd->behaviorStatus.pathFindingEnd = p;
                                 for(auto it:bd->autoWalk){
                                     if(first)
                                         first = false;
@@ -277,12 +291,48 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
     });
 }
 
+void pathFinding::navigation(body::bodyItem * bd, const vec3 & p){
+    auto am = scene->createDeleteAnimator(1000);
+    bd->setFollow(NULL);
+    if(useAIPathingFinding){
+        if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
+            bool first = true;
+            vec3 lastp;
+            bd->behaviorStatus.pathFindingEnd = p;
+            for(auto it:bd->autoWalk){
+                if(first)
+                    first = false;
+                else{
+                    auto tmp = (lastp+it)*0.5;
+                    auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),tmp);
+                    pn->setMaterialTexture(0,texture_pathPoint);
+                    pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                    pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                    pn->addAnimator(am);
+                }
+                auto pn = scene->addBillboardSceneNode(0,core::dimension2d<f32>(0.2,0.2),it);
+                pn->setMaterialTexture(0,texture_pathPoint);
+                pn->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+                pn->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+                pn->addAnimator(am);
+
+                lastp = it;
+            }
+        }
+    }else{
+        bd->autoWalk.clear();
+        bd->autoWalk.push_back(p);
+    }
+    am->drop();
+}
+
 void pathFinding::followMainControl(){
     bodyItem * follow = mainControlBody;
 
     if(mainControlBody==NULL)
         return;
 
+    mainControlBody->clearFollowers();
     mainControlBody->setFollow(NULL);
 
     for(auto bd:selectedBodies){
