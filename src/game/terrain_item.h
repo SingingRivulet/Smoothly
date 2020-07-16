@@ -10,7 +10,7 @@ namespace smoothly{
         public:
             terrain_item();
             ~terrain_item();
-            void setRemoveTable(int x,int y,const std::set<mapItem> & rmt);
+            bool setRemoveTable(int x,int y,const std::set<mapItem> & rmt,bool cache=true);
             void pushRemoveTable(int x,int y,const std::set<mapItem> & rmt);
             void removeTerrainItem(int x , int y ,int index,int id);
             void releaseTerrainItems(int x , int y);
@@ -35,6 +35,7 @@ namespace smoothly{
             }
             void occupy(int x,int y);
         private:
+            std::map<ipair,std::set<mapItem> > rmtCache;
             struct chunk;
             struct item{
                 irr::scene::ISceneNode  * node[4];
@@ -125,6 +126,7 @@ namespace smoothly{
 
             virtual void occupyChunk()=0;
         public:
+            virtual void createChunk(int x,int y)override;
             inline void setTerrainMapMessage(const std::wstring & w){
                 showingText = w;
                 showText_time = time(0);

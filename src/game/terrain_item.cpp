@@ -7,12 +7,16 @@ namespace smoothly{
     auto it = chunks.find(ipair(x,y)); \
     if(it!=chunks.end())
 
-void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
+bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, bool cache){
     chunk * ptr;
-    if(!chunkLoaded(x,y))//chunk未被创建，将不再创建items
-        return;
+    if(!chunkLoaded(x,y)){//chunk未被创建，将不再创建items，并保存到cache
+        if(cache){
+            rmtCache[ipair(x,y)] = rmt;
+        }
+        return false;
+    }
     findChunk(x,y){
-        return;
+        return true;
         //ptr = it->second;
         //releaseChildren(ptr);
     }else{
@@ -63,6 +67,7 @@ void terrain_item::setRemoveTable(int x,int y,const std::set<mapItem> & rmt){
         //ptr->minimap_element = n;
         //m->drop();
     }
+    return true;
 }
 
 void terrain_item::pushRemoveTable(int x, int y, const std::set<mapItem> &r){
@@ -794,6 +799,16 @@ bool terrain_item::isMyChunk(int x, int y){
             return true;
     }
     return false;
+}
+
+void terrain_item::createChunk(int x, int y){
+    terrain::createChunk(x,y);
+    auto it = rmtCache.find(ipair(x,y));
+    if(it!=rmtCache.end()){
+        if(setRemoveTable(x,y,it->second,false)){
+            rmtCache.erase(it);
+        }
+    }
 }
 
 }
