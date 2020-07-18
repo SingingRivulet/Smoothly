@@ -143,7 +143,7 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->buildingEnd();
                         }
                         break;
-                    case irr::KEY_KEY_G://建造
+                    case irr::KEY_KEY_G://丢弃
                         if(event.KeyInput.PressedDown){
                         }else{
                             parent->dropHand();

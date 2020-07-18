@@ -234,9 +234,12 @@ class body:public mission{
                 }
                 void make(int id);
 
-            protected:
+                void moveToEndOfFollow();//移到跟随队列尾部
+
                 bodyItem                           * follow;//跟随
                 std::set<bodyItem*>                  followers;
+
+            protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
                 void updateFromWorld();
                 void updateStatus(bool finish = false);
@@ -265,7 +268,7 @@ class body:public mission{
                 void HP_inc_c(int d);//设置body血量
 
                 float tmpBuffer;
-        };
+        };//end bodyItem
 
     protected:
         lua_State * L;//

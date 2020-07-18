@@ -12,10 +12,14 @@ void body::bodyItem::AIExec(){
     lua_settop(parent->L , 0);
     lua_rawgeti(parent->L,LUA_REGISTRYINDEX,aiFunc);
     if(lua_isfunction(parent->L,-1)){
-        lua_createtable(parent->L,0,10);//创建主数组
+        lua_createtable(parent->L,0,11);//创建主数组
         {
             lua_pushstring(parent->L,"uuid");
             lua_pushstring(parent->L, uuid.c_str());
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"time");
+            lua_pushinteger(parent->L, parent->timer->getTime());
             lua_settable(parent->L, -3);
 
             lua_pushstring(parent->L,"body");

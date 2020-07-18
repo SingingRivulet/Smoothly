@@ -351,6 +351,32 @@ void body::bodyItem::make(int id){
     parent->cmd_make(id,p.X,p.Y,p.Z,uuid.c_str());
 }
 
+void body::bodyItem::moveToEndOfFollow(){
+    if(!followers.empty()){
+        auto it = followers.begin();
+        body::bodyItem * p = *it;
+        auto tp = p;
+        while(p){
+            if(p==this){
+                return;//构成环形
+            }else if(p->followers.empty()){//插在此位置
+                if(follow==NULL){
+                    tp->follow = NULL;  //子节点成了队首
+                    followers.erase(it);//断开链表
+                    follow = p;         //跟随p
+                    p->followers.insert(this);
+                }else{
+                    clearFollowers();
+                    setFollow(p);
+                }
+                return;
+            }else{//指针下移
+                p = *(p->followers.begin());
+            }
+        }
+    }
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;

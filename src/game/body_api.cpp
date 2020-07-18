@@ -98,6 +98,19 @@ static int luafunc_addStatus(lua_State * L){
     return 1;
 }
 
+static int luafunc_moveToEndOfFollow(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    self->moveToEndOfFollow();
+
+    return 0;
+}
+
 static int luafunc_session_get(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
@@ -187,8 +200,13 @@ static int luafunc_navigation(lua_State * L){
 }
 
 void body::loadBodyLuaAPI(lua_State * L){
-    lua_createtable(L,0,5);
+    lua_createtable(L,0,6);
     {
+
+        lua_pushstring(L,"moveToEndOfFollow");
+        lua_pushcfunction(L,luafunc_moveToEndOfFollow);
+        lua_settable(L,-3);
+
         lua_pushstring(L,"pushCommond");
         lua_pushcfunction(L,luafunc_pushCommond);
         lua_settable(L,-3);

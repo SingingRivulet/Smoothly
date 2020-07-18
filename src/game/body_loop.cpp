@@ -75,8 +75,17 @@ void body::loop(){
                         auto len = overlap.size();
                         for(int i = 0;i<len;++i){
                             auto op = ((bodyInfo*)(overlap.at(i)->getUserPointer()));
-                            if(op->type==BODY_BODY){
-                                b->behaviorStatus.hitBody = true;
+                            if(op->type==BODY_BODY_PART){
+                                auto c = (building::character*)op->ptr;
+                                if(c){
+                                    auto bdp = (bodyInfo*)c->m_ghostObject->getUserPointer();
+                                    if(bdp->type==BODY_BODY){
+                                        auto bd = (bodyItem*)bdp->ptr;
+                                        if(bd!=b){
+                                            b->behaviorStatus.hitBody = true;
+                                        }
+                                    }
+                                }
                             }else if(op->type==BODY_BUILDING){
                                 b->behaviorStatus.hitBuilding = true;
                             }else if(op->type==BODY_TERRAIN){
@@ -93,9 +102,6 @@ void body::loop(){
                         //跟随模式
                         bodyItem * bd = b->follow;
                         auto target  = bd->node->getPosition();
-
-                        irr::core::vector2df ap(posi.X,posi.Z),bp(target.X,target.Z);
-
                         b->behaviorStatus.followTarget = target;
                         b->behaviorStatus.haveFollow = true;
                     }
@@ -103,9 +109,7 @@ void body::loop(){
                 {
                     while(!b->autoWalk.empty()){
                         auto target = b->autoWalk.front();
-
                         vec3 dir = target-posi;
-
                         irr::core::vector2df tdir(dir.X,dir.Z);
                         if(tdir.getLengthSQ()<1){
                             b->autoWalk.pop_front();//到达目标，删除任务

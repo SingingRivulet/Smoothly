@@ -67,36 +67,64 @@ bodyAPI = {
              }
 }
 ]]--
+function getLen3DSQ(a,b)
+    local deltaX = a[1]-b[1]
+    local deltaY = a[2]-b[2]
+    local deltaZ = a[3]-b[3]
+    return deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ
+end
 function defaultAI(arg)
     --print_r(arg)
     --print_r(bodyAPI)
-    if arg.haveFollow then
+    if arg.pathFindingMode then
+        local deltaX = arg.pathFindingTarget[1]-arg.position[1]
+        local deltaY = arg.pathFindingTarget[2]-arg.position[2]
+        local deltaZ = arg.pathFindingTarget[3]-arg.position[3]
+        local pfLenSq3D = deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ
+
+        if arg.haveFollow then
+            local fldeltaX = arg.followTarget[1]-arg.position[1]
+            local fldeltaY = arg.followTarget[2]-arg.position[2]
+            local fldeltaZ = arg.followTarget[3]-arg.position[3]
+            local followLenSQ = fldeltaX*fldeltaX + fldeltaZ*fldeltaZ
+            if followLenSQ < 9 then
+                bodyAPI.pushCommond(arg.body , {
+                    ["cmd"]="status_remove" ,
+                    ["int"]=bodyAPI.status.BM_WALK
+                })
+                return
+            elseif followLenSQ >100 then
+                --寻路
+                bodyAPI.navigation(arg.body , arg.pathFindingEnd)
+                bodyAPI.pushCommond(arg.body , {
+                    ["cmd"]="status_remove" ,
+                    ["int"]=bodyAPI.status.BM_WALK
+                })
+                return
+            end
+        end
+        if pfLenSq3D >1 then
+            bodyAPI.pushCommond(arg.body , {
+                ["cmd"]="status_add" ,
+                ["int"]=bodyAPI.status.BM_WALK_F
+            })
+            bodyAPI.pushCommond(arg.body , {
+                ["cmd"]="lookat" ,
+                ["vec"]={deltaX , deltaY , deltaZ}
+            })
+            if deltaY>1 then
+                bodyAPI.pushCommond(arg.body , {
+                    ["cmd"]="jump",
+                    ["vec"]={0,1,0}
+                })
+            end
+        end
+    elseif arg.haveFollow then
         local deltaX = arg.followTarget[1]-arg.position[1]
         local deltaY = arg.followTarget[2]-arg.position[2]
         local deltaZ = arg.followTarget[3]-arg.position[3]
 
-        if deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ>1000 and arg.pathFindingMode then
-            --掉队，开始导航
-            deltaX = arg.pathFindingTarget[1]-arg.position[1]
-            deltaY = arg.pathFindingTarget[2]-arg.position[2]
-            deltaZ = arg.pathFindingTarget[3]-arg.position[3]
-            if deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ >1 then
-                bodyAPI.pushCommond(arg.body , {
-                    ["cmd"]="status_add" ,
-                    ["int"]=bodyAPI.status.BM_WALK_F
-                })
-                bodyAPI.pushCommond(arg.body , {
-                    ["cmd"]="lookat" ,
-                    ["vec"]={deltaX , deltaY , deltaZ}
-                })
-                if deltaY>1 then
-                    bodyAPI.pushCommond(arg.body , {
-                        ["cmd"]="jump",
-                        ["vec"]={0,1,0}
-                    })
-                end
-            end
-        elseif deltaX*deltaX + deltaZ*deltaZ>9 then
+        if deltaX*deltaX + deltaZ*deltaZ>9 then
             bodyAPI.pushCommond(arg.body , {
                 ["cmd"]="status_add" ,
                 ["int"]=bodyAPI.status.BM_WALK_F
@@ -116,26 +144,6 @@ function defaultAI(arg)
                 ["cmd"]="status_remove" ,
                 ["int"]=bodyAPI.status.BM_WALK
             })
-        end
-    elseif arg.pathFindingMode then
-        local deltaX = arg.pathFindingTarget[1]-arg.position[1]
-        local deltaY = arg.pathFindingTarget[2]-arg.position[2]
-        local deltaZ = arg.pathFindingTarget[3]-arg.position[3]
-        if deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ >1 then
-            bodyAPI.pushCommond(arg.body , {
-                ["cmd"]="status_add" ,
-                ["int"]=bodyAPI.status.BM_WALK_F
-            })
-            bodyAPI.pushCommond(arg.body , {
-                ["cmd"]="lookat" ,
-                ["vec"]={deltaX , deltaY , deltaZ}
-            })
-            if deltaY>1 then
-                bodyAPI.pushCommond(arg.body , {
-                    ["cmd"]="jump",
-                    ["vec"]={0,1,0}
-                })
-            end
         end
     else
         bodyAPI.pushCommond(arg.body , {

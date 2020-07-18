@@ -227,7 +227,7 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
 
         for(auto bd:selectedBodies){
             bd->tmpBuffer = (bd->node->getPosition()-p).getLengthSQ();
-            bd->behaviorStatus.session.erase("P");
+            bd->behaviorStatus.session.clear();
             fbodies.push_back(bd);
         }
         std::sort(fbodies.begin(),fbodies.end(),[](const bodyItem * p1,const bodyItem * p2)->bool{
@@ -291,10 +291,20 @@ void pathFinding::findPathByRay(const vec3 & start,const vec3 & end){
     });
 }
 
+static void setPathToChildren(body::bodyItem * bd,const std::list<vec3> & v){
+    for(auto it:bd->followers){
+        if(it->autoWalk!=v){
+            it->autoWalk=v;
+            setPathToChildren(it,v);
+        }
+    }
+}
+
 void pathFinding::navigation(body::bodyItem * bd, const vec3 & p){
     auto am = scene->createDeleteAnimator(1000);
     bd->setFollow(NULL);
     if(useAIPathingFinding){
+        bd->autoWalk.clear();
         if(findPath(bd->node->getPosition(),p,bd->autoWalk)){
             bool first = true;
             vec3 lastp;
@@ -323,6 +333,7 @@ void pathFinding::navigation(body::bodyItem * bd, const vec3 & p){
         bd->autoWalk.clear();
         bd->autoWalk.push_back(p);
     }
+    setPathToChildren(bd,bd->autoWalk);
     am->drop();
 }
 
