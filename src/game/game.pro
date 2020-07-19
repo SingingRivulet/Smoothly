@@ -142,5 +142,4 @@ DISTFILES += \
     ../script/fire.lua \
     ../shader/shadow.ps.glsl \
     ../shader/shadow.vs.glsl \
-    ../script/body_ai.lua \
     ../script/voxelDrawer.lua

@@ -1,4 +1,4 @@
-package.path = package.path .. ";../script/?.lua;"
+package.path = package.path .. ";../script/?.lua;../../?.lua"
 require("utils.print_r")
 require("body_animation")
-require("body_ai")
+require("ai.main")

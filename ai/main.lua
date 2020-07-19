@@ -1,4 +1,6 @@
 --[[
+自定义ai行为
+
 arg = {
 [body] => userdata: 0x7f81e6170760
 [onFloor] => true
@@ -81,6 +83,16 @@ function defaultAI(arg)
         local deltaY = arg.pathFindingTarget[2]-arg.position[2]
         local deltaZ = arg.pathFindingTarget[3]-arg.position[3]
         local pfLenSq3D = deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ
+
+        local lenToEnd = getLen3DSQ(arg.pathFindingEnd , arg.position)
+        if arg.hitBody and lenToEnd<27 then
+            --防止终点被占用时卡住
+            bodyAPI.pushCommond(arg.body , {
+                ["cmd"]="status_remove" ,
+                ["int"]=bodyAPI.status.BM_WALK
+            })
+            return
+        end
 
         if arg.haveFollow then
             local fldeltaX = arg.followTarget[1]-arg.position[1]
