@@ -1,12 +1,10 @@
 #ifndef SMOOTHLY_ENGINE
 #define SMOOTHLY_ENGINE
-#include "physical.h"
-#include "../libclient/terrainGen.h"
-#include "RealisticWater.h"
-#include "CGUITTFont.h"
+#include <Urho3D/Engine/Application.h>
+#include <Urho3D/Engine/Engine.h>
 #include <vector>
 namespace smoothly{
-    inline void rotate2d(irr::core::vector2df & v,double a){
+    inline void rotate2d(Vector3 & v,double a){
         auto cosa=cos(a);
         auto sina=sin(a);
         auto x=v.X*cosa - v.Y*sina;
@@ -19,7 +17,7 @@ namespace smoothly{
         irr::core::vector3df d=A-B;
         return fabs(d.X)+fabs(d.Y)+fabs(d.Z);
     }
-    class engine:public physical,public smoothly::world::terrain::terrainGen{
+    class engine: public Urho3D::Application,public smoothly::world::terrain::terrainGen{
         public:
             irr::gui::CGUITTFont * ttf;
             irr::IrrlichtDevice       * device;
