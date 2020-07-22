@@ -38,6 +38,12 @@ namespace smoothly{
                 bool debugBorders);
             //irrlicht自带的太差，所以自己实现一个
             float genTerrain(float ** img,int x , int y ,int pointNum);
+        public:
+            float ** genTerrain(int x , int y){
+                genTerrain(mapBuf , x , y , 33);
+                return mapBuf;
+            }
+        private:
             
             struct chunk{//各组件维护各自的chunk
                 irr::scene::IMeshSceneNode  * node , * shadowNode;

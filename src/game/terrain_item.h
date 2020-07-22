@@ -85,6 +85,7 @@ namespace smoothly{
                 vec3 scale;
                 irr::s32             shader;
                 bool                 useShader;
+                bool                 flat;
             };
             std::map<int,conf*> config;
             
@@ -123,6 +124,8 @@ namespace smoothly{
 
             std::wstring showingText;
             time_t showText_time;
+
+            std::vector<ipair> flatCells;
 
             virtual void occupyChunk()=0;
         public:

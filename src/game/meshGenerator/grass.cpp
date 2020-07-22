@@ -24,9 +24,9 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed,int & lodLevel){
     int lodRand =  randg.rand() % 10;
 
     if(lodRand>7)
-        lodLevel = 3;
+        lodLevel = 4;
     else
-        lodLevel = 2;
+        lodLevel = 3;
 
     return res;
 }

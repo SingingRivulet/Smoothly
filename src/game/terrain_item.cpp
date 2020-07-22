@@ -36,15 +36,56 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
     getGenList(x,y,tem,hu,getRealHight(x*32,y*32),pl);
     
     randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
+
+    flatCells.clear();
+    auto tbuf = genTerrain(x,y);
+    for(int i=0;i<16;++i){
+        for(int j=0;j<16;++j){
+            int ti = i*2;
+            int tj = j*2;
+            float d = (fabs(tbuf[ti][tj]-tbuf[ti+1][tj])+fabs(tbuf[ti][tj]-tbuf[ti][tj+1]))*0.5;
+            if(d<0.5){
+                flatCells.push_back(ipair(ti,tj));
+            }
+        }
+    }
     
     for(auto it:pl){
         int delta=it.prob*1000;
         int num = it.num;
+
+        bool flat = false;
+
+        if(it.id>0){
+            auto bit = config.find(it.id);
+            if(bit==config.end())
+                continue;
+
+            conf * c = bit->second;
+            flat = c->flat;
+        }else{
+            if(it.id==-2)
+                flat = true;
+        }
+
         for(int i=0;i<num;i++){
             int pr=(randg.rand())%1000;
             if(pr<delta){
-                float mx=(randg.frand()+x)*32;
-                float my=(randg.frand()+y)*32;
+                float mx;
+                float my;
+
+                if(flat){
+                    if(flatCells.empty())
+                        continue;
+                    int ci = randg.rand()%flatCells.size();
+                    auto cell = flatCells[ci];
+                    mx = x*32+(cell.x+randg.frand())*2;
+                    my = y*32+(cell.y+randg.frand())*2;
+                }else{
+                    mx=(randg.frand()+x)*32;
+                    my=(randg.frand()+y)*32;
+                }
+
                 float mr=randg.frand()*360;
                 if(rmt.find(mapItem(it.id , i))==rmt.end()){
                     auto im=makeTerrainItem(it.id , i , mx , my , mr);
@@ -667,6 +708,7 @@ void terrain_item::loadJSON(cJSON * json){
     c->deltaHeight  = 0;
     c->scale.set(1,1,1);
     c->useShader    = false;
+    c->flat         = false;
     for(int i = 0;i<4;++i)
         c->mesh[i] = NULL;
 
@@ -717,6 +759,11 @@ void terrain_item::loadJSON(cJSON * json){
         auto sz = cJSON_GetObjectItem(scale , "z");
         if(sz && sz->type==cJSON_Number)c->scale.Z = sz->valuedouble;
         
+    }
+
+    auto ft = cJSON_GetObjectItem(json,"flat");
+    if(ft && ft->type==cJSON_Number){
+        c->flat = (ft->valueint!=0);
     }
 
     auto shader = cJSON_GetObjectItem(json,"shader");

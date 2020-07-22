@@ -93,6 +93,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
         irr::core::dimension2d<irr::u32>(33 , 33),
         true
     );
+    //创建寻路单元
     for(int i=0;i<16;++i){
         for(int j=0;j<16;++j){
             res->collMap[i][j]=floor(mapBuf[i*2][j*2]/2);
@@ -139,6 +140,28 @@ terrain::chunk * terrain::genChunk(int x,int y){
     this->dynamicsWorld->addRigidBody(res->rigidBody);
     
     mesh->drop();
+
+    /*
+    for(int i=0;i<16;++i){
+        for(int j=0;j<16;++j){
+            float deltax,deltay;
+
+            if(i==15)
+                deltax = mapBuf[i][j] - mapBuf[i-1][j];
+            else
+                deltax = mapBuf[i][j] - mapBuf[i+1][j];
+
+            if(j==15)
+                deltay = mapBuf[i][j] - mapBuf[i][j-1];
+            else
+                deltay = mapBuf[i][j] - mapBuf[i][j+1];
+
+            float delta = (deltax+deltay)/2;
+
+        }
+    }
+    */
+
     return res;
 }
 void terrain::freeChunk(terrain::chunk * p){
