@@ -163,6 +163,34 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->controlSelectedBody();
                         }
                         break;
+                    case irr::KEY_KEY_1:
+                        if(!event.KeyInput.PressedDown){
+                            cmd.cmd = CMD_TOOL_USE_ID;
+                            cmd.data_int = parent->fastUseTool[0];
+                            parent->pushCommond(cmd);
+                        }
+                        break;
+                    case irr::KEY_KEY_2:
+                        if(!event.KeyInput.PressedDown){
+                            cmd.cmd = CMD_TOOL_USE_ID;
+                            cmd.data_int = parent->fastUseTool[1];
+                            parent->pushCommond(cmd);
+                        }
+                        break;
+                    case irr::KEY_KEY_3:
+                        if(!event.KeyInput.PressedDown){
+                            cmd.cmd = CMD_TOOL_USE_ID;
+                            cmd.data_int = parent->fastUseTool[2];
+                            parent->pushCommond(cmd);
+                        }
+                        break;
+                    case irr::KEY_KEY_4:
+                        if(!event.KeyInput.PressedDown){
+                            cmd.cmd = CMD_TOOL_USE_ID;
+                            cmd.data_int = parent->fastUseTool[3];
+                            parent->pushCommond(cmd);
+                        }
+                        break;
                     case irr::KEY_KEY_5://切换建筑
                         if(event.KeyInput.PressedDown){
                             parent->switchBuilding();
@@ -180,6 +208,13 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             cmd.cmd = CMD_TOOL_RELOAD_END;
                         }
                         parent->pushCommond(cmd);
+                        break;
+                    case irr::KEY_KEY_Q://攻击定位
+                        if(event.KeyInput.PressedDown){
+                            parent->attackPositionStart();
+                        }else{
+                            parent->attackPositionEnd();
+                        }
                         break;
                     case irr::KEY_KEY_H:
                         if(event.KeyInput.PressedDown){
@@ -357,6 +392,26 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
             case irr::EET_KEY_INPUT_EVENT:
                 switch(event.KeyInput.Key){
                     walkEvent;
+                    case irr::KEY_KEY_1:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFastUseToolBySelect(0);
+                        }
+                        break;
+                    case irr::KEY_KEY_2:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFastUseToolBySelect(1);
+                        }
+                        break;
+                    case irr::KEY_KEY_3:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFastUseToolBySelect(2);
+                        }
+                        break;
+                    case irr::KEY_KEY_4:
+                        if(!event.KeyInput.PressedDown){
+                            parent->setFastUseToolBySelect(3);
+                        }
+                        break;
                     case irr::KEY_TAB:
                         if(event.KeyInput.PressedDown){
                             parent->body_bag_resource->setVisible(true);

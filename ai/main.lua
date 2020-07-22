@@ -69,16 +69,30 @@ bodyAPI = {
              }
 }
 ]]--
-function getLen3DSQ(a,b)
+
+function getLen3DSQ(a,b) --求两点坐标的平方
     local deltaX = a[1]-b[1]
     local deltaY = a[2]-b[2]
     local deltaZ = a[3]-b[3]
     return deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ
 end
+
 function defaultAI(arg)
     --print_r(arg)
     --print_r(bodyAPI)
-    if arg.pathFindingMode then
+    if arg.attackTargetFlag==1 then
+        bodyAPI.pushCommond(arg.body , {
+            ["cmd"]="lookat" ,
+            ["vec"]=bodyAPI.getShootDir(arg.position,arg.attackTarget,10,10,true)
+        })
+        bodyAPI.pushCommond(arg.body , {
+            ["cmd"]="status_remove" ,
+            ["int"]=bodyAPI.status.BM_WALK
+        })
+        return
+    elseif arg.attackTargetFlag==-1 then
+
+    elseif arg.pathFindingMode then
         local deltaX = arg.pathFindingTarget[1]-arg.position[1]
         local deltaY = arg.pathFindingTarget[2]-arg.position[2]
         local deltaZ = arg.pathFindingTarget[3]-arg.position[3]

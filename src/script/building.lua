@@ -18,7 +18,11 @@ function pathFindingInit(self)
     addVoxel(board,0,0,0)
 
     local board = seekConfig(self,-4)
-    addVoxel(board,0,0,0)
+    for i=-4,4 do
+        for j=-1,8 do
+            addVoxel(board,i,j,0)
+        end
+    end
 
     local board = seekConfig(self,-5)
     addVoxel(board,0,0,0)

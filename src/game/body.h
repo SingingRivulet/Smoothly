@@ -47,10 +47,18 @@ class body:public mission{
                 bool hitBody;
                 bool haveFollow;
                 bool pathFindingMode;
-                vec3 position,pathFindingTarget,followTarget,pathFindingEnd;
+                bool haveAttackTarget;
+
+                int attackTargetFlag;//-1结束，1开始，0无变化
+
+                vec3 position,pathFindingTarget,followTarget,pathFindingEnd,attackTarget;
                 std::unordered_map<std::string,std::string> session;
                 behaviorStatus_t() {
                     statusInit();
+                    haveAttackTarget = false;
+                }
+                void edge(){
+                    attackTargetFlag = 0;
                 }
                 void statusInit(){
                     onFloor        = false;
@@ -61,6 +69,13 @@ class body:public mission{
                     pathFindingMode= false;
                 }
         };
+        void attackPositionStart();
+        void attackPositionStart(const vec3 & posi);
+        void attackPositionEnd();
+    private:
+        irr::video::ITexture * texture_attackTarget;
+        bool attackingTarget;
+
     private:
         void loadBodyLuaAPI(lua_State * L);
 
@@ -168,7 +183,7 @@ class body:public mission{
         btVector3 gravity;
 
     public:
-        class bodyItem{
+        class bodyItem{//bodyItem类
             friend class body;
             public:
                 character                            m_character;
@@ -232,9 +247,10 @@ class body:public mission{
                     animationBlend.clear();
                     animationBlend.insert(scene::IAnimatedMeshSceneNode::IAnimationBlend((irr::scene::ISkinnedMesh*)config->mesh,1.0));
                 }
-                void make(int id);
 
+                void make(int id);
                 void moveToEndOfFollow();//移到跟随队列尾部
+                void useToolById(int id);//指定id换枪
 
                 bodyItem                           * follow;//跟随
                 std::set<bodyItem*>                  followers;
@@ -377,7 +393,9 @@ class body:public mission{
             CMD_FIRE_BEGIN,
             CMD_FIRE_END,
             CMD_TOOL_RELOAD_START,
-            CMD_TOOL_RELOAD_END
+            CMD_TOOL_RELOAD_END,
+            CMD_TOOL_USE_ID,    //基于useToolById
+            CMD_TOOL_USE
         }bodyCmd_t;
         struct commond{
             std::string uuid;
@@ -530,6 +548,33 @@ class body:public mission{
 
     public:
         void getChunkMission();
+
+    public:
+        int fastUseTool[4];
+        inline void setFastUseTool(int key,int id){
+            if(key>=0  && key<4){
+                if(fastUseTool[key] != id)
+                    fastUseTool[key] = id;
+                else
+                    fastUseTool[key] = -1;
+            }
+        }
+        inline void setFastUseToolBySelect(int key){
+            try{
+                int id = body_bag_resource->getSelected();
+                hand_t & h = handItems.at(id);
+                if(h.isTool){
+                    auto tit = tools.find(h.toolUUID);
+                    if(tit!=tools.end()){
+                        tool & t = tit->second;
+                        setFastUseTool(key,t.id);
+                        updateBagUI();
+                    }
+                }
+            }catch(...){}
+        }
+        void saveFastUseTool();
+        void loadFastUseTool();
 
     private:
         void occupyChunk()override;

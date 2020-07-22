@@ -20,7 +20,16 @@ void body::updateBagUI(){
                     if(keyIndex>9)
                         break;
                     handItems.push_back(hand_t(it));
-                    swprintf(buf,256,L"\nUUID:%s\nDP:%d\n",it.c_str(),t->second.dur);
+                    std::string pad;
+                    if(t->second.id==fastUseTool[0])
+                        pad += "(1)";
+                    if(t->second.id==fastUseTool[1])
+                        pad += "(2)";
+                    if(t->second.id==fastUseTool[2])
+                        pad += "(3)";
+                    if(t->second.id==fastUseTool[3])
+                        pad += "(4)";
+                    swprintf(buf,256,L"\nUUID:%s %s\nDP:%d\n",it.c_str(),pad.c_str(),t->second.dur);
                     ++keyIndex;
                     int id;
                     auto icit = bag_tool_icons_mapping.find(t->second.id);

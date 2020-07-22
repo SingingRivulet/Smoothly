@@ -78,19 +78,19 @@ void body::doCommond(const commond & c){
 
     switch (c.cmd) {
 
-    case CMD_SET_LOOKAT:
-        p->setLookAt(c.data_vec);
-        break;
+        case CMD_SET_LOOKAT:
+            p->setLookAt(c.data_vec);
+            break;
 
-    case CMD_SET_POSITION:
-        p->m_character.setPosition(c.data_vec);
-        break;
+        case CMD_SET_POSITION:
+            p->m_character.setPosition(c.data_vec);
+            break;
 
-    case CMD_SET_ROTATION:
-        p->m_character.setRotation(c.data_vec);
-        break;
+        case CMD_SET_ROTATION:
+            p->m_character.setRotation(c.data_vec);
+            break;
 
-    case CMD_JUMP:
+        case CMD_JUMP:
         {
             if(!p->uncreatedChunk){
                 auto v = c.data_vec;
@@ -99,62 +99,70 @@ void body::doCommond(const commond & c){
                 p->m_character.jump(btVector3(v.X , v.Y , v.Z));
             }
         }
-        break;
+            break;
 
-    case CMD_STATUS_SET:
-        p->status_mask   = c.data_int;
-        p->status        = c.data_int;
-        //cmd_setStatus(p->uuid , p->status_mask);
-        break;
+        case CMD_STATUS_SET:
+            p->status_mask   = c.data_int;
+            p->status        = c.data_int;
+            //cmd_setStatus(p->uuid , p->status_mask);
+            break;
 
-    case CMD_STATUS_ADD:
-        p->status_mask   = p->status.toMask();
-        p->status_mask  |= c.data_int;
-        p->status        = p->status_mask;
-        //cmd_setStatus(p->uuid , p->status_mask);
-        break;
+        case CMD_STATUS_ADD:
+            p->status_mask   = p->status.toMask();
+            p->status_mask  |= c.data_int;
+            p->status        = p->status_mask;
+            //cmd_setStatus(p->uuid , p->status_mask);
+            break;
 
-    case CMD_STATUS_REMOVE:
-        p->status_mask   = p->status.toMask();
-        p->status_mask  &= ~c.data_int;
-        p->status        = p->status_mask;
-        //cmd_setStatus(p->uuid , p->status_mask);
-        break;
+        case CMD_STATUS_REMOVE:
+            p->status_mask   = p->status.toMask();
+            p->status_mask  &= ~c.data_int;
+            p->status        = p->status_mask;
+            //cmd_setStatus(p->uuid , p->status_mask);
+            break;
 
-    case CMD_INTERACTIVE:
-        p->interactive_c(c.data_str);
-        break;
+        case CMD_INTERACTIVE:
+            p->interactive_c(c.data_str);
+            break;
 
-    case CMD_WEARING_ADD:
-        p->wearing_add_c(c.data_int);
-        break;
+        case CMD_WEARING_ADD:
+            p->wearing_add_c(c.data_int);
+            break;
 
-    case CMD_WEARING_REMOVE:
-        p->wearing_remove_c(c.data_int);
-        break;
+        case CMD_WEARING_REMOVE:
+            p->wearing_remove_c(c.data_int);
+            break;
 
-    case CMD_WEARING_CLEAR:
-        p->wearing_clear_c();
-        break;
+        case CMD_WEARING_CLEAR:
+            p->wearing_clear_c();
+            break;
 
-    case CMD_FIRE_BEGIN:
-        p->firing = true;
-        break;
+        case CMD_FIRE_BEGIN:
+            p->firing = true;
+            break;
 
-    case CMD_FIRE_END:
-        p->firing = false;
-        break;
+        case CMD_FIRE_END:
+            p->firing = false;
+            break;
 
-    case CMD_TOOL_RELOAD_START:
-        p->reloadStart();
-        break;
+        case CMD_TOOL_RELOAD_START:
+            p->reloadStart();
+            break;
 
-    case CMD_TOOL_RELOAD_END:
-        p->reloadEnd();
-        break;
+        case CMD_TOOL_RELOAD_END:
+            p->reloadEnd();
+            break;
 
-    default:
-        break;
+        case CMD_TOOL_USE_ID:
+            p->useToolById(c.data_int);
+            break;
+
+        case CMD_TOOL_USE:
+            cmd_useBagTool(p->uuid.c_str() , c.data_str.c_str());
+            break;
+
+        default:
+            break;
     }
 }
 void body::pushCommond(const commond & c){
@@ -170,6 +178,48 @@ void body::doCommonds(){
         cmdQueue.pop();
     }
     cmdQueue_locker.unlock();
+}
+
+void body::attackPositionStart(){
+    if(attackingTarget)
+        return;
+    attackingTarget = true;
+    auto ori    = camera->getPosition();
+    auto dir    = camera->getTarget()-ori;
+    dir.normalize();
+    auto start  = ori;
+    auto end    = ori+dir*200;
+
+    fetchByRay(start , end,[&](const vec3 & p,bodyInfo * ){
+        attackPositionStart(p);
+        auto tg = scene->addBillboardSceneNode(0,core::dimension2d<f32>(5,5),p+vec3(0,1,0));
+        tg->setMaterialTexture(0,texture_attackTarget);
+        tg->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+        tg->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        auto am = scene->createDeleteAnimator(1000);
+        tg->addAnimator(am);
+        am->drop();
+    });
+}
+
+void body::attackPositionStart(const vec3 & posi){
+    for(auto it:selectedBodies){
+        it->behaviorStatus.attackTarget = posi;
+        if(!it->behaviorStatus.haveAttackTarget){
+            it->behaviorStatus.attackTargetFlag = 1;
+            it->behaviorStatus.haveAttackTarget = true;
+        }
+    }
+}
+
+void body::attackPositionEnd(){
+    attackingTarget = false;
+    for(auto it:myBodies){
+        if(it.second->behaviorStatus.haveAttackTarget){
+            it.second->behaviorStatus.haveAttackTarget = false;
+            it.second->behaviorStatus.attackTargetFlag = -1;
+        }
+    }
 }
 
 }

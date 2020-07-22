@@ -122,6 +122,7 @@ void body::loop(){
                 }
                 //调用AI脚本
                 b->AIExec();
+                b->behaviorStatus.edge();
             }
         }
     }

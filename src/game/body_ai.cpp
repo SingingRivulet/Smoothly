@@ -12,10 +12,14 @@ void body::bodyItem::AIExec(){
     lua_settop(parent->L , 0);
     lua_rawgeti(parent->L,LUA_REGISTRYINDEX,aiFunc);
     if(lua_isfunction(parent->L,-1)){
-        lua_createtable(parent->L,0,11);//创建主数组
+        lua_createtable(parent->L,0,14);//创建主数组
         {
             lua_pushstring(parent->L,"uuid");
             lua_pushstring(parent->L, uuid.c_str());
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"attackTargetFlag");
+            lua_pushinteger(parent->L, behaviorStatus.attackTargetFlag);
             lua_settable(parent->L, -3);
 
             lua_pushstring(parent->L,"time");
@@ -24,6 +28,10 @@ void body::bodyItem::AIExec(){
 
             lua_pushstring(parent->L,"body");
             lua_pushlightuserdata(parent->L, this);
+            lua_settable(parent->L, -3);
+
+            lua_pushstring(parent->L,"haveAttackTarget");
+            lua_pushboolean(parent->L, behaviorStatus.haveAttackTarget);
             lua_settable(parent->L, -3);
 
             lua_pushstring(parent->L,"haveFollow");
@@ -50,6 +58,20 @@ void body::bodyItem::AIExec(){
             lua_pushboolean(parent->L, behaviorStatus.pathFindingMode);
             lua_settable(parent->L, -3);
 
+            lua_pushstring(parent->L,"attackTarget");
+            lua_createtable(parent->L,3,0);
+            {
+                lua_pushnumber(parent->L, behaviorStatus.attackTarget.X);
+                lua_seti(parent->L,-2,1);
+
+                lua_pushnumber(parent->L, behaviorStatus.attackTarget.Y);
+                lua_seti(parent->L,-2,2);
+
+                lua_pushnumber(parent->L, behaviorStatus.attackTarget.Z);
+                lua_seti(parent->L,-2,3);
+            }
+            lua_settable(parent->L, -3);
+
             lua_pushstring(parent->L,"pathFindingTarget");
             lua_createtable(parent->L,3,0);
             {
@@ -63,7 +85,6 @@ void body::bodyItem::AIExec(){
                 lua_seti(parent->L,-2,3);
             }
             lua_settable(parent->L, -3);
-
 
             lua_pushstring(parent->L,"pathFindingEnd");
             lua_createtable(parent->L,3,0);

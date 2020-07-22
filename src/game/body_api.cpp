@@ -76,6 +76,10 @@ static int luafunc_pushCommond(lua_State * L){
                 cmd.cmd = body::CMD_TOOL_RELOAD_START;
             }else if(strcmp(cmdStr,"tool_reload_end")==0){
                 cmd.cmd = body::CMD_TOOL_RELOAD_END;
+            }else if(strcmp(cmdStr,"tool_use_id")==0){
+                cmd.cmd = body::CMD_TOOL_USE_ID;
+            }else if(strcmp(cmdStr,"tool_use")==0){
+                cmd.cmd = body::CMD_TOOL_USE;
             }else if(strcmp(cmdStr,"status_add")==0){
                 cmd.cmd = body::CMD_STATUS_ADD;
             }else if(strcmp(cmdStr,"status_remove")==0){
@@ -199,9 +203,108 @@ static int luafunc_navigation(lua_State * L){
     return 0;
 }
 
-void body::loadBodyLuaAPI(lua_State * L){
-    lua_createtable(L,0,6);
+static int luafunc_getShootDir(lua_State * L){//弹道计算（因为用得太多，所以用c加速）
+    vec3 ori,target;
+    float gravity;
+    float speed;
+    bool proj = false;
+
+    if(lua_istable(L,1)){
+        if(luaL_len(L,1)>=3){
+            lua_geti(L,1,1);
+            if(lua_isnumber(L,-1)){
+                ori.X = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,1,2);
+            if(lua_isnumber(L,-1)){
+                ori.Y = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,1,3);
+            if(lua_isnumber(L,-1)){
+                ori.Z = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+        }
+    }else return 0;
+
+    if(lua_istable(L,2)){
+        if(luaL_len(L,2)>=3){
+            lua_geti(L,2,1);
+            if(lua_isnumber(L,-1)){
+                target.X = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,2,2);
+            if(lua_isnumber(L,-1)){
+                target.Y = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,2,3);
+            if(lua_isnumber(L,-1)){
+                target.Z = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+        }
+    }else return 0;
+
+    gravity = luaL_checknumber(L,3);
+    speed   = luaL_checknumber(L,4);
+    if(lua_isboolean(L,5)){
+        proj = lua_toboolean(L,5);
+    }
+
+    vec3 dir;
+
+    auto dirHor = vec3(target.X-ori.X , 0 , target.Z-ori.Z);
+    float distXSQ = dirHor.getLengthSQ();
+    float distX = sqrt(distXSQ);
+    float distY = target.Y - ori.Y;
+    float posBase = (gravity* distXSQ) / (2.0f * speed * speed);
+    float posX = distX / posBase;
+    float posY = ((posX*posX) / 4.0f) - ((posBase - distY) / posBase);
+
+    if (posY >= 0.0f){
+        if (proj)  //抛射
+            dir.Y = -posX / 2.0f + sqrt(posY);
+        else
+            dir.Y = -posX / 2.0f - sqrt(posY);
+    }else{
+        dir.Y = 1;
+    }
+
+    dir.X = 0;
+    dir.Z = 1;
+    dir.normalize();
+
+    vec3 ang = dirHor.getHorizontalAngle();
+    dir.rotateXZBy(-ang.Y);
+
+    lua_createtable(L,3,0);
     {
+        lua_pushnumber(L, dir.X);
+        lua_seti(L,-2,1);
+
+        lua_pushnumber(L, dir.Y);
+        lua_seti(L,-2,2);
+
+        lua_pushnumber(L, dir.Z);
+        lua_seti(L,-2,3);
+    }
+    return 1;
+}
+
+void body::loadBodyLuaAPI(lua_State * L){
+    lua_createtable(L,0,7);
+    {
+        lua_pushstring(L,"getShootDir");
+        lua_pushcfunction(L,luafunc_getShootDir);
+        lua_settable(L,-3);
 
         lua_pushstring(L,"moveToEndOfFollow");
         lua_pushcfunction(L,luafunc_moveToEndOfFollow);

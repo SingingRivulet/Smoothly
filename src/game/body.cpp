@@ -377,6 +377,19 @@ void body::bodyItem::moveToEndOfFollow(){
     }
 }
 
+void body::bodyItem::useToolById(int id){
+    for(auto it:tools){
+        auto tit = parent->tools.find(it);
+        if(tit!=parent->tools.end()){
+            tool & t = tit->second;
+            if(t.id==id && t.dur>0){
+                parent->cmd_useBagTool(uuid.c_str() , it.c_str());
+                return;
+            }
+        }
+    }
+}
+
 body::bodyItem::bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis):
     m_character(w,h,position,wis,jis){
     firing          = false;
@@ -786,6 +799,7 @@ body::body():gravity(0,-10,0){
         printf("[body]%s \n",lua_tostring(L, -1));
     }
 
+    loadFastUseTool();
     loadBodyConfig();
     loadWearingConfig();
     loadFireCost();
@@ -816,12 +830,15 @@ body::body():gravity(0,-10,0){
 
     texture_hp = driver->getTexture("../../res/icon/hp.png");
     texture_minimap_body = driver->getTexture("../../res/icon/texture_minimap_body.png");
+    texture_attackTarget = driver->getTexture("../../res/icon/attackTarget.png");
+    attackingTarget = false;
 }
 
 body::~body(){
     lua_close(L);
     releaseBodyConfig();
     releaseWearingConfig();
+    saveFastUseTool();
 }
 
 void body::msg_setVisualRange(int v){
@@ -1105,6 +1122,25 @@ void body::getChunkMission(){
         }
 
         scanAnimate();
+    }
+}
+
+void body::saveFastUseTool(){
+    auto fp = fopen("fastUseTool.txt","w");
+    if(fp){
+        fprintf(fp,"%d %d %d %d",fastUseTool[0],fastUseTool[1],fastUseTool[2],fastUseTool[3]);
+        fclose(fp);
+    }
+}
+void body::loadFastUseTool(){
+    fastUseTool[0] = -1;
+    fastUseTool[1] = -1;
+    fastUseTool[2] = -1;
+    fastUseTool[3] = -1;
+    auto fp = fopen("fastUseTool.txt","r");
+    if(fp){
+        fscanf(fp,"%d %d %d %d",&fastUseTool[0],&fastUseTool[1],&fastUseTool[2],&fastUseTool[3]);
+        fclose(fp);
     }
 }
 
