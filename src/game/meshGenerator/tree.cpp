@@ -360,6 +360,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     trunk->setMaterialFlag(irr::video::EMF_ANISOTROPIC_FILTER, true );
     trunk->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
     trunk->setMaterialTexture(0,texture_treeTrunk);
+    trunk->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     trunk->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     bodyMesh = createBtMesh(trunk_mesh);
     trunk_mesh->drop();
@@ -377,6 +378,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     leaves->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     res->setMaterialFlag(irr::video::EMF_ANISOTROPIC_FILTER, true );
     leaves->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
+    leaves->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     leaves->setMaterialTexture(0,texture_treeLeaves);
     leaves->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     leaves_mesh->drop();

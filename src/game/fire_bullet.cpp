@@ -62,6 +62,7 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
                 n->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
                 n->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
                 n->setMaterialTexture( 0 , conf->bulletConf.texture);
+                n->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
 
             }
         }else{
@@ -98,6 +99,7 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
             ps->setMaterialTexture(0, conf->particleConfig.texture); // fireball
             //ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
             ps->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+            ps->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         }
         if(conf->particleConfig.gravity.have){
             auto af = ps->createGravityAffector(conf->particleConfig.gravity.gravity,conf->particleConfig.gravity.timeForceLost);

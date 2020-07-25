@@ -31,6 +31,7 @@ void body::loadBodyConfig(){
                             auto mnode = cJSON_GetObjectItem(c,"mesh");
                             if(mnode && mnode->type==cJSON_String){
                                 auto mesh = scene->getMesh(mnode->valuestring);
+                                int meshBufferNum = mesh->getMeshBufferCount();
                                 if(mesh){
                                     auto ptr  = new bodyConf;
                                     bodyConfig[id]= ptr;
@@ -116,6 +117,30 @@ void body::loadBodyConfig(){
                                                             }else{
                                                                 printf("[error]fail to load %s\n",path);
                                                                 break;
+                                                            }
+                                                        }
+                                                    }
+                                                    line = line->next;
+                                                }
+                                            }else if(strcmp(item->string,"texture")==0){
+                                                auto line = item->child;
+                                                while(line){
+                                                    if(line->type==cJSON_Object){
+                                                        auto bufferId = cJSON_GetObjectItem(line,"bufferId");
+                                                        auto textureId = cJSON_GetObjectItem(line,"textureId");
+                                                        auto texturePath = cJSON_GetObjectItem(line,"path");
+                                                        if(bufferId && textureId && texturePath &&
+                                                           bufferId->type==cJSON_Number &&
+                                                           textureId->type==cJSON_Number &&
+                                                           texturePath->type==cJSON_String){
+                                                            if(bufferId->valueint >=0 && bufferId->valueint < meshBufferNum){
+                                                                auto buffer = mesh->getMeshBuffer(bufferId->valueint);
+                                                                if(buffer){
+                                                                    auto texture = driver->getTexture(texturePath->valuestring);
+                                                                    if(texture){
+                                                                        buffer->getMaterial().setTexture(textureId->valueint,texture);
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }

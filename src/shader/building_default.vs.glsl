@@ -15,5 +15,5 @@ void main(){
     vec4 diffuse = gl_LightSource[0].diffuse;
     lcolor =  NdotL * diffuse;
     pointPosition = modelMatrix * gl_Vertex;
-    gl_Position = transformMatrix * pointPosition;
+    gl_Position = ftransform();
 }

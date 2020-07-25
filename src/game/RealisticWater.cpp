@@ -71,6 +71,8 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 
 	_waterSceneNode->setMaterialTexture(1, _refractionMap);
 	_waterSceneNode->setMaterialTexture(2, _reflectionMap);
+    _waterSceneNode->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+    _waterSceneNode->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
 }
 
 RealisticWaterSceneNode::~RealisticWaterSceneNode()

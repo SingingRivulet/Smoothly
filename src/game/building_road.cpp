@@ -46,6 +46,7 @@ void building::buildingBody::showVoxels(){
         n->setMaterialTexture(0,parent->texture_collPoint);
         n->setMaterialFlag(irr::video::EMF_LIGHTING, false );
         n->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+        n->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         auto am = parent->scene->createDeleteAnimator(1000);
         n->addAnimator(am);
         am->drop();

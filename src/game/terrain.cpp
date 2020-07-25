@@ -113,6 +113,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     int lv;
     res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y,lv));
+    res->node->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     
     int l = std::max(abs(x-cm_cx),abs(y-cm_cy));
     if(l<=getVisualRange()){

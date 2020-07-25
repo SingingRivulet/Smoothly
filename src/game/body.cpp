@@ -662,6 +662,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+    p->node->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
 
     irr::scene::ISkinnedMesh* skinnedMesh = reinterpret_cast<irr::scene::ISkinnedMesh*>(p->node->getMesh());
     skinnedMesh->animationOverrideCallback = &p->jointCallback;

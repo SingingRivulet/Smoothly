@@ -256,6 +256,7 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
             res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
         }
         res->node[i]->setMaterialTexture(0,shadowMapTexture);
+        res->node[i]->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         if(c->texture){
             res->node[i]->setMaterialTexture(1,c->texture);
         }

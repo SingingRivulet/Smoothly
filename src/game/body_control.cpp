@@ -194,6 +194,7 @@ void body::attackPositionStart(){
         attackPositionStart(p);
         auto tg = scene->addBillboardSceneNode(0,core::dimension2d<f32>(5,5),p+vec3(0,1,0));
         tg->setMaterialTexture(0,texture_attackTarget);
+        tg->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         tg->setMaterialFlag(irr::video::EMF_LIGHTING, false );
         tg->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         auto am = scene->createDeleteAnimator(1000);

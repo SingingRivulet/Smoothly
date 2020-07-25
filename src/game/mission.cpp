@@ -250,7 +250,11 @@ mission::mission(){
     m.BackfaceCulling = false;
     scan_animation->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     scan_animation->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    scan_animation->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    scan_animation->setMaterialType((video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                        "../shader/scan.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                                        "../shader/scan.ps.glsl", "main", irr::video::EPST_PS_1_1));
+    scan_animation->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+    scan_animation->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
     scan_animation->setMaterialTexture(0,driver->getTexture("../../res/texture/scan/1.png"));
     scan_animation->setVisible(false);
     scan_animation_time = 0;
@@ -261,7 +265,7 @@ mission::~mission(){
     for(auto it:missions){
         releaseMission(it.second);
     }
-    missions.clear();;
+    missions.clear();
 }
 
 void mission::getMission(const vec3 & posi,std::vector<mission_node_t*> & m){
