@@ -150,6 +150,8 @@ void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
             cloudBack
         );
     box->setMaterialFlag(irr::video::EMF_ANTI_ALIASING,true);
+    box->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+    box->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
 
 #define processFace(id,tex,col) \
     callback[id*16]=[](skyBox * self){\

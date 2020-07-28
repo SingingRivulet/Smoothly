@@ -1,17 +1,44 @@
 #include "building.h"
 
 namespace smoothly{
+/*
+void genCubeBuffer(irr::scene::SMeshBuffer* buffer,
+                   const vec3 & FLD,const vec3 & FRD,const vec3 & BRD,const vec3 & BLD,
+                   const vec3 & FLU,const vec3 & FRU,const vec3 & BRU,const vec3 & BLU){
+    int index=0;
+    //添加一个面（顺时针）
+    #define addFace(a,b,c,d) \
+        buffer->Vertices.push_back(video::S3DVertex(a,vec3(0,0,1), video::SColor(255,255,255,255), 0, 1));\
+        buffer->Vertices.push_back(video::S3DVertex(b,vec3(0,0,1), video::SColor(255,255,255,255), 0, 1));\
+        buffer->Vertices.push_back(video::S3DVertex(c,vec3(0,0,1), video::SColor(255,255,255,255), 0, 1));\
+        buffer->Vertices.push_back(video::S3DVertex(d,vec3(0,0,1), video::SColor(255,255,255,255), 0, 1));\
+        buffer->Indices.push_back(index+1);\
+        buffer->Indices.push_back(index+0);\
+        buffer->Indices.push_back(index+2);\
+        buffer->Indices.push_back(index+2);\
+        buffer->Indices.push_back(index+0);\
+        buffer->Indices.push_back(index+3);\
+        index+=4;
 
+    addFace(FLU,BLU,BRU,FRU);//顶面
+    addFace(FLD,FLU,FRU,FRD);//正面
+    addFace(BLD,BLU,FLU,FLD);//左面
+    addFace(BRD,BRU,BLU,BLD);//背面
+    addFace(FRD,FRU,BRU,BRD);//右面
+    addFace(FRU,BRU,BLU,FLU);//底面
+}
+*/
 void building::addDefaultBuilding(){
     def_shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                 "../shader/building_default.vs.glsl", "main", irr::video::EVST_VS_1_1,
                 "../shader/building_default.ps.glsl", "main", irr::video::EPST_PS_1_1,
                 &buildingShaderCallback);
     {
+        auto mesh = scene->getMesh("../../res/model/building/building-1.obj");
         auto ptr  = new buildingConf;
         ptr->id   = -1;
         config[-1]= ptr;
-        ptr->mesh[0] = scene->getGeometryCreator()->createCubeMesh(vec3(10,0.5,10));
+        ptr->mesh[0] = mesh;
         ptr->texture = driver->getTexture("../../res/tree_trunk.tga");
         ptr->haveBody = true;
         ptr->bodyShape.init("+b0 0 0 0 0 0 1 5 0.5 5");
@@ -24,49 +51,8 @@ void building::addDefaultBuilding(){
         ptr->desTexture = driver->getTexture("../../res/description/building-1.png");
     }
     {
-        irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
 
-        // Create indices
-        const u16 u[36] = {   0,2,1,   0,3,2,   1,5,4,   1,2,5,   4,6,7,   4,5,6,
-                              7,3,0,   7,6,3,   9,5,2,   9,8,5,   0,11,10,   0,10,7};
-
-        buffer->Indices.set_used(36);
-
-        for (u32 i=0; i<36; ++i)
-            buffer->Indices[i] = u[i];
-
-
-        // Create vertices
-        video::SColor clr(255,255,255,255);
-
-        buffer->Vertices.reallocate(12);
-
-        buffer->Vertices.push_back(video::S3DVertex(-5,-0.5,0, -1,-1,-1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,0   ,0,  1, 1,-1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,9.5 ,10,  1,-1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,10  ,10,  1, 1, 1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10  ,10, -1, 1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,9.5 ,10, -1,-1, 1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10  ,10, -1, 1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,9.5 ,10,  1,-1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 0, 0));
-
-        // Recalculate bounding box
-        buffer->BoundingBox.reset(0,0,0);
-
-        for (u32 i=0; i<12; ++i){
-            buffer->BoundingBox.addInternalPoint(buffer->Vertices[i].Pos);
-        }
-
-        irr::scene::SMesh* mesh = new irr::scene::SMesh;
-        mesh->addMeshBuffer(buffer);
-        buffer->drop();
-
-        mesh->recalculateBoundingBox();
-
+        auto mesh = scene->getMesh("../../res/model/building/building-2.obj");
         //创建配置
         auto ptr  = new buildingConf;
         ptr->id   = -2;
@@ -89,50 +75,8 @@ void building::addDefaultBuilding(){
         ptr->desTexture = driver->getTexture("../../res/description/building-2.png");
     }
     {
-        irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
 
-        // Create indices
-        const u16 u[36] = {   0,2,1,   0,3,2,   1,5,4,   1,2,5,   4,6,7,   4,5,6,
-                              7,3,0,   7,6,3,   9,5,2,   9,8,5,   0,11,10,   0,10,7};
-
-        buffer->Indices.set_used(36);
-
-        for (u32 i=0; i<36; ++i)
-            buffer->Indices[i] = u[i];
-
-
-        // Create vertices
-        video::SColor clr(255,255,255,255);
-
-        buffer->Vertices.reallocate(12);
-
-        buffer->Vertices.push_back(video::S3DVertex(-5,-0.5,0, -1,-1,-1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,0   ,0,  1, 1,-1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,4.5 ,10,  1,-1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,5   ,10,  1, 1, 1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,5   ,10, -1, 1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,4.5 ,10, -1,-1, 1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,5   ,10, -1, 1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,4.5 ,10,  1,-1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 0, 0));
-
-        // Recalculate bounding box
-        buffer->BoundingBox.reset(0,0,0);
-
-        for (u32 i=0; i<12; ++i){
-            buffer->BoundingBox.addInternalPoint(buffer->Vertices[i].Pos);
-        }
-
-        irr::scene::SMesh* mesh = new irr::scene::SMesh;
-        mesh->addMeshBuffer(buffer);
-        buffer->drop();
-
-        mesh->recalculateBoundingBox();
-
-        //创建配置
+        auto mesh = scene->getMesh("../../res/model/building/building-3.obj");
         auto ptr  = new buildingConf;
         ptr->id   = -3;
         config[-3]= ptr;
@@ -153,48 +97,7 @@ void building::addDefaultBuilding(){
         ptr->desTexture = driver->getTexture("../../res/description/building-3.png");
     }
     {
-        irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
-
-        // Create indices
-        const u16 u[36] = {   0,2,1,   0,3,2,   1,5,4,   1,2,5,   4,6,7,   4,5,6,
-                              7,3,0,   7,6,3,   9,5,2,   9,8,5,   0,11,10,   0,10,7};
-
-        buffer->Indices.set_used(36);
-
-        for (u32 i=0; i<36; ++i)
-            buffer->Indices[i] = u[i];
-
-
-        // Create vertices
-        video::SColor clr(255,255,255,255);
-
-        buffer->Vertices.reallocate(12);
-
-        buffer->Vertices.push_back(video::S3DVertex(-5,0,0, -1,-1,-1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5,0,0,  1,-1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5,10,0,  1, 1,-1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10,0, -1, 1,-1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5,0,0.25,  1,-1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5,10,0.25,  1, 1, 1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10,0.25, -1, 1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0,0.25, -1,-1, 1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10,0.25, -1, 1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,10,0, -1, 1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5,0,0.25,  1,-1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5,0,0,  1,-1,-1, clr, 0, 0));
-        // Recalculate bounding box
-        buffer->BoundingBox.reset(0,0,0);
-
-        for (u32 i=0; i<12; ++i){
-            buffer->BoundingBox.addInternalPoint(buffer->Vertices[i].Pos);
-        }
-
-        irr::scene::SMesh* mesh = new irr::scene::SMesh;
-        mesh->addMeshBuffer(buffer);
-        buffer->drop();
-
-        mesh->recalculateBoundingBox();
-
+        auto mesh = scene->getMesh("../../res/model/building/building-4.obj");
         auto ptr  = new buildingConf;
         ptr->id   = -4;
         config[-4]= ptr;
@@ -214,49 +117,7 @@ void building::addDefaultBuilding(){
     }
 
     {
-        irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
-
-        // Create indices
-        const u16 u[36] = {   0,2,1,   0,3,2,   1,5,4,   1,2,5,   4,6,7,   4,5,6,
-                              7,3,0,   7,6,3,   9,5,2,   9,8,5,   0,11,10,   0,10,7};
-
-        buffer->Indices.set_used(36);
-
-        for (u32 i=0; i<36; ++i)
-            buffer->Indices[i] = u[i];
-
-
-        // Create vertices
-        video::SColor clr(255,255,255,255);
-
-        buffer->Vertices.reallocate(12);
-
-        buffer->Vertices.push_back(video::S3DVertex(-5,-0.5,0, -1,-1,-1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,0   ,0,  1, 1,-1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-10.5 ,10,  1,-1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-10  ,10,  1, 1, 1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-10  ,10, -1, 1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-10.5 ,10, -1,-1, 1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-10  ,10, -1, 1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-10.5 ,10,  1,-1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 0, 0));
-
-        // Recalculate bounding box
-        buffer->BoundingBox.reset(0,0,0);
-
-        for (u32 i=0; i<12; ++i){
-            buffer->BoundingBox.addInternalPoint(buffer->Vertices[i].Pos);
-        }
-
-        irr::scene::SMesh* mesh = new irr::scene::SMesh;
-        mesh->addMeshBuffer(buffer);
-        buffer->drop();
-
-        mesh->recalculateBoundingBox();
-
+        auto mesh = scene->getMesh("../../res/model/building/building-5.obj");
         //创建配置
         auto ptr  = new buildingConf;
         ptr->id   = -5;
@@ -279,49 +140,7 @@ void building::addDefaultBuilding(){
         ptr->desTexture = driver->getTexture("../../res/description/building-5.png");
     }
     {
-        irr::scene::SMeshBuffer* buffer = new irr::scene::SMeshBuffer();
-
-        // Create indices
-        const u16 u[36] = {   0,2,1,   0,3,2,   1,5,4,   1,2,5,   4,6,7,   4,5,6,
-                              7,3,0,   7,6,3,   9,5,2,   9,8,5,   0,11,10,   0,10,7};
-
-        buffer->Indices.set_used(36);
-
-        for (u32 i=0; i<36; ++i)
-            buffer->Indices[i] = u[i];
-
-
-        // Create vertices
-        video::SColor clr(255,255,255,255);
-
-        buffer->Vertices.reallocate(12);
-
-        buffer->Vertices.push_back(video::S3DVertex(-5,-0.5,0, -1,-1,-1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,0   ,0,  1, 1,-1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-5.5 ,10,  1,-1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-5   ,10,  1, 1, 1, clr, 0, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-5   ,10, -1, 1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-5.5 ,10, -1,-1, 1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,-5   ,10, -1, 1, 1, clr, 0, 1));
-        buffer->Vertices.push_back(video::S3DVertex(-5,0   ,0, -1, 1,-1, clr, 1, 1));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-5.5 ,10,  1,-1, 1, clr, 1, 0));
-        buffer->Vertices.push_back(video::S3DVertex(5 ,-0.5,0,  1,-1,-1, clr, 0, 0));
-
-        // Recalculate bounding box
-        buffer->BoundingBox.reset(0,0,0);
-
-        for (u32 i=0; i<12; ++i){
-            buffer->BoundingBox.addInternalPoint(buffer->Vertices[i].Pos);
-        }
-
-        irr::scene::SMesh* mesh = new irr::scene::SMesh;
-        mesh->addMeshBuffer(buffer);
-        buffer->drop();
-
-        mesh->recalculateBoundingBox();
-
+        auto mesh = scene->getMesh("../../res/model/building/building-6.obj");
         //创建配置
         auto ptr  = new buildingConf;
         ptr->id   = -6;
