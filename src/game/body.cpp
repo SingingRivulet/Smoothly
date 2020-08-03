@@ -820,6 +820,13 @@ body::body():gravity(0,-10,0){
     gui->addImage(driver->getTexture("../../res/icon/bag_footer.png"),irr::core::vector2di(0,256),true,body_bag_resource);
     body_bag_page = NULL;
 
+    commond_flags_list = gui->addListBox(irr::core::rect<irr::s32>(cx-200,cy-300,cx+200,cy+300),0,-1,true);
+    commond_flags_list->setItemHeight(32);
+    commond_flags_icons = gui->addEmptySpriteBank("commond_flags_icons");
+    commond_flags_list->setSpriteBank(commond_flags_icons);
+    commond_flags_list->setVisible(false);
+    loadCommonds();
+
     body_bag_using = gui->addListBox(irr::core::rect<irr::s32>(20,20,200,52),0,-1,false);
     body_bag_using->setSpriteBank(bag_icons);
     body_bag_using->setItemHeight(32);

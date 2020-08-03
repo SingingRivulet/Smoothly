@@ -312,6 +312,43 @@ void body::make(int id){
     }
 }
 
+void body::loadCommonds(){
+    printf("[status]get commonds config\n" );
+    QFile file("../config/commonds.json");
+    if(!file.open(QFile::ReadOnly)){
+        printf("[error]fail to read ../config/commonds.json\n" );
+        return;
+    }
+    QByteArray allData = file.readAll();
+    file.close();
+    auto str = allData.toStdString();
+    cJSON * json=cJSON_Parse(str.c_str());
+    if(json){
+        if(json->type==cJSON_Array){
+            cJSON *c=json->child;
+            while (c){
+                if(c->type == cJSON_Object){
+                    auto name = cJSON_GetObjectItem(c,"name");
+                    auto icon = cJSON_GetObjectItem(c,"icon");
+                    if(name && icon && name->type==cJSON_String && icon->type==cJSON_String){
+                        auto tex = driver->getTexture(icon->valuestring);
+                        if(tex){
+                            int iconid = commond_flags_icons->addTextureAsSprite(tex);
+                            commond_flags.push_back(std::pair<std::string,int>(name->valuestring,iconid));
+                            commond_flags_list->addItem(L"",iconid);
+                        }
+                    }
+                }
+                c=c->next;
+            }
+        }else{
+            printf("[error]root in ../config/commonds.json is not Array!\n" );
+        }
+        cJSON_Delete(json);
+    }else{
+        printf("[error]fail to load json\n" );
+    }
+}
 void body::loadFireCost(){
     printf("[status]get fire_cost config\n" );
     QFile file("../config/fire_cost.json");

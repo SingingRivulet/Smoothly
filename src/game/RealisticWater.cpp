@@ -69,6 +69,7 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 	_refractionMap = _videoDriver->addRenderTargetTexture(renderTargetSize);
 	_reflectionMap = _videoDriver->addRenderTargetTexture(renderTargetSize);
 
+    //int mtnum = _waterSceneNode->getMaterialCount();
 	_waterSceneNode->setMaterialTexture(1, _refractionMap);
 	_waterSceneNode->setMaterialTexture(2, _reflectionMap);
     _waterSceneNode->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;

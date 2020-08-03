@@ -53,6 +53,7 @@ class body:public mission{
 
                 vec3 position,pathFindingTarget,followTarget,pathFindingEnd,attackTarget;
                 std::unordered_map<std::string,std::string> session;
+                std::unordered_map<std::string,int> controlFlags;
                 behaviorStatus_t() {
                     statusInit();
                     haveAttackTarget = false;
@@ -438,10 +439,20 @@ class body:public mission{
                 void loadStr(const char *);
         };
         std::unordered_map<std::string,tool> tools;
+        //背包的ui
         irr::gui::IGUISpriteBank * bag_icons;
         std::map<int,irr::s32> bag_res_icons_mapping,bag_tool_icons_mapping;
         void loadBagIcons();
         void make(int id)override;
+
+        //指挥参数面板
+    private:
+        irr::gui::IGUISpriteBank * commond_flags_icons;
+        std::vector<std::pair<std::string,int> > commond_flags;//{varName,iconKey}
+        void loadCommonds();
+    public:
+        void setCommondValue(int v);
+        irr::gui::IGUIListBox * commond_flags_list;
 
     private:
         struct fire_cost{

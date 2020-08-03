@@ -223,4 +223,14 @@ void body::attackPositionEnd(){
     }
 }
 
+void body::setCommondValue(int v){
+    int id = commond_flags_list->getSelected();
+    try{
+        auto & cm = commond_flags.at(id);
+        for(auto & it:selectedBodies){
+            it->behaviorStatus.controlFlags[cm.first] = v;
+        }
+    }catch(...){}
+}
+
 }

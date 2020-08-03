@@ -241,6 +241,12 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
                             parent->setGUIMode(false);
                         }
                         break;
+                    case irr::KEY_CAPITAL:
+                        if(!event.KeyInput.PressedDown){
+                            parent->commond_flags_list->setVisible(true);
+                            parent->setGUIMode(true);
+                        }
+                        break;
                     case irr::KEY_KEY_P:
                         if(!event.KeyInput.PressedDown){
                             parent->getChunkMission();
@@ -640,6 +646,43 @@ bool control::eventRecv::OnEvent(const irr::SEvent &event){
 
             default:break;
 
+        }
+    }else if(parent->commond_flags_list->isVisible()){//指挥参数
+
+        switch(event.EventType){
+
+            case irr::EET_KEY_INPUT_EVENT:
+                switch(event.KeyInput.Key){
+                    walkEvent;
+                    case irr::KEY_CAPITAL:
+                        if(!event.KeyInput.PressedDown){
+                            parent->commond_flags_list->setVisible(false);
+                            parent->setGUIMode(false);
+                        }
+                        return true;
+                    #define processCommondKey(v) \
+                        case irr::KEY_KEY_##v:\
+                            if(!event.KeyInput.PressedDown){\
+                                parent->setCommondValue(v);\
+                            }\
+                        break;
+
+                    processCommondKey(0);
+                    processCommondKey(1);
+                    processCommondKey(2);
+                    processCommondKey(3);
+                    processCommondKey(4);
+                    processCommondKey(5);
+                    processCommondKey(6);
+                    processCommondKey(7);
+                    processCommondKey(8);
+                    processCommondKey(9);
+
+                    default:break;
+                }
+                break;
+
+            default:break;
         }
     }
     return false;

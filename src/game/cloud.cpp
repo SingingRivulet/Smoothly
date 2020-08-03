@@ -143,14 +143,15 @@ void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
     cloudBack  = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudBack").c_str(), video::ECF_A8R8G8B8);
     box        = scene->addSkyBoxSceneNode(
             cloudTop,
-            NULL,
+            cloudTop,
             cloudLeft,
             cloudRight,
             cloudFront,
             cloudBack
         );
     box->setMaterialFlag(irr::video::EMF_ANTI_ALIASING,true);
-    for(int i=0;i<6;++i){
+    int num = box->getMaterialCount();
+    for(int i=0;i<num;++i){
         auto & m = box->getMaterial(i);
         m.ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         m.BlendOperation = irr::video::EBO_ADD;

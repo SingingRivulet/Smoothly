@@ -135,6 +135,26 @@ static int luafunc_session_get(lua_State * L){
     }
 }
 
+static int luafunc_getFlag(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    auto s = luaL_checkstring(L,2);
+
+    auto it = self->behaviorStatus.controlFlags.find(s);
+    if(it==self->behaviorStatus.controlFlags.end()){
+        lua_pushnil(L);
+        return 1;
+    }else{
+        lua_pushnumber(L,it->second);
+        return 1;
+    }
+}
+
 static int luafunc_session_set(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
@@ -374,6 +394,10 @@ void body::loadBodyLuaAPI(lua_State * L){
             lua_pushcfunction(L,luafunc_session_set);
             lua_settable(L,-3);
         }
+        lua_settable(L,-3);
+
+        lua_pushstring(L,"getFlag");
+        lua_pushcfunction(L,luafunc_getFlag);
         lua_settable(L,-3);
     }
 
