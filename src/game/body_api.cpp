@@ -223,6 +223,65 @@ static int luafunc_navigation(lua_State * L){
     return 0;
 }
 
+static int luafunc_rayTest(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    vec3 dir;
+
+    if(lua_istable(L,-1)){
+        if(luaL_len(L,-1)>=3){
+
+            lua_geti(L,-1,1);
+            if(lua_isnumber(L,-1)){
+                dir.X = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,-1,2);
+            if(lua_isnumber(L,-1)){
+                dir.Y = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            lua_geti(L,-1,3);
+            if(lua_isnumber(L,-1)){
+                dir.Z = lua_tonumber(L,-1);
+            }
+            lua_pop(L,1);
+
+            vec3 posi;
+            bool haveValue = false;
+            //执行射线检测
+            self->parent->fetchByRay(self->behaviorStatus.position,self->behaviorStatus.position+dir,[&](const vec3 & p,body::bodyInfo * ){
+                posi = p;
+                haveValue = true;
+            });
+            if(haveValue){
+                lua_createtable(L,3,0);
+                {
+                    lua_pushnumber(L, posi.X);
+                    lua_seti(L,-2,1);
+
+                    lua_pushnumber(L, posi.Y);
+                    lua_seti(L,-2,2);
+
+                    lua_pushnumber(L, posi.Z);
+                    lua_seti(L,-2,3);
+                }
+                return 1;
+            }else{
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
+
 static int luafunc_getShootDir(lua_State * L){//弹道计算（因为用得太多，所以用c加速）
     vec3 ori,target;
     float gravity;
@@ -340,6 +399,10 @@ void body::loadBodyLuaAPI(lua_State * L){
 
         lua_pushstring(L,"navigation");
         lua_pushcfunction(L,luafunc_navigation);
+        lua_settable(L,-3);
+
+        lua_pushstring(L,"rayTest");
+        lua_pushcfunction(L,luafunc_rayTest);
         lua_settable(L,-3);
 
         lua_pushstring(L,"status");

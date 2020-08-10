@@ -293,7 +293,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     std::vector<std::pair<vec3,float> > oris,oris_child;
     //主干
     m.buildTree(2*randg.frand()+2,8,
-                randg.frand()*0.03,16*randg.frand()+6,
+                0.01+randg.frand()*0.01,16*randg.frand()+6,
                 vec3((randg.frand()-0.5)*0.07,4,(randg.frand()-0.5)*0.07),
                 [&](const vec3 & o,float r,int i){
         if(i>3){
@@ -320,7 +320,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
         m.transform.setRotationDegrees(rotation);
         m.transform.setTranslation(it.first);
         irr::core::matrix4 backup = m.transform;
-        m.buildTree(it.second,4,0.05,8*randg.frand(),vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float r,int){
+        m.buildTree(it.second,4,0.05,4*randg.frand()+8,vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float r,int){
             oris_child.push_back(std::pair<vec3,float>(o,r));
         });
         //二级分支
@@ -333,7 +333,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
             st.setTranslation(it2.first);
             rt.buildRotateFromTo(vec3(0,1,0),vec3(randg.frand()>0.5?1:-1,0,(randg.frand()-0.5)*0.3));
             m.transform = st*rt;
-            m.buildTree(it2.second,2,0.06,6*randg.frand(),vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float,int){
+            m.buildTree(it2.second,4,0.06,3*randg.frand()+3,vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float,int){
                 if(randg.frand()>0.5)
                     return;
                 g.transform.setTranslation(o);
