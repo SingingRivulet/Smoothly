@@ -143,4 +143,5 @@ DISTFILES += \
     ../shader/shadow.ps.glsl \
     ../shader/shadow.vs.glsl \
     ../script/voxelDrawer.lua \
-    ../../ai/main.lua
+    ../../ai/main.lua \
+    ../script/body_animation.lua

@@ -481,6 +481,10 @@ void body::bodyItem::updateStatus(bool finish){
             lua_pushinteger(parent->L, status_mask);
             lua_settable(parent->L, -3);
 
+            lua_pushstring(parent->L,"onGround");
+            lua_pushboolean(parent->L,m_character.onGround());
+            lua_settable(parent->L, -3);
+
         }
         lua_settable(parent->L, -3);
 
