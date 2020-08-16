@@ -146,6 +146,15 @@ void body::loadBodyConfig(){
                                                     }
                                                     line = line->next;
                                                 }
+                                            }else if(strcmp(item->string,"audio")==0){
+                                                auto line = item->child;
+                                                while(line){
+                                                    if(line->type==cJSON_String){
+                                                        auto au = getAudioBuffer(line->valuestring);
+                                                        ptr->audioBuffers.push_back(au);
+                                                    }
+                                                    line = line->next;
+                                                }
                                             }
                                         }
                                         item = item->next;
