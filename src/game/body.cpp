@@ -55,7 +55,6 @@ void body::bodyItem::updateFromWorld(){
 
     node->animateJoints(true,&animationBlend);
 
-    bool needUpdateStatus = false;
     if(owner==parent->myUUID){//拥有的物体
         //尝试上传
         if(fabs(lastPosition.X-irrPos.X)>0.01 || fabs(lastPosition.Y!=irrPos.Y)>0.01 || fabs(lastPosition.Z!=irrPos.Z)>0.01){
@@ -85,6 +84,14 @@ void body::bodyItem::updateFromWorld(){
             needUpdateStatus = true;
         }
     }
+    if(audio){
+        if(audio->isPlaying())
+            audio->setPosition(irrPos);
+        else{
+            audio->drop();
+            audio = NULL;
+        }
+    }
     int pitchAngle = getPitchAngle();
     if(pitchAngle!=lastPitchAngle){
         needUpdateStatus = true;
@@ -93,6 +100,7 @@ void body::bodyItem::updateFromWorld(){
 
     if(needUpdateStatus)
         updateStatus();
+    needUpdateStatus = false;
 
     //setPositionByTransform(node,t);
 
@@ -543,6 +551,45 @@ void body::bodyItem::updateStatus(bool finish){
                 }
                 lua_pop(parent->L,1);
 
+                lua_pushstring(parent->L, "audio");
+                lua_gettable(parent->L, -2);
+                if(lua_istable(parent->L,-1)){
+
+                    lua_pushstring(parent->L, "stop");
+                    lua_gettable(parent->L, -2);
+                    if(lua_isboolean(parent->L,-1) && lua_toboolean(parent->L,-1)){
+                        //停止
+                        if(audio){
+                            audio->drop();
+                            audio = NULL;
+                        }
+                        lua_pop(parent->L,1);
+                    }else{
+                        lua_pop(parent->L,1);
+
+                        int audioId = 0;
+                        bool audioLoop = false;
+
+                        lua_pushstring(parent->L, "id");
+                        lua_gettable(parent->L, -2);
+                        if(lua_isinteger(parent->L,-1)){
+                            audioId = lua_tointeger(parent->L,-1);
+                        }
+                        lua_pop(parent->L,1);
+
+                        lua_pushstring(parent->L, "loop");
+                        lua_gettable(parent->L, -2);
+                        if(lua_isboolean(parent->L,-1)){
+                            audioLoop = lua_toboolean(parent->L,-1);
+                        }
+                        lua_pop(parent->L,1);
+
+                        playAudio(audioId,audioLoop);
+                    }
+
+                }
+                lua_pop(parent->L,1);
+
                 lua_pushstring(parent->L, "blend");
                 lua_gettable(parent->L, -2);
                 if(lua_istable(parent->L,-1)){
@@ -644,6 +691,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->m_character.setDir(l);
     p->m_character.setUserPointer(&(p->info));
 
+    p->needUpdateStatus = true;
+
     p->info.ptr  = p;
     p->info.type = BODY_BODY;
 
@@ -663,6 +712,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->status = sta_mask;
     p->status_mask = sta_mask;
     p->lastStatus = sta_mask;
+
+    p->audio = NULL;
     p->node   = scene->addAnimatedMeshSceneNode(c->mesh);
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
@@ -847,6 +898,9 @@ body::body():gravity(0,-10,0){
 }
 
 body::~body(){
+    for(auto it:bodies){
+        releaseBody(it.second);
+    }
     lua_close(L);
     releaseBodyConfig();
     releaseWearingConfig();
@@ -1009,6 +1063,8 @@ void body::releaseBody(bodyItem * b){
         delete b->coll_bodyState;
     b->m_character.removeFromWorld();
     b->node->remove();
+    if(b->audio)
+        b->audio->drop();
 
     //清除跟随
     b->clearFollowers();

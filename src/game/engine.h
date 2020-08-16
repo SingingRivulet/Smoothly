@@ -5,6 +5,7 @@
 #include "RealisticWater.h"
 #include "CGUITTFont.h"
 #include <vector>
+#include <AL/alut.h>
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
         auto cosa=cos(a);
@@ -62,6 +63,63 @@ namespace smoothly{
 
             void drawArcProgressBar(core::position2d<s32> center,
                 f32 radius, video::SColor color, s32 count,f32 progress);
+
+            //音频
+            ALCcontext * audioContext;
+            ALCdevice *  audioDevice;
+
+            struct audioBuffer:public irr::IReferenceCounted{//音频buffer
+                    ALuint alBuffer;
+                    inline audioBuffer(const char * path){
+                       alBuffer = alutCreateBufferFromFile(path);
+                    }
+                    inline ~audioBuffer(){
+                        alDeleteBuffers(1,&alBuffer);
+                    }
+            };
+            std::map<std::string,audioBuffer*> audioBuffers;
+            audioBuffer * getAudioBuffer(const char * path);
+            struct audioSource:public irr::IReferenceCounted{//发声地点
+                    ALuint alSource;
+                    audioBuffer * playingBuffer;
+
+                    inline audioSource(){
+                        alGenSources(1, &alSource);
+                        playingBuffer = NULL;
+                    }
+                    inline ~audioSource(){
+                        stop();//先停止，再删除
+                        alDeleteSources(1,&alSource);
+                    }
+                    inline void play(audioBuffer * buffer,ALboolean loop){
+                        stop();//先停止
+                        playingBuffer = buffer;
+                        buffer->grab();
+                        alSourcei(alSource, AL_BUFFER, buffer->alBuffer);//buffer
+                        alSourcei(alSource, AL_LOOPING, loop);           //循环
+                        alSourcePlay(alSource);                          //播放
+                    }
+                    inline void stop(){
+                        if(playingBuffer){
+                            alSourceStop(alSource);
+                            playingBuffer->drop();
+                            playingBuffer=NULL;
+                        }
+                    }
+                    inline bool isPlaying(){
+                        ALint sourceState;
+                        alGetSourcei(alSource, AL_SOURCE_STATE, &sourceState);
+                        return (sourceState == AL_PLAYING);
+                    }
+                    inline void setPosition(const irr::core::vector3df & posi){
+                        alSource3f(alSource,AL_POSITION, posi.X, posi.Y, posi.Z);
+                    }
+                    inline void setVelocity(const irr::core::vector3df & velo){
+                        alSource3f(alSource,AL_VELOCITY, velo.X, velo.Y, velo.Z);
+                    }
+            };
+        private:
+            void updateListener();
 
         private:
             float deltaTime,lastTime;

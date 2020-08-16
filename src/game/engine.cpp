@@ -148,6 +148,13 @@ engine::engine(){
     ttf->attach(face,16);
     face->drop();
 
+    //初始化音频
+    audioDevice = alcOpenDevice(NULL);
+    if(audioDevice  == NULL)
+        exit(1);
+    audioContext=alcCreateContext(audioDevice, NULL);
+    alcMakeContextCurrent(audioContext);
+    alGetError();
 }
 engine::~engine(){
     ttf->drop();
@@ -157,6 +164,18 @@ engine::~engine(){
     delete overlappingPairCache;
     delete dispatcher;
     delete collisionConfiguration;
+
+    //释放音频buffer
+    for(auto it:audioBuffers){
+        it.second->drop();
+    }
+    audioBuffers.clear();
+    //释放音频设备
+    ALCcontext* context = alcGetCurrentContext();
+    ALCdevice* device = alcGetContextsDevice( context );
+    alcMakeContextCurrent( NULL );
+    alcDestroyContext( context );
+    alcCloseDevice( device );
 }
 void engine::sceneLoop(){
     if(!driver)
@@ -171,6 +190,7 @@ void engine::sceneLoop(){
     renderSky();
     renderShadow();
     renderMiniMap();
+    updateListener();
 
     driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
@@ -264,6 +284,36 @@ void engine::drawArcProgressBar(core::position2d<s32> center,
         else
             driver->draw2DLine(a, b, color);
     }
+}
+
+engine::audioBuffer *engine::getAudioBuffer(const char * path){
+    auto it = audioBuffers.find(path);
+    if(it==audioBuffers.end()){
+        auto p = new audioBuffer(path);
+        audioBuffers[path] = p;
+        return p;
+    }else{
+        return it->second;
+    }
+}
+
+void engine::updateListener(){
+    auto posi = camera->getPosition();
+    auto targ = camera->getTarget();
+    auto dir  = targ-posi;
+    dir.normalize();//朝向
+    auto up   = camera->getUpVector();
+
+    alListener3f(AL_POSITION, posi.X, posi.Y, posi.Z);
+
+    float vec[6];
+    vec[0] = dir.X;
+    vec[1] = dir.Y;
+    vec[2] = dir.Z;
+    vec[3] = up.X;
+    vec[4] = up.Y;
+    vec[5] = up.Z;
+    alListenerfv(AL_ORIENTATION, vec);
 }
 
 }

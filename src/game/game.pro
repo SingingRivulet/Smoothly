@@ -25,7 +25,7 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 INCLUDEPATH += ../../dep/ /usr/local/include/bullet/ ../../dep/irrlicht/include ../../dep/freetype2/include/
 
 LIBS += -luuid -lleveldb -lpthread -lRakNetDLL -llua -ldl ../../dep/irrlicht/source/Irrlicht/libIrrlicht.a -lBulletDynamics -lBulletCollision -lLinearMath
-LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lSDL2 -lSDL2_ttf -lfreetype
+LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lSDL2 -lSDL2_ttf -lfreetype -lalut -lopenal
 HEADERS += \
     engine.h \
     myCharacter.h \

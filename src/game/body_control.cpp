@@ -96,6 +96,7 @@ void body::doCommond(const commond & c){
                 auto v = c.data_vec;
                 v.normalize();
                 v*=p->config->jump;
+                p->needUpdateStatus = true;
                 p->m_character.jump(btVector3(v.X , v.Y , v.Z));
             }
         }

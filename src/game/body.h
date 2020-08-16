@@ -193,12 +193,15 @@ class body:public mission{
                 int                                  id,hp;
                 std::string                          uuid,owner;
                 irr::scene::IAnimatedMeshSceneNode * node;
+                audioSource                        * audio;
                 vec3                                 lookAt;
                 body                               * parent;
                 bodyConf                           * config;
                 std::map<int,irr::scene::IAnimatedMeshSceneNode*> wearing;
                 bodyInfo                             info;
                 bool                                 uncreatedChunk;//未创建区块，锁住物体
+
+                bool                                 needUpdateStatus;
 
                 std::map<int,int>                    resources;
                 std::unordered_set<std::string>      tools;
@@ -255,6 +258,17 @@ class body:public mission{
 
                 bodyItem                           * follow;//跟随
                 std::set<bodyItem*>                  followers;
+
+                inline void playAudio(int id,bool playloop){
+                    try{
+                        auto buffer = config->audioBuffers.at(id);
+                        if(audio==NULL){
+                            audio = new audioSource;
+                        }
+                        if(audio)
+                            audio->play(buffer,playloop);
+                    }catch(...){}
+                }
 
             protected:
                 bodyItem(btScalar w,btScalar h,const btVector3 & position,bool wis,bool jis);
@@ -331,6 +345,9 @@ class body:public mission{
             irr::video::ITexture * texture;
             int hp;
             std::vector<irr::scene::ISkinnedMesh*> animation;//用于混合的动画
+
+            std::vector<audioBuffer*> audioBuffers;
+
             inline bodyConf(){
                 mesh         = NULL;
                 texture      = NULL;
