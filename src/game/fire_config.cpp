@@ -68,6 +68,9 @@ fire::fireConfig::fireConfig(){
     this->bulletConf.mesh           = NULL;
     this->bulletConf.texture        = NULL;
 
+    this->startAudio                = NULL;
+    this->flyAudio                  = NULL;
+
     this->castShape                 = NULL;
     this->id                        = 0;
     this->lifeTime                  = 4000;
@@ -252,6 +255,12 @@ void fire::openConfig(){
                                         if(strcmp(line->valuestring,"laser")==0){
                                             p->type = FIRE_LASER;
                                         }
+                                    }else
+                                    if(strcmp(line->string,"startAudio")==0){
+                                        p->startAudio = getAudioBuffer(line->valuestring);
+                                    }else
+                                    if(strcmp(line->string,"flyAudio")==0){
+                                        p->flyAudio = getAudioBuffer(line->valuestring);
                                     }
                                 }else
                                 if(line->type==cJSON_Number){

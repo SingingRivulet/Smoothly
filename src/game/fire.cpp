@@ -99,6 +99,11 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
     if(conf==NULL)
         return;
 
+    //声音
+    if(conf->startAudio){
+        playAudioPosition(from,conf->startAudio);
+    }
+
     if(conf->type==FIRE_SHOOT){
         shoot(uuid,conf,from,dir,attack);
     }else

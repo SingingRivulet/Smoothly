@@ -297,6 +297,15 @@ engine::audioBuffer *engine::getAudioBuffer(const char * path){
     }
 }
 
+void engine::playAudioPosition(const core::vector3df & posi, engine::audioBuffer * buf){
+    auto au = new audioSource;
+    if(au){
+        au->setPosition(posi);
+        au->play(buf,false);
+        playingSources.push_back(au);
+    }
+}
+
 void engine::updateListener(){
     auto posi = camera->getPosition();
     auto targ = camera->getTarget();
@@ -314,6 +323,14 @@ void engine::updateListener(){
     vec[4] = up.Y;
     vec[5] = up.Z;
     alListenerfv(AL_ORIENTATION, vec);
+
+    playingSources.remove_if([](audioSource * s){
+        if(!s->isPlaying()){
+            s->drop();
+            return true;
+        }
+        return false;
+    });
 }
 
 }

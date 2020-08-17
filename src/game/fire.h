@@ -62,6 +62,9 @@ class fire:public interactive{
             float       impulse;//发射子弹的冲量
             float       billboardSize;//billboard模式下子弹的大小
 
+            audioBuffer * startAudio;//释放技能时的声音
+            audioBuffer * flyAudio;//飞行时的声音（仅子弹）
+
             struct{
                 bool have;
                 struct{
@@ -117,6 +120,7 @@ class fire:public interactive{
             std::string                   owner;//拥有这颗子弹的单位
             fireConfig                  * config;
             unsigned int                  expire;
+            audioSource                 * audio;
             void update();
         };
         struct emitter{

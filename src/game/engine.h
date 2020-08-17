@@ -118,7 +118,9 @@ namespace smoothly{
                         alSource3f(alSource,AL_VELOCITY, velo.X, velo.Y, velo.Z);
                     }
             };
+            void playAudioPosition(const irr::core::vector3df & posi,audioBuffer * buf);
         private:
+            std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）
             void updateListener();
 
         private:

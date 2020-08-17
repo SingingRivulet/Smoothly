@@ -16,6 +16,12 @@ void fire::bullet::update(){
     btTransform t;
     bodyState->getWorldTransform(t);
     setPositionByTransform(node , t);
+    if(audio){
+        auto v = rigidBody->getLinearVelocity();
+        auto p = t.getOrigin();
+        audio->setVelocity(vec3(v.x(),v.y(),v.z()));
+        audio->setPosition(vec3(p.x(),p.y(),p.z()));
+    }
 }
 void fire::bulletAttackBody(bullet * b , const btCollisionObject * body){
     auto ptr = (bodyInfo*)body->getUserPointer();
@@ -31,6 +37,8 @@ void fire::processBulletRemove(){
         dynamicsWorld->removeRigidBody(b->rigidBody);
         delete b->rigidBody;
         delete b->bodyState;
+        if(b->audio)
+            b->audio->drop();
         bullets.erase(b);
         delete b;
     }
@@ -127,6 +135,22 @@ void fire::shoot(const std::string &uuid, fireConfig * conf, const vec3 &from, c
     imp.normalize();
     imp*=conf->impulse;
     b->rigidBody->applyCentralImpulse(btVector3(imp.X , imp.Y , imp.Z));
+
+    //声音
+    if(conf->flyAudio){
+        auto au = new audioSource;
+        if(au){
+            auto v = b->rigidBody->getLinearVelocity();
+            au->setVelocity(vec3(v.x(),v.y(),v.z()));
+            au->setPosition(vec3(from.X,from.Y,from.Z));
+            au->play(conf->flyAudio,false);
+            b->audio = au;
+        }else{
+            b->audio = NULL;
+        }
+    }else{
+        b->audio = NULL;
+    }
 
     bullets.insert(b);
 }
