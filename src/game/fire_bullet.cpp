@@ -19,8 +19,8 @@ void fire::bullet::update(){
     if(audio){
         auto v = rigidBody->getLinearVelocity();
         auto p = t.getOrigin();
-        audio->setVelocity(vec3(v.x(),v.y(),v.z()));
-        audio->setPosition(vec3(p.x(),p.y(),p.z()));
+        audio->setVelocity(vec3(v.x() , v.y() , v.z()));
+        audio->setPosition(vec3(p.x() , p.y() , p.z()));
     }
 }
 void fire::bulletAttackBody(bullet * b , const btCollisionObject * body){
