@@ -12,6 +12,7 @@ shadow::shadow(){
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
     shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(64,64,0.9f,200.f),true);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "shadowMap", video::ECF_R32F);//创建渲染目标
+    shadowFactor = 0.3;
 }
 
 void shadow::renderShadow(){

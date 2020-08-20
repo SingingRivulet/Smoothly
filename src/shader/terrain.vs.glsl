@@ -86,6 +86,7 @@ float cnoise(vec3 P){
 }
 
 void main(){
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
     gl_Position = ftransform();//设置坐标
     vec4 posi = modelMatrix * gl_Vertex;
     pointPosition4 = posi;

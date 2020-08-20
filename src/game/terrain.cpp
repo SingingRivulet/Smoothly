@@ -113,6 +113,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     int lv;
     res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y,lv));
+    res->node->setMaterialTexture(0,shadowMapTexture);
     res->node->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     
     int l = std::max(abs(x-cm_cx),abs(y-cm_cy));
@@ -338,6 +339,7 @@ int terrain::getCollHeight(int x, int y){
 void terrain::TerrainShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
     s32 var0 = 0;
     services->setPixelShaderConstant("shadowMap",&var0, 1);
+    services->setPixelShaderConstant("shadowFactor",&parent->shadowFactor, 1);
     services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
     core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
     services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);

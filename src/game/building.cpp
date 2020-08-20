@@ -913,6 +913,7 @@ void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererSe
     s32 var0 = 0;
     s32 var1 = 1;
     services->setPixelShaderConstant("shadowMap",&var0, 1);
+    services->setPixelShaderConstant("shadowFactor",&parent->shadowFactor, 1);
     services->setPixelShaderConstant("tex",&var1, 1);
     services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
     core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);

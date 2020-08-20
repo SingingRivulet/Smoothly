@@ -2,6 +2,7 @@ uniform sampler2D tex;
 uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
+uniform float shadowFactor;
 
 varying vec4 lcolor;
 varying vec4 pointPosition;
@@ -29,7 +30,7 @@ void main(){
     if(color.a<0.7)
         discard;
 
-    color -= vec4(color.rgb,0.0)*shadow*0.3;
+    color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
 
     gl_FragColor = color;
 }

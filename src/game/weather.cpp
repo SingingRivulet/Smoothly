@@ -1,4 +1,6 @@
 #include "weather.h"
+#include <algorithm>
+
 namespace smoothly{
 
 weather::weather(){
@@ -137,6 +139,11 @@ void weather::updateWeather(int tm){
     }else{
         setRain(0);
     }
+
+    float shadowK = std::max(0.7f-cloudy,0.f);
+    shadowK = std::min(shadowK,0.4f);
+    shadowK/= 0.4;
+    shadowFactor = 0.3*shadowK;
 
     lightTarget = camera->getPosition();
     auto level = getRealHight(floor(lightTarget.X/32.f)*32,floor(lightTarget.Z/32.f)*32);

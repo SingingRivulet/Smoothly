@@ -14,6 +14,7 @@ class shadow:public cloud{
         irr::video::ITexture         * shadowMapTexture;        //渲染目标
         irr::s32                       shadowMapShader;         //光影着色器
         irr::core::vector3df           lightDir;
+        irr::f32                       shadowFactor;
         shadow();
 
         void renderShadow()override;
