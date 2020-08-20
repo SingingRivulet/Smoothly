@@ -282,7 +282,7 @@ class leavesBuffer{//树叶buffer
         irr::scene::SMeshBuffer *   buffer;
 };
 
-irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMesh){
+irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& shadowMesh, btTriangleMesh *&bodyMesh){
     meshGenerator m(4);
     leavesBuffer   g;
     world::terrain::predictableRand randg;
@@ -363,7 +363,9 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed, btTriangleMesh *&bodyMe
     trunk->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     trunk->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     bodyMesh = createBtMesh(trunk_mesh);
-    trunk_mesh->drop();
+    shadowMesh = trunk_mesh;
+    //trunk_mesh->drop();
+    //trunk_mesh要返回出去作为光影，所以不能drop
 
     //添加叶子
     g.buffer->recalculateBoundingBox();

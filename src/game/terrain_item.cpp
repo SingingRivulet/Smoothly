@@ -283,13 +283,18 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.id.id=id;
             res->id.id.index=index;
             btTriangleMesh * mesh;
-            res->node[0]=genTree(x * y + index + id , mesh);
+            irr::scene::SMesh * shadowMesh;
+            res->node[0]=genTree(x * y + index + id, shadowMesh , mesh);
             res->bodyMesh = mesh;
             res->bodyShape = createShape(mesh);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-            res->node[0]->setPosition(vec3(x,realHeight-4,y));
+            vec3 pos(x,realHeight-4,y);
+            res->node[0]->setPosition(pos);
             res->node[0]->updateAbsolutePosition();//更新矩阵
+
+            res->shadowNode = shadowSpace->addMeshSceneNode(shadowMesh,0,-1,pos);
+            shadowMesh->drop();
 
             res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());
             res->rigidBody =createBody(res->bodyShape,res->bodyState);
@@ -510,6 +515,8 @@ void terrain_item::releaseTerrainItem(item * p){
             p->node[i]->remove();
         }
     }
+    if(p->shadowNode)
+        p->shadowNode->remove();
     delete p;
 }
 irr::scene::IMesh * createMapMesh(const irr::video::SColor & color){

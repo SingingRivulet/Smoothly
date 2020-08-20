@@ -39,6 +39,7 @@ namespace smoothly{
             struct chunk;
             struct item{
                 irr::scene::ISceneNode  * node[4];
+                irr::scene::ISceneNode  * shadowNode;
                 mapId id;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -53,6 +54,7 @@ namespace smoothly{
                     bodyMesh  = NULL;
                     bodyShape = NULL;
                     hideLodLevel = 5;
+                    shadowNode = NULL;
                     for(int i = 0;i<4;++i)
                         node[i] = NULL;
                 }
@@ -92,7 +94,7 @@ namespace smoothly{
             void loadConfig();
             void loadJSON(cJSON * json);
             void releaseConfig();
-            irr::scene::ISceneNode * genTree(int seed,btTriangleMesh *& bodyMesh);
+            irr::scene::ISceneNode * genTree(int seed, scene::SMesh *& shadowMesh, btTriangleMesh *& bodyMesh);
             irr::scene::ISceneNode * genGrass(int seed, int & lodLevel);
             void genGrassMesh();
 

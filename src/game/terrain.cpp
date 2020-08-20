@@ -104,6 +104,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->shadowNode = createShadowNode(mesh,0,-1);
     res->node->setPosition(posi);
     res->shadowNode->setPosition(posi);
+    res->shadowNode->getMaterial(0).BackfaceCulling = false;
 
     auto selector=scene->createOctreeTriangleSelector(mesh,res->node);   //创建选择器
     res->node->setTriangleSelector(selector);
