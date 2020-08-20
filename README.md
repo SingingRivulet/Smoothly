@@ -1,7 +1,7 @@
 # Smoothly  
 这是一个第一人称策略型沙盒游戏，使用qt开发，图形基于irrlicht，物理基于bullet，网络基于raknet，数据库基于leveldb。  
 [点击查看视频演示](https://www.bilibili.com/video/BV1HA411h78b/)  
-![img](img/2020-08-20 21-45-02.png)  
+![img](img/2020-08-20%2021-45-02.png)  
 ![img](img/2020-05-23-13-07-50.png)  
 ![img](img/2020-03-29-21-01-04.png)  
 ![img](img/2020-04-06-09-25-54.png)  
