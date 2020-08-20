@@ -188,9 +188,9 @@ void main(){
     
     float closestDepth = texture2D(shadowMap, lightView.xy).r; 
     float currentDepth = lightView.z;
-    float shadow = currentDepth+0.5 > closestDepth  ? 1.0 : 0.0;
+    float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
     
-    scolor -= scolor*shadow*0.5;
+    scolor -= vec4(scolor.rgb,0.0)*shadow*0.3;
 
     gl_FragColor = scolor;
 

@@ -64,6 +64,7 @@ class fire:public interactive{
 
             audioBuffer * startAudio;//释放技能时的声音
             audioBuffer * flyAudio;//飞行时的声音（仅子弹）
+            audioBuffer * endAudio;//飞行时的声音（仅子弹）
 
             struct{
                 bool have;

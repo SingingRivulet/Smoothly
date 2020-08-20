@@ -15,9 +15,13 @@ void main(){
     vec3 lightView = lightView4.xyz / lightView4.w;
     lightView = lightView * 0.5 + 0.5;
 
-    float closestDepth = texture2D(shadowMap, lightView.xy).r;
+    float closestDepth;
+    if(lightView.x<0.0 || lightView.x>1.0 || lightView.y<0.0 || lightView.y>1.0)
+        closestDepth = 1.0;
+    else
+        closestDepth = texture2D(shadowMap, lightView.xy).r;
     float currentDepth = lightView.z;
-    float shadow = currentDepth+0.5 < closestDepth  ? 1.0 : 0.0;
+    float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
 
     color.x*=(lcolor.x+0.2);
     color.y*=(lcolor.y+0.2);
@@ -25,7 +29,7 @@ void main(){
     if(color.a<0.7)
         discard;
 
-    color -= color*shadow*0.5;
+    color -= vec4(color.rgb,0.0)*shadow*0.3;
 
     gl_FragColor = color;
 }

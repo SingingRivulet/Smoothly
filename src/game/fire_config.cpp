@@ -261,6 +261,9 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"flyAudio")==0){
                                         p->flyAudio = getAudioBuffer(line->valuestring);
+                                    }else
+                                    if(strcmp(line->string,"endAudio")==0){
+                                        p->endAudio = getAudioBuffer(line->valuestring);
                                     }
                                 }else
                                 if(line->type==cJSON_Number){

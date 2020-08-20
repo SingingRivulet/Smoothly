@@ -148,6 +148,7 @@ void weather::updateWeather(int tm){
     ldir.Z = -ldir.X;
     ldir.X = 0;
     ldir.normalize();
+    lightDir = ldir;
     ldir*=200;
     ldir+=lightTarget;
     light->setPosition(ldir);

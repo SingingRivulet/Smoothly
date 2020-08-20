@@ -10,22 +10,24 @@ shadow::shadow(){
                           &shadowCallback);
     shadowSpace = scene->createNewSceneManager(false);//创建光影空间
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
-    //shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(128,128,0.9f,200.f),true);
-    shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "shadowMap", video::ECF_A8R8G8B8);//创建渲染目标
+    shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(64,64,0.9f,200.f),true);
+    shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), "shadowMap", video::ECF_R32F);//创建渲染目标
 }
 
 void shadow::renderShadow(){
     driver->setRenderTarget(shadowMapTexture,true,true,irr::video::SColor(255,255,255,255));
 
-    shadowMapLight->setPosition(light->getPosition());
-    shadowMapLight->setTarget(lightTarget);
+    auto cam = camera->getPosition();
+
+    shadowMapLight->setPosition(lightDir*100+cam);
+    shadowMapLight->setTarget(cam);
     shadowMapLight->updateAbsolutePosition();
 
     //position = projection * view * pixel
     //透视矩阵×视图矩阵×像素点坐标
     shadowMatrix = shadowMapLight->getProjectionMatrix() * shadowMapLight->getViewMatrix();
 
-    driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
+    driver->beginScene(true, true, irr::video::SColor(255,255,0,0));
     shadowSpace->drawAll();
 }
 
