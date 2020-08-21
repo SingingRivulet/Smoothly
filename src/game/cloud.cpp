@@ -141,9 +141,10 @@ void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
     cloudRight = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudRight").c_str(), video::ECF_A8R8G8B8);
     cloudFront = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudFront").c_str(), video::ECF_A8R8G8B8);
     cloudBack  = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudBack").c_str(), video::ECF_A8R8G8B8);
+    cloudBottom  = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudBottom").c_str(), video::ECF_A8R8G8B8);
     box        = scene->addSkyBoxSceneNode(
             cloudTop,
-            cloudTop,
+            cloudBottom,
             cloudLeft,
             cloudRight,
             cloudFront,
@@ -292,11 +293,23 @@ void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
     processFace(2,self->cloudBack,irr::video::SColor(0,255,0,255));
     processFace(3,self->cloudLeft,irr::video::SColor(0,0,0,0));
     processFace(4,self->cloudRight,irr::video::SColor(0,0,0,255));
+    callback[80]=[](skyBox * self){
+        self->driver->setRenderTarget(self->cloudBottom,false,true);
+        self->driver->setMaterial(self->cloudMaterial);
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
+                                                            irr::core::vector3df(-1,-1,1),
+                                                            irr::core::vector3df(-1, 1,1)),
+                               irr::video::SColor(0,255,255,0));
+        self->driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
+                                                            irr::core::vector3df(-1,-1,1),
+                                                            irr::core::vector3df( 1, 1,1)),
+                               irr::video::SColor(0,255,255,0));
+    };
     count = -1;
 }
 
 bool cloud::skyBox::process(){
-    if(count>=80){
+    if(count>=81){
         count = 0;
         return true;
     }else{

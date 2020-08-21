@@ -29,7 +29,7 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 												 scene::ISceneNode* parent, s32 id):
 	scene::ISceneNode(parent, sceneManager, id), _time(0),
 	_size(width, height), _sceneManager(sceneManager), _refractionMap(NULL), _reflectionMap(NULL),
-	_windForce(20.0f),_windDirection(0, 1),_waveHeight(0.3f), _waterColor(0.1f, 0.1f, 0.6f, 1.0f), _colorBlendFactor(0.2f), _camera(NULL)
+    _windForce(20.0f),_windDirection(0, 1),_waveHeight(0.3f), _waterColor(0.1f, 0.1f, 0.6f, 1.0f), _colorBlendFactor(0.2f), _camera(NULL)
 {
 	_videoDriver = sceneManager->getVideoDriver();
 
@@ -72,8 +72,8 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
     //int mtnum = _waterSceneNode->getMaterialCount();
 	_waterSceneNode->setMaterialTexture(1, _refractionMap);
 	_waterSceneNode->setMaterialTexture(2, _reflectionMap);
-    _waterSceneNode->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
-    _waterSceneNode->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
+    //_waterSceneNode->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+    //_waterSceneNode->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
 }
 
 RealisticWaterSceneNode::~RealisticWaterSceneNode()
@@ -127,7 +127,7 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 	_time = timeMs;
 
 	//fixes glitches with incomplete refraction
-	const f32 CLIP_PLANE_OFFSET_Y = 5.0f;
+    //const f32 CLIP_PLANE_OFFSET_Y = 5.0f;
 
 	if (IsVisible)
 	{
@@ -137,13 +137,13 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 		_videoDriver->setRenderTarget(_refractionMap, true, true); //render to refraction
 
 		//refraction clipping plane
-		core::plane3d<f32> refractionClipPlane(0, RelativeTranslation.Y + CLIP_PLANE_OFFSET_Y, 0, 0, -1, 0); //refraction clip plane
-		_videoDriver->setClipPlane(0, refractionClipPlane, true);
+        //core::plane3d<f32> refractionClipPlane(0, RelativeTranslation.Y + CLIP_PLANE_OFFSET_Y, 0, 0, -1, 0); //refraction clip plane
+        //_videoDriver->setClipPlane(0, refractionClipPlane, true);
 
 		_sceneManager->drawAll(); //draw the scene
 
 		//reflection
-		_videoDriver->setRenderTarget(_reflectionMap, true, true); //render to reflection
+        _videoDriver->setRenderTarget(_reflectionMap, true, true); //render to reflection
 
 		//get current camera
 		scene::ICameraSceneNode* currentCamera = _sceneManager->getActiveCamera();
@@ -166,19 +166,19 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 		_sceneManager->setActiveCamera(_camera);
 
 		//reflection clipping plane
-		core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
-		_videoDriver->setClipPlane(0, reflectionClipPlane, true);
+        //core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
+        //_videoDriver->setClipPlane(0, reflectionClipPlane, true);
 
-		_sceneManager->drawAll(); //draw the scene
+        _sceneManager->drawAll(); //draw the scene
 
 		//disable clip plane
-		_videoDriver->enableClipPlane(0, false);
+        //_videoDriver->enableClipPlane(0, false);
 
 		//set back old render target
 		_videoDriver->setRenderTarget(0);
 
 		//set back the active camera
-		_sceneManager->setActiveCamera(currentCamera);
+        _sceneManager->setActiveCamera(currentCamera);
 
 		setVisible(true); //show it again
 	}

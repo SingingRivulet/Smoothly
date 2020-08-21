@@ -102,6 +102,7 @@ engine::engine(){
     scene->getRootSceneNode()->addChild(water);
     auto g = scene->getGeometryCreator();
     auto m = g->createPlaneMesh(irr::core::dimension2df(2048,2048));
+    /*
     auto dw = driver->getTexture("../../res/deepwater.png");
     auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-1024,1024),irr::core::vector3df(-90,0,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, true );
@@ -128,13 +129,14 @@ engine::engine(){
     //f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
     //水底
-    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-2048,0),irr::core::vector3df(0,0,0));
+    auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,-2048,0),irr::core::vector3df(0,0,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     f->setMaterialTexture(0, driver->getTexture("../../res/waterBottom.png"));
     f->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     //f->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+    */
 
-    f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
+    auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
     f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
     irr::video::ITexture* pTexture = driver->getTexture("../../res/waterTop.png");
     f->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;

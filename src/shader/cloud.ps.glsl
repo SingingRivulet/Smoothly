@@ -90,33 +90,35 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
     }
 
 
-    if(dir.y<=0.0)//地平线以下
-        return res;
-    vec3 nvec;//当前所在的坐标
-    float deltaHor = 20000.0 - dir.y;   //20000是光线步进的起始平面
-
-    //计算起始点
-    if(deltaHor>0.0){//人在云层下
-        float stepDeltaHor = deltaHor/dir.y;
-        nvec = start+stepDeltaHor*dir;
+    if(dir.y<=0.0){//地平线以下
+        return mix(res,vec3(0,0,0),-dir.y);
     }else{
-        nvec = start;
-    }
+        vec3 nvec;//当前所在的坐标
+        float deltaHor = 20000.0 - dir.y;   //20000是光线步进的起始平面
 
-    vec3 deltaStep = dir*(stepLen/dir.y);//每步走的距离
-
-    //开始光线步进
-    for(int i=0;i<step;++i){
-        float c = haveCloud(nvec);
-        if(c>cloudThre){
-            float f = exp((nvec.y-40000.0)/60000.0)*lightness;
-            vec3 col =  vec3(f,f,f)+astrLight*astTheta*f*0.5;
-            vec3 dt = res - col;
-            res = res - dt/32.0;
+        //计算起始点
+        if(deltaHor>0.0){//人在云层下
+            float stepDeltaHor = deltaHor/dir.y;
+            nvec = start+stepDeltaHor*dir;
+        }else{
+            nvec = start;
         }
-        nvec  += deltaStep;
+
+        vec3 deltaStep = dir*(stepLen/dir.y);//每步走的距离
+
+        //开始光线步进
+        for(int i=0;i<step;++i){
+            float c = haveCloud(nvec);
+            if(c>cloudThre){
+                float f = exp((nvec.y-40000.0)/60000.0)*lightness;
+                vec3 col =  vec3(f,f,f)+astrLight*astTheta*f*0.5;
+                vec3 dt = res - col;
+                res = res - dt/32.0;
+            }
+            nvec  += deltaStep;
+        }
+        return res;
     }
-    return res;
 }
 void main(){
     vec3 ncmdir = normalize(pointPosition-camera);

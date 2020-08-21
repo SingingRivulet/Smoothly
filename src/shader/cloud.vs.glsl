@@ -6,8 +6,13 @@ void main(){
     //screen = ftransform();//设置坐标
 
     if(gl_Color.g>0.5){//顶部
-        gl_Position = vec4(gl_Vertex.xy,0.0,1.0);
-        pointPosition = gl_Vertex.xzy; //把坐标点传给像素
+        if(gl_Color.r<0.5){
+            gl_Position = vec4(gl_Vertex.xy,0.0,1.0);
+            pointPosition = gl_Vertex.xzy; //把坐标点传给像素
+        }else{//底部
+            gl_Position = vec4(gl_Vertex.xy,0.0,1.0);
+            pointPosition = vec3(gl_Vertex.x,-gl_Vertex.z,gl_Vertex.y); //把坐标点传给像素
+        }
     }else{
         if(gl_Color.r>0.5){
             if(gl_Color.b<0.5){

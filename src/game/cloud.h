@@ -29,8 +29,9 @@ class cloud:public carto{
             irr::video::ITexture * cloudBack;
             irr::video::ITexture * cloudLeft;
             irr::video::ITexture * cloudRight;
+            irr::video::ITexture * cloudBottom;
             irr::scene::ISceneNode * box;
-            void(*callback[80])(skyBox *);
+            void(*callback[81])(skyBox *);
             int count;
             bool first;
             void init(const std::string &name, irr::s32 cloud);
