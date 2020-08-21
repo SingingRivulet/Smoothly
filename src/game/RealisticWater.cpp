@@ -165,7 +165,7 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 		//set the reflection camera
 		_sceneManager->setActiveCamera(_camera);
 
-		//reflection clipping plane
+        //reflection clipping plane
         //core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
         //_videoDriver->setClipPlane(0, reflectionClipPlane, true);
 
