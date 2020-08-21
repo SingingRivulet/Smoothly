@@ -13,6 +13,7 @@ shadow::shadow(){
     shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(256,256,0.9f,200.f),true);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(2048, 2048), "shadowMap", video::ECF_R32F);//创建渲染目标
     shadowFactor = 0.3;
+    defaultCallback.parent = this;
 }
 
 void shadow::renderShadow(){
@@ -48,6 +49,26 @@ void shadow::ShadowCallback::OnSetConstants(video::IMaterialRendererServices * s
     services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
     core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
     services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);
+}
+
+void shadow::DefaultCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    s32 var0 = 0;
+    s32 var1 = 1;
+    services->setPixelShaderConstant("shadowMap",&var1, 1);
+
+    irr::f32 sas = parent->scan_animation_showing;
+    services->setPixelShaderConstant("scan_animation_showing",&sas, 1);
+    services->setPixelShaderConstant("scan_animation_size",&parent->scan_animation_size, 1);
+
+    auto campos = parent->camera->getPosition();
+    services->setPixelShaderConstant("campos",&campos.X, 3);
+
+    services->setPixelShaderConstant("shadowFactor",&parent->shadowFactor, 1);
+    services->setPixelShaderConstant("tex",&var0, 1);
+    services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
+    core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
+    services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);
+    services->setVertexShaderConstant("transformMatrix" , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
 }
 
 }

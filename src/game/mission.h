@@ -122,14 +122,10 @@ class mission:public technology{
     public:
         bool openMissionEditBox;
 
-    private:
-        irr::scene::ISceneNode * scan_animation;
-        irr::u32 scan_animation_time;
-        bool scan_animation_showing;
     public:
         void scanAnimate(){
             scan_animation_time = timer->getTime();
-            scan_animation_showing = true;
+            scan_animation_showing = 1;
         }
 };
 

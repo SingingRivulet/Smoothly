@@ -913,6 +913,14 @@ void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererSe
     s32 var0 = 0;
     s32 var1 = 1;
     services->setPixelShaderConstant("shadowMap",&var0, 1);
+
+    irr::f32 sas = parent->scan_animation_showing;
+    services->setPixelShaderConstant("scan_animation_showing",&sas, 1);
+    services->setPixelShaderConstant("scan_animation_size",&parent->scan_animation_size, 1);
+
+    auto campos = parent->camera->getPosition();
+    services->setPixelShaderConstant("campos",&campos.X, 3);
+
     services->setPixelShaderConstant("shadowFactor",&parent->shadowFactor, 1);
     services->setPixelShaderConstant("tex",&var1, 1);
     services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);

@@ -578,7 +578,7 @@ terrain_item::terrain_item(){
     texture_treeLeaves = driver->getTexture("../../res/tree_leaves.tga");
     shader_tree = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                             "../shader/tree.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                            "../shader/tree.ps.glsl", "main", irr::video::EPST_PS_1_1);
+                            "../shader/tree.ps.glsl", "main", irr::video::EPST_PS_1_1,&defaultCallback);
     //草纹理
     auto fp = fopen("../config/grass.txt","r");
     if(fp){
@@ -781,7 +781,7 @@ void terrain_item::loadJSON(cJSON * json){
             c->useShader = true;
             c->shader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                         vs->valuestring, "main", irr::video::EVST_VS_1_1,
-                        ps->valuestring, "main", irr::video::EPST_PS_1_1);
+                        ps->valuestring, "main", irr::video::EPST_PS_1_1,&defaultCallback);
         }
     }
     

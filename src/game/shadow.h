@@ -35,6 +35,12 @@ class shadow:public cloud{
                 const irr::core::vector3df &  	rotation = irr::core::vector3df(0, 0, 0),
                 const irr::core::vector3df &  	scale    = irr::core::vector3df(1.0f, 1.0f, 1.0f));//创建一个光影节点
 
+        class DefaultCallback:public irr::video::IShaderConstantSetCallBack{
+            public:
+                shadow * parent;
+                void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+        }defaultCallback;
+
 };
 
 }

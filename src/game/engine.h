@@ -119,6 +119,12 @@ namespace smoothly{
                     }
             };
             void playAudioPosition(const irr::core::vector3df & posi,audioBuffer * buf);
+
+        public:
+            irr::u32 scan_animation_time;
+            irr::s32 scan_animation_showing;
+            irr::f32 scan_animation_size;
+
         private:
             std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）
             void updateListener();

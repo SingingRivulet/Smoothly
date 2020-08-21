@@ -3,6 +3,10 @@ uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform float shadowFactor;
+uniform vec3 campos;
+
+uniform float scan_animation_showing;
+uniform float scan_animation_size;
 
 varying vec4 lcolor;
 varying vec4 pointPosition;
@@ -31,6 +35,8 @@ void main(){
         discard;
 
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
+    
+    color.b += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
 
     gl_FragColor = color;
 }

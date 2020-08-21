@@ -243,22 +243,8 @@ mission::mission(){
 
     missionParent = NULL;
 
-    //扫描动画
-    scan_animation = scene->addSphereSceneNode(1);
-    irr::video::SMaterial & m = scan_animation->getMaterial(0);
-    m.BlendOperation = irr::video::EBO_ADD;
-    m.BackfaceCulling = false;
-    scan_animation->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    scan_animation->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    scan_animation->setMaterialType((video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
-                                        "../shader/scan.vs.glsl", "main", irr::video::EVST_VS_1_1,
-                                        "../shader/scan.ps.glsl", "main", irr::video::EPST_PS_1_1));
-    scan_animation->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
-    scan_animation->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
-    scan_animation->setMaterialTexture(0,driver->getTexture("../../res/texture/scan/1.png"));
-    scan_animation->setVisible(false);
     scan_animation_time = 0;
-    scan_animation_showing = false;
+    scan_animation_showing = 0;
 }
 
 mission::~mission(){
@@ -340,23 +326,17 @@ void mission::onDraw(){
 void mission::loop(){
     technology::loop();
 
-    if(scan_animation_showing){
+    if(scan_animation_showing==1){
         auto t = timer->getTime();
         auto delta = t-scan_animation_time;
-        if(delta < 5000 && delta > 1){
+        if(delta < 20000 && delta > 1){
 
-            scan_animation->setVisible(true);
-            scan_animation->setPosition(camera->getPosition());
-            float sc = delta*0.1;
-            scan_animation->setScale(vec3(sc,sc,sc));
-
-        }else{
-
-            scan_animation->setVisible(false);
+            float sc = delta*0.05;
+            scan_animation_size = sc;
 
         }
-        if(delta>5000){
-            scan_animation_showing = false;
+        if(delta>20000){
+            scan_animation_showing = 0;
         }
     }
 }

@@ -2,6 +2,10 @@ uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform float shadowFactor;
+uniform vec3 campos;
+
+uniform float scan_animation_showing;
+uniform float scan_animation_size;
 
 varying vec3 pointPosition;//坐标
 varying vec4 pointPosition4;
@@ -200,6 +204,8 @@ void main(){
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
     
     scolor -= vec4(scolor.rgb,0.0)*shadow*shadowFactor;
+
+    scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
 
     gl_FragColor = scolor;
 
