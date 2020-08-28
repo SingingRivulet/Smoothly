@@ -4,6 +4,9 @@ uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform float shadowFactor;
 uniform vec3 campos;
+uniform float clipY;
+uniform int enableClipY;
+uniform int clipYUp;
 
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
@@ -12,6 +15,17 @@ varying vec4 lcolor;
 varying vec4 pointPosition;
 
 void main(){
+    if(enableClipY==1){
+        float y = pointPosition.y/pointPosition.w;
+        if(clipYUp==1){
+            if(y>clipY)
+                discard;
+        }else{
+            if(y<clipY)
+                discard;
+        }
+    }
+    
     vec2 t = gl_TexCoord[0].st;
     t = vec2(t.x,1.0-t.y);
     vec4 color = texture2D(tex,t);

@@ -338,6 +338,11 @@ int terrain::getCollHeight(int x, int y){
 }
 
 void terrain::TerrainShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+
+    services->setPixelShaderConstant("clipY",&parent->clipY, 1);
+    services->setPixelShaderConstant("clipYUp",&parent->clipYUp, 1);
+    services->setPixelShaderConstant("enableClipY",&parent->enableClipY, 1);
+
     s32 var0 = 0;
 
     irr::f32 sas = parent->scan_animation_showing;

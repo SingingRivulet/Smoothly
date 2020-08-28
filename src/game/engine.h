@@ -6,6 +6,7 @@
 #include "CGUITTFont.h"
 #include <vector>
 #include <AL/alut.h>
+#include "graphbase.h"
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
         auto cosa=cos(a);
@@ -20,7 +21,7 @@ namespace smoothly{
         irr::core::vector3df d=A-B;
         return fabs(d.X)+fabs(d.Y)+fabs(d.Z);
     }
-    class engine:public physical,public smoothly::world::terrain::terrainGen{
+    class engine:public physical,public smoothly::world::terrain::terrainGen,public graphBase{
         public:
             irr::gui::CGUITTFont * ttf;
             irr::IrrlichtDevice       * device;
@@ -53,7 +54,7 @@ namespace smoothly{
             
             virtual void onCollision(btPersistentManifold * contactManifold)=0;
             
-            float waterLevel;
+            irr::f32 waterLevel;
 
             int width,height;
 
@@ -124,6 +125,16 @@ namespace smoothly{
             irr::u32 scan_animation_time;
             irr::s32 scan_animation_showing;
             irr::f32 scan_animation_size;
+
+        public:
+            irr::video::ITexture * post_tex , * post_depth;
+            irr::video::IRenderTarget * post;//后期
+            irr::video::SMaterial postMaterial;
+            class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
+                public:
+                    engine * parent;
+                    void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+            }postShaderCallback;
 
         private:
             std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）

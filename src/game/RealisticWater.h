@@ -25,6 +25,7 @@
 #define _REALISTIC_WATER_SCENE_NODE_H
 
 #include <irrlicht.h>
+#include "graphbase.h"
 
 using namespace irr;
 
@@ -55,6 +56,10 @@ public:
 
 	void setWaterColor(const video::SColorf& waterColor);
 	void setColorBlendFactor(f32 colorBlendFactor);
+
+    smoothly::graphBase * graph;
+
+    irr::video::IRenderTarget * renderTarget;
 
 private:
 

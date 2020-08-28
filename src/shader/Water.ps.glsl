@@ -45,7 +45,13 @@ varying vec3 position3D;
 void main()
 {
 	//bump color
-	vec4 bumpColor = texture2D(WaterBump, bumpMapTexCoord);
+        vec4 bumpColor = 
+                    texture2D(WaterBump, mod(bumpMapTexCoord*64.0,vec2(1.0,1.0)))/64.0+
+                    texture2D(WaterBump, mod(bumpMapTexCoord*32.0,vec2(1.0,1.0)))/32.0+
+                    texture2D(WaterBump, mod(bumpMapTexCoord*16.0,vec2(1.0,1.0)))/16.0+
+                    texture2D(WaterBump, mod(bumpMapTexCoord*8.0 ,vec2(1.0,1.0)))/8.0+
+                    texture2D(WaterBump, mod(bumpMapTexCoord*4.0 ,vec2(1.0,1.0)))/4.0+
+                    texture2D(WaterBump, mod(bumpMapTexCoord*2.0 ,vec2(1.0,1.0)))/2.0;
 	vec2 perturbation = WaveHeight * (bumpColor.rg - 0.5);
 	
 	//refraction

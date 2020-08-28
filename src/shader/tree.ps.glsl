@@ -7,11 +7,24 @@ uniform float shadowFactor;
 uniform vec3 campos;
 uniform sampler2D tex;
 uniform sampler2D shadowMap;
+uniform float clipY;
+uniform int enableClipY;
+uniform int clipYUp;
 
 varying vec4 lcolor;
 varying vec4 pointPosition;
 
 void main(){
+    if(enableClipY==1){
+        float y = pointPosition.y;
+        if(clipYUp==1){
+            if(y>clipY)
+                discard;
+        }else{
+            if(y<clipY)
+                discard;
+        }
+    }
     vec2 t = gl_TexCoord[0].st;
     t = vec2(t.x,1.0-t.y);
     vec4 color = texture2D(tex,t);

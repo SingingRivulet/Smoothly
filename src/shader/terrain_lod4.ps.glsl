@@ -4,6 +4,9 @@ uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform float shadowFactor;
 uniform vec3 campos;
+uniform float clipY;
+uniform int enableClipY;
+uniform int clipYUp;
 
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
@@ -143,6 +146,16 @@ float turbulence (in vec2 st) {
     return value;
 }
 void main(){
+    if(enableClipY==1){
+        float y = pointPosition.y;
+        if(clipYUp==1){
+            if(y>clipY)
+                discard;
+        }else{
+            if(y<clipY)
+                discard;
+        }
+    }
     float noise                 = 0.5;
     //float texture_delta_fissure = turbulence(pointPosition.xz*0.1);
     vec3  texture_grass         = vec3(0.1,0.7,0.1)*noise;

@@ -87,8 +87,9 @@ void cloud::setRain(float k){
 }
 
 void cloud::renderSky(){
-    rain->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
-    snow->setPosition(camera->getPosition()+core::vector3df(0,1000,0));
+    auto rp = camera->getPosition()+core::vector3df(0,1000,0);
+    rain->setPosition(rp);
+    snow->setPosition(rp);
     clock_t starts,ends;
     starts=clock();
     begin:

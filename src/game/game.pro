@@ -65,7 +65,8 @@ HEADERS += \
     mission.h \
     CGUITTFont.h \
     ui/missioneditor.h \
-    mail.h
+    mail.h \
+    graphbase.h
 
 SOURCES += \
     createTerrainMesh.cpp \

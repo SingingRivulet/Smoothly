@@ -139,6 +139,9 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 		//refraction clipping plane
         //core::plane3d<f32> refractionClipPlane(0, RelativeTranslation.Y + CLIP_PLANE_OFFSET_Y, 0, 0, -1, 0); //refraction clip plane
         //_videoDriver->setClipPlane(0, refractionClipPlane, true);
+        graph->enableClipY = 1;
+        graph->clipY = getAbsolutePosition().Y;
+        graph->clipYUp = 1;
 
 		_sceneManager->drawAll(); //draw the scene
 
@@ -168,6 +171,7 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
         //reflection clipping plane
         //core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
         //_videoDriver->setClipPlane(0, reflectionClipPlane, true);
+        graph->clipYUp = -1;
 
         _sceneManager->drawAll(); //draw the scene
 
@@ -175,12 +179,13 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
         //_videoDriver->enableClipPlane(0, false);
 
 		//set back old render target
-		_videoDriver->setRenderTarget(0);
+        _videoDriver->setRenderTargetEx(renderTarget,video::ECBF_COLOR | video::ECBF_DEPTH);
 
 		//set back the active camera
         _sceneManager->setActiveCamera(currentCamera);
 
 		setVisible(true); //show it again
+        graph->enableClipY = 0;
 	}
 }
 

@@ -3,6 +3,9 @@ uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform float shadowFactor;
 uniform vec3 campos;
+uniform float clipY;
+uniform int enableClipY;
+uniform int clipYUp;
 
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
@@ -142,6 +145,16 @@ float turbulence (in vec2 st) {
     return value;
 }
 void main(){
+    if(enableClipY==1){
+        float y = pointPosition.y;
+        if(clipYUp==1){
+            if(y>clipY)
+                discard;
+        }else{
+            if(y<clipY)
+                discard;
+        }
+    }
     float n1                    = snoise(pointPosition*10.0);
     float n2                    = snoise(pointPosition*20.0);
     float n3                    = snoise(pointPosition*40.0);

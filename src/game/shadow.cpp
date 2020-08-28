@@ -52,6 +52,11 @@ void shadow::ShadowCallback::OnSetConstants(video::IMaterialRendererServices * s
 }
 
 void shadow::DefaultCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+
+    services->setPixelShaderConstant("clipY",&parent->clipY, 1);
+    services->setPixelShaderConstant("clipYUp",&parent->clipYUp, 1);
+    services->setPixelShaderConstant("enableClipY",&parent->enableClipY, 1);
+
     s32 var0 = 0;
     s32 var1 = 1;
     services->setPixelShaderConstant("shadowMap",&var1, 1);

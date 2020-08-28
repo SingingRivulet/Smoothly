@@ -98,7 +98,8 @@ engine::engine(){
 */
     water = new RealisticWaterSceneNode(scene, 2048, 2048, "../../");
     water->setMaterialFlag(irr::video::EMF_FOG_ENABLE, true );
-    water->setWindForce(10);
+    water->setWindForce(5);
+    water->graph = this;
     scene->getRootSceneNode()->addChild(water);
     auto g = scene->getGeometryCreator();
     auto m = g->createPlaneMesh(irr::core::dimension2df(2048,2048));
@@ -137,7 +138,7 @@ engine::engine(){
     */
 
     auto f = scene->addMeshSceneNode(m,water,0,irr::core::vector3df(0,0,0),irr::core::vector3df(-180,0,0));
-    f->setMaterialFlag(irr::video::EMF_LIGHTING, false );
+    f->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     irr::video::ITexture* pTexture = driver->getTexture("../../res/waterTop.png");
     f->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     f->setMaterialTexture(0, pTexture);
@@ -157,6 +158,19 @@ engine::engine(){
     audioContext=alcCreateContext(audioDevice, NULL);
     alcMakeContextCurrent(audioContext);
     alGetError();
+
+    post_tex = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "RTT1", video::ECF_A8R8G8B8);
+    post_depth = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "DepthStencil", video::ECF_D32);
+    post = driver->addRenderTarget();
+    post->setTexture(post_tex, post_depth);
+    water->renderTarget = post;
+    postMaterial.setTexture(0,post_tex);
+    postMaterial.setTexture(1,post_depth);
+    postShaderCallback.parent = this;
+    postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);;
 }
 engine::~engine(){
     ttf->drop();
@@ -194,12 +208,25 @@ void engine::sceneLoop(){
     renderMiniMap();
     updateListener();
 
-    driver->setRenderTarget(0);
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
+    driver->setRenderTargetEx(post,video::ECBF_COLOR | video::ECBF_DEPTH);
     scene->drawAll();
-    if(cm.Y<waterLevel){//水下效果
-        driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
-    }
+    driver->setRenderTarget(0);
+    driver->setMaterial(postMaterial);
+    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
+                                                  irr::core::vector3df(-1,-1,1),
+                                                  irr::core::vector3df(-1, 1,1)),
+                           irr::video::SColor(0,0,0,0));
+    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
+                                                  irr::core::vector3df(-1,-1,1),
+                                                  irr::core::vector3df( 1, 1,1)),
+                           irr::video::SColor(0,0,0,0));
+    //driver->draw2DImage(post_tex,core::vector2di(0,0));
+    //scene->drawAll();
+    //if(cm.Y<waterLevel){//水下效果
+    //    driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
+    //}
+
     onDraw();
     gui->drawAll();
 
@@ -333,6 +360,16 @@ void engine::updateListener(){
         }
         return false;
     });
+}
+
+void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    s32 var0 = 0;
+    s32 var1 = 1;
+    auto cam = parent->camera->getPosition();
+    services->setPixelShaderConstant("tex",&var0, 1);
+    services->setPixelShaderConstant("depth",&var1, 1);
+    services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
+    services->setPixelShaderConstant("camera",&cam.X, 3);
 }
 
 }
