@@ -225,6 +225,7 @@ class leavesBuffer{//树叶buffer
             index+=4;
 
             //背面
+            /*
             v.Pos.X = 0;
             v.Pos.Y = 0;
             v.Pos.Z = 0;
@@ -274,6 +275,7 @@ class leavesBuffer{//树叶buffer
             buffer->Indices.push_back(index+3);
 
             index+=4;
+            */
         }
         irr::core::matrix4          transform;
     private:
@@ -363,6 +365,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
     trunk->setMaterialTexture(1,shadowMapTexture);
     trunk->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     trunk->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
+    trunk->getMaterial(0).BackfaceCulling=false;
     bodyMesh = createBtMesh(trunk_mesh);
     shadowMesh = trunk_mesh;
     //trunk_mesh->drop();
@@ -385,6 +388,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
     leaves->setMaterialTexture(0,texture_treeLeaves);
     leaves->setMaterialTexture(1,shadowMapTexture);
     leaves->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
+    leaves->getMaterial(0).BackfaceCulling = false;
     leaves_mesh->drop();
 
     return res;

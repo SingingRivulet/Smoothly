@@ -17,7 +17,7 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed,int & lodLevel){
     res->setMaterialTexture(0,texture_grass[r]);
     res->setMaterialTexture(1,shadowMapTexture);
     res->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
-
+    res->getMaterial(0).BackfaceCulling = false;
     res->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
 
     res->setRotation(vec3(0,randg.frand()*360,0));
@@ -83,49 +83,6 @@ void terrain_item::genGrassMesh(){
     buffer->Indices.push_back(index+3);\
     buffer->Indices.push_back(index+1);\
     buffer->Indices.push_back(index+2);\
-    buffer->Indices.push_back(index+3);\
-    index+=4;\
-    v.Pos.X = -len;\
-    v.Pos.Y = -len;\
-    v.Pos.Z = 0;\
-    transform.transformVect(v.Pos);\
-    v.TCoords.X=0.f;\
-    v.TCoords.Y=0.f;\
-    v.Normal = v.Pos;\
-    v.Normal.normalize();\
-    buffer->Vertices.push_back(v);\
-    v.Pos.X = -len;\
-    v.Pos.Y = len;\
-    v.Pos.Z = 0;\
-    transform.transformVect(v.Pos);\
-    v.TCoords.X=0.f;\
-    v.TCoords.Y=1.f;\
-    v.Normal = v.Pos;\
-    v.Normal.normalize();\
-    buffer->Vertices.push_back(v);\
-    v.Pos.X = len;\
-    v.Pos.Y = len;\
-    v.Pos.Z = 0;\
-    transform.transformVect(v.Pos);\
-    v.TCoords.X=1.f;\
-    v.TCoords.Y=1.f;\
-    v.Normal = v.Pos;\
-    v.Normal.normalize();\
-    buffer->Vertices.push_back(v);\
-    v.Pos.X = len;\
-    v.Pos.Y = -len;\
-    v.Pos.Z = 0;\
-    transform.transformVect(v.Pos);\
-    v.TCoords.X=1.f;\
-    v.TCoords.Y=0.f;\
-    v.Normal = v.Pos;\
-    v.Normal.normalize();\
-    buffer->Vertices.push_back(v);\
-    buffer->Indices.push_back(index+1);\
-    buffer->Indices.push_back(index+0);\
-    buffer->Indices.push_back(index+2);\
-    buffer->Indices.push_back(index+2);\
-    buffer->Indices.push_back(index+0);\
     buffer->Indices.push_back(index+3);\
     index+=4;
 

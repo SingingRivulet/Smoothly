@@ -201,7 +201,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                 ps->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true);
                 if(conf->particleConfig.texture){
                     ps->setMaterialTexture(0, conf->particleConfig.texture); // fireball
-                    ps->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+                    //ps->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
                     //ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
                     ps->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
                 }
@@ -294,7 +294,7 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
                     ps->setMaterialTexture(0, conf->particleConfig.texture); // fireball
                     //ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
                     ps->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
-                    ps->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+                    //ps->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
                 }
                 if(conf->particleConfig.gravity.have){
                     auto af = ps->createGravityAffector(conf->particleConfig.gravity.gravity,conf->particleConfig.gravity.timeForceLost);

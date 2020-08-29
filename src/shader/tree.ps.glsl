@@ -54,7 +54,7 @@ void main(){
         discard;
 
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
-    color.b += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
+    color.g += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
     
     gl_FragColor = color;
     gl_FragColor.a =1.0;
