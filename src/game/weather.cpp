@@ -143,7 +143,7 @@ void weather::updateWeather(int tm){
     float shadowK = std::max(0.7f-cloudy,0.f);
     shadowK = std::min(shadowK,0.4f);
     shadowK/= 0.4;
-    shadowFactor = 0.3*shadowK;
+    shadowFactor = 0.7*shadowK;
 
     lightTarget = camera->getPosition();
     auto level = getRealHight(floor(lightTarget.X/32.f)*32,floor(lightTarget.Z/32.f)*32);

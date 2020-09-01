@@ -10,7 +10,7 @@ shadow::shadow(){
                           &shadowCallback);
     shadowSpace = scene->createNewSceneManager(false);//创建光影空间
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
-    shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(256,256,0.9f,200.f),true);
+    shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(256,256,0.9f,400.f),true);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(2048, 2048), "shadowMap", video::ECF_R32F);//创建渲染目标
     shadowFactor = 0.3;
     defaultCallback.parent = this;

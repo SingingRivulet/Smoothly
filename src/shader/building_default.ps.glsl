@@ -13,6 +13,7 @@ uniform float scan_animation_size;
 
 varying vec4 lcolor;
 varying vec4 pointPosition;
+varying float NdotL;
 
 void main(){
     if(enableClipY==1){
@@ -42,14 +43,14 @@ void main(){
     float currentDepth = lightView.z;
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
 
-    color.x*=(lcolor.x+0.2);
-    color.y*=(lcolor.y+0.2);
-    color.z*=(lcolor.z+0.2);
+    vec3 lightcolor = lcolor.rgb - lcolor.rgb*shadow*shadowFactor*NdotL;
+
+    color.x*=(lightcolor.x+0.2);
+    color.y*=(lightcolor.y+0.2);
+    color.z*=(lightcolor.z+0.2);
     if(color.a<0.7)
         discard;
 
-    color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
-    
     color.rg += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
 
     gl_FragColor = color;

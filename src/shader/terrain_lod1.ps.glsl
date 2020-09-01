@@ -1,3 +1,4 @@
+uniform sampler2D tex;
 uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
@@ -6,6 +7,11 @@ uniform vec3 campos;
 uniform float clipY;
 uniform int enableClipY;
 uniform int clipYUp;
+
+uniform int lightCount;
+uniform vec3 lightPosition[8];
+uniform vec4 lightColor[8];
+uniform float lightRange[8];
 
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
@@ -201,8 +207,6 @@ void main(){
     lcolor.x +=0.1;
     lcolor.y +=0.1;
     lcolor.z +=0.1;
-
-    vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
     
     vec4 lightView4 = shadowMatrix * pointPosition4;
     vec3 lightView = lightView4.xyz / lightView4.w;
@@ -216,7 +220,8 @@ void main(){
     float currentDepth = lightView.z;
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
     
-    scolor -= vec4(scolor.rgb,0.0)*shadow*shadowFactor;
+    lcolor -= vec4(lcolor.rgb,0.0)*shadow*shadowFactor*NdotL;
+    vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
 
     scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
 

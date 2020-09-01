@@ -197,8 +197,6 @@ void main(){
     lcolor.x +=0.1;
     lcolor.y +=0.1;
     lcolor.z +=0.1;
-
-    vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
     
     vec4 lightView4 = shadowMatrix * pointPosition4;
     vec3 lightView = lightView4.xyz / lightView4.w;
@@ -212,7 +210,8 @@ void main(){
     float currentDepth = lightView.z;
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
     
-    scolor -= vec4(scolor.rgb,0.0)*shadow*shadowFactor;
+    lcolor -= vec4(lcolor.rgb,0.0)*shadow*shadowFactor*NdotL;
+    vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
 
     scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
 
