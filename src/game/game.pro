@@ -66,7 +66,8 @@ HEADERS += \
     CGUITTFont.h \
     ui/missioneditor.h \
     mail.h \
-    graphbase.h
+    graphbase.h \
+    localLight.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -117,7 +118,8 @@ SOURCES += \
     control_cmd.cpp \
     mail.cpp \
     body_ai.cpp \
-    body_api.cpp
+    body_api.cpp \
+    localLight.cpp
 
 FORMS += \
     ui/login.ui \

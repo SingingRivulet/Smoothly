@@ -1,11 +1,13 @@
-#ifndef LOCALLIGHT_H
-#define LOCALLIGHT_H
+#ifndef SMOOTHLY_LOCALLIGHT
+#define SMOOTHLY_LOCALLIGHT
 
+namespace smoothly{
 
-class localLight
-{
+class localLight{
     public:
         localLight();
 };
 
-#endif // LOCALLIGHT_H
+}
+
+#endif // SMOOTHLY_LOCALLIGHT
