@@ -127,7 +127,7 @@ namespace smoothly{
             irr::f32 scan_animation_size;
 
         public:
-            irr::video::ITexture * post_tex , * post_depth;
+            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调

@@ -159,13 +159,22 @@ engine::engine(){
     alcMakeContextCurrent(audioContext);
     alGetError();
 
-    post_tex = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "RTT1", video::ECF_A8R8G8B8);
+    post_tex = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "tex", video::ECF_A8R8G8B8);
+    post_mat = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "mat", video::ECF_A8R8G8B8);
+    post_normal = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "normal", video::ECF_A8R8G8B8);
     post_depth = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "DepthStencil", video::ECF_D32);
     post = driver->addRenderTarget();
-    post->setTexture(post_tex, post_depth);
+    core::array<video::ITexture*> textureArray(3);
+    textureArray.push_back(post_tex);
+    textureArray.push_back(post_mat);
+    textureArray.push_back(post_normal);
+    post->setTexture(textureArray, post_depth);
+
     water->renderTarget = post;
     postMaterial.setTexture(0,post_tex);
     postMaterial.setTexture(1,post_depth);
+    postMaterial.setTexture(2,post_mat);
+    postMaterial.setTexture(3,post_normal);
     postShaderCallback.parent = this;
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
@@ -365,9 +374,13 @@ void engine::updateListener(){
 void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
     s32 var0 = 0;
     s32 var1 = 1;
+    s32 var2 = 2;
+    s32 var3 = 3;
     auto cam = parent->camera->getPosition();
     services->setPixelShaderConstant("tex",&var0, 1);
     services->setPixelShaderConstant("depth",&var1, 1);
+    services->setPixelShaderConstant("material",&var2, 1);
+    services->setPixelShaderConstant("normal",&var3, 1);
     services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
     services->setPixelShaderConstant("camera",&cam.X, 3);
 }

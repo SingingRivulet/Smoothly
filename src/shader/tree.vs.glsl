@@ -3,10 +3,11 @@ uniform mat4 modelMatrix;
 uniform mat4 transformMatrix;
 varying vec4 lcolor;
 varying vec4 pointPosition;
+varying vec3 normal;
 
 void main(){
     gl_TexCoord[0] = gl_MultiTexCoord0;
-    vec3 normal  = normalize(gl_NormalMatrix * gl_Normal);
+    normal  = normalize(gl_NormalMatrix * gl_Normal);
     //vec3 normal  = gl_Normal;
     vec3 lightDir = normalize(vec3(gl_LightSource[0].position));
     float NdotL = max(dot(normal, lightDir), 0.0);

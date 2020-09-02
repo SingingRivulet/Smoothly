@@ -14,6 +14,7 @@ uniform float scan_animation_size;
 varying vec4 lcolor;
 varying vec4 pointPosition;
 varying float NdotL;
+varying vec3 normal;
 
 void main(){
     if(enableClipY==1){
@@ -30,6 +31,7 @@ void main(){
     vec2 t = gl_TexCoord[0].st;
     t = vec2(t.x,1.0-t.y);
     vec4 color = texture2D(tex,t);
+    gl_FragData[1] = color;
 
     vec4 lightView4 = shadowMatrix * pointPosition;
     vec3 lightView = lightView4.xyz / lightView4.w;
@@ -53,5 +55,6 @@ void main(){
 
     color.rg += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
 
-    gl_FragColor = color;
+    gl_FragData[0] = color;
+    gl_FragData[2] = vec4(normal*0.5 + vec3(0.5,0.5,0.5),1.0);
 }

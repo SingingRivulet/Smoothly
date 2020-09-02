@@ -13,6 +13,7 @@ uniform int clipYUp;
 
 varying vec4 lcolor;
 varying vec4 pointPosition;
+varying vec3 normal;
 
 void main(){
     if(enableClipY==1){
@@ -28,12 +29,12 @@ void main(){
     vec2 t = gl_TexCoord[0].st;
     t = vec2(t.x,1.0-t.y);
     vec4 color = texture2D(tex,t);
+    if(color.a<0.7)
+        discard;
+    gl_FragData[1] = color;
     color.x*=(lcolor.x+0.2);
     color.y*=(lcolor.y+0.2);
     color.z*=(lcolor.z+0.2);
-    if(color.a<0.7)
-        discard;
-    
     
     vec4 lightView4 = shadowMatrix * pointPosition;
     vec3 lightView = lightView4.xyz / lightView4.w;
@@ -55,7 +56,8 @@ void main(){
 
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
     color.g += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
+    gl_FragData[2] = vec4(normal*0.5 + vec3(0.5,0.5,0.5),1.0);
     
-    gl_FragColor = color;
-    gl_FragColor.a =1.0;
+    gl_FragData[0] = color;
+    gl_FragData[0].a =1.0;
 }

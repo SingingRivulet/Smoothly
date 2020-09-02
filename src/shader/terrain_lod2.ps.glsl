@@ -184,6 +184,7 @@ void main(){
     }else{
         diffuseColor = vec4(texture_snow,1.0);
     }
+    gl_FragData[1] = diffuseColor;
 
     vec4 diffuse;
     float NdotL;
@@ -192,6 +193,7 @@ void main(){
     rnormal+=vec3(n1 , snoise(pointPosition+vec3(0.0,100.0,0.0)), snoise(pointPosition+vec3(0.0,400.0,100.0)))*4.0;
     rnormal+=vec3(n2 , snoise(pointPosition*10.0+vec3(0.0,100.0,0.0)), snoise(pointPosition*10.0+vec3(0.0,400.0,100.0)))*4.0;
     rnormal=normalize(rnormal);
+    gl_FragData[2] = vec4(rnormal*0.5 + vec3(0.5,0.5,0.5),1.0);
 
     NdotL = max(dot(rnormal, lightDir), 0.0);
     diffuse = gl_LightSource[0].diffuse;
@@ -217,6 +219,6 @@ void main(){
 
     scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
 
-    gl_FragColor = scolor;
+    gl_FragData[0] = scolor;
 
 }
