@@ -7,6 +7,7 @@
 #include <vector>
 #include <AL/alut.h>
 #include "graphbase.h"
+
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
         auto cosa=cos(a);
@@ -32,7 +33,7 @@ namespace smoothly{
             irr::scene::ICameraSceneNode * camera;
             irr::scene::ISceneCollisionManager * collisionManager;
             irr::core::stringc          vendor;
-            
+
             irr::core::vector2di screenCenter;
 
             btDiscreteDynamicsWorld   * dynamicsWorld;
@@ -40,20 +41,20 @@ namespace smoothly{
             btCollisionDispatcher* dispatcher;
             btBroadphaseInterface* overlappingPairCache;
             btSequentialImpulseConstraintSolver* solver;
-            
+
             engine();
             ~engine();
             virtual void sceneLoop();
             virtual void worldLoop();
             virtual void onDraw();
             void deltaTimeUpdate();
-            
+
             inline float getDeltaTime(){
                 return deltaTime;
             }
-            
+
             virtual void onCollision(btPersistentManifold * contactManifold)=0;
-            
+
             irr::f32 waterLevel;
 
             int width,height;

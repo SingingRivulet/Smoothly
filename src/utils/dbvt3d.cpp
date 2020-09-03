@@ -239,4 +239,13 @@ dbvt3d::~dbvt3d(){
         root->drop();
 }
 
+void dbvt3d::makeID(dbvt3d::AABB * p){
+    p->id = ++tmpid;
+    onMakeID(p);
+    if(p->left)
+        makeID(p->left);
+    if(p->right)
+        makeID(p->right);
+}
+
 }//namespace smoothly

@@ -264,18 +264,18 @@ void engine::worldLoop(){
             if(numContacts>0){
                 //const btCollisionObject * obA = contactManifold->getBody0();
                 //const btCollisionObject * obB = contactManifold->getBody1();
-                
+
                 onCollision(contactManifold);
-                
+
                 //int numContacts=contactManifold->getNumContacts();
                 //for(int j=0;j<numContacts;j++){
-                    
+
                 //    auto point=contactManifold->getContactPoint(j);
-                    
+
                 //    //float impulse=point.getAppliedImpulse();
-                    
+
                 //    onCollision(obA,obB,point);
-                    
+
                 //}
             }
         }
@@ -383,6 +383,13 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     services->setPixelShaderConstant("normal",&var3, 1);
     services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
     services->setPixelShaderConstant("camera",&cam.X, 3);
+
+    auto vmat = parent->camera->getViewMatrix();
+    services->setPixelShaderConstant("ViewMatrix" , vmat.pointer(), 16);
+    irr::core::matrix4 vmati;
+    vmat.getInverse(vmati);
+    services->setPixelShaderConstant("ViewMatrixInv" , vmati.pointer(), 16);
+
 }
 
 }

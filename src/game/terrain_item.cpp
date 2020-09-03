@@ -29,12 +29,12 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
     printf("[setRemoveTable](%d,%d)\n",x,y);
     std::list<genProb> pl;//物体->概率
     world::terrain::predictableRand randg;
-    
+
     int tem = getTemperatureF(x,y);
     int hu  = getHumidityF(x,y);
-    
+
     getGenList(x,y,tem,hu,getRealHight(x*32,y*32),pl);
-    
+
     randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
 
     flatCells.clear();
@@ -49,7 +49,7 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
             }
         }
     }
-    
+
     for(auto it:pl){
         int delta=it.prob*1000;
         int num = it.num;
@@ -331,7 +331,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
     auto it = config.find(id);
     if(it==config.end())
         return NULL;
-    
+
     auto res = new item;
     res->id.cx=floor(x/32.f);
     res->id.cy=floor(y/32.f);
@@ -373,17 +373,17 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
         res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());//创建状态
         res->rigidBody=createBody(it->second->shape.compound,res->bodyState);//创建物体
         res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);//设置碰撞模式
-        
+
         res->info.type=BODY_TERRAIN_ITEM;//设置用户数据，指向mapId
         res->info.ptr=&res->id;
         res->rigidBody->setUserPointer(&(res->info));
-        
+
         dynamicsWorld->addRigidBody(res->rigidBody);//添加物体
     }else{
         res->bodyState=NULL;
         res->rigidBody=NULL;
     }
-    
+
     return res;
 }
 
@@ -671,7 +671,7 @@ void terrain_item::loadConfig(){
         return;
     }
     text=(char*)malloc(lSize+1);// 用完后需要将内存free掉
-    rewind(pf); 
+    rewind(pf);
     fread(text,sizeof(char),lSize,pf);
     text[lSize] = '\0';
     fclose(pf);
@@ -699,9 +699,9 @@ void terrain_item::loadJSON(cJSON * json){
             return;
     }else
         return;
-    
+
     auto path = cJSON_GetObjectItem(json,"mesh");
-    
+
     irr::scene::IMesh * mesh;
     if(path && path->type==cJSON_String){
         mesh = scene->getMesh(path->valuestring);
@@ -709,7 +709,7 @@ void terrain_item::loadJSON(cJSON * json){
             return;
     }else
         return;
-    
+
     auto c          = new conf;
     c->haveBody     = false;
     c->deltaHeight  = 0;
@@ -742,30 +742,30 @@ void terrain_item::loadJSON(cJSON * json){
             }
         }
     }
-    
+
     auto body = cJSON_GetObjectItem(json,"body");
     if(body && body->type==cJSON_String){
         c->haveBody = true;
         c->shape.init(body->valuestring);
     }
-    
+
     auto deltaHeight = cJSON_GetObjectItem(json,"deltaHeight");
     if(deltaHeight && deltaHeight->type==cJSON_Number){
         c->deltaHeight = deltaHeight->valuedouble;
     }
-    
+
     auto scale = cJSON_GetObjectItem(json,"scale");
     if(scale && scale->type==cJSON_Object){
-        
+
         auto sx = cJSON_GetObjectItem(scale , "x");
         if(sx && sx->type==cJSON_Number)c->scale.X = sx->valuedouble;
-        
+
         auto sy = cJSON_GetObjectItem(scale , "y");
         if(sy && sy->type==cJSON_Number)c->scale.Y = sy->valuedouble;
-        
+
         auto sz = cJSON_GetObjectItem(scale , "z");
         if(sz && sz->type==cJSON_Number)c->scale.Z = sz->valuedouble;
-        
+
     }
 
     auto ft = cJSON_GetObjectItem(json,"flat");
@@ -784,7 +784,7 @@ void terrain_item::loadJSON(cJSON * json){
                         ps->valuestring, "main", irr::video::EPST_PS_1_1,&defaultCallback);
         }
     }
-    
+
     config[id->valueint] = c;
 }
 void terrain_item::releaseConfig(){

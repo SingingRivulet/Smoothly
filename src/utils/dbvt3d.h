@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
+#include <functional>
+
 namespace smoothly{
     class dbvt3d{
         public:
@@ -21,6 +23,8 @@ namespace smoothly{
                     dbvt3d * box;
                     
                     vec3 from,to;
+
+                    int id;
                     
                     void * data;
                     
@@ -209,10 +213,19 @@ namespace smoothly{
             ){
                 root->fetchByPoint(point,callback,arg);
             }
+            inline void makeID(){
+                tmpid = 0;
+                if(root)
+                    makeID(root);
+            }
+            std::function<void(AABB*)> onMakeID;
             dbvt3d();
             ~dbvt3d();
             
         private:
+
+            int tmpid;
+            void makeID(AABB * p);
             
             void poolInit();
             void poolDestroy();
