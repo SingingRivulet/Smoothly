@@ -34,6 +34,8 @@ namespace smoothly{
             irr::scene::ISceneCollisionManager * collisionManager;
             irr::core::stringc          vendor;
 
+            irr::s32 shadowMapSize;
+
             irr::core::vector2di screenCenter;
 
             btDiscreteDynamicsWorld   * dynamicsWorld;
@@ -149,6 +151,9 @@ namespace smoothly{
             virtual void renderSky()=0;
             virtual void renderShadow()=0;
             virtual void renderMiniMap()=0;
+
+        private:
+            void loadConfig();
 
     };
 }

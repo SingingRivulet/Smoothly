@@ -1,4 +1,5 @@
 #include "engine.h"
+#include <sstream>
 namespace smoothly{
 engine::engine(){
     deltaTimeUpdateFirst    = true;
@@ -9,6 +10,9 @@ engine::engine(){
     lastFPS                 = 0;
     width                   = 1024;
     height                  = 768;
+    shadowMapSize           = 2048;
+
+    loadConfig();
 
     //device = irr::createDevice(
     //            irr::video::EDT_OPENGL,
@@ -369,6 +373,24 @@ void engine::updateListener(){
         }
         return false;
     });
+}
+
+void engine::loadConfig(){
+    auto fp = fopen("../config/game.txt","r");
+    if(fp){
+        char buf[1024];
+        while (!feof(fp)) {
+            bzero(buf,sizeof(buf));
+            fgets(buf,sizeof(buf),fp);
+            std::istringstream iss(buf);
+            std::string key;
+            iss>>key;
+            if(key=="shadowMapSize"){
+                iss>>shadowMapSize;
+            }
+        }
+        fclose(fp);
+    }
 }
 
 void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
