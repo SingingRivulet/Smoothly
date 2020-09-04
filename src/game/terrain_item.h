@@ -94,8 +94,8 @@ namespace smoothly{
             void loadConfig();
             void loadJSON(cJSON * json);
             void releaseConfig();
-            irr::scene::ISceneNode * genTree(int seed, scene::SMesh *& shadowMesh, btTriangleMesh *& bodyMesh);
-            irr::scene::ISceneNode * genGrass(int seed, int & lodLevel);
+            irr::scene::ISceneNode * genTree(int seed, scene::SMesh *& shadowMesh1,scene::SMesh *& shadowMesh2, btTriangleMesh *& bodyMesh);
+            irr::scene::ISceneNode * genGrass(int seed, int & lodLevel,irr::video::ITexture *& tex);
             void genGrassMesh();
 
             irr::video::ITexture * texture_treeTrunk,* texture_treeLeaves;

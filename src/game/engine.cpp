@@ -379,8 +379,8 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     auto cam = parent->camera->getPosition();
     services->setPixelShaderConstant("tex",&var0, 1);
     services->setPixelShaderConstant("depth",&var1, 1);
-    services->setPixelShaderConstant("material",&var2, 1);
-    services->setPixelShaderConstant("normal",&var3, 1);
+    services->setPixelShaderConstant("materialMap",&var2, 1);
+    services->setPixelShaderConstant("normalMap",&var3, 1);
     services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
     services->setPixelShaderConstant("camera",&cam.X, 3);
 

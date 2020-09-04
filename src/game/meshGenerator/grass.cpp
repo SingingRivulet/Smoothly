@@ -3,7 +3,7 @@
 
 namespace smoothly{
 
-irr::scene::ISceneNode * terrain_item::genGrass(int seed,int & lodLevel){
+irr::scene::ISceneNode * terrain_item::genGrass(int seed, int & lodLevel, video::ITexture *& tex){
     world::terrain::predictableRand randg;
     randg.setSeed(seed);
 
@@ -14,6 +14,7 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed,int & lodLevel){
     res->setMaterialType((irr::video::E_MATERIAL_TYPE)shader_tree);
 
     int r = randg.rand()%texture_grass.size();
+    tex = texture_grass[r];
     res->setMaterialTexture(0,texture_grass[r]);
     res->setMaterialTexture(1,shadowMapTexture);
     res->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;

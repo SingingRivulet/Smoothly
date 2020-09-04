@@ -284,8 +284,8 @@ class leavesBuffer{//树叶buffer
         irr::scene::SMeshBuffer *   buffer;
 };
 
-irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& shadowMesh, btTriangleMesh *&bodyMesh){
-    meshGenerator m(4);
+irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& shadowMesh1, scene::SMesh *& shadowMesh2, btTriangleMesh *&bodyMesh){
+    meshGenerator m(3);
     leavesBuffer   g;
     world::terrain::predictableRand randg;
     randg.setSeed(seed);
@@ -316,7 +316,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
     if(!oris.empty())
         oris.pop_back();
     for(auto it:oris){
-        m.setSteps(3);
+        m.setSteps(2);
         oris_child.clear();
         auto rotation = vec3(90+(randg.frand()-0.5)*30,randg.frand()*360,0);
         m.transform.setRotationDegrees(rotation);
@@ -367,7 +367,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
     trunk->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     trunk->getMaterial(0).BackfaceCulling=false;
     bodyMesh = createBtMesh(trunk_mesh);
-    shadowMesh = trunk_mesh;
+    shadowMesh1 = trunk_mesh;
     //trunk_mesh->drop();
     //trunk_mesh要返回出去作为光影，所以不能drop
 
@@ -389,7 +389,8 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
     leaves->setMaterialTexture(1,shadowMapTexture);
     leaves->getMaterial(0).BlendOperation=irr::video::EBO_NONE;
     leaves->getMaterial(0).BackfaceCulling = false;
-    leaves_mesh->drop();
+    //leaves_mesh->drop();
+    shadowMesh2 = leaves_mesh;
 
     return res;
 }

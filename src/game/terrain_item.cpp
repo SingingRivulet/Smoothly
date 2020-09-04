@@ -283,8 +283,8 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.id.id=id;
             res->id.id.index=index;
             btTriangleMesh * mesh;
-            irr::scene::SMesh * shadowMesh;
-            res->node[0]=genTree(x * y + index + id, shadowMesh , mesh);
+            irr::scene::SMesh * shadowMesh1,* shadowMesh2;
+            res->node[0]=genTree(x * y + index + id, shadowMesh1 , shadowMesh2 , mesh);
             res->bodyMesh = mesh;
             res->bodyShape = createShape(mesh);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
@@ -293,8 +293,10 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->node[0]->setPosition(pos);
             res->node[0]->updateAbsolutePosition();//更新矩阵
 
-            res->shadowNode = shadowSpace->addMeshSceneNode(shadowMesh,0,-1,pos);
-            shadowMesh->drop();
+            res->shadowNode = createShadowNode(shadowMesh1,0,-1,pos);
+            shadowMesh1->drop();
+            createShadowNode(shadowMesh2,res->shadowNode)->setMaterialTexture(0,texture_treeLeaves);
+            shadowMesh2->drop();
 
             res->bodyState=setMotionState(res->node[0]->getAbsoluteTransformation().pointer());
             res->rigidBody =createBody(res->bodyShape,res->bodyState);
@@ -319,11 +321,15 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.y =y;
             res->id.id.id=id;
             res->id.id.index=index;
-            res->node[0]=genGrass(x * y + index + id,res->hideLodLevel);
+            irr::video::ITexture * tex;
+            res->node[0]=genGrass(x * y + index + id,res->hideLodLevel , tex);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-            res->node[0]->setPosition(vec3(x,realHeight,y));
+            vec3 pos(x,realHeight,y);
+            res->node[0]->setPosition(pos);
             res->node[0]->updateAbsolutePosition();//更新矩阵
+            res->shadowNode = createShadowNode(mesh_grass,0,-1,pos);
+            res->shadowNode->setMaterialTexture(0,tex);
             return res;
         }
         return NULL;

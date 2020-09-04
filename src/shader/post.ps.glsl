@@ -1,8 +1,11 @@
 varying vec2 position;
+varying vec2 viewPos;
 uniform sampler2D tex;
 uniform sampler2D depth;
+uniform sampler2D normalMap;
 uniform vec3 camera;
 uniform float waterLevel;
+
 void main(){
     
     vec3 bloom = vec3(0.0);
