@@ -167,11 +167,13 @@ engine::engine(){
     post_mat = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "mat", video::ECF_A8R8G8B8);
     post_normal = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "normal", video::ECF_A8R8G8B8);
     post_depth = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "DepthStencil", video::ECF_D32);
+    post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
     post = driver->addRenderTarget();
     core::array<video::ITexture*> textureArray(3);
     textureArray.push_back(post_tex);
     textureArray.push_back(post_mat);
     textureArray.push_back(post_normal);
+    textureArray.push_back(post_posi);
     post->setTexture(textureArray, post_depth);
 
     water->renderTarget = post;
@@ -179,6 +181,7 @@ engine::engine(){
     postMaterial.setTexture(1,post_depth);
     postMaterial.setTexture(2,post_mat);
     postMaterial.setTexture(3,post_normal);
+    postMaterial.setTexture(4,post_posi);
     postShaderCallback.parent = this;
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
@@ -226,6 +229,7 @@ void engine::sceneLoop(){
     scene->drawAll();
     driver->setRenderTarget(0);
     driver->setMaterial(postMaterial);
+    lightManager.updateLight(cm,driver);
     driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
                                                   irr::core::vector3df(-1,-1,1),
                                                   irr::core::vector3df(-1, 1,1)),
@@ -398,13 +402,16 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     s32 var1 = 1;
     s32 var2 = 2;
     s32 var3 = 3;
+    s32 var4 = 4;
     auto cam = parent->camera->getPosition();
     services->setPixelShaderConstant("tex",&var0, 1);
     services->setPixelShaderConstant("depth",&var1, 1);
     services->setPixelShaderConstant("materialMap",&var2, 1);
     services->setPixelShaderConstant("normalMap",&var3, 1);
+    services->setPixelShaderConstant("posMap",&var4, 1);
     services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
     services->setPixelShaderConstant("camera",&cam.X, 3);
+    services->setPixelShaderConstant("nearLightNum",&parent->lightManager.nearLightNum, 1);
 
     auto vmat = parent->camera->getViewMatrix();
     services->setPixelShaderConstant("ViewMatrix" , vmat.pointer(), 16);

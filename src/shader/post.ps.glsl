@@ -5,6 +5,7 @@ uniform sampler2D depth;
 uniform sampler2D normalMap;
 uniform vec3 camera;
 uniform float waterLevel;
+uniform int nearLightNum;
 
 void main(){
     

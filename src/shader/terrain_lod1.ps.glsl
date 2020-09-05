@@ -228,5 +228,6 @@ void main(){
     scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
 
     gl_FragData[0] = scolor;
+    gl_FragData[3] = vec4(pointPosition,1.0);
 
 }

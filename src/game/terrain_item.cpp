@@ -307,6 +307,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->info.ptr=&res->id;
             res->rigidBody->setUserPointer(&(res->info));
             dynamicsWorld->addRigidBody(res->rigidBody);
+            lightManager.addLight(pos,32);
             res->hideLodLevel=4;
             return res;
         }else if(id==-2){//草

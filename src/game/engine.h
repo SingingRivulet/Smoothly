@@ -7,6 +7,7 @@
 #include <vector>
 #include <AL/alut.h>
 #include "graphbase.h"
+#include "localLight.h"
 
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
@@ -37,6 +38,8 @@ namespace smoothly{
             irr::s32 shadowMapSize;
 
             irr::core::vector2di screenCenter;
+
+            localLight lightManager;
 
             btDiscreteDynamicsWorld   * dynamicsWorld;
             btDefaultCollisionConfiguration* collisionConfiguration;
@@ -130,7 +133,7 @@ namespace smoothly{
             irr::f32 scan_animation_size;
 
         public:
-            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal;
+            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_posi;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
