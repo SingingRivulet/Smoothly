@@ -1,1 +1,1 @@
-shadowMapSize 2048
+shadowMapSize 1024

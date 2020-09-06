@@ -240,7 +240,7 @@ void engine::sceneLoop(){
 
     driver->setRenderTarget(post_tex,false,false);
     driver->setMaterial(lightMaterial);
-    lightManager.updateLight(cm,[&](localLight::lightSource * sour){
+    lightManager.updateLight(camera,[&](localLight::lightSource * sour){
         postShaderCallback.lightColor.X = sour->color.r;
         postShaderCallback.lightColor.Y = sour->color.g;
         postShaderCallback.lightColor.Z = sour->color.b;
@@ -253,6 +253,20 @@ void engine::sceneLoop(){
         driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
                                                       irr::core::vector3df(-1,-1,1),
                                                       irr::core::vector3df( 1, 1,1)),
+                               irr::video::SColor(0,0,0,0));
+    },[&](irr::f32 x1,irr::f32 y1,irr::f32 x2,irr::f32 y2,localLight::lightSource * sour){
+        postShaderCallback.lightColor.X = sour->color.r;
+        postShaderCallback.lightColor.Y = sour->color.g;
+        postShaderCallback.lightColor.Z = sour->color.b;
+        postShaderCallback.lightPos = sour->position;
+        postShaderCallback.lightRange = sour->range;
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(x2,y2,1),
+                                                      irr::core::vector3df(x1,y1,1),
+                                                      irr::core::vector3df(x1,y2,1)),
+                               irr::video::SColor(0,0,0,0));
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df(x2,y1,1),
+                                                      irr::core::vector3df(x1,y1,1),
+                                                      irr::core::vector3df(x2,y2,1)),
                                irr::video::SColor(0,0,0,0));
     });
 

@@ -17,6 +17,8 @@ void main(){
     float length = length(pos - lightPos);
     if(length<lightRange){
         color += texture2D( materialMap , position)*max(1.0-(length/lightRange) , 0.0);
+        gl_FragColor = color;
+    }else{
+        discard;
     }
-    gl_FragColor = color;
 }
