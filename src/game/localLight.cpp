@@ -93,15 +93,12 @@ bool localLight::getRadiusInScreen(const irr::scene::ICameraSceneNode * camera, 
 void localLight::getLightArea(const irr::core::vector3df & pos3d, const irr::scene::ICameraSceneNode * camera,irr::f32 r, std::function<void (irr::f32, irr::f32, irr::f32, irr::f32)> callback){
     irr::f32 x , y , scr , x1 , x2 , y1 , y2;
     if(getRadiusInScreen(camera,pos3d,r,x,y,scr)){
-        x1 = x-scr;
-        x2 = x+scr;
-        y1 = y-scr;
-        y2 = y+scr;
-        if((x1<-1.0 || x1>1.0) &&
-           (y1<-1.0 || y1>1.0) &&
-           (x2<-1.0 || x2>1.0) &&
-           (y2<-1.0 || y2>1.0))//超出范围
-            return;
+        auto driver = camera->getSceneManager()->getVideoDriver();
+        auto d = ((float)driver->getViewPort().getWidth())/((float)driver->getViewPort().getHeight());
+        x1 = x-scr*1.2;
+        x2 = x+scr*1.2;
+        y1 = y-scr*d;
+        y2 = y+scr*d;
 
         if(x1<-1.0)
             x1 = -1.0;
@@ -112,6 +109,9 @@ void localLight::getLightArea(const irr::core::vector3df & pos3d, const irr::sce
             x2 = 1.0;
         if(y2>1.0)
             y2 = 1.0;
+
+        if(x1==x2 || y1==y2)//超出范围
+            return;
 
         callback(x1,y1,x2,y2);
     }
