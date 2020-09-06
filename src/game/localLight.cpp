@@ -21,31 +21,20 @@ void localLight::releaseLight(localLight::lightSource * light){
     delete light;
 }
 
-void localLight::updateLight(const irr::core::vector3df & cam, irr::video::IVideoDriver * driver){
+void localLight::updateLight(const irr::core::vector3df & cam, std::function<void(localLight::lightSource*)> callback){
     struct arg_t{
             localLight * self;
-            irr::video::IVideoDriver * driver;
-            int index;
+            std::function<void(localLight::lightSource*)> callback;
     }arg;
-    arg.index = 0;
     arg.self = this;
-    arg.driver = driver;
-    driver->deleteAllDynamicLights();
+    arg.callback = callback;
     lightMap.fetchByPoint(cam,[](dbvt3d::AABB * box,void * a){
         auto arg = (arg_t*)a;
         if(box->data){
             auto s = (localLight::lightSource*)box->data;
-            if(arg->index < 8){
-                irr::video::SLight light;
-                light.DiffuseColor = s->color;
-                light.Falloff = 1.0/s->range;
-                light.Position = s->position;
-                arg->driver->addDynamicLight(light);
-                ++(arg->index);
-            }
+            arg->callback(s);
         }
     },&arg);
-    nearLightNum = arg.index;
 }
 
 }

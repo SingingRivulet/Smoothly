@@ -136,10 +136,14 @@ namespace smoothly{
             irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_posi;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;
+            irr::video::SMaterial lightMaterial;
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;
                     void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
+                    irr::core::vector3df lightPos;
+                    irr::core::vector3df lightColor;
+                    irr::f32 lightRange;
             }postShaderCallback;
 
         private:

@@ -60,4 +60,5 @@ void main(){
     
     gl_FragData[0] = color;
     gl_FragData[0].a =1.0;
+    gl_FragData[3] = vec4(pointPosition.xyz/pointPosition.w,1.0);
 }

@@ -18,8 +18,7 @@ class localLight{
         lightSource * addLight(const irr::core::vector3df & position,irr::f32 range,const irr::video::SColorf & color = irr::video::SColorf(1.0,1.0,1.0,1.0));
         void releaseLight(lightSource * light);
 
-        void updateLight(const irr::core::vector3df & cam,irr::video::IVideoDriver * driver);
-        irr::s32 nearLightNum;
+        void updateLight(const irr::core::vector3df & cam, std::function<void(localLight::lightSource*)> callback);
 };
 
 }

@@ -186,7 +186,17 @@ engine::engine(){
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
-                                    &postShaderCallback);;
+                                    &postShaderCallback);
+    lightMaterial.setTexture(0,post_tex);
+    lightMaterial.setTexture(1,post_depth);
+    lightMaterial.setTexture(2,post_mat);
+    lightMaterial.setTexture(3,post_normal);
+    lightMaterial.setTexture(4,post_posi);
+    lightMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/light.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/light.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+    lightMaterial.ZBuffer = video::ECFN_DISABLED;
 }
 engine::~engine(){
     ttf->drop();
@@ -227,9 +237,27 @@ void engine::sceneLoop(){
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     driver->setRenderTargetEx(post,video::ECBF_COLOR | video::ECBF_DEPTH);
     scene->drawAll();
+
+    driver->setRenderTarget(post_tex,false,false);
+    driver->setMaterial(lightMaterial);
+    lightManager.updateLight(cm,[&](localLight::lightSource * sour){
+        postShaderCallback.lightColor.X = sour->color.r;
+        postShaderCallback.lightColor.Y = sour->color.g;
+        postShaderCallback.lightColor.Z = sour->color.b;
+        postShaderCallback.lightPos = sour->position;
+        postShaderCallback.lightRange = sour->range;
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
+                                                      irr::core::vector3df(-1,-1,1),
+                                                      irr::core::vector3df(-1, 1,1)),
+                               irr::video::SColor(0,0,0,0));
+        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
+                                                      irr::core::vector3df(-1,-1,1),
+                                                      irr::core::vector3df( 1, 1,1)),
+                               irr::video::SColor(0,0,0,0));
+    });
+
     driver->setRenderTarget(0);
     driver->setMaterial(postMaterial);
-    lightManager.updateLight(cm,driver);
     driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
                                                   irr::core::vector3df(-1,-1,1),
                                                   irr::core::vector3df(-1, 1,1)),
@@ -411,7 +439,9 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     services->setPixelShaderConstant("posMap",&var4, 1);
     services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
     services->setPixelShaderConstant("camera",&cam.X, 3);
-    services->setPixelShaderConstant("nearLightNum",&parent->lightManager.nearLightNum, 1);
+    services->setPixelShaderConstant("lightColor",&lightColor.X, 3);
+    services->setPixelShaderConstant("lightPos",&lightPos.X, 3);
+    services->setPixelShaderConstant("lightRange",&lightRange, 1);
 
     auto vmat = parent->camera->getViewMatrix();
     services->setPixelShaderConstant("ViewMatrix" , vmat.pointer(), 16);
