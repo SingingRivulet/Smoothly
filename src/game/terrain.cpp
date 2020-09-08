@@ -339,25 +339,25 @@ int terrain::getCollHeight(int x, int y){
 
 void terrain::TerrainShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
 
-    services->setPixelShaderConstant("clipY",&parent->clipY, 1);
-    services->setPixelShaderConstant("clipYUp",&parent->clipYUp, 1);
-    services->setPixelShaderConstant("enableClipY",&parent->enableClipY, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("clipY"),&parent->clipY, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("clipYUp"),&parent->clipYUp, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("enableClipY"),&parent->enableClipY, 1);
 
     s32 var0 = 0;
 
     irr::f32 sas = parent->scan_animation_showing;
-    services->setPixelShaderConstant("scan_animation_showing",&sas, 1);
-    services->setPixelShaderConstant("scan_animation_size",&parent->scan_animation_size, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("scan_animation_showing"),&sas, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("scan_animation_size"),&parent->scan_animation_size, 1);
 
     auto campos = parent->camera->getPosition();
-    services->setPixelShaderConstant("campos",&campos.X, 3);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("campos"),&campos.X, 3);
 
-    services->setPixelShaderConstant("shadowMap",&var0, 1);
-    services->setPixelShaderConstant("shadowFactor",&parent->shadowFactor, 1);
-    services->setVertexShaderConstant("shadowMatrix" , parent->shadowMatrix.pointer() , 16);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var0, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowFactor"),&parent->shadowFactor, 1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("shadowMatrix") , parent->shadowMatrix.pointer() , 16);
     core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
-    services->setVertexShaderConstant("modelMatrix" , world.pointer() , 16);
-    services->setVertexShaderConstant("transformMatrix" , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("modelMatrix") , world.pointer() , 16);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("transformMatrix") , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
 }
 
 }

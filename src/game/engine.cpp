@@ -177,26 +177,35 @@ engine::engine(){
     post->setTexture(textureArray, post_depth);
 
     water->renderTarget = post;
-    postMaterial.setTexture(0,post_tex);
-    postMaterial.setTexture(1,post_depth);
-    postMaterial.setTexture(2,post_mat);
-    postMaterial.setTexture(3,post_normal);
-    postMaterial.setTexture(4,post_posi);
+
     postShaderCallback.parent = this;
+
+#define initPostMat(p) \
+    p.setTexture(0,post_tex);\
+    p.setTexture(1,post_depth);\
+    p.setTexture(2,post_mat);\
+    p.setTexture(3,post_normal);\
+    p.setTexture(4,post_posi);\
+
+    initPostMat(postMaterial);
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
-    lightMaterial.setTexture(0,post_tex);
-    lightMaterial.setTexture(1,post_depth);
-    lightMaterial.setTexture(2,post_mat);
-    lightMaterial.setTexture(3,post_normal);
-    lightMaterial.setTexture(4,post_posi);
+
+    initPostMat(lightMaterial);
     lightMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/light.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/light.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
     lightMaterial.ZBuffer = video::ECFN_DISABLED;
+
+    initPostMat(fogMaterial);
+    fogMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/fog.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/fog.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+
 }
 engine::~engine(){
     ttf->drop();
@@ -234,26 +243,32 @@ void engine::sceneLoop(){
     renderMiniMap();
     updateListener();
 
+    //前向渲染
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     driver->setRenderTargetEx(post,video::ECBF_COLOR | video::ECBF_DEPTH);
     scene->drawAll();
 
+#define drawScreen \
+    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),\
+                                                  irr::core::vector3df(-1,-1,1),\
+                                                  irr::core::vector3df(-1, 1,1)),\
+                           irr::video::SColor(0,0,0,0));\
+    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),\
+                                                  irr::core::vector3df(-1,-1,1),\
+                                                  irr::core::vector3df( 1, 1,1)),\
+                           irr::video::SColor(0,0,0,0));
+
+    //后期：光照
     driver->setRenderTarget(post_tex,false,false);
     driver->setMaterial(lightMaterial);
+    postShaderCallback.lightMode = true;
     lightManager.updateLight(camera,[&](localLight::lightSource * sour){
         postShaderCallback.lightColor.X = sour->color.r;
         postShaderCallback.lightColor.Y = sour->color.g;
         postShaderCallback.lightColor.Z = sour->color.b;
         postShaderCallback.lightPos = sour->position;
         postShaderCallback.lightRange = sour->range;
-        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
-                                                      irr::core::vector3df(-1,-1,1),
-                                                      irr::core::vector3df(-1, 1,1)),
-                               irr::video::SColor(0,0,0,0));
-        driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
-                                                      irr::core::vector3df(-1,-1,1),
-                                                      irr::core::vector3df( 1, 1,1)),
-                               irr::video::SColor(0,0,0,0));
+        drawScreen;
     },[&](irr::f32 x1,irr::f32 y1,irr::f32 x2,irr::f32 y2,localLight::lightSource * sour){
         postShaderCallback.lightColor.X = sour->color.r;
         postShaderCallback.lightColor.Y = sour->color.g;
@@ -269,23 +284,18 @@ void engine::sceneLoop(){
                                                       irr::core::vector3df(x2,y2,1)),
                                irr::video::SColor(0,0,0,0));
     });
+    postShaderCallback.lightMode = false;
 
+    //后期：体积雾
+    driver->setMaterial(fogMaterial);
+    drawScreen;
+
+    //最终后期处理
     driver->setRenderTarget(0);
     driver->setMaterial(postMaterial);
-    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),
-                                                  irr::core::vector3df(-1,-1,1),
-                                                  irr::core::vector3df(-1, 1,1)),
-                           irr::video::SColor(0,0,0,0));
-    driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1,-1,1),
-                                                  irr::core::vector3df(-1,-1,1),
-                                                  irr::core::vector3df( 1, 1,1)),
-                           irr::video::SColor(0,0,0,0));
-    //driver->draw2DImage(post_tex,core::vector2di(0,0));
-    //scene->drawAll();
-    //if(cm.Y<waterLevel){//水下效果
-    //    driver->draw2DRectangle(irr::video::SColor(128,128,128,255),irr::core::rect<irr::s32>(0,0,width,height));
-    //}
+    drawScreen;
 
+    //渲染gui
     onDraw();
     gui->drawAll();
 
@@ -446,22 +456,26 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     s32 var3 = 3;
     s32 var4 = 4;
     auto cam = parent->camera->getPosition();
-    services->setPixelShaderConstant("tex",&var0, 1);
-    services->setPixelShaderConstant("depth",&var1, 1);
-    services->setPixelShaderConstant("materialMap",&var2, 1);
-    services->setPixelShaderConstant("normalMap",&var3, 1);
-    services->setPixelShaderConstant("posMap",&var4, 1);
-    services->setPixelShaderConstant("waterLevel",&parent->waterLevel, 1);
-    services->setPixelShaderConstant("camera",&cam.X, 3);
-    services->setPixelShaderConstant("lightColor",&lightColor.X, 3);
-    services->setPixelShaderConstant("lightPos",&lightPos.X, 3);
-    services->setPixelShaderConstant("lightRange",&lightRange, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("tex"),&var0, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("depth"),&var1, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("materialMap"),&var2, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("normalMap"),&var3, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("posMap"),&var4, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("waterLevel"),&parent->waterLevel, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("camera"),&cam.X, 3);
+    if(lightMode){
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("lightColor"),&lightColor.X, 3);
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("lightPos"),&lightPos.X, 3);
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("lightRange"),&lightRange, 1);
+    }
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("windowHeight"),&parent->height, 1);
 
     auto vmat = parent->camera->getViewMatrix();
-    services->setPixelShaderConstant("ViewMatrix" , vmat.pointer(), 16);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("ViewMatrix") , vmat.pointer(), 16);
     irr::core::matrix4 vmati;
     vmat.getInverse(vmati);
-    services->setPixelShaderConstant("ViewMatrixInv" , vmati.pointer(), 16);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("ViewMatrixInv") , vmati.pointer(), 16);
 
 }
 

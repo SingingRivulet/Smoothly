@@ -216,7 +216,7 @@ void RealisticWaterSceneNode::OnSetConstants(video::IMaterialRendererServices* s
 	core::matrix4 cameraView = _camera->getViewMatrix();
 
 	//vertex shader constants
-	//services->setVertexShaderConstant("View", view.pointer(), 16);
+	//services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), view.pointer(), 16);
 	
 	core::matrix4 worldViewProj = projection;			
 	worldViewProj *= view;
@@ -252,16 +252,16 @@ void RealisticWaterSceneNode::OnSetConstants(video::IMaterialRendererServices* s
 	services->setPixelShaderConstant(services->getVertexShaderConstantID("WaterColor"), &_waterColor.r, 4);
 	services->setPixelShaderConstant(services->getVertexShaderConstantID("ColorBlendFactor"), &_colorBlendFactor, 1);
 #else
-	services->setVertexShaderConstant("WorldViewProj", worldViewProj.pointer(), 16);
-	services->setVertexShaderConstant("WorldReflectionViewProj", worldReflectionViewProj.pointer(), 16);
-	services->setVertexShaderConstant("WaveLength", &waveLength, 1);
-	services->setVertexShaderConstant("Time", &time, 1);
-	services->setVertexShaderConstant("WindForce", &_windForce, 1);
-	services->setVertexShaderConstant("WindDirection", &_windDirection.X, 2);
-	services->setPixelShaderConstant("CameraPosition", &cameraPosition.X, 3);
-	services->setPixelShaderConstant("WaveHeight", &_waveHeight, 1);
-	services->setPixelShaderConstant("WaterColor", &_waterColor.r, 4);
-	services->setPixelShaderConstant("ColorBlendFactor", &_colorBlendFactor, 1);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), worldViewProj.pointer(), 16);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), worldReflectionViewProj.pointer(), 16);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), &waveLength, 1);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), &time, 1);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), &_windForce, 1);
+	services->setVertexShaderConstant(services->getVertexShaderConstantID("$1"), &_windDirection.X, 2);
+	services->setPixelShaderConstant(services->getPixelShaderConstantID("CameraPosition", &cameraPosition.X, 3);
+	services->setPixelShaderConstant(services->getPixelShaderConstantID("WaveHeight", &_waveHeight, 1);
+	services->setPixelShaderConstant(services->getPixelShaderConstantID("WaterColor", &_waterColor.r, 4);
+	services->setPixelShaderConstant(services->getPixelShaderConstantID("ColorBlendFactor", &_colorBlendFactor, 1);
 #endif
 	
 	//texture constants for GLSL
@@ -279,12 +279,12 @@ void RealisticWaterSceneNode::OnSetConstants(video::IMaterialRendererServices* s
 		services->setPixelShaderConstant(services->getVertexShaderConstantID("FogEnabled"), (int*)&fogEnabled, 1);
 		services->setPixelShaderConstant(services->getVertexShaderConstantID("FogMode"), (int*)&fogType, 1);
 #else
-		services->setPixelShaderConstant("WaterBump", &var0, 1);
-		services->setPixelShaderConstant("RefractionMap", &var1, 1);
-		services->setPixelShaderConstant("ReflectionMap", &var2, 1);
+		services->setPixelShaderConstant(services->getPixelShaderConstantID("WaterBump", &var0, 1);
+		services->setPixelShaderConstant(services->getPixelShaderConstantID("RefractionMap", &var1, 1);
+		services->setPixelShaderConstant(services->getPixelShaderConstantID("ReflectionMap", &var2, 1);
 		
-		services->setPixelShaderConstant("FogEnabled", (int*)&fogEnabled, 1);
-		services->setPixelShaderConstant("FogMode", (int*)&fogType, 1);
+		services->setPixelShaderConstant(services->getPixelShaderConstantID("FogEnabled", (int*)&fogEnabled, 1);
+		services->setPixelShaderConstant(services->getPixelShaderConstantID("FogMode", (int*)&fogType, 1);
 #endif
 	}
 }

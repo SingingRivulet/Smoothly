@@ -34,7 +34,7 @@ class cloud:public carto{
             void(*callback[81])(skyBox *);
             int count;
             bool first;
-            void init(const std::string &name, irr::s32 cloud);
+            void init(const std::string &name, irr::s32 cloud, video::ITexture * sky_cubemap);
             bool process();
         };
         skyBox * sky_p , * sky_pb;

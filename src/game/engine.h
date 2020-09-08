@@ -62,7 +62,7 @@ namespace smoothly{
 
             irr::f32 waterLevel;
 
-            int width,height;
+            irr::s32 width,height;
 
             bool running;
 
@@ -135,8 +135,9 @@ namespace smoothly{
         public:
             irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_posi;
             irr::video::IRenderTarget * post;//后期
-            irr::video::SMaterial postMaterial;
-            irr::video::SMaterial lightMaterial;
+            irr::video::SMaterial postMaterial;//最终后期
+            irr::video::SMaterial lightMaterial;//延迟光照
+            irr::video::SMaterial fogMaterial;//体积雾
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;
@@ -144,6 +145,7 @@ namespace smoothly{
                     irr::core::vector3df lightPos;
                     irr::core::vector3df lightColor;
                     irr::f32 lightRange;
+                    bool lightMode;
             }postShaderCallback;
 
         private:

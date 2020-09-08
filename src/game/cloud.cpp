@@ -20,12 +20,28 @@ cloud::cloud(){
                     "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
                     "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1,
                 &cloudShaderCallback);
+
+    auto posx = driver->createImageFromFile("../../res/sky/posx.jpg");
+    auto negx = driver->createImageFromFile("../../res/sky/negx.jpg");
+    auto posy = driver->createImageFromFile("../../res/sky/posy.jpg");
+    auto negy = driver->createImageFromFile("../../res/sky/negy.jpg");
+    auto posz = driver->createImageFromFile("../../res/sky/posz.jpg");
+    auto negz = driver->createImageFromFile("../../res/sky/negz.jpg");
+    auto cubemap_sky = driver->addTextureCubemap("cubemap_sky",//天空背景
+                                            posx,negx,posy,negy,posz,negz);
+    if(posx)posx->drop();
+    if(negx)negx->drop();
+    if(posy)posy->drop();
+    if(negy)negy->drop();
+    if(posz)posz->drop();
+    if(negz)negz->drop();
+
     sky_1.driver = driver;
     sky_1.scene  = scene;
-    sky_1.init("sky1",cloudShader);
+    sky_1.init("sky1",cloudShader,cubemap_sky);
     sky_2.driver = driver;
     sky_2.scene  = scene;
-    sky_2.init("sky2",cloudShader);
+    sky_2.init("sky2",cloudShader,cubemap_sky);
     sky_2.box->setVisible(false);
     sky_p  = &sky_1;
     sky_pb = &sky_2;
@@ -133,8 +149,9 @@ void cloud::renderSky(){
     cloudy_text->setOverrideFont(font);
 }
 
-void cloud::skyBox::init(const std::string & name, irr::s32 cloud){
+void cloud::skyBox::init(const std::string & name, irr::s32 cloud,irr::video::ITexture * sky_cubemap){
     cloudMaterial.MaterialType = (irr::video::E_MATERIAL_TYPE)cloud;
+    cloudMaterial.setTexture(0,sky_cubemap);
 
     //创建天空的渲染目标
     cloudTop   = driver->addRenderTargetTexture(core::dimension2d<u32>(512, 512), (name+"cloudTop").c_str(), video::ECF_A8R8G8B8);
@@ -326,15 +343,18 @@ bool cloud::skyBox::process(){
 }
 
 void cloud::CloudShaderCallback::OnSetConstants(irr::video::IMaterialRendererServices *services, irr::s32){
-    services->setVertexShaderConstant("time",&parent->cloudTime,1);
-    services->setVertexShaderConstant("cloudThre",&parent->cloudThre,1);
-    services->setVertexShaderConstant("cloudy",&parent->cloudy,1);
-    services->setVertexShaderConstant("lightness",&parent->lightness,1);
-    services->setVertexShaderConstant("astrAtomScat",&parent->astrAtomScat,1);
-    services->setVertexShaderConstant("astrViewTheta",&parent->astrTheta,1);
-    services->setVertexShaderConstant("astronomical",&parent->astronomical.X,3);
-    services->setVertexShaderConstant("astrLight",&parent->astrLight.X,3);
-    services->setVertexShaderConstant("astrColor",&parent->astrColor.X,3);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("time"),&parent->cloudTime,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("cloudThre"),&parent->cloudThre,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("cloudy"),&parent->cloudy,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("lightness"),&parent->lightness,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("astrAtomScat"),&parent->astrAtomScat,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("astrViewTheta"),&parent->astrTheta,1);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("astronomical"),&parent->astronomical.X,3);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("astrLight"),&parent->astrLight.X,3);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("astrColor"),&parent->astrColor.X,3);
+
+    s32 var0 = 0;
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("skymap"),&var0, 1);
 }
 
 }

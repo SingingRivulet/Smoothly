@@ -75,18 +75,30 @@ bool localLight::pos3dToScreen(const irr::core::vector3df & pos3d, const irr::sc
 bool localLight::getRadiusInScreen(const irr::scene::ICameraSceneNode * camera, const irr::core::vector3df & ori, irr::f32 r,irr::f32 & x,irr::f32 & y, irr::f32 & scr){
     auto cam = camera->getPosition();
     irr::core::vector3df dir = ori - cam;
-    auto c = dir.crossProduct(irr::core::vector3df(0,1,0));
+    auto c = dir.crossProduct(irr::core::vector3df(0,1,0));//水平方向
     c.normalize();
     c*=r;
+    auto u = dir.crossProduct(c);//垂直方向
+    u.normalize();
+    u*=r;
+
     auto p = ori+c;
-    irr::f32 x1,y1,x2,y2;
+    auto q = ori+u;
+
+    irr::f32 x1,y1,x2,y2,x3,y3;
     if(!pos3dToScreen(ori,camera,x1,y1))
         return false;
     if(!pos3dToScreen(p  ,camera,x2,y2))
         return false;
+    if(!pos3dToScreen(q  ,camera,x3,y3))
+        return false;
     x=x1;
     y=y1;
-    scr = fabs(x2-x1);
+
+    float s1 = fabs(x2-x1);
+    float s2 = fabs(y3-y1);
+
+    scr = fmax(s1,s2);
     return true;
 }
 
