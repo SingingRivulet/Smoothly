@@ -10,6 +10,7 @@ uniform vec3  astrLight;//天体亮度
 uniform float astrAtomScat;//大气层散射
 uniform float astrViewTheta;//天体在视野中夹角
 uniform vec3  astrColor;//天体颜色
+uniform samplerCube skymap;
 
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
@@ -70,6 +71,7 @@ float haveCloud(vec3 p){
 
 //光线步进
 vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
+    vec3 background = textureCube(skymap,dir).rgb;
     vec3 res = vec3(0.23,0.41,0.72);
     vec3 cdy = vec3(0.61,0.61,0.61);
 
@@ -88,6 +90,8 @@ vec3 rayMarch(vec3 start,vec3 dir,int step,float stepLen){//dir要先normalize
         res+=dc*cloudy;
         res*=lightness;
     }
+    
+    res+=background;
 
 
     if(dir.y<=0.0){//地平线以下
