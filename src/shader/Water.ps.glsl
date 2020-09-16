@@ -41,6 +41,7 @@ varying vec2 bumpMapTexCoord;
 varying vec3 refractionMapTexCoord;
 varying vec3 reflectionMapTexCoord;
 varying vec3 position3D;
+varying vec4 pointPosition;
     
 void main()
 {
@@ -100,5 +101,6 @@ void main()
     gl_FragData[0] = mix(gl_Fog.color, finalColor, fogFactor );
     gl_FragData[1] = vec4(0.5,0.5,0.5,1.0);
     gl_FragData[2] = vec4(vec3(0.0,1.0,0.0)*gl_NormalMatrix,1.0);
+    gl_FragData[3] = vec4(pointPosition.xyz/pointPosition.w,1.0);
 }
 

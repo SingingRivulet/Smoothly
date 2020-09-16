@@ -31,12 +31,14 @@ uniform float	WaveLength;
 uniform float	Time;
 uniform float	WindForce;
 uniform vec2	WindDirection;
+uniform mat4	modelMatrix;
 
 // Vertex shader output structure
 varying vec2 bumpMapTexCoord;
 varying vec3 refractionMapTexCoord;
 varying vec3 reflectionMapTexCoord;
 varying vec3 position3D;
+varying vec4 pointPosition;
 
 void main()
 {
@@ -62,4 +64,5 @@ void main()
 	
 	// position of the vertex
 	position3D = gl_Vertex.xyz;
+	pointPosition = modelMatrix * gl_Vertex;
 }

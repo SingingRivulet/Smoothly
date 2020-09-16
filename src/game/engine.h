@@ -137,7 +137,6 @@ namespace smoothly{
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
             irr::video::SMaterial lightMaterial;//延迟光照
-            irr::video::SMaterial fogMaterial;//体积雾
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;

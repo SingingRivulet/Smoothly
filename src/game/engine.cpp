@@ -186,6 +186,7 @@ engine::engine(){
     p.setTexture(2,post_mat);\
     p.setTexture(3,post_normal);\
     p.setTexture(4,post_posi);\
+    p.ZBuffer = video::ECFN_DISABLED;
 
     initPostMat(postMaterial);
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
@@ -198,14 +199,6 @@ engine::engine(){
                                     "../shader/light.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/light.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
-    lightMaterial.ZBuffer = video::ECFN_DISABLED;
-
-    initPostMat(fogMaterial);
-    fogMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
-                                    "../shader/fog.vs.glsl", "main", video::EVST_VS_1_1,
-                                    "../shader/fog.ps.glsl", "main", video::EPST_PS_1_1,
-                                    &postShaderCallback);
-
 }
 engine::~engine(){
     ttf->drop();
@@ -285,10 +278,6 @@ void engine::sceneLoop(){
                                irr::video::SColor(0,0,0,0));
     });
     postShaderCallback.lightMode = false;
-
-    //后期：体积雾
-    driver->setMaterial(fogMaterial);
-    drawScreen;
 
     //最终后期处理
     driver->setRenderTarget(0);

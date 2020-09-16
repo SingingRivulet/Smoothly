@@ -1,6 +1,7 @@
 package.path = package.path .. ";../script/?.lua;"
 require("voxelDrawer")
 print("load building.lua success")
+print(_VERSION)
 function pathFindingInit(self)
     print("[pathFindingInit]start")
 

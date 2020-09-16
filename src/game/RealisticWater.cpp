@@ -242,6 +242,7 @@ void RealisticWaterSceneNode::OnSetConstants(video::IMaterialRendererServices* s
 	
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR == 9)
 	services->setVertexShaderConstant(services->getVertexShaderConstantID("WorldViewProj"), worldViewProj.pointer(), 16);
+    services->setVertexShaderConstant(services->getVertexShaderConstantID("modelMatrix"), world.pointer(), 16);
 	services->setVertexShaderConstant(services->getVertexShaderConstantID("WorldReflectionViewProj"), worldReflectionViewProj.pointer(), 16);
 	services->setVertexShaderConstant(services->getVertexShaderConstantID("WaveLength"), &waveLength, 1);
 	services->setVertexShaderConstant(services->getVertexShaderConstantID("Time"), &time, 1);
