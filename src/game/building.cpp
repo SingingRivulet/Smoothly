@@ -910,6 +910,8 @@ void building::linkChunk(building::buildingChunk * c, int x, int y){
 }
 
 void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
+
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipY"),&parent->clipY, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipYUp"),&parent->clipYUp, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("enableClipY"),&parent->enableClipY, 1);

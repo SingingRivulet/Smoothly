@@ -450,6 +450,8 @@ void engine::loadConfig(){
             iss>>key;
             if(key=="shadowMapSize"){
                 iss>>shadowMapSize;
+            }else if(key=="shadowArea"){
+                iss>>shadowArea;
             }
         }
         fclose(fp);

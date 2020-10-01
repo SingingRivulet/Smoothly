@@ -338,6 +338,7 @@ int terrain::getCollHeight(int x, int y){
 }
 
 void terrain::TerrainShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
 
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipY"),&parent->clipY, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipYUp"),&parent->clipYUp, 1);

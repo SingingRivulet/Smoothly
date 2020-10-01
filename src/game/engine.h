@@ -35,7 +35,7 @@ namespace smoothly{
             irr::scene::ISceneCollisionManager * collisionManager;
             irr::core::stringc          vendor;
 
-            irr::s32 shadowMapSize;
+            irr::s32 shadowMapSize,shadowArea;
 
             irr::core::vector2di screenCenter;
 
