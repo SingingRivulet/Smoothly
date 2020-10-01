@@ -188,7 +188,7 @@ void main(){
     float NdotL;
 
     vec3 rnormal=normalize(normal);
-    gl_FragData[2] = vec4(rnormal*0.5 + vec3(0.5,0.5,0.5),1.0);
+    gl_FragData[2] = vec4(onormal*0.5 + vec3(0.5,0.5,0.5),1.0);
 
     NdotL = max(dot(rnormal, lightDir), 0.0);
     diffuse = gl_LightSource[0].diffuse;

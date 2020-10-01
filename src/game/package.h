@@ -36,6 +36,9 @@ class package:public terrainDispather{
         void loop()override;
 
         irr::scene::ISceneNode * selectedPackageSceneNode;
+
+        irr::s32 packageShader_normal;
+        irr::s32 packageShader_select;
 };
 
 }

@@ -49,6 +49,14 @@ package::package(){
     }else{
         printf("[error]fail to load json\n" );
     }
+    packageShader_normal = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                          "../shader/package.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                          "../shader/package.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                          &defaultCallback);
+    packageShader_select = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                          "../shader/package.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                          "../shader/package_selected.ps.glsl", "main", irr::video::EPST_PS_1_1,
+                          &defaultCallback);
 }
 
 package::~package(){
@@ -69,6 +77,8 @@ void package::addPackage(int id ,int x , int y , const vec3 & posi, const std::s
                 pack.cx   = x;
                 pack.cy   = y;
                 pack.node = scene->addMeshSceneNode(conf->mesh,packageRoot);
+                pack.node->setMaterialType((video::E_MATERIAL_TYPE)packageShader_normal);
+                pack.node->setMaterialTexture(1,shadowMapTexture);
                 vec3 tmpp = posi;
                 auto hei = getRealHight(tmpp.X,tmpp.Z);
                 if(tmpp.Y<hei)
@@ -146,7 +156,8 @@ void package::msg_package_remove(int32_t, int32_t, const char * uuid){
 void package::loop(){
     terrainDispather::loop();
     if(selectedPackageSceneNode){
-        selectedPackageSceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        //selectedPackageSceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        selectedPackageSceneNode->setMaterialType((video::E_MATERIAL_TYPE)packageShader_normal);
         selectedPackageSceneNode = NULL;
     }
     irr::core::line3df ray;
@@ -154,7 +165,8 @@ void package::loop(){
     ray.end     = camera->getTarget();
     auto p = collisionManager->getSceneNodeFromRayBB(ray,0,false,packageRoot);
     if(p && (p->getPosition()-ray.start).getLengthSQ()<8){
-        p->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+        //p->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+        p->setMaterialType((video::E_MATERIAL_TYPE)packageShader_select);
         selectedPackageSceneNode = p;
         if(autoPickup){
             auto packit = packages.find(selectedPackageSceneNode->getName());

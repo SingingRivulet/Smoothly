@@ -191,7 +191,7 @@ void main(){
     vec3 rnormal = normal;
     rnormal+=vec3(n1 , snoise(pointPosition+vec3(0.0,100.0,0.0)), snoise(pointPosition+vec3(0.0,400.0,100.0)))*4.0;
     rnormal=normalize(rnormal);
-    gl_FragData[2] = vec4(rnormal*0.5 + vec3(0.5,0.5,0.5),1.0);
+    gl_FragData[2] = vec4(onormal*0.5 + vec3(0.5,0.5,0.5),1.0);
 
     NdotL = max(dot(rnormal, lightDir), 0.0);
     diffuse = gl_LightSource[0].diffuse;

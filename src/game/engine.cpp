@@ -167,7 +167,9 @@ engine::engine(){
     post_mat = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "mat", video::ECF_A8R8G8B8);
     post_normal = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "normal", video::ECF_A8R8G8B8);
     post_depth = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "DepthStencil", video::ECF_D32);
+    post_ssao = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "ssao", video::ECF_R32F);
     post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
+
     post = driver->addRenderTarget();
     core::array<video::ITexture*> textureArray(3);
     textureArray.push_back(post_tex);
@@ -189,6 +191,7 @@ engine::engine(){
     p.ZBuffer = video::ECFN_DISABLED;
 
     initPostMat(postMaterial);
+    postMaterial.setTexture(5,post_ssao);
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
@@ -199,6 +202,12 @@ engine::engine(){
                                     "../shader/light.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/light.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
+    initPostMat(ssaoMaterial);
+    ssaoMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/ssao.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/ssao.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+
 }
 engine::~engine(){
     ttf->drop();
@@ -224,6 +233,8 @@ engine::~engine(){
 void engine::sceneLoop(){
     if(!driver)
         return;
+    postShaderCallback.lightMode = false;
+    postShaderCallback.ssaoMode  = false;
     auto cm  = camera->getPosition();
 
     auto coll = scene->getSceneCollisionManager();
@@ -279,10 +290,17 @@ void engine::sceneLoop(){
     });
     postShaderCallback.lightMode = false;
 
+    //ssao
+    driver->setRenderTarget(post_ssao);
+    driver->setMaterial(ssaoMaterial);
+    drawScreen;
+
     //最终后期处理
+    postShaderCallback.ssaoMode = true;//最终渲染加载ssao map
     driver->setRenderTarget(0);
     driver->setMaterial(postMaterial);
     drawScreen;
+    postShaderCallback.ssaoMode = false;
 
     //渲染gui
     onDraw();
@@ -457,8 +475,15 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         services->setPixelShaderConstant(services->getPixelShaderConstantID("lightPos"),&lightPos.X, 3);
         services->setPixelShaderConstant(services->getPixelShaderConstantID("lightRange"),&lightRange, 1);
     }
+    if(ssaoMode){
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("ssaoMap"),&var5, 1);
+    }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowHeight"),&parent->height, 1);
+
+    auto pmat = parent->camera->getProjectionMatrix();
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("ProjMatrix") , pmat.pointer(), 16);
 
     auto vmat = parent->camera->getViewMatrix();
     services->setPixelShaderConstant(services->getPixelShaderConstantID("ViewMatrix") , vmat.pointer(), 16);

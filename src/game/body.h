@@ -311,6 +311,8 @@ class body:public mission{
         void selectBodyStart();
         void selectBodyEnd();
     private:
+        irr::video::E_MATERIAL_TYPE bodyShader;
+    private:
         void selectBodyUpdate();
         int selectBodyStartTime;
         bool selecting;

@@ -14,6 +14,7 @@ uniform int clipYUp;
 varying vec4 lcolor;
 varying vec4 pointPosition;
 varying vec3 normal;
+varying vec3 onormal;
 
 void main(){
     if(enableClipY==1){
@@ -56,7 +57,7 @@ void main(){
 
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
     color.g += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
-    gl_FragData[2] = vec4(normal*0.5 + vec3(0.5,0.5,0.5),1.0);
+    gl_FragData[2] = vec4(onormal*0.5 + vec3(0.5,0.5,0.5),1.0);
     
     gl_FragData[0] = color;
     gl_FragData[0].a =1.0;

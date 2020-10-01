@@ -726,8 +726,10 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
 
     p->node->setJointMode(irr::scene::EJUOR_CONTROL);//设为控制模式，因为要混合
 
+    p->node->setMaterialType(bodyShader);
+    p->node->setMaterialTexture( 1 , shadowMapTexture);
+
     if(c->texture){
-        p->node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
         p->node->setMaterialTexture( 0 , c->texture);
     }
     p->parent = this;
@@ -895,6 +897,10 @@ body::body():gravity(0,-10,0){
     texture_minimap_body = driver->getTexture("../../res/icon/texture_minimap_body.png");
     texture_attackTarget = driver->getTexture("../../res/icon/attackTarget.png");
     attackingTarget = false;
+
+    bodyShader = (irr::video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                "../shader/body.vs.glsl", "main", irr::video::EVST_VS_1_1,
+                                "../shader/body.ps.glsl", "main", irr::video::EPST_PS_1_1,&defaultCallback);
 }
 
 body::~body(){

@@ -21,6 +21,10 @@ cloud::cloud(){
                     "../shader/cloud.ps.glsl", "main", irr::video::EPST_PS_1_1,
                 &cloudShaderCallback);
 
+    auto skyShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                    "../shader/sky.vs.glsl","main", irr::video::EVST_VS_1_1,
+                    "../shader/sky.ps.glsl", "main", irr::video::EPST_PS_1_1);
+
     auto posx = driver->createImageFromFile("../../res/sky/posx.jpg");
     auto negx = driver->createImageFromFile("../../res/sky/negx.jpg");
     auto posy = driver->createImageFromFile("../../res/sky/posy.jpg");
@@ -39,9 +43,11 @@ cloud::cloud(){
     sky_1.driver = driver;
     sky_1.scene  = scene;
     sky_1.init("sky1",cloudShader,cubemap_sky);
+    sky_1.box->setMaterialType((video::E_MATERIAL_TYPE)skyShader);
     sky_2.driver = driver;
     sky_2.scene  = scene;
     sky_2.init("sky2",cloudShader,cubemap_sky);
+    sky_2.box->setMaterialType((video::E_MATERIAL_TYPE)skyShader);
     sky_2.box->setVisible(false);
     sky_p  = &sky_1;
     sky_pb = &sky_2;
