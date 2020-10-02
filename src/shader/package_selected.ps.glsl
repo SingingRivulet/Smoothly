@@ -32,9 +32,9 @@ void main(){
     if(color.a<0.7)
         discard;
     gl_FragData[1] = color;
-    color.x*=(lcolor.x+0.2);
-    color.y*=(lcolor.y+0.2);
-    color.z*=(lcolor.z+0.2);
+    color.x*=(lcolor.x+0.9);
+    color.y*=(lcolor.y+0.9);
+    color.z*=(lcolor.z+0.9);
     
     vec4 lightView4 = shadowMatrix * pointPosition;
     vec3 lightView = lightView4.xyz / lightView4.w;
@@ -47,12 +47,6 @@ void main(){
         closestDepth = texture2D(shadowMap, lightView.xy).r;
     float currentDepth = lightView.z;
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
-
-    color.x*=(lcolor.x+0.8);
-    color.y*=(lcolor.y+0.8);
-    color.z*=(lcolor.z+0.8);
-    if(color.a<0.7)
-        discard;
 
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
     color.g += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));

@@ -13,15 +13,18 @@ uniform mat4 ViewMatrix;
 uniform float windowWidth;
 uniform float windowHeight;
 
+varying mat4 PVmat;
 
 float randNum(vec3 co){
-    return fract(sin(dot(co.xyz, vec3(12.9898,78.233,65.4323))) * 43758.5453);
+    return fract(sin(dot(co.xyz, vec3(12.9898,78.233,65.4323))) * 43758.5453)-0.5;
 }
 
 float getPosDepth(vec3 pos){
-    vec4 otp = ProjMatrix * ViewMatrix * vec4(pos,1.0);//透视变换
+    vec4 otp = PVmat * vec4(pos,1.0);//透视变换
     vec3 tp = otp.xyz/otp.w;//归一化
     tp = tp * 0.5 + vec3(0.5);//变换到纹理空间
+    if(tp.x<0.0 || tp.y<0.0 || tp.x>1.0 || tp.y>1.0)
+        return 0.0;
     return length(texture2D(posMap,tp.xy).rgb-camera)-length(pos-camera);
 }
 
@@ -48,9 +51,9 @@ void main(){
     //ssao
     if(abs(pos.x)>0.1 && abs(pos.y)>0.1 && abs(pos.z)>0.1){
         for(int i=0;i<8;++i){
-            vec3 rot = normalize( vec3( randNum(vec3(position,1.0)) , randNum(vec3(position,10.0)) , 1.0 ) );
+            vec3 rot = normalize( vec3( randNum(vec3(position,1.0*float(i))) , randNum(vec3(position,10.0*float(i))) , 1.0 ) );
             float sd = getPosDepth(pos+genSampleNormal(normal, rot )*0.5);
-            if(sd<0.0 && sd>-1.0)
+            if(sd<0.0 && sd>-0.5)
                 ssaoFactor += 1.0;
         }
     }

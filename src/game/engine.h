@@ -133,11 +133,12 @@ namespace smoothly{
             irr::f32 scan_animation_size;
 
         public:
-            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_ssao , * post_posi;
+            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_ssao , * post_posi , * post_ssrt;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
             irr::video::SMaterial lightMaterial;//延迟光照
             irr::video::SMaterial ssaoMaterial;//ssao
+            irr::video::SMaterial ssrtMaterial;//ssrt
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;
@@ -146,7 +147,7 @@ namespace smoothly{
                     irr::core::vector3df lightColor;
                     irr::f32 lightRange;
                     bool lightMode;
-                    bool ssaoMode;
+                    bool finalPass;
             }postShaderCallback;
 
         private:
