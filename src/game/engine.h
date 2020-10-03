@@ -139,6 +139,10 @@ namespace smoothly{
             irr::video::SMaterial lightMaterial;//延迟光照
             irr::video::SMaterial ssaoMaterial;//ssao
             irr::video::SMaterial ssrtMaterial;//ssrt
+
+            bool haveSSAO;
+            bool haveSSRTGI;
+
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;

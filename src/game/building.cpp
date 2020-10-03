@@ -223,6 +223,9 @@ void building::releaseBuilding(building::buildingBody * p){
             p->node[i]->remove();
         }
     }
+    if(p->light){
+        lightManager.releaseLight(p->light);
+    }
     if(p->bb){
         p->bb->autodrop();
     }
@@ -282,6 +285,11 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
     }else{
         res->bodyState=NULL;
         res->rigidBody=NULL;
+    }
+
+    //光源
+    if(c->haveLight){
+        res->light = lightManager.addLight(p,c->lightRange,c->lightColor);
     }
 
     if(c->canBuildOn){
@@ -417,6 +425,16 @@ void building::loadConfig(){
                                                     ptr->autoAttach.deltaHor = item->valuedouble;
                                                 }else if(strcmp(item->string,"canBuildOn")==0){
                                                     ptr->canBuildOn = (item->valueint!=0);
+                                                }else if(strcmp(item->string,"haveLight")==0){
+                                                    ptr->haveLight = (item->valueint!=0);
+                                                }else if(strcmp(item->string,"lightRange")==0){
+                                                    ptr->lightRange = item->valuedouble;
+                                                }else if(strcmp(item->string,"lightColorR")==0){
+                                                    ptr->lightColor.r = item->valuedouble;
+                                                }else if(strcmp(item->string,"lightColorG")==0){
+                                                    ptr->lightColor.g = item->valuedouble;
+                                                }else if(strcmp(item->string,"lightColorB")==0){
+                                                    ptr->lightColor.b = item->valuedouble;
                                                 }
                                             }
                                             item = item->next;

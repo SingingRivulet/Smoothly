@@ -1,2 +1,0 @@
-shadowMapSize 1024
-shadowArea 64

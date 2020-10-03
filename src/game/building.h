@@ -115,6 +115,7 @@ class building:public weather{
             btRigidBody      * rigidBody;
             btMotionState    * bodyState;
             buildingConf             * config;
+            localLight::lightSource  * light;//光源
             bodyInfo info;
             dbvt3d::AABB     * bb;
             building         * parent;
@@ -181,6 +182,10 @@ class building:public weather{
 
             std::vector<vec3>             collisionVoxels;
 
+            bool haveLight;
+            irr::video::SColorf lightColor;
+            irr::f32 lightRange;
+
             buildingConf(){
                 haveBody             = false;
                 haveShader           = false;
@@ -189,6 +194,9 @@ class building:public weather{
                 useAutoAttach        = false;
                 canBuildOn           = false;
                 useAttachHandler     = false;
+                haveLight            = false;
+                lightRange           = 32;
+                lightColor.set(1,1,1,1);
                 attachHandler        = 0;
                 autoAttach.deltaHei  = 0;
                 autoAttach.deltaHor  = 1;

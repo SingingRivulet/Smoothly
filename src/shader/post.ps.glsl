@@ -15,6 +15,9 @@ uniform mat4 ViewMatrix;
 uniform int windowWidth;
 uniform int windowHeight;
 
+uniform int haveSSAO;
+uniform int haveSSRTGI;
+
 varying mat4 PVmat;
 
 vec3 getbloom(){
@@ -93,11 +96,14 @@ void main(){
     float dep = texture2D(depth,position).r;//深度
     float realDepth = length(pos-camera);//真实深度
     
-    float ssaoFactor = getSSAO();
+    float ssaoFactor = 0.0;
     vec3 bloom = getbloom();
     vec4 color = texture2D(tex,position);
     vec4 matcol = texture2D(materialMap,position);
-    vec3 ssgi = getSSGI(realDepth);
+    vec3 ssgi = vec3(0.0);
+    
+    if(haveSSAO==1)ssaoFactor = getSSAO();
+    if(haveSSRTGI==1)ssgi = getSSGI(realDepth);
     
     color.rgb += bloom.rgb - color.rgb*ssaoFactor + color.rgb*ssgi;
     

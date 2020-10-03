@@ -11,6 +11,8 @@ engine::engine(){
     width                   = 1024;
     height                  = 768;
     shadowMapSize           = 2048;
+    haveSSAO                = true;
+    haveSSRTGI              = true;
 
     loadConfig();
 
@@ -297,15 +299,19 @@ void engine::sceneLoop(){
     });
     postShaderCallback.lightMode = false;
 
-    //ssao
-    driver->setRenderTarget(post_ssao);
-    driver->setMaterial(ssaoMaterial);
-    drawScreen;
+    if(haveSSAO){
+        //ssao
+        driver->setRenderTarget(post_ssao);
+        driver->setMaterial(ssaoMaterial);
+        drawScreen;
+    }
 
-    //ssrt
-    driver->setRenderTarget(post_ssrt);
-    driver->setMaterial(ssrtMaterial);
-    drawScreen;
+    if(haveSSRTGI){
+        //ssrt
+        driver->setRenderTarget(post_ssrt);
+        driver->setMaterial(ssrtMaterial);
+        drawScreen;
+    }
 
     //最终后期处理
     postShaderCallback.finalPass = true;
@@ -451,19 +457,28 @@ void engine::updateListener(){
 }
 
 void engine::loadConfig(){
-    auto fp = fopen("../config/game.txt","r");
+    auto fp = fopen("../config/game.conf","r");
     if(fp){
         char buf[1024];
         while (!feof(fp)) {
             bzero(buf,sizeof(buf));
             fgets(buf,sizeof(buf),fp);
-            std::istringstream iss(buf);
-            std::string key;
-            iss>>key;
-            if(key=="shadowMapSize"){
-                iss>>shadowMapSize;
-            }else if(key=="shadowArea"){
-                iss>>shadowArea;
+            if(buf[0]!='#'){
+                int val = 0;
+                std::istringstream iss(buf);
+                std::string key;
+                iss>>key;
+                if(key=="shadowMapSize"){
+                    iss>>shadowMapSize;
+                }else if(key=="shadowArea"){
+                    iss>>shadowArea;
+                }else if(key=="SSAO"){
+                    iss>>val;
+                    haveSSAO = (val==1);
+                }else if(key=="SSRTGI"){
+                    iss>>val;
+                    haveSSRTGI = (val==1);
+                }
             }
         }
         fclose(fp);
@@ -494,6 +509,10 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         services->setPixelShaderConstant(services->getPixelShaderConstantID("ssaoMap"),&var5, 1);
         s32 var6 = 6;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("ssrtMap"),&var6, 1);
+        s32 ssao = parent->haveSSAO?1:0;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("haveSSAO"),&ssao, 1);
+        s32 ssrtgi = parent->haveSSRTGI?1:0;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("haveSSRTGI"),&ssrtgi, 1);
     }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowHeight"),&parent->height, 1);
