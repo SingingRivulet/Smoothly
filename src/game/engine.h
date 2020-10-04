@@ -142,6 +142,7 @@ namespace smoothly{
 
             bool haveSSAO;
             bool haveSSRTGI;
+            s32 SSRTStep;
 
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
@@ -151,6 +152,7 @@ namespace smoothly{
                     irr::core::vector3df lightColor;
                     irr::f32 lightRange;
                     bool lightMode;
+                    bool ssrtMode;
                     bool finalPass;
             }postShaderCallback;
 

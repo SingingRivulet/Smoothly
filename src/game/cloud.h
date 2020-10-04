@@ -1,4 +1,4 @@
-#ifndef SMOOTHLY_CLOUD
+﻿#ifndef SMOOTHLY_CLOUD
 #define SMOOTHLY_CLOUD
 #include "carto.h"
 namespace smoothly{

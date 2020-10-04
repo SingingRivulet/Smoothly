@@ -49,12 +49,6 @@ void main(){
     float currentDepth = lightView.z;
     float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
 
-    color.x*=(lcolor.x+0.2);
-    color.y*=(lcolor.y+0.2);
-    color.z*=(lcolor.z+0.2);
-    if(color.a<0.7)
-        discard;
-
     color -= vec4(color.rgb,0.0)*shadow*shadowFactor;
     color.g += scan_animation_showing/exp(abs(length(pointPosition.xyz/pointPosition.w-campos)-scan_animation_size));
     gl_FragData[2] = vec4(onormal*0.5 + vec3(0.5,0.5,0.5),1.0);

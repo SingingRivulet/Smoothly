@@ -13,6 +13,8 @@ uniform mat4 ViewMatrix;
 uniform int windowWidth;
 uniform int windowHeight;
 
+uniform int SSRTStep;
+
 varying mat4 PVmat;
 
 
@@ -33,7 +35,7 @@ void main(){
         vec3 rayScreenPosResult;
         if(dot(ray_dir,ray_reflect)>0.0){//没有向摄像机方向反射
             rayMarchPos += ray_reflect*rayMarchStepLen;
-            for(int i=0;i<64;++i){
+            for(int i=0;i<SSRTStep;++i){
                 vec4 rayScreenPos4 = PVmat * vec4(rayMarchPos,1.0);//透视
                 vec3 rayScreenPos = rayScreenPos4.xyz/rayScreenPos4.w;//归一化
                 rayScreenPos = rayScreenPos * 0.5 + vec3(0.5);//变换到纹理空间
@@ -47,12 +49,13 @@ void main(){
                     rayMarchStepLen*=0.5;
                     rayMarchPos -= ray_reflect*rayMarchStepLen;
                 }else{
+                    rayMarchStepLen*=2.0;
                     rayMarchPos += ray_reflect*rayMarchStepLen;
                 }
             }
         }
         if(haveColl)
-            reflectColor = texture2D( tex , rayScreenPosResult.xy).rgb;
+            reflectColor = texture2D( tex , rayScreenPosResult.xy).rgb*(1.0-dot(-ray_dir,normal));
     }
     gl_FragColor = vec4(reflectColor,1.0);
 }

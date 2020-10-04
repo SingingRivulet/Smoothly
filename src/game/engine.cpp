@@ -13,6 +13,7 @@ engine::engine(){
     shadowMapSize           = 2048;
     haveSSAO                = true;
     haveSSRTGI              = true;
+    SSRTStep                = 16;
 
     loadConfig();
 
@@ -244,6 +245,7 @@ void engine::sceneLoop(){
         return;
     postShaderCallback.lightMode = false;
     postShaderCallback.finalPass  = false;
+    postShaderCallback.ssrtMode = false;
     auto cm  = camera->getPosition();
 
     auto coll = scene->getSceneCollisionManager();
@@ -308,9 +310,11 @@ void engine::sceneLoop(){
 
     if(haveSSRTGI){
         //ssrt
+        postShaderCallback.ssrtMode = true;
         driver->setRenderTarget(post_ssrt);
         driver->setMaterial(ssrtMaterial);
         drawScreen;
+        postShaderCallback.ssrtMode = false;
     }
 
     //最终后期处理
@@ -478,6 +482,8 @@ void engine::loadConfig(){
                 }else if(key=="SSRTGI"){
                     iss>>val;
                     haveSSRTGI = (val==1);
+                }else if(key=="SSRTStep"){
+                    iss>>SSRTStep;
                 }
             }
         }
@@ -514,6 +520,11 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         s32 ssrtgi = parent->haveSSRTGI?1:0;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("haveSSRTGI"),&ssrtgi, 1);
     }
+    if(ssrtMode){
+
+    }
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);
+
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowHeight"),&parent->height, 1);
 

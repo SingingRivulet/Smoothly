@@ -67,7 +67,7 @@ void weather::updateWeather(int tm){
 
     cloudy = interpolation(left,lw,right,rw,tm);
 
-    int ntm = tm%1200;//一天对应当前时间
+    int ntm = 300;//一天对应当前时间
     cloudThre = 1-cloudy;
     if(ntm<600){
         //计算太阳位置
