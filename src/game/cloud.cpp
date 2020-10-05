@@ -15,6 +15,12 @@ cloud::cloud(){
     astrColor.set(3.0,2.8,2.6);
     astrTheta               = 0.025;
     cloudShaderCallback.parent = this;
+
+    skySpace                = scene->createNewSceneManager();
+    skySpace_camera = skySpace->addCameraSceneNode();
+    skySpace_camera->setTarget(irr::core::vector3df(0,1,0));
+    skySpace_camera->setFOV(irr::core::PI/1.1);
+
     cloudTime = time(0);
     auto cloudShader = driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                     "../shader/cloud.vs.glsl","main", irr::video::EVST_VS_1_1,
@@ -51,6 +57,25 @@ cloud::cloud(){
     sky_2.box->setVisible(false);
     sky_p  = &sky_1;
     sky_pb = &sky_2;
+
+    skySpace_p = skySpace->addSkyBoxSceneNode(
+                sky_1.cloudTop,
+                sky_1.cloudBottom,
+                sky_1.cloudLeft,
+                sky_1.cloudRight,
+                sky_1.cloudFront,
+                sky_1.cloudBack
+            );
+    skySpace_pb = skySpace->addSkyBoxSceneNode(
+                sky_2.cloudTop,
+                sky_2.cloudBottom,
+                sky_2.cloudLeft,
+                sky_2.cloudRight,
+                sky_2.cloudFront,
+                sky_2.cloudBack
+            );
+    skySpace_pb->setVisible(false);
+    skyMatrix = skySpace_camera->getProjectionMatrix() * skySpace_camera->getViewMatrix();
 
     snow = scene->addParticleSystemSceneNode(false);
     snow->setMaterialTexture(0,driver->getTexture("../../res/snow.png"));
@@ -119,9 +144,22 @@ void cloud::renderSky(){
         sky_pb->box->setVisible(true);
         sky_p->box->setVisible(false);
         //交换双缓冲
-        auto tmp = sky_p;
-        sky_p = sky_pb;
-        sky_pb = tmp;
+        {
+            auto tmp = sky_p;
+            sky_p = sky_pb;
+            sky_pb = tmp;
+        }
+        {
+            auto tmp = skySpace_p;
+            skySpace_p = skySpace_pb;
+            skySpace_pb = tmp;
+            skySpace_p->setVisible(true);
+            skySpace_pb->setVisible(false);
+            driver->beginScene(true, true, irr::video::SColor(0,0,0,0));
+            driver->setRenderTarget(post_sky,true,true);
+            skyMatrix = skySpace_camera->getProjectionMatrix() * skySpace_camera->getViewMatrix();
+            skySpace->drawAll();
+        }
         cloudTime = time(0);//更新时间
         updateWeather(cloudTime);
 

@@ -38,6 +38,7 @@ class cloud:public carto{
             bool process();
         };
         skyBox * sky_p , * sky_pb;
+        irr::scene::ISceneNode * skySpace_p , * skySpace_pb;
         skyBox sky_1,sky_2;
         class CloudShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
             public:
@@ -54,6 +55,8 @@ class cloud:public carto{
     public:
         irr::scene::ILightSceneNode * light;
         irr::core::vector3df lightTarget;
+        irr::scene::ISceneManager * skySpace;
+        irr::scene::ICameraSceneNode * skySpace_camera;
 };
 
 }

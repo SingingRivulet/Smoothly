@@ -172,6 +172,8 @@ engine::engine(){
     post_depth = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "DepthStencil", video::ECF_D32);
     post_ssao = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "ssao", video::ECF_R32F);
     post_ssrt = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "ssrt", video::ECF_A8R8G8B8);
+    post_ssrtConf = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "ssrtConf", video::ECF_A16B16G16R16F);
+    post_sky = driver->addRenderTargetTexture(core::dimension2d<u32>(1024, 1024), "post_sky", video::ECF_A8R8G8B8);
     post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
 
     post = driver->addRenderTarget();
@@ -180,6 +182,7 @@ engine::engine(){
     textureArray.push_back(post_mat);
     textureArray.push_back(post_normal);
     textureArray.push_back(post_posi);
+    textureArray.push_back(post_ssrtConf);
     post->setTexture(textureArray, post_depth);
 
     water->renderTarget = post;
@@ -197,6 +200,7 @@ engine::engine(){
     initPostMat(postMaterial);
     postMaterial.setTexture(5,post_ssao);
     postMaterial.setTexture(6,post_ssrt);
+    postMaterial.setTexture(7,post_ssrtConf);
     postMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/post.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
@@ -213,6 +217,7 @@ engine::engine(){
                                     "../shader/ssao.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
     initPostMat(ssrtMaterial);
+    ssrtMaterial.setTexture(5,post_sky);
     ssrtMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/ssrt.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/ssrt.ps.glsl", "main", video::EPST_PS_1_1,
@@ -515,13 +520,17 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         services->setPixelShaderConstant(services->getPixelShaderConstantID("ssaoMap"),&var5, 1);
         s32 var6 = 6;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("ssrtMap"),&var6, 1);
+        s32 var7 = 7;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("ssrtConfMap"),&var7, 1);
         s32 ssao = parent->haveSSAO?1:0;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("haveSSAO"),&ssao, 1);
         s32 ssrtgi = parent->haveSSRTGI?1:0;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("haveSSRTGI"),&ssrtgi, 1);
     }
     if(ssrtMode){
-
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("skyMap"),&var5, 1);
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("skyMatrix") , parent->skyMatrix.pointer(), 16);
     }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);
 

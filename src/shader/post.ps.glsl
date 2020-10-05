@@ -7,6 +7,7 @@ uniform sampler2D materialMap;
 uniform sampler2D posMap;
 uniform sampler2D ssaoMap;
 uniform sampler2D ssrtMap;
+uniform sampler2D ssrtConfMap;
 uniform vec3 camera;
 uniform float waterLevel;
 uniform mat4 ProjMatrix;
@@ -65,11 +66,11 @@ float getSSAO(){
     return ssao*0.7;
 }
 
-vec3 getSSGI(float realDepth){
+vec3 getSSGI(float realDepth,int iseg){
     float deltaX = 2.0/float(windowWidth);
     float deltaY = 2.0/float(windowHeight);
     vec3 ssgi = vec3(0.0);
-    int seg = 5;
+    int seg = iseg;
     int i = -seg;
     int j = 0;
     float f = 0.0;
@@ -95,6 +96,7 @@ void main(){
     vec3 pos = texture2D(posMap,position).xyz;//位置
     float dep = texture2D(depth,position).r;//深度
     float realDepth = length(pos-camera);//真实深度
+    vec3 ssrtConf = texture2D(ssrtConfMap,position).xyz;
     
     float ssaoFactor = 0.0;
     vec3 bloom = getbloom();
@@ -103,9 +105,9 @@ void main(){
     vec3 ssgi = vec3(0.0);
     
     if(haveSSAO==1)ssaoFactor = getSSAO();
-    if(haveSSRTGI==1)ssgi = getSSGI(realDepth);
+    if(haveSSRTGI==1)ssgi = getSSGI(realDepth,int(ssrtConf.x));
     
-    color.rgb += bloom.rgb - color.rgb*ssaoFactor + color.rgb*ssgi;
+    color.rgb += bloom.rgb - color.rgb*ssaoFactor + ssgi*color.rgb*ssrtConf.y + ssgi*ssrtConf.z;
     
     //水下
     float wk = clamp((camera.y - waterLevel),0.2,1.0);

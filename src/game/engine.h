@@ -133,7 +133,8 @@ namespace smoothly{
             irr::f32 scan_animation_size;
 
         public:
-            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_ssao , * post_posi , * post_ssrt;
+            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_ssao , * post_posi , * post_ssrt , * post_ssrtConf , * post_sky;
+            irr::core::matrix4 skyMatrix;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
             irr::video::SMaterial lightMaterial;//延迟光照
