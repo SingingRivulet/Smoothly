@@ -1,13 +1,6 @@
 varying vec2 position;
 varying vec2 viewPos;
-uniform sampler2D tex;
-uniform sampler2D depth;
-uniform sampler2D normalMap;
-uniform sampler2D materialMap;
 uniform sampler2D posMap;
-uniform sampler2D ssaoMap;
-uniform sampler2D ssrtMap;
-uniform sampler2D ssrtConfMap;
 uniform sampler2D resultMap;
 uniform vec3 camera;
 uniform float waterLevel;
