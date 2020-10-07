@@ -100,11 +100,11 @@ terrain::chunk * terrain::genChunk(int x,int y){
     for(int i=0;i<4;++i){
         int meshLod = 1;
         if(i==1)
-            meshLod = 2;
-        else if(i==2)
             meshLod = 4;
-        else if(i==3)
+        else if(i==2)
             meshLod = 8;
+        else if(i==3)
+            meshLod = 16;
 
         auto mesh=this->createTerrainMesh(
             NULL ,

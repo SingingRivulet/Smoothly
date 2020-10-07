@@ -62,7 +62,7 @@ scene::IMesh * terrain::createTerrainMesh(
 			}
 
 			buffer->Indices.reallocate((blockSize.Height-1)*(blockSize.Width-1)*6);
-			// add indices of vertex block
+            // add indices of vertex block
             s32 c1 = 0;
             if(lod==1){
                 for (y=0; y<blockSize.Height-1; ++y)
@@ -82,19 +82,124 @@ scene::IMesh * terrain::createTerrainMesh(
                     c1 += blockSize.Width;
                 }
             }else{
-                for (y=0; y<blockSize.Height/lod; ++y)
+                u32 H = blockSize.Height/lod;
+                u32 W = blockSize.Width/lod;
+                for (y=0; y<H; ++y)
                 {
-                    for (u32 x=0; x<blockSize.Width/lod; ++x)
+                    for (u32 x=0; x<W; ++x)
                     {
                         const s32 c = c1 + x;
 
-                        buffer->Indices.push_back(c*lod);
-                        buffer->Indices.push_back(c*lod + blockSize.Width*lod);
-                        buffer->Indices.push_back(c*lod + lod);
+                        if(x==0){
+                            if(y==0){
+                                //角
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*(vi+1) );
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod + lod);
+                                }
 
-                        buffer->Indices.push_back(c*lod + lod);
-                        buffer->Indices.push_back(c*lod + blockSize.Width*lod);
-                        buffer->Indices.push_back(c*lod + lod + blockSize.Width*lod);
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod + lod);
+                                    buffer->Indices.push_back(c*lod + vi + 1);
+                                }
+
+                            }else if(y==H-1){
+                                //角
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*(vi+1));
+                                    buffer->Indices.push_back(c*lod + lod);
+                                }
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + lod);
+                                    buffer->Indices.push_back(c*lod + vi + blockSize.Width*lod);
+                                    buffer->Indices.push_back(c*lod + vi + 1 + blockSize.Width*lod);
+                                }
+                            }else{
+                                //边
+                                buffer->Indices.push_back(c*lod + lod);
+                                buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                buffer->Indices.push_back(c*lod + lod + blockSize.Width*lod);
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*(vi+1));
+                                    buffer->Indices.push_back(c*lod + lod);
+                                }
+                            }
+                        }else if(y==0){
+                            if(x==W-1){
+                                //角
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                    buffer->Indices.push_back(c*lod + vi + 1);
+                                }
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + lod + blockSize.Width*vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                    buffer->Indices.push_back(c*lod + lod + blockSize.Width*(vi+1));
+                                }
+                            }else{
+                                //边
+                                buffer->Indices.push_back(c*lod + lod);
+                                buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                buffer->Indices.push_back(c*lod + lod + blockSize.Width*lod);
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                    buffer->Indices.push_back(c*lod + vi + 1);
+                                }
+                            }
+                        }else if(x==W-1){
+                            if(y==H-1){
+                                //角
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod + vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod + vi +1);
+                                }
+
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*(vi+1) + lod);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*vi + lod);
+                                }
+
+                            }else{
+                                //边
+                                buffer->Indices.push_back(c*lod);
+                                buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                buffer->Indices.push_back(c*lod + lod);
+                                for(u32 vi = 0;vi<lod;++vi){
+                                    buffer->Indices.push_back(c*lod + lod + blockSize.Width*vi);
+                                    buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                                    buffer->Indices.push_back(c*lod + lod + blockSize.Width*(vi+1));
+                                }
+                            }
+
+                        }else if(y==H-1){
+                            //边
+                            buffer->Indices.push_back(c*lod);
+                            buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                            buffer->Indices.push_back(c*lod + lod);
+                            for(u32 vi = 0;vi<lod;++vi){
+                                buffer->Indices.push_back(c*lod + lod);
+                                buffer->Indices.push_back(c*lod + vi + blockSize.Width*lod);
+                                buffer->Indices.push_back(c*lod + vi + 1 + blockSize.Width*lod);
+                            }
+
+                        }else{
+                            //中间的格子
+                            buffer->Indices.push_back(c*lod);
+                            buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                            buffer->Indices.push_back(c*lod + lod);
+
+                            buffer->Indices.push_back(c*lod + lod);
+                            buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                            buffer->Indices.push_back(c*lod + lod + blockSize.Width*lod);
+                        }
                     }
                     c1 += blockSize.Width;
                 }
