@@ -221,6 +221,6 @@ void main(){
 
     gl_FragData[0] = scolor;
     gl_FragData[3] = vec4(pointPosition,1.0);
-    gl_FragData[4] = vec4(4.0,1.0,0.0,1.0);
+    gl_FragData[4] = vec4(4.0,0.2,0.0,1.0);
 
 }

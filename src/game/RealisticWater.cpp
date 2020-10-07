@@ -24,9 +24,9 @@
 
 #include "RealisticWater.h"
 
-RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height, 
-												 const irr::core::stringc& resourcePath, core::dimension2du renderTargetSize,
-												 scene::ISceneNode* parent, s32 id):
+RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
+                                                 const irr::core::stringc& resourcePath, core::dimension2du renderTargetSize,
+                                                 scene::ISceneNode* parent, s32 id):
 	scene::ISceneNode(parent, sceneManager, id), _time(0),
 	_size(width, height), _sceneManager(sceneManager), _refractionMap(NULL), _reflectionMap(NULL),
     _windForce(20.0f),_windDirection(0, 1),_waveHeight(0.3f), _waterColor(0.1f, 0.1f, 0.6f, 1.0f), _colorBlendFactor(0.2f), _camera(NULL)
@@ -46,10 +46,10 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 	core::stringc waterVertexShader;
 
 	if (_videoDriver->getDriverType() == video::EDT_DIRECT3D9)
-	{
+    {
         waterPixelShader = "../shader/Water.ps.hlsl";
         waterVertexShader = "../shader/Water.vs.hlsl";
-	}
+    }
 	else if (_videoDriver->getDriverType() == video::EDT_OPENGL)
 	{
         waterPixelShader = "../shader/Water.ps.glsl";
@@ -128,6 +128,9 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 
 	//fixes glitches with incomplete refraction
     //const f32 CLIP_PLANE_OFFSET_Y = 5.0f;
+    auto oecy = graph->enableClipY;
+    auto ocy = graph->clipY;
+    auto ocyu = graph->clipYUp;
 
 	if (IsVisible)
 	{
@@ -185,7 +188,10 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
         _sceneManager->setActiveCamera(currentCamera);
 
 		setVisible(true); //show it again
-        graph->enableClipY = 0;
+
+        graph->enableClipY = oecy;
+        graph->clipY = ocy;
+        graph->clipYUp = ocyu;
 	}
 }
 

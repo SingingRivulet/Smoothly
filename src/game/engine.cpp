@@ -14,6 +14,7 @@ engine::engine(){
     haveSSAO                = true;
     haveSSRTGI              = true;
     SSRTStep                = 16;
+    waterMapSize            = 512;
 
     loadConfig();
 
@@ -103,7 +104,7 @@ engine::engine(){
                    true,                                  //true代表像素（片断）雾，false代表顶点雾
                    true);
 */
-    water = new RealisticWaterSceneNode(scene, 2048, 2048, "../../");
+    water = new RealisticWaterSceneNode(scene, 2048, 2048, "../../" , core::dimension2du(waterMapSize,waterMapSize));
     water->setMaterialFlag(irr::video::EMF_FOG_ENABLE, true );
     water->setWindForce(5);
     water->graph = this;
@@ -218,6 +219,7 @@ engine::engine(){
                                     &postShaderCallback);
     initPostMat(ssrtMaterial);
     ssrtMaterial.setTexture(5,post_sky);
+    ssrtMaterial.setTexture(6,post_ssrtConf);
     ssrtMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/ssrt.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/ssrt.ps.glsl", "main", video::EPST_PS_1_1,
@@ -253,6 +255,12 @@ void engine::sceneLoop(){
     postShaderCallback.ssrtMode = false;
     auto cm  = camera->getPosition();
 
+    if(cm.Y<waterLevel){
+        water->setVisible(false);
+    }else{
+        water->setVisible(true);
+    }
+
     auto coll = scene->getSceneCollisionManager();
     screenCenter = coll->getScreenCoordinatesFrom3DPosition(camera->getTarget(),camera);
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
@@ -266,7 +274,13 @@ void engine::sceneLoop(){
     //前向渲染
     driver->beginScene(true, true, irr::video::SColor(255,0,0,0));
     driver->setRenderTargetEx(post,video::ECBF_COLOR | video::ECBF_DEPTH);
+    if(cm.Y>waterLevel){
+        enableClipY = 1;
+        clipYUp = -1;
+        clipY = waterLevel;
+    }
     scene->drawAll();
+    enableClipY = 0;
 
 #define drawScreen \
     driver->draw3DTriangle(irr::core::triangle3df(irr::core::vector3df( 1, 1,1),\
@@ -489,6 +503,8 @@ void engine::loadConfig(){
                     haveSSRTGI = (val==1);
                 }else if(key=="SSRTStep"){
                     iss>>SSRTStep;
+                }else if(key=="waterMapSize"){
+                    iss>>waterMapSize;
                 }
             }
         }
@@ -530,6 +546,8 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     if(ssrtMode){
         s32 var5 = 5;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("skyMap"),&var5, 1);
+        s32 var6 = 6;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("ssrtConfMap"),&var6, 1);
         services->setPixelShaderConstant(services->getPixelShaderConstantID("skyMatrix") , parent->skyMatrix.pointer(), 16);
     }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);

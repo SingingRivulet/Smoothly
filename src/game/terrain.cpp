@@ -86,49 +86,65 @@ terrain::chunk * terrain::genChunk(int x,int y){
     //printf("[genChunk](%d,%d)\n",x,y);
     auto res = new chunk;
     genTerrain(mapBuf , x , y , 33);
-    auto mesh=this->createTerrainMesh(
-        NULL , 
-        mapBuf , 33 , 33 ,
-        irr::core::dimension2d<irr::f32>(1 , 1),
-        irr::core::dimension2d<irr::u32>(33 , 33),
-        true
-    );
     //创建寻路单元
     for(int i=0;i<16;++i){
         for(int j=0;j<16;++j){
             res->collMap[i][j]=floor(mapBuf[i*2][j*2]/2);
         }
     }
-    auto posi = vec3(x*32.0f , 0 , y*32.0f);
-    res->node = scene->addMeshSceneNode(mesh,0,-1);
-    res->shadowNode = createShadowNode(mesh,0,-1);
-    res->node->setPosition(posi);
-    res->shadowNode->setPosition(posi);
-    res->shadowNode->getMaterial(0).BackfaceCulling = false;
 
-    auto selector=scene->createOctreeTriangleSelector(mesh,res->node);   //创建选择器
-    res->node->setTriangleSelector(selector);
-    selector->drop();
-    
-    res->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
-    res->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
-    int lv;
-    res->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(x,y,lv));
-    res->node->setMaterialTexture(0,shadowMapTexture);
-    res->node->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
-    
-    int l = std::max(abs(x-cm_cx),abs(y-cm_cy));
-    if(l<=getVisualRange()){
-        res->node->setVisible(true);
-    }else{
-        res->node->setVisible(false);
+    auto posi = vec3(x*32.0f , 0 , y*32.0f);
+
+    res->updateLOD(x,y,cm_cx,cm_cy);
+
+    for(int i=0;i<4;++i){
+        int meshLod = 1;
+        if(i==1)
+            meshLod = 2;
+        else if(i==2)
+            meshLod = 4;
+        else if(i==3)
+            meshLod = 8;
+
+        auto mesh=this->createTerrainMesh(
+            NULL ,
+            mapBuf , 33 , 33 ,
+            irr::core::dimension2d<irr::f32>(1 , 1),
+            irr::core::dimension2d<irr::u32>(33 , 33),
+            meshLod,true
+        );
+        res->node[i] = scene->addMeshSceneNode(mesh,0,-1);
+        res->node[i]->setPosition(posi);
+
+        if(i==0){
+            res->shadowNode = createShadowNode(mesh,0,-1);
+            res->shadowNode->setPosition(posi);
+            res->shadowNode->getMaterial(0).BackfaceCulling = false;
+            auto selector=scene->createOctreeTriangleSelector(mesh,res->node[i]);   //创建选择器
+            res->node[i]->setTriangleSelector(selector);
+            selector->drop();
+            res->bodyMesh  = createBtMesh(mesh);
+        }
+
+        res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
+        res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
+
+        res->node[i]->setMaterialTexture(0,shadowMapTexture);
+        res->node[i]->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+        //res->node[i]->getMaterial(0).Wireframe = true;
+
+        mesh->drop();
     }
 
-    res->node->updateAbsolutePosition();
-    res->bodyState =setMotionState(res->node->getAbsoluteTransformation().pointer());
-    //res->node->addShadowVolumeSceneNode();
-    
-    res->bodyMesh  =createBtMesh(mesh);
+
+    res->node[0]->setMaterialType((irr::video::E_MATERIAL_TYPE)shaderv1);
+    res->node[1]->setMaterialType((irr::video::E_MATERIAL_TYPE)shaderv2);
+    res->node[2]->setMaterialType((irr::video::E_MATERIAL_TYPE)shaderv3);
+    res->node[3]->setMaterialType((irr::video::E_MATERIAL_TYPE)shaderv4);
+
+    res->node[0]->updateAbsolutePosition();
+    res->bodyState =setMotionState(res->node[0]->getAbsoluteTransformation().pointer());
+
     res->bodyShape =createShape(res->bodyMesh);
 
     res->rigidBody =createBody(res->bodyShape,res->bodyState);
@@ -141,8 +157,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->rigidBody->setUserPointer(&(res->info));
     
     this->dynamicsWorld->addRigidBody(res->rigidBody);
-    
-    mesh->drop();
+
 
     /*
     for(int i=0;i<16;++i){
@@ -165,6 +180,8 @@ terrain::chunk * terrain::genChunk(int x,int y){
     }
     */
 
+    res->show();
+
     return res;
 }
 void terrain::freeChunk(terrain::chunk * p){
@@ -173,7 +190,9 @@ void terrain::freeChunk(terrain::chunk * p){
     delete p->bodyState;
     delete p->bodyShape;
     delete p->bodyMesh;
-    p->node->remove();
+    for(int i=0;i<4;++i){
+        p->node[i]->remove();
+    }
     p->shadowNode->remove();
     delete p;
 }
@@ -209,7 +228,7 @@ void terrain::releaseChunk(int x,int y){
 bool terrain::chunkShowing(int x,int y){
     auto it = chunks.find(ipair(x,y));
     if(it!=chunks.end()){
-        return it->second->node->isVisible();
+        return it->second->node[0]->isVisible() || it->second->node[1]->isVisible() || it->second->node[2]->isVisible() || it->second->node[3]->isVisible();
     }else
         return false;
 }
@@ -223,14 +242,13 @@ void terrain::loop(){
         for(auto it:chunks){
             ipair ch = it.first;
             int l = std::max(abs(ch.x-cm_cx),abs(ch.y-cm_cy));
+            it.second->updateLOD(ch.x,ch.y,cm_cx,cm_cy);
             if(l<=getVisualRange()){
-                int lv;
-                it.second->node->setMaterialType((irr::video::E_MATERIAL_TYPE)getShader(ch.x,ch.y,lv));
-                updateLOD(ch.x,ch.y,lv);
-                it.second->node->setVisible(true);
+                updateLOD(ch.x,ch.y,it.second->lodLevel);
+                it.second->show();
             }else{
                 updateLOD(ch.x,ch.y,0);
-                it.second->node->setVisible(false);
+                it.second->hide();
             }
         }
     }

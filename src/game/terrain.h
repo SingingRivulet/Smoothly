@@ -29,12 +29,12 @@ namespace smoothly{
             int getCollHeight(int x,int y);
         private:
             float ** mapBuf;
-            static irr::scene::IMesh * createTerrainMesh(
-                irr::video::ITexture* texture,
+            static irr::scene::IMesh * createTerrainMesh(irr::video::ITexture* texture,
                 float ** heightmap,
-                irr::u32 hx,irr::u32 hy,
+                irr::u32 hx, irr::u32 hy,
                 const irr::core::dimension2d<irr::f32>& stretchSize,
-                const irr::core::dimension2d<irr::u32>& maxVtxBlockSize, //网眼大小。官方文档没写
+                const irr::core::dimension2d<irr::u32>& maxVtxBlockSize,  //网眼大小。官方文档没写
+                u32 lod,
                 bool debugBorders);
             //irrlicht自带的太差，所以自己实现一个
             float genTerrain(float ** img,int x , int y ,int pointNum);
@@ -46,7 +46,7 @@ namespace smoothly{
         private:
             
             struct chunk{//各组件维护各自的chunk
-                irr::scene::IMeshSceneNode  * node , * shadowNode;
+                irr::scene::IMeshSceneNode  * node[4] , * shadowNode;
                 
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
@@ -56,10 +56,33 @@ namespace smoothly{
                 bodyInfo info;
                 
                 inline void show(){
-                    node->setVisible(true);
+                    for(int i=0;i<4;++i){
+                        if(i+1 == lodLevel){
+                            node[i]->setVisible(true);
+                        }else{
+                            node[i]->setVisible(false);
+                        }
+                    }
                 }
                 inline void hide(){
-                    node->setVisible(false);
+                    for(int i=0;i<4;++i){
+                        node[i]->setVisible(false);
+                    }
+                }
+                short lodLevel;
+                inline void updateLOD(int x,int y,int cm_cx,int cm_cy){
+                    int len = std::max(abs(x-cm_cx) , abs(y-cm_cy));
+                    if(len<2){
+                        lodLevel = 1;
+                    }else
+                    if(len<4){
+                        lodLevel = 2;
+                    }else
+                    if(len<8){
+                        lodLevel = 3;
+                    }else{
+                        lodLevel = 4;
+                    }
                 }
 
                 int collMap[16][16];
@@ -86,13 +109,14 @@ namespace smoothly{
                 }else{
                     return scene->getSceneCollisionManager()->getCollisionPoint(
                                                     ray,
-                                                    it->second->node->getTriangleSelector(),
+                                                    it->second->node[0]->getTriangleSelector(),
                                                     outCollisionPoint,
                                                     outTriangle,
                                                     outNode
                                                     );
                 }
             }
+            /*
             inline irr::s32 getShader(int x,int y,int & lv){
                 int len = std::max(abs(x-cm_cx) , abs(y-cm_cy));
                 if(len<2){
@@ -111,6 +135,7 @@ namespace smoothly{
                     return shaderv4;
                 }
             }
+            */
             bool first;
             inline bool updateCamChunk(){
                 if(camera==NULL)

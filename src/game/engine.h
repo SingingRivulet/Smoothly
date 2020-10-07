@@ -48,7 +48,7 @@ namespace smoothly{
             btSequentialImpulseConstraintSolver* solver;
 
             engine();
-            ~engine();
+            virtual ~engine();
             virtual void sceneLoop();
             virtual void worldLoop();
             virtual void onDraw();
@@ -63,6 +63,8 @@ namespace smoothly{
             irr::f32 waterLevel;
 
             irr::s32 width,height;
+
+            irr::s32 waterMapSize;
 
             bool running;
 

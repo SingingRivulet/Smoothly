@@ -32,6 +32,7 @@ void main(){
     vec4 color = texture2D(tex,t);
     if(color.a<0.7)
         discard;
+    color.a = 1.0;
     gl_FragData[1] = color;
     color.x*=(lcolor.x+0.2);
     color.y*=(lcolor.y+0.2);

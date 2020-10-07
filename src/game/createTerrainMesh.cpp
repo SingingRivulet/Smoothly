@@ -9,6 +9,7 @@ scene::IMesh * terrain::createTerrainMesh(
     u32 hx,u32 hy,
     const core::dimension2d<f32>& stretchSize,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
+    u32 lod,
     bool debugBorders
 ){
     if (!heightmap)
@@ -62,23 +63,42 @@ scene::IMesh * terrain::createTerrainMesh(
 
 			buffer->Indices.reallocate((blockSize.Height-1)*(blockSize.Width-1)*6);
 			// add indices of vertex block
-			s32 c1 = 0;
-			for (y=0; y<blockSize.Height-1; ++y)
-			{
-				for (u32 x=0; x<blockSize.Width-1; ++x)
-				{
-					const s32 c = c1 + x;
+            s32 c1 = 0;
+            if(lod==1){
+                for (y=0; y<blockSize.Height-1; ++y)
+                {
+                    for (u32 x=0; x<blockSize.Width-1; ++x)
+                    {
+                        const s32 c = c1 + x;
 
-					buffer->Indices.push_back(c);
-					buffer->Indices.push_back(c + blockSize.Width);
-					buffer->Indices.push_back(c + 1);
+                        buffer->Indices.push_back(c);
+                        buffer->Indices.push_back(c + blockSize.Width);
+                        buffer->Indices.push_back(c + 1);
 
-					buffer->Indices.push_back(c + 1);
-					buffer->Indices.push_back(c + blockSize.Width);
-					buffer->Indices.push_back(c + 1 + blockSize.Width);
-				}
-				c1 += blockSize.Width;
-			}
+                        buffer->Indices.push_back(c + 1);
+                        buffer->Indices.push_back(c + blockSize.Width);
+                        buffer->Indices.push_back(c + 1 + blockSize.Width);
+                    }
+                    c1 += blockSize.Width;
+                }
+            }else{
+                for (y=0; y<blockSize.Height/lod; ++y)
+                {
+                    for (u32 x=0; x<blockSize.Width/lod; ++x)
+                    {
+                        const s32 c = c1 + x;
+
+                        buffer->Indices.push_back(c*lod);
+                        buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                        buffer->Indices.push_back(c*lod + lod);
+
+                        buffer->Indices.push_back(c*lod + lod);
+                        buffer->Indices.push_back(c*lod + blockSize.Width*lod);
+                        buffer->Indices.push_back(c*lod + lod + blockSize.Width*lod);
+                    }
+                    c1 += blockSize.Width;
+                }
+            }
 
 			// recalculate normals
 			for (u32 i=0; i<buffer->Indices.size(); i+=3)

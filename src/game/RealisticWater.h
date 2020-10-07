@@ -34,7 +34,7 @@ class RealisticWaterSceneNode: public scene::ISceneNode, video::IShaderConstantS
 public:
 	RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
 							const irr::core::stringc& resourcePath = irr::core::stringc(),
-							core::dimension2du renderTargetSize=core::dimension2du(512,512),scene::ISceneNode* parent = NULL, s32 id = -1);
+                            core::dimension2du renderTargetSize=core::dimension2du(512,512),scene::ISceneNode* parent = NULL, s32 id = -1);
 	virtual ~RealisticWaterSceneNode();
 
 	// frame
