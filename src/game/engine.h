@@ -135,17 +135,29 @@ namespace smoothly{
             irr::f32 scan_animation_size;
 
         public:
-            irr::video::ITexture * post_tex , * post_depth , * post_mat , * post_normal , * post_ssao , * post_posi , * post_ssrt , * post_ssrtConf , * post_sky;
+            irr::video::ITexture    * post_tex ,
+                                    * post_depth ,
+                                    * post_mat ,
+                                    * post_normal ,
+                                    * post_ssao ,
+                                    * post_posi ,
+                                    * post_ssrt ,
+                                    * post_ssrtConf ,
+                                    * post_sky ,
+                                    * post_final;
             irr::core::matrix4 skyMatrix;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
+            irr::video::SMaterial mblurMaterial;//动态模糊
             irr::video::SMaterial lightMaterial;//延迟光照
             irr::video::SMaterial ssaoMaterial;//ssao
             irr::video::SMaterial ssrtMaterial;//ssrt
 
             bool haveSSAO;
             bool haveSSRTGI;
+            bool haveMblur;
             s32 SSRTStep;
+            s32 mblurStep;
 
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
@@ -157,6 +169,8 @@ namespace smoothly{
                     bool lightMode;
                     bool ssrtMode;
                     bool finalPass;
+                    bool mblurMode;
+                    irr::core::matrix4 preViewMatrix;
             }postShaderCallback;
 
         private:

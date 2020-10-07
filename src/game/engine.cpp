@@ -15,6 +15,8 @@ engine::engine(){
     haveSSRTGI              = true;
     SSRTStep                = 16;
     waterMapSize            = 512;
+    mblurStep               = 4;
+    haveMblur               = true;
 
     loadConfig();
 
@@ -176,6 +178,7 @@ engine::engine(){
     post_ssrtConf = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "ssrtConf", video::ECF_A16B16G16R16F);
     post_sky = driver->addRenderTargetTexture(core::dimension2d<u32>(1024, 1024), "post_sky", video::ECF_A8R8G8B8);
     post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
+    post_final = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "final", video::ECF_A8R8G8B8);
 
     post = driver->addRenderTarget();
     core::array<video::ITexture*> textureArray(3);
@@ -189,6 +192,7 @@ engine::engine(){
     water->renderTarget = post;
 
     postShaderCallback.parent = this;
+    postShaderCallback.preViewMatrix = camera->getViewMatrix();
 
 #define initPostMat(p) \
     p.setTexture(0,post_tex);\
@@ -216,6 +220,12 @@ engine::engine(){
     ssaoMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/ssao.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/ssao.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+    initPostMat(mblurMaterial);
+    mblurMaterial.setTexture(5,post_final);
+    mblurMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/mblur.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/mblur.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
     initPostMat(ssrtMaterial);
     ssrtMaterial.setTexture(5,post_sky);
@@ -253,6 +263,7 @@ void engine::sceneLoop(){
     postShaderCallback.lightMode = false;
     postShaderCallback.finalPass  = false;
     postShaderCallback.ssrtMode = false;
+    postShaderCallback.mblurMode = false;
     auto cm  = camera->getPosition();
 
     if(cm.Y<waterLevel){
@@ -338,10 +349,23 @@ void engine::sceneLoop(){
 
     //最终后期处理
     postShaderCallback.finalPass = true;
-    driver->setRenderTarget(0);
+    if(haveMblur){
+        driver->setRenderTarget(post_final);
+    }else{
+        driver->setRenderTarget(0);
+    }
     driver->setMaterial(postMaterial);
     drawScreen;
     postShaderCallback.finalPass = false;
+
+    if(haveMblur){
+        //动态模糊
+        postShaderCallback.mblurMode = true;
+        driver->setRenderTarget(0);
+        driver->setMaterial(mblurMaterial);
+        drawScreen;
+        postShaderCallback.mblurMode = false;
+    }
 
     //渲染gui
     onDraw();
@@ -357,6 +381,9 @@ void engine::sceneLoop(){
         device->setWindowCaption(str.c_str());
         lastFPS = fps;
     }
+
+    //为下一帧做准备
+    postShaderCallback.preViewMatrix = camera->getViewMatrix();
 }
 void engine::worldLoop(){
     if(dynamicsWorld && deltaTime!=0.0f){
@@ -505,6 +532,11 @@ void engine::loadConfig(){
                     iss>>SSRTStep;
                 }else if(key=="waterMapSize"){
                     iss>>waterMapSize;
+                }else if(key=="mblurStep"){
+                    iss>>mblurStep;
+                    if(mblurStep<=1){
+                        haveMblur = false;
+                    }
                 }
             }
         }
@@ -550,6 +582,11 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         services->setPixelShaderConstant(services->getPixelShaderConstantID("ssrtConfMap"),&var6, 1);
         services->setPixelShaderConstant(services->getPixelShaderConstantID("skyMatrix") , parent->skyMatrix.pointer(), 16);
     }
+    if(mblurMode){
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("resultMap"),&var5, 1);
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("mblurStep"),&parent->mblurStep, 1);
+    }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);
 
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
@@ -557,6 +594,7 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
 
     auto pmat = parent->camera->getProjectionMatrix();
     services->setPixelShaderConstant(services->getPixelShaderConstantID("ProjMatrix") , pmat.pointer(), 16);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("preViewMatrix") , preViewMatrix.pointer(), 16);
 
     auto vmat = parent->camera->getViewMatrix();
     services->setPixelShaderConstant(services->getPixelShaderConstantID("ViewMatrix") , vmat.pointer(), 16);

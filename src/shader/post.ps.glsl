@@ -12,6 +12,7 @@ uniform vec3 camera;
 uniform float waterLevel;
 uniform mat4 ProjMatrix;
 uniform mat4 ViewMatrix;
+uniform mat4 preViewMatrix;
 
 uniform int windowWidth;
 uniform int windowHeight;

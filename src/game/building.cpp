@@ -290,6 +290,8 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
     //光源
     if(c->haveLight){
         res->light = lightManager.addLight(p,c->lightRange,c->lightColor);
+    }else{
+        res->light = NULL;
     }
 
     if(c->canBuildOn){
