@@ -8,6 +8,8 @@ uniform float clipY;
 uniform int enableClipY;
 uniform int clipYUp;
 
+uniform vec4 ambientColor;
+
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
 
@@ -48,9 +50,9 @@ void main(){
 
     vec3 lightcolor = lcolor.rgb - lcolor.rgb*shadow*shadowFactor*NdotL;
 
-    color.x*=(lightcolor.x+0.2);
-    color.y*=(lightcolor.y+0.2);
-    color.z*=(lightcolor.z+0.2);
+    color.x*=(lightcolor.x+ambientColor.x);
+    color.y*=(lightcolor.y+ambientColor.y);
+    color.z*=(lightcolor.z+ambientColor.z);
     if(color.a<0.7)
         discard;
 

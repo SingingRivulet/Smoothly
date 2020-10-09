@@ -11,6 +11,8 @@ uniform float clipY;
 uniform int enableClipY;
 uniform int clipYUp;
 
+uniform vec4 ambientColor;
+
 varying vec4 lcolor;
 varying vec4 pointPosition;
 varying vec3 normal;
@@ -34,9 +36,9 @@ void main(){
         discard;
     color.a = 1.0;
     gl_FragData[1] = color;
-    color.x*=(lcolor.x+0.2);
-    color.y*=(lcolor.y+0.2);
-    color.z*=(lcolor.z+0.2);
+    color.x*=(lcolor.x+ambientColor.x);
+    color.y*=(lcolor.y+ambientColor.y);
+    color.z*=(lcolor.z+ambientColor.z);
     
     vec4 lightView4 = shadowMatrix * pointPosition;
     vec3 lightView = lightView4.xyz / lightView4.w;

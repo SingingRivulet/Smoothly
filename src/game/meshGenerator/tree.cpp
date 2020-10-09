@@ -322,7 +322,7 @@ irr::scene::ISceneNode * terrain_item::genTree(int seed , irr::scene::SMesh *& s
         m.transform.setRotationDegrees(rotation);
         m.transform.setTranslation(it.first);
         irr::core::matrix4 backup = m.transform;
-        m.buildTree(it.second,4,0.05,4*randg.frand()+8,vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float r,int){
+        m.buildTree(it.second,4,0.05,4*randg.frand()+4,vec3((randg.frand()-0.5)*0.3,4,-(randg.frand()*0.3)),[&](const vec3 & o,float r,int){
             oris_child.push_back(std::pair<vec3,float>(o,r));
         });
         //二级分支

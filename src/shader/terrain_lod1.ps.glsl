@@ -8,10 +8,7 @@ uniform float clipY;
 uniform int enableClipY;
 uniform int clipYUp;
 
-uniform int lightCount;
-uniform vec3 lightPosition[8];
-uniform vec4 lightColor[8];
-uniform float lightRange[8];
+uniform vec4 ambientColor;
 
 uniform float scan_animation_showing;
 uniform float scan_animation_size;
@@ -206,9 +203,9 @@ void main(){
     NdotL = max(dot(rnormal, lightDir), 0.0);
     diffuse = gl_LightSource[0].diffuse;
     vec4 lcolor =  NdotL * diffuse;
-    lcolor.x +=0.1;
-    lcolor.y +=0.1;
-    lcolor.z +=0.1;
+    lcolor.x +=ambientColor.x;
+    lcolor.y +=ambientColor.y;
+    lcolor.z +=ambientColor.z;
     
     vec4 lightView4 = shadowMatrix * pointPosition4;
     vec3 lightView = lightView4.xyz / lightView4.w;

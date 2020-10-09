@@ -159,6 +159,8 @@ namespace smoothly{
             s32 SSRTStep;
             s32 mblurStep;
 
+            irr::video::SColorf ambientColor;
+
             class PostShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
                 public:
                     engine * parent;

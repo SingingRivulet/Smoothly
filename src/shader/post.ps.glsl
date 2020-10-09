@@ -109,7 +109,9 @@ void main(){
     if(haveSSRTGI==1)ssgi = getSSGI(realDepth,int(ssrtConf.x));
     
     color.rgb += bloom.rgb - color.rgb*ssaoFactor + ssgi*color.rgb*ssrtConf.y + ssgi*ssrtConf.z;
-    
+
+    if(abs(pos.x)>1.0 && abs(pos.y)>1.0 && abs(pos.z)>1.0){
+    }
     //水下
     float wk = clamp((camera.y - waterLevel),0.2,1.0);
     color.r *= wk;

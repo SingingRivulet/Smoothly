@@ -19,6 +19,7 @@ engine::engine(){
     haveMblur               = true;
 
     loadConfig();
+    ambientColor.set(1.0,0.2,0.2,0.2);
 
     //device = irr::createDevice(
     //            irr::video::EDT_OPENGL,

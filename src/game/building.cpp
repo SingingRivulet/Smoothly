@@ -952,7 +952,19 @@ void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererSe
     services->setVertexShaderConstant(services->getVertexShaderConstantID("shadowMatrix") , parent->shadowMatrix.pointer() , 16);
     core::matrix4 world = parent->driver->getTransform(video::ETS_WORLD);
     services->setVertexShaderConstant(services->getVertexShaderConstantID("modelMatrix") , world.pointer() , 16);
+    services->setPixelShaderConstant(services->getVertexShaderConstantID("ambientColor"), &parent->ambientColor.r, 4);
     services->setVertexShaderConstant(services->getVertexShaderConstantID("transformMatrix") , (parent->camera->getProjectionMatrix()*parent->camera->getViewMatrix()).pointer() , 16);
+    {
+        irr::video::SColor color;
+        irr::video::E_FOG_TYPE fogType;
+        f32 start;
+        f32 end;
+        f32 density;
+        bool pixelFog;
+        bool rangeFog;
+        parent->driver->getFog(color, fogType, start, end, density, pixelFog, rangeFog);
+        services->setPixelShaderConstant(services->getVertexShaderConstantID("FogMode"), (int*)&fogType, 1);
+    }
 }
 
 }

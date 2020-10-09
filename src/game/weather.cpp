@@ -135,7 +135,7 @@ void weather::updateWeather(int tm){
     glow         =   interpolation(0.0f,sglow          , 1.0f,cglow,cloudy);
 
     if(cloudy>0.7){
-        setRain((1-cloudy)*3);
+        setRain((cloudy-0.7)*3);
     }else{
         setRain(0);
     }
