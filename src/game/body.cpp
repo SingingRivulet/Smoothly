@@ -53,7 +53,13 @@ void body::bodyItem::updateFromWorld(){
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
 
+    //处理动画
     node->animateJoints(true,&animationBlend);
+    if(!ik_effectors.empty() && config && config->ik_solver){//如果需要使用ik
+        uploadIK();//上传数据至ik
+        solveIK();//更新ik
+        updateIK();//修正骨骼
+    }
 
     if(owner==parent->myUUID){//拥有的物体
         //尝试上传
@@ -1078,6 +1084,8 @@ void body::releaseBody(bodyItem * b){
         b->follow->followers.erase(b);
         b->follow=NULL;
     }
+
+    b->clearIKEffector();
 
     if(b->owner == myUUID && (!myUUID.empty())){//是自己拥有的
         removeCharacterChunk(b->uuid);

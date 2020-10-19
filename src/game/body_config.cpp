@@ -37,6 +37,28 @@ void body::loadBodyConfig(){
                                     bodyConfig[id]= ptr;
                                     ptr->mesh = mesh;
                                     auto item = c->child;
+
+                                    if(mesh->getMeshType()==irr::scene::EAMT_SKINNED){
+                                        //连接ik
+                                        auto skmesh = (irr::scene::ISkinnedMesh*)mesh;
+                                        auto & joints = skmesh->getAllJoints();
+                                        auto jointnum = joints.size();
+                                        if(jointnum>0){
+                                            //更新bone-id表
+                                            ptr->boneIDMap.clear();
+                                            for(u32 j=0;j<jointnum;++j){
+                                                ptr->boneIDMap[joints[j]] = j;
+                                            }
+                                            ptr->ik_nodes.resize(jointnum,NULL);
+                                            //创建ik对象
+                                            ptr->ik_solver = ik.solver.create(IK_FABRIK);
+                                            auto root = ptr->ik_solver->node->create(0);
+                                            ptr->ik_nodes[0] = root;
+                                            ptr->buildIKTree(joints[0],root);
+                                            printf("build ik tree : %d\n" , jointnum);
+                                        }
+                                    }
+
                                     while(item){
                                         if(item->type==cJSON_Number){
                                             if(strcmp(item->string,"width")==0){

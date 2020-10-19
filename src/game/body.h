@@ -8,6 +8,10 @@
 #include <mutex>
 #include <unordered_set>
 #include <unordered_map>
+extern "C"{
+#include <ik/ik.h>
+}
+
 namespace smoothly{
 
 class body:public mission{
@@ -245,6 +249,13 @@ class body:public mission{
 
                 float getPitchAngle();
 
+                void uploadIK();
+                void solveIK();
+                void updateIK();
+                void clearIKEffector();
+                ik_effector_t * addIKEffector(u32 boneID);
+                std::vector<std::pair<ik_effector_t*,u32> > ik_effectors;
+
                 irr::core::array<irr::scene::IAnimatedMeshSceneNode::IAnimationBlend> animationBlend;//动画混合器
 
                 inline void setBlenderAsDefault(){
@@ -350,6 +361,12 @@ class body:public mission{
 
             std::vector<audioBuffer*> audioBuffers;
 
+            std::map<irr::scene::ISkinnedMesh::SJoint*,int> boneIDMap;
+
+            //ik解算器
+            ik_solver_t                        * ik_solver;
+            std::vector<ik_node_t*>              ik_nodes;
+
             inline bodyConf(){
                 mesh         = NULL;
                 texture      = NULL;
@@ -364,9 +381,18 @@ class body:public mission{
                 haveAniCallback = false;
                 haveAILoop   = false;
                 hp           = 0;
+                ik_solver    = NULL;
             }
+            inline ~bodyConf(){
+                if(ik_solver){
+                    ik.solver.destroy(ik_solver);
+                }
+            }
+
+            void buildIKTree(irr::scene::ISkinnedMesh::SJoint * ori , ik_node_t * targ);
         };
         std::map<int,bodyConf*> bodyConfig;
+
 
         struct wearingConf{
             std::map<int,std::string>   attach;

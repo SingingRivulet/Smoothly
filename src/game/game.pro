@@ -27,8 +27,18 @@ INCLUDEPATH += ../../dep/irrlicht/include/
 INCLUDEPATH += ../../dep/freetype2/include/
 INCLUDEPATH += ../../dep/RakNet/include/
 
-LIBS += -luuid -lleveldb -lpthread -llua -ldl ../../dep/irrlicht/source/Irrlicht/libIrrlicht.a -lBulletDynamics -lBulletCollision -lLinearMath
-LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lSDL2 -lSDL2_ttf -lfreetype -lalut -lopenal ../../dep/RakNet/build/Lib/LibStatic/libRakNetLibStatic.a
+INCLUDEPATH += ../../dep/ik/ik/include/public
+INCLUDEPATH += ../../dep/ik/ik/include/private
+INCLUDEPATH += ../../dep/ik/build/ik/include/public
+INCLUDEPATH += ../../dep/ik/build/ik/include/private
+
+LIBS += -luuid -lleveldb -lpthread -llua -ldl
+LIBS += ../../dep/irrlicht/source/Irrlicht/libIrrlicht.a -lBulletDynamics -lBulletCollision -lLinearMath
+LIBS += ../../dep/ik/build/ik/ik.a
+LIBS += -L/usr/X11R6/lib$(LIBSELECT) -L../../lib/Linux
+LIBS += -lGL -lXxf86vm -lXext -lX11 -lSDL2 -lSDL2_ttf -lfreetype -lalut -lopenal
+LIBS += ../../dep/RakNet/build/Lib/LibStatic/libRakNetLibStatic.a
+
 HEADERS += \
     engine.h \
     myCharacter.h \
@@ -119,7 +129,8 @@ SOURCES += \
     mail.cpp \
     body_ai.cpp \
     body_api.cpp \
-    localLight.cpp
+    localLight.cpp \
+    body_ik.cpp
 
 FORMS += \
     ui/login.ui \

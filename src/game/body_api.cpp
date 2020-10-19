@@ -282,6 +282,73 @@ static int luafunc_rayTest(lua_State * L){
     return 0;
 }
 
+static int luafunc_ik_clearEffector(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+    self->clearIKEffector();
+    lua_pushboolean(L,1);
+    return 1;
+}
+static int luafunc_ik_createEffector(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+
+    if(self->config && self->config->mesh && self->config->mesh->getMeshType()==irr::scene::EAMT_SKINNED){
+        auto skmesh = (irr::scene::ISkinnedMesh*)self->config->mesh;
+        auto name = luaL_checkstring(L,2);
+        s32 id = skmesh->getJointNumber(name);
+        if(id>=0){
+            auto eff = self->addIKEffector(id);
+            if(eff){
+                lua_pushlightuserdata(L,eff);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+static int luafunc_ik_effector_setPosition(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(ik_effector_t*)ptr;
+    float x = luaL_checknumber(L,2);
+    float y = luaL_checknumber(L,3);
+    float z = luaL_checknumber(L,4);
+
+    self->target_position = ik.vec3.vec3(x,y,z);
+
+    lua_pushboolean(L,1);
+    return 1;
+}
+static int luafunc_ik_effector_setRotation(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(ik_effector_t*)ptr;
+    float x = luaL_checknumber(L,2);
+    float y = luaL_checknumber(L,3);
+    float z = luaL_checknumber(L,4);
+    float w = luaL_checknumber(L,5);
+
+    self->target_rotation = ik.quat.quat(x,y,z,w);
+
+    lua_pushboolean(L,1);
+    return 1;
+}
+
 static int luafunc_getShootDir(lua_State * L){//弹道计算（因为用得太多，所以用c加速）
     vec3 ori,target;
     float gravity;
@@ -462,6 +529,33 @@ void body::loadBodyLuaAPI(lua_State * L){
         lua_pushstring(L,"getFlag");
         lua_pushcfunction(L,luafunc_getFlag);
         lua_settable(L,-3);
+
+        lua_pushstring(L,"ik");
+        lua_createtable(L,0,3);
+        {
+            lua_pushstring(L,"effector");
+            lua_createtable(L,0,2);
+            {
+                lua_pushstring(L,"setPosition");
+                lua_pushcfunction(L,luafunc_ik_effector_setPosition);
+                lua_settable(L,-3);
+
+                lua_pushstring(L,"setRotation");
+                lua_pushcfunction(L,luafunc_ik_effector_setRotation);
+                lua_settable(L,-3);
+            }
+            lua_settable(L,-3);
+
+            lua_pushstring(L,"createEffector");
+            lua_pushcfunction(L,luafunc_ik_createEffector);
+            lua_settable(L,-3);
+
+            lua_pushstring(L,"clearEffector");
+            lua_pushcfunction(L,luafunc_ik_clearEffector);
+            lua_settable(L,-3);
+        }
+        lua_settable(L,-3);
+
     }
 
     lua_setglobal(L,"bodyAPI");

@@ -1,0 +1,91 @@
+#include "ik/build_info_static.h"
+#include "ik/build_info_for_every_compile.h"
+
+#define QUOTE(str) #str
+#define EXPAND_AND_QUOTE(str) QUOTE(str)
+
+#define IK_VERSION "${IK_VERSION}." EXPAND_AND_QUOTE(IK_BUILD_NUMBER)
+#define IK_CMAKE_CONFIG \
+    "    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \\\n" \
+    "    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} \\\n" \
+    "    -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} \\\n" \
+    "    -DIK_API_NAME=\"${IK_API_NAME}\" \\\n" \
+    "    -DIK_BENCHMARKS=${IK_BENCHMARKS} \\\n" \
+    "    -DIK_DOT_EXPORT=${IK_DOT_EXPORT} \\\n" \
+    "    -DIK_LIB_TYPE=${IK_LIB_TYPE} \\\n" \
+    "    -DIK_MEMORY_DEBUGGING=${IK_MEMORY_DEBUGGING} \\\n" \
+    "    -DIK_MEMORY_BACKTRACE=${IK_MEMORY_BACKTRACE} \\\n" \
+    "    -DIK_PIC=${IK_PIC} \\\n" \
+    "    -DIK_PRECISION=${IK_PRECISION} \\\n" \
+    "    -DIK_PROFILING=${IK_PROFILING} \\\n" \
+    "    -DIK_PYTHON=${IK_PYTHON} \\\n" \
+    "    -DIK_TESTS=${IK_TESTS}"
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_version(void)
+{
+    return IK_VERSION;
+}
+
+/* ------------------------------------------------------------------------- */
+int
+ik_build_info_static_build_number(void)
+{
+    return IK_BUILD_NUMBER;
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_host(void)
+{
+    return "${IK_HOST_COMPUTER}";
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_date(void)
+{
+    return IK_BUILD_TIME;
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_commit(void)
+{
+    return "${IK_COMMIT_INFO}";
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_compiler(void)
+{
+    return "${IK_COMPILER}";
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_cmake(void)
+{
+    return IK_CMAKE_CONFIG;
+}
+
+/* ------------------------------------------------------------------------- */
+const char*
+ik_build_info_static_all(void)
+{
+    return
+    "This is IK " IK_VERSION " (major,minor,patch,build number)\n"
+    "Host: ${IK_HOST_COMPUTER}\n"
+    "Time compiled: " IK_BUILD_TIME "\n"
+    "Commit: ${IK_COMMIT_INFO}\n"
+    "Compiler: ${IK_COMPILER}\n"
+    "CMake configuration:\n"
+    IK_CMAKE_CONFIG "\n"
+    "Other interesting variables:\n"
+    "    IK_HAVE_STDINT_H=${IK_HAVE_STDINT_H}\n"
+    "    IK_WARN_UNUSED=${IK_WARN_UNUSED}\n"
+    "    IK_PUBLIC_API=" EXPAND_AND_QUOTE(IK_PUBLIC_API) "\n"
+    "    IK_PRIVATE_API=" EXPAND_AND_QUOTE(IK_PRIVATE_API)
+    ;
+}

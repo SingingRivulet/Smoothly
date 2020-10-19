@@ -1,0 +1,12 @@
+# build folders
+build*/
+
+# IDE files
+*.kdev4
+*.idea
+
+# Wiki repository
+ik.wiki
+
+# valgrind results
+*.grind
