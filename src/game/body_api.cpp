@@ -293,7 +293,19 @@ static int luafunc_ik_clearEffector(lua_State * L){
     lua_pushboolean(L,1);
     return 1;
 }
-static int luafunc_ik_createEffector(lua_State * L){
+static int luafunc_ik_removeEffector(lua_State * L){
+    if(!lua_isuserdata(L,1))
+        return 0;
+    void * ptr=lua_touserdata(L,1);
+    if(ptr==NULL)
+        return 0;
+    auto self=(body::bodyItem*)ptr;
+    auto effname = luaL_checkstring(L,2);
+    self->removeIKEffector(effname);
+    lua_pushboolean(L,1);
+    return 1;
+}
+static int luafunc_ik_getEffector(lua_State * L){
     if(!lua_isuserdata(L,1))
         return 0;
     void * ptr=lua_touserdata(L,1);
@@ -303,12 +315,21 @@ static int luafunc_ik_createEffector(lua_State * L){
 
     if(self->config && self->config->mesh && self->config->mesh->getMeshType()==irr::scene::EAMT_SKINNED){
         auto skmesh = (irr::scene::ISkinnedMesh*)self->config->mesh;
-        auto name = luaL_checkstring(L,2);
-        s32 id = skmesh->getJointNumber(name);
-        if(id>=0){
-            auto eff = self->addIKEffector(id);
-            if(eff){
-                lua_pushlightuserdata(L,eff);
+        auto effname = luaL_checkstring(L,2);
+        if(lua_isstring(L,3)){
+            auto bonename = lua_tostring(L,3);
+            s32 id = skmesh->getJointNumber(bonename);
+            if(id>=0){
+                auto eff = self->getIKEffector(id,effname);
+                if(eff){
+                    lua_pushlightuserdata(L,eff);
+                    return 1;
+                }
+            }
+        }else{
+            auto it = self->ik_effectors.find(effname);
+            if(it!=self->ik_effectors.end()){
+                lua_pushlightuserdata(L,it->second.first);
                 return 1;
             }
         }
@@ -546,12 +567,16 @@ void body::loadBodyLuaAPI(lua_State * L){
             }
             lua_settable(L,-3);
 
-            lua_pushstring(L,"createEffector");
-            lua_pushcfunction(L,luafunc_ik_createEffector);
+            lua_pushstring(L,"getEffector");
+            lua_pushcfunction(L,luafunc_ik_getEffector);
             lua_settable(L,-3);
 
             lua_pushstring(L,"clearEffector");
             lua_pushcfunction(L,luafunc_ik_clearEffector);
+            lua_settable(L,-3);
+
+            lua_pushstring(L,"removeEffector");
+            lua_pushcfunction(L,luafunc_ik_removeEffector);
             lua_settable(L,-3);
         }
         lua_settable(L,-3);

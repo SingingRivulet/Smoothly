@@ -47,17 +47,17 @@ void body::bodyItem::uploadIK(){
 void body::bodyItem::solveIK(){
     for(auto it:ik_effectors){
         try{
-            auto iknode = config->ik_nodes.at(it.second);//没有节点在这一步会throw
-            config->ik_solver->effector->attach(it.first , iknode);
+            auto iknode = config->ik_nodes.at(it.second.second);//没有节点在这一步会throw
+            config->ik_solver->effector->attach(it.second.first , iknode);
         }catch(...){
-            printf("error:joint %d no found\n",it.second);
+            printf("error:joint %d no found\n",it.second.second);
         }
     }
     ik.solver.rebuild(config->ik_solver);
     ik.solver.update_distances(config->ik_solver);
     ik.solver.solve(config->ik_solver);
     for(auto it:ik_effectors){
-        config->ik_solver->effector->detach(it.first);
+        config->ik_solver->effector->detach(it.second.first);
     }
 }
 
@@ -95,16 +95,36 @@ void body::bodyItem::updateIK(){
 void body::bodyItem::clearIKEffector(){
     if(!ik_effectors.empty() && config && config->ik_solver){
         for(auto it:ik_effectors){
-            config->ik_solver->effector->destroy(it.first);
+            config->ik_solver->effector->destroy(it.second.first);
         }
         ik_effectors.clear();
     }
 }
 
-ik_effector_t *body::bodyItem::addIKEffector(u32 boneID){
-    auto res = config->ik_solver->effector->create();
-    ik_effectors.push_back(std::pair<ik_effector_t*,u32>(res,boneID));
-    return res;
+void body::bodyItem::removeIKEffector(const std::string & name){
+    if(config && config->ik_solver){
+        auto it = ik_effectors.find(name);
+        if(it!=ik_effectors.end()){
+            config->ik_solver->effector->destroy(it->second.first);
+            ik_effectors.erase(it);
+        }
+    }
+}
+
+ik_effector_t *body::bodyItem::getIKEffector(u32 boneID, const std::string & name){
+    if(config && config->ik_solver){
+        auto it = ik_effectors.find(name);
+        if(it!=ik_effectors.end()){
+            it->second.second = boneID;
+            return it->second.first;
+        }else{
+            auto res = config->ik_solver->effector->create();
+            ik_effectors[name] = std::pair<ik_effector_t*,u32>(res,boneID);
+            return res;
+        }
+    }else{
+        return NULL;
+    }
 }
 
 }

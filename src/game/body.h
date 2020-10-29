@@ -253,8 +253,9 @@ class body:public mission{
                 void solveIK();
                 void updateIK();
                 void clearIKEffector();
-                ik_effector_t * addIKEffector(u32 boneID);
-                std::vector<std::pair<ik_effector_t*,u32> > ik_effectors;
+                void removeIKEffector(const std::string & name);
+                ik_effector_t * getIKEffector(u32 boneID,const std::string & name);
+                std::unordered_map<std::string,std::pair<ik_effector_t*,u32> > ik_effectors;
 
                 irr::core::array<irr::scene::IAnimatedMeshSceneNode::IAnimationBlend> animationBlend;//动画混合器
 
