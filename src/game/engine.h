@@ -144,7 +144,8 @@ namespace smoothly{
                                     * post_ssrt ,
                                     * post_ssrtConf ,
                                     * post_sky ,
-                                    * post_final;
+                                    * post_final ,
+                                    * post_shadow;
             irr::core::matrix4 skyMatrix;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
@@ -152,6 +153,8 @@ namespace smoothly{
             irr::video::SMaterial lightMaterial;//延迟光照
             irr::video::SMaterial ssaoMaterial;//ssao
             irr::video::SMaterial ssrtMaterial;//ssrt
+            irr::video::SMaterial shadowMapMaterial;
+            irr::video::SMaterial shadowBlendMaterial;
 
             bool haveSSAO;
             bool haveSSRTGI;
@@ -172,8 +175,15 @@ namespace smoothly{
                     bool ssrtMode;
                     bool finalPass;
                     bool mblurMode;
+                    bool shadowMapMode;
+                    bool shadowBlendMode;
                     irr::core::matrix4 preViewMatrix;
             }postShaderCallback;
+
+            //阴影相关
+            irr::core::vector3df           lightDir;
+            irr::f32                       shadowFactor;
+            irr::core::matrix4             shadowMatrix;
 
         private:
             std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）

@@ -180,6 +180,7 @@ engine::engine(){
     post_sky = driver->addRenderTargetTexture(core::dimension2d<u32>(1024, 1024), "post_sky", video::ECF_A8R8G8B8);
     post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
     post_final = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "final", video::ECF_A8R8G8B8);
+    post_shadow = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "shadow", video::ECF_A8R8G8B8);
 
     post = driver->addRenderTarget();
     core::array<video::ITexture*> textureArray(3);
@@ -203,6 +204,7 @@ engine::engine(){
     p.setTexture(4,post_posi);\
     p.ZBuffer = video::ECFN_DISABLED;
 
+    printf("post shader:final\n");
     initPostMat(postMaterial);
     postMaterial.setTexture(5,post_ssao);
     postMaterial.setTexture(6,post_ssrt);
@@ -212,22 +214,29 @@ engine::engine(){
                                     "../shader/post.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
 
+    printf("post shader:light\n");
     initPostMat(lightMaterial);
     lightMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/light.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/light.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
+
+    printf("post shader:ssao\n");
     initPostMat(ssaoMaterial);
     ssaoMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/ssao.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/ssao.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
+
+    printf("post shader:mblur\n");
     initPostMat(mblurMaterial);
     mblurMaterial.setTexture(5,post_final);
     mblurMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/mblur.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/mblur.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
+
+    printf("post shader:ssrt\n");
     initPostMat(ssrtMaterial);
     ssrtMaterial.setTexture(5,post_sky);
     ssrtMaterial.setTexture(6,post_ssrtConf);
@@ -236,6 +245,20 @@ engine::engine(){
                                     "../shader/ssrt.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
 
+    printf("post shader:shadow blend\n");
+    initPostMat(shadowBlendMaterial);
+    shadowBlendMaterial.setTexture(5,post_shadow);
+    shadowBlendMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/shadowBlend.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/shadowBlend.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+
+    printf("post shader:shadow map\n");
+    initPostMat(shadowMapMaterial);
+    shadowMapMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/shadowMap.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/shadowMap.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
 }
 engine::~engine(){
     ttf->drop();
@@ -265,6 +288,8 @@ void engine::sceneLoop(){
     postShaderCallback.finalPass  = false;
     postShaderCallback.ssrtMode = false;
     postShaderCallback.mblurMode = false;
+    postShaderCallback.shadowMapMode = false;
+    postShaderCallback.shadowBlendMode = false;
     auto cm  = camera->getPosition();
 
     if(cm.Y<waterLevel){
@@ -303,6 +328,20 @@ void engine::sceneLoop(){
                                                   irr::core::vector3df(-1,-1,1),\
                                                   irr::core::vector3df( 1, 1,1)),\
                            irr::video::SColor(0,0,0,0));
+
+    //后期：阴影
+    //pass 1
+    driver->setRenderTarget(post_shadow,false,false);
+    driver->setMaterial(shadowMapMaterial);
+    postShaderCallback.shadowMapMode = true;
+    drawScreen;
+    postShaderCallback.shadowMapMode = false;
+    //pass 2
+    driver->setRenderTarget(post_tex,false,false);
+    driver->setMaterial(shadowBlendMaterial);
+    postShaderCallback.shadowBlendMode = true;
+    drawScreen;
+    postShaderCallback.shadowBlendMode = false;
 
     //后期：光照
     driver->setRenderTarget(post_tex,false,false);
@@ -588,10 +627,22 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
         services->setPixelShaderConstant(services->getPixelShaderConstantID("resultMap"),&var5, 1);
         services->setPixelShaderConstant(services->getPixelShaderConstantID("mblurStep"),&parent->mblurStep, 1);
     }
+    if(shadowBlendMode){
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowViewMap"),&var5, 1);
+    }
+    if(shadowMapMode){
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var5, 1);
+    }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);
 
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowWidth"),&parent->width, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("windowHeight"),&parent->height, 1);
+
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("lightDir"),&parent->lightDir.X, 3);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowFactor"),&parent->shadowFactor, 1);
+    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMatrix"),parent->shadowMatrix.pointer(), 16);
 
     auto pmat = parent->camera->getProjectionMatrix();
     services->setPixelShaderConstant(services->getPixelShaderConstantID("ProjMatrix") , pmat.pointer(), 16);

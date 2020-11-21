@@ -13,13 +13,9 @@ class shadow:public cloud{
         irr::scene::ICameraSceneNode * shadowMapLight;          //光源
         irr::video::ITexture         * shadowMapTexture;        //渲染目标
         irr::s32                       shadowMapShader;         //光影着色器
-        irr::core::vector3df           lightDir;
-        irr::f32                       shadowFactor;
         shadow();
 
         void renderShadow()override;
-
-        irr::core::matrix4 shadowMatrix;
 
         class ShadowCallback:public irr::video::IShaderConstantSetCallBack{//shader回调
             public:

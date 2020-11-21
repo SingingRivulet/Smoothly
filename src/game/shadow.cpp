@@ -12,6 +12,7 @@ shadow::shadow(){
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
     shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(shadowArea,shadowArea,0.9f,400.f),true);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMap", video::ECF_R32F);//创建渲染目标
+    shadowMapMaterial.setTexture(5,shadowMapTexture);//设置后期材质
     shadowFactor = 0.3;
     defaultCallback.parent = this;
 }
