@@ -253,6 +253,14 @@ engine::engine(){
                                     "../shader/shadowBlend.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
 
+    printf("post shader:shadow soft\n");
+    initPostMat(shadowSoftMaterial);
+    shadowSoftMaterial.setTexture(5,post_shadow);
+    shadowSoftMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/shadowSoft.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/shadowSoft.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+
     printf("post shader:shadow map\n");
     initPostMat(shadowMapMaterial);
     shadowMapMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
@@ -337,9 +345,12 @@ void engine::sceneLoop(){
     drawScreen;
     postShaderCallback.shadowMapMode = false;
     //pass 2
+    driver->setMaterial(shadowSoftMaterial);
+    postShaderCallback.shadowBlendMode = true;
+    drawScreen;
+    //pass 3
     driver->setRenderTarget(post_tex,false,false);
     driver->setMaterial(shadowBlendMaterial);
-    postShaderCallback.shadowBlendMode = true;
     drawScreen;
     postShaderCallback.shadowBlendMode = false;
 

@@ -154,6 +154,7 @@ namespace smoothly{
             irr::video::SMaterial ssaoMaterial;//ssao
             irr::video::SMaterial ssrtMaterial;//ssrt
             irr::video::SMaterial shadowMapMaterial;
+            irr::video::SMaterial shadowSoftMaterial;
             irr::video::SMaterial shadowBlendMaterial;
 
             bool haveSSAO;
