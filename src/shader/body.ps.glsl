@@ -1,8 +1,4 @@
 uniform sampler2D tex;
-uniform sampler2D shadowMap;
-uniform mat4 shadowMatrix;
-uniform mat4 modelMatrix;
-uniform float shadowFactor;
 uniform vec3 campos;
 uniform float clipY;
 uniform int enableClipY;
@@ -34,19 +30,7 @@ void main(){
     vec4 color = vec4(1.0,1.0,1.0,1.0);//texture2D(tex,t);
     gl_FragData[1] = color;
 
-    vec4 lightView4 = shadowMatrix * pointPosition;
-    vec3 lightView = lightView4.xyz / lightView4.w;
-    lightView = lightView * 0.5 + 0.5;
-
-    float closestDepth;
-    if(lightView.x<0.0 || lightView.x>1.0 || lightView.y<0.0 || lightView.y>1.0)
-        closestDepth = 1.0;
-    else
-        closestDepth = texture2D(shadowMap, lightView.xy).r;
-    float currentDepth = lightView.z;
-    float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
-
-    vec3 lightcolor = lcolor.rgb - lcolor.rgb*shadow*shadowFactor*NdotL;
+    vec3 lightcolor = lcolor.rgb;
 
     color.x*=(lightcolor.x+0.2);
     color.y*=(lightcolor.y+0.2);

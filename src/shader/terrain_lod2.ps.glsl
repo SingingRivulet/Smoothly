@@ -1,8 +1,4 @@
 uniform sampler2D tex;
-uniform sampler2D shadowMap;
-uniform mat4 shadowMatrix;
-uniform mat4 modelMatrix;
-uniform float shadowFactor;
 uniform vec3 campos;
 uniform float clipY;
 uniform int enableClipY;
@@ -204,19 +200,6 @@ void main(){
     lcolor.y +=ambientColor.y;
     lcolor.z +=ambientColor.z;
     
-    vec4 lightView4 = shadowMatrix * pointPosition4;
-    vec3 lightView = lightView4.xyz / lightView4.w;
-    lightView = lightView * 0.5 + 0.5;
-    
-    float closestDepth;
-    if(lightView.x<0.0 || lightView.x>1.0 || lightView.y<0.0 || lightView.y>1.0)
-        closestDepth = 1.0;
-    else
-        closestDepth = texture2D(shadowMap, lightView.xy).r;
-    float currentDepth = lightView.z;
-    float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
-    
-    lcolor -= vec4(lcolor.rgb,0.0)*shadow*shadowFactor*NdotL;
     vec4 scolor = vec4(diffuseColor.x*lcolor.x , diffuseColor.y*lcolor.y , diffuseColor.z*lcolor.z ,1.0);
 
     scolor.b += scan_animation_showing/exp(abs(length(pointPosition-campos)-scan_animation_size));
