@@ -197,6 +197,7 @@ class body:public mission{
                 int                                  id,hp;
                 std::string                          uuid,owner;
                 irr::scene::IAnimatedMeshSceneNode * node;
+                irr::scene::IAnimatedMeshSceneNode * shadow;
                 audioSource                        * audio;
                 vec3                                 lookAt;
                 body                               * parent;

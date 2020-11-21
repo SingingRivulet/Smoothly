@@ -77,7 +77,8 @@ HEADERS += \
     ui/missioneditor.h \
     mail.h \
     graphbase.h \
-    localLight.h
+    localLight.h \
+    texturepool.h
 
 SOURCES += \
     createTerrainMesh.cpp \

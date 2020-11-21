@@ -46,6 +46,7 @@ terrain::terrain(){
     lastUCT = 0;
 
     terrainShaderCallback.parent = this;
+
 }
 terrain::~terrain(){
     for(auto it:chunks)
@@ -157,28 +158,6 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->rigidBody->setUserPointer(&(res->info));
     
     this->dynamicsWorld->addRigidBody(res->rigidBody);
-
-
-    /*
-    for(int i=0;i<16;++i){
-        for(int j=0;j<16;++j){
-            float deltax,deltay;
-
-            if(i==15)
-                deltax = mapBuf[i][j] - mapBuf[i-1][j];
-            else
-                deltax = mapBuf[i][j] - mapBuf[i+1][j];
-
-            if(j==15)
-                deltay = mapBuf[i][j] - mapBuf[i][j-1];
-            else
-                deltay = mapBuf[i][j] - mapBuf[i][j+1];
-
-            float delta = (deltax+deltay)/2;
-
-        }
-    }
-    */
 
     res->show();
 

@@ -86,6 +86,7 @@ namespace smoothly{
                 }
 
                 int collMap[16][16];
+
             };
             std::map<ipair,chunk*> chunks;
             chunk * genChunk(int x,int y);
@@ -116,26 +117,6 @@ namespace smoothly{
                                                     );
                 }
             }
-            /*
-            inline irr::s32 getShader(int x,int y,int & lv){
-                int len = std::max(abs(x-cm_cx) , abs(y-cm_cy));
-                if(len<2){
-                    lv = 1;
-                    return shaderv1;
-                }else
-                if(len<4){
-                    lv = 2;
-                    return shaderv2;
-                }else
-                if(len<8){
-                    lv = 3;
-                    return shaderv3;
-                }else{
-                    lv = 4;
-                    return shaderv4;
-                }
-            }
-            */
             bool first;
             inline bool updateCamChunk(){
                 if(camera==NULL)

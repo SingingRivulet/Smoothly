@@ -61,6 +61,23 @@ void body::bodyItem::updateFromWorld(){
         updateIK();//修正骨骼
     }
 
+    //更新光影
+    if(this->shadow){
+        this->shadow->setPosition(irrPos);
+        this->shadow->setRotation(irrRot);
+        u32 num = node->getJointCount();
+        if(num == this->shadow->getJointCount()){
+            for(u32 i=0;i<num;++i){
+                auto jt1 = this->shadow->getJointNode(i);
+                auto jt2 = node->getJointNode(i);
+                if(jt1 && jt2){
+                    jt1->setPosition(jt2->getPosition());
+                    jt1->setRotation(jt2->getRotation());
+                }
+            }
+        }
+    }
+
     if(owner==parent->myUUID){//拥有的物体
         //尝试上传
         if(fabs(lastPosition.X-irrPos.X)>0.01 || fabs(lastPosition.Y!=irrPos.Y)>0.01 || fabs(lastPosition.Z!=irrPos.Z)>0.01){
@@ -724,6 +741,11 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node->setMaterialFlag(irr::video::EMF_LIGHTING, true );
     p->node->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     p->node->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
+
+    //光影
+    p->shadow = shadowSpace->addAnimatedMeshSceneNode(c->mesh);
+    p->shadow->setMaterialType((irr::video::E_MATERIAL_TYPE)shadowMapShader);
+    p->shadow->setJointMode(irr::scene::EJUOR_CONTROL);
 
     irr::scene::ISkinnedMesh* skinnedMesh = reinterpret_cast<irr::scene::ISkinnedMesh*>(p->node->getMesh());
     skinnedMesh->animationOverrideCallback = &p->jointCallback;

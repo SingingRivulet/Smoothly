@@ -25,6 +25,7 @@ class control:public mail{
         void processCmd();
         void processCmd_mission(std::istringstream & iss);
         void processCmd_mail(std::istringstream & iss);
+        void processCmd_ik(std::istringstream & iss);
 };
 
 }
