@@ -35,7 +35,7 @@ void main(){
     float rayMarchStepLen = 0.2;
     vec3 rayMarchPos = pos;
     vec3 reflectColor = vec3(0.0);
-    if(abs(pos.x)>0.1 && abs(pos.y)>0.1 && abs(pos.z)>0.1){
+    if(abs(pos.x)>0.1 || abs(pos.y)>0.1 || abs(pos.z)>0.1){
         vec3 ray_dir = normalize(pos-camera);
         vec3 ray_reflect = normalize(reflect(ray_dir,normal));//反射光线
         bool haveColl = false;

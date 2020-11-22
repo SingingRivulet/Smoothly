@@ -22,7 +22,7 @@ void main(){
     vec3 pos = texture2D(posMap,position).xyz;//位置
     if(abs(pos.x)>0.1 || abs(pos.y)>0.1 || abs(pos.z)>0.1){
         float color = 0.0;
-        int seg = 5;
+        int seg = 2;
         int i = -seg;
         int j = 0;
         float f = 0.0;

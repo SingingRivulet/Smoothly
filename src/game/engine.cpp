@@ -645,6 +645,7 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     if(shadowMapMode){
         s32 var5 = 5;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var5, 1);
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
     }
     services->setPixelShaderConstant(services->getPixelShaderConstantID("SSRTStep"),&parent->SSRTStep, 1);
 

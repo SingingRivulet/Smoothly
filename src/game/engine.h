@@ -35,8 +35,6 @@ namespace smoothly{
             irr::scene::ISceneCollisionManager * collisionManager;
             irr::core::stringc          vendor;
 
-            irr::s32 shadowMapSize,shadowArea;
-
             irr::core::vector2di screenCenter;
 
             localLight lightManager;
@@ -185,6 +183,8 @@ namespace smoothly{
             irr::core::vector3df           lightDir;
             irr::f32                       shadowFactor;
             irr::core::matrix4             shadowMatrix;
+            irr::s32                       shadowMapSize ,
+                                           shadowArea;
 
         private:
             std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）
