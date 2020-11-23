@@ -530,6 +530,38 @@ void engine::playAudioPosition(const core::vector3df & posi, engine::audioBuffer
     }
 }
 
+bool engine::pointVisible(const core::vector3df & pos3d){
+    irr::core::matrix4 trans = camera->getProjectionMatrix();
+    trans *= postShaderCallback.preViewMatrix;
+
+    irr::f32 transformedPos[4] = { pos3d.X, pos3d.Y, pos3d.Z, 1.0f };
+
+    trans.multiplyWith1x4Matrix(transformedPos);
+
+    if (transformedPos[3] < 0)
+        return false;
+
+    const irr::f32 zDiv = transformedPos[3] == 0.0f ? 1.0f :
+                                                 irr::core::reciprocal(transformedPos[3]);
+
+    float x = transformedPos[0] * zDiv;
+    float y = transformedPos[1] * zDiv;
+    float z = transformedPos[2] * zDiv;
+
+    if(x<-1 || x>1 || y<-1 || y>1 || z<0 || z>1)//在屏幕外
+        return false;
+
+    u32 sx = round(width*((x+1.0)/2.0));
+    u32 sy = round(height*((y+1.0)/2.0));
+
+    auto buf = (u32*)post_depth->lock(irr::video::ETLM_READ_ONLY);
+    u32 dep = buf[sy*width+sx];
+    u32 ndep = z*0xffffffff;
+    post_depth->unlock();
+
+    return (ndep<dep);
+}
+
 void engine::updateListener(){
     auto posi = camera->getPosition();
     auto targ = camera->getTarget();

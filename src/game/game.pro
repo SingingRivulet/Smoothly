@@ -78,7 +78,8 @@ HEADERS += \
     mail.h \
     graphbase.h \
     localLight.h \
-    texturepool.h
+    texturepool.h \
+    group_ai.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -131,7 +132,8 @@ SOURCES += \
     body_ai.cpp \
     body_api.cpp \
     localLight.cpp \
-    body_ik.cpp
+    body_ik.cpp \
+    group_ai.cpp
 
 FORMS += \
     ui/login.ui \

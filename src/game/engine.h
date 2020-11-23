@@ -186,6 +186,9 @@ namespace smoothly{
             irr::s32                       shadowMapSize ,
                                            shadowArea;
 
+        public:
+            bool pointVisible(const irr::core::vector3df & p);//判断一个点是否在视野内（hi-z剔除）
+
         private:
             std::list<audioSource*> playingSources;//正在播放的声音（由系统接管）
             void updateListener();
