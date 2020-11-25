@@ -1,9 +1,9 @@
 #ifndef SMOOTHLY_CONTROL
 #define SMOOTHLY_CONTROL
-#include "mail.h"
+#include "group_ai.h"
 namespace smoothly{
 
-class control:public mail{
+class control:public group_ai{
     public:
         control();
         void processControl();

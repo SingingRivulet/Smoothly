@@ -3,7 +3,11 @@
 namespace smoothly{
 
 group_ai::group_ai(){
+    L = luaL_newstate();
+}
 
+group_ai::~group_ai(){
+    lua_close(L);
 }
 
 BrainTree::Node::Status group_ai::group::Action::update(){
@@ -31,6 +35,87 @@ BrainTree::Node::Status group_ai::group::Action::update(){
         lua_settop(G->parent->L,0);
     }
     return res;
+}
+
+void group_ai::group::load(cJSON * data, std::shared_ptr<BrainTree::Composite> n){
+    if(data && data->type==cJSON_Array){
+        auto line = data->child;
+        while(line){
+            if(line->type == cJSON_Object){
+                auto type = cJSON_GetObjectItem(line,"type");
+                auto decorator = cJSON_GetObjectItem(line,"decorator");
+                auto children = cJSON_GetObjectItem(line,"children");
+                if(type->type==cJSON_String){
+
+                    #define addnode \
+                        if(decorator && decorator->type==cJSON_String){\
+                            if(strcmp(decorator->valuestring,"succeeder")==0){\
+                                auto d = std::make_shared<BrainTree::Succeeder>();\
+                                d->setChild(newnode);\
+                                n->addChild(d);\
+                            }else if(strcmp(decorator->valuestring,"failer")==0){\
+                                auto d = std::make_shared<BrainTree::Failer>();\
+                                d->setChild(newnode);\
+                                n->addChild(d);\
+                            }else if(strcmp(decorator->valuestring,"repeater")==0){\
+                                auto lim = cJSON_GetObjectItem(line,"lim");\
+                                int limit = 0;\
+                                if(lim && lim->type==cJSON_String){\
+                                    limit = lim->valueint;\
+                                }\
+                                auto d = std::make_shared<BrainTree::Repeater>(limit);\
+                                d->setChild(newnode);\
+                                n->addChild(d);\
+                            }else{\
+                                n->addChild(newnode);\
+                            }\
+                        }else{\
+                            n->addChild(newnode);\
+                        }
+
+                    if(strcmp(type->valuestring,"action")==0){
+
+                        auto func = cJSON_GetObjectItem(line,"func");
+                        auto arg = cJSON_GetObjectItem(line,"arg");
+                        if(func && func->type==cJSON_String){
+                            auto newnode = std::make_shared<Action>();
+                            newnode->G = this;
+                            newnode->func = func->valuestring;
+                            if(arg && arg->type==cJSON_String){
+                                newnode->arg = arg->valuestring;
+                            }
+                            addnode;
+                        }
+
+                    }else if(strcmp(type->valuestring,"selector")==0){
+                        auto newnode = std::make_shared<BrainTree::Selector>();
+                        if(children){
+                            this->load(children , newnode);
+                        }
+                        addnode;
+                    }else if(strcmp(type->valuestring,"sequence")==0){
+                        auto newnode = std::make_shared<BrainTree::Sequence>();
+                        if(children){
+                            this->load(children , newnode);
+                        }
+                        addnode;
+                    }
+                    #undef addnode
+                }
+            }
+            line = line->next;
+        }
+    }
+}
+
+void group_ai::group::load(cJSON * data){
+    auto sequence = std::make_shared<BrainTree::Sequence>();
+    auto rep = std::make_shared<BrainTree::Repeater>();
+    rep->setChild(sequence);
+    tree.setRoot(rep);
+    if(data && data->type==cJSON_Array){
+        this->load(data , sequence);
+    }
 }
 
 }

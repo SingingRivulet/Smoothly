@@ -23,6 +23,8 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
         ptr = new chunk;
         ptr->x = x;
         ptr->y = y;
+        ptr->parent = this;
+        ptr->lodLevel = 0;
         linkChunk(ptr,x,y);
         chunks[ipair(x,y)]=ptr;
     }
@@ -143,6 +145,13 @@ void terrain_item::loop(){
         if((ends-starts)/(CLOCKS_PER_SEC/1000)>1)
             break;
     }
+
+    hizBegin();
+    for(auto it:chunks){
+        it.second->updateVisible();
+    }
+    hizEnd();
+
     int left = rmtQueue.size();
     if(left==0){
         chunkLeft=0;
@@ -290,6 +299,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
             vec3 pos(x,realHeight-4,y);
+            res->position = pos;
             res->node[0]->setPosition(pos);
             res->node[0]->updateAbsolutePosition();//更新矩阵
 
@@ -326,6 +336,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
             res->node[0]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
             vec3 pos(x,realHeight,y);
+            res->position = pos;
             res->node[0]->setPosition(pos);
             res->node[0]->updateAbsolutePosition();//更新矩阵
             res->shadowNode = createShadowNode(mesh_grass,0,-1,pos);
@@ -354,10 +365,11 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
                 ml=0;
             break;
         }
+        res->position = vec3(x,realHeight+it->second->deltaHeight,y);
         auto n = scene->addMeshSceneNode(
                     it->second->mesh[i],NULL,
                     -1,
-                    vec3(x,realHeight+it->second->deltaHeight,y),
+                    res->position ,
                     vec3(0,r,0),
                     it->second->scale
                     );
@@ -440,27 +452,31 @@ void terrain_item::occupy(int x, int y){
 void terrain_item::updateLOD(int x, int y, int lv){
     terrain::updateLOD(x,y,lv);
     findChunk(x,y){
+        it->second->lodLevel = lv;
         if(lv==0){
             for(auto c:it->second->children){
                 item * im = c.second;
-                for(int i=0;i<4;++i){
-                    if(im->node[i])
-                        im->node[i]->setVisible(false);
-                }
+                im->lodLevel = -1;
+                //for(int i=0;i<4;++i){
+                //    if(im->node[i])
+                //        im->node[i]->setVisible(false);
+                //}
             }
         }else{
             for(auto c:it->second->children){
                 item * im = c.second;
-                for(int i=0;i<4;++i){
-                    if(im->node[i])
-                        im->node[i]->setVisible(false);
-                }
+                im->lodLevel = -1;
+                //for(int i=0;i<4;++i){
+                //    if(im->node[i])
+                //        im->node[i]->setVisible(false);
+                //}
                 if(lv<im->hideLodLevel){
                     for(int i=lv-1;i>=0;--i){
                         //反向遍历lod列表
                         if(im->node[i]){
                             //找到可用的最大lod
-                            im->node[i]->setVisible(true);
+                            //im->node[i]->setVisible(true);
+                            im->lodLevel = i;
                             break;
                         }
                     }
@@ -835,6 +851,14 @@ void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t,con
     }
 }
 
+void terrain_item::chunk::updateVisible(){
+    if(lodLevel>0){
+        for(auto i : children){
+            i.second->updateVisible();
+        }
+    }
+}
+
 void terrain_item::chunk::unlink(){
     if(nearx0){
         nearx0->nearx1 = NULL;
@@ -867,6 +891,20 @@ void terrain_item::createChunk(int x, int y){
     if(it!=rmtCache.end()){
         if(setRemoveTable(x,y,it->second,false)){
             rmtCache.erase(it);
+        }
+    }
+}
+
+void terrain_item::item::updateVisible(){
+    if(!useHiZ || parent->parent->pointVisible(position)){
+        for(int i=0;i<4;++i){
+            if(node[i])
+                node[i]->setVisible(i==lodLevel);
+        }
+    }else{
+        for(int i=0;i<4;++i){
+            if(node[i])
+                node[i]->setVisible(false);
         }
     }
 }

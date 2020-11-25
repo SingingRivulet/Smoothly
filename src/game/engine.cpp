@@ -34,6 +34,7 @@ engine::engine(){
     param.Stencilbuffer = true;
     param.WindowSize.set(width,height);
     param.Bits = 16;
+    hizbuf_size = width*height;
 
     device = irr::createDeviceEx(param);
 
@@ -530,6 +531,10 @@ void engine::playAudioPosition(const core::vector3df & posi, engine::audioBuffer
     }
 }
 
+void engine::hizBegin(){
+    hizbuf = (u32*)post_depth->lock(irr::video::ETLM_READ_ONLY);
+}
+
 bool engine::pointVisible(const core::vector3df & pos3d){
     irr::core::matrix4 trans = camera->getProjectionMatrix();
     trans *= postShaderCallback.preViewMatrix;
@@ -548,18 +553,23 @@ bool engine::pointVisible(const core::vector3df & pos3d){
     float y = transformedPos[1] * zDiv;
     float z = transformedPos[2] * zDiv;
 
-    if(x<-1 || x>1 || y<-1 || y>1 || z<0 || z>1)//在屏幕外
+    if(x<=-1 || x>=1 || y<=-1 || y>=1 || z<=0 || z>=1)//在屏幕外
         return false;
 
     u32 sx = round(width*((x+1.0)/2.0));
     u32 sy = round(height*((y+1.0)/2.0));
+    u32 index = sy*width+sx;
+    if(index>=hizbuf_size)
+        return false;
 
-    auto buf = (u32*)post_depth->lock(irr::video::ETLM_READ_ONLY);
-    u32 dep = buf[sy*width+sx];
+    u32 dep = hizbuf[index];
     u32 ndep = z*0xffffffff;
-    post_depth->unlock();
 
     return (ndep<dep);
+}
+
+void engine::hizEnd(){
+    post_depth->unlock();
 }
 
 void engine::updateListener(){

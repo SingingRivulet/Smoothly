@@ -39,8 +39,10 @@ namespace smoothly{
             struct chunk;
             struct item{
                 irr::scene::ISceneNode  * node[4];
+                int lodLevel;
                 irr::scene::ISceneNode  * shadowNode;
                 mapId id;
+                vec3 position;
                 btRigidBody      * rigidBody;
                 btMotionState    * bodyState;
                 btTriangleMesh   * bodyMesh;
@@ -48,6 +50,7 @@ namespace smoothly{
                 bodyInfo info;
                 chunk * parent;
                 int hideLodLevel;
+                bool useHiZ;
                 inline item(){
                     rigidBody = NULL;
                     bodyState = NULL;
@@ -57,15 +60,21 @@ namespace smoothly{
                     shadowNode = NULL;
                     for(int i = 0;i<4;++i)
                         node[i] = NULL;
+                    lodLevel = -1;
+                    useHiZ = false;
                 }
+                void updateVisible();
             };
             struct chunk{
                 int x,y;
+                terrain_item * parent;
                 chunk *nearx0,*nearx1,*neary0,*neary1;//所有chunk构成一张二维链表，方便查询
                 irr::scene::ISceneNode * minimap_element;
                 std::string owner;
                 bool allowBuilding,allowColl,allowAttack;
                 std::map<mapItem,item*> children;
+                int lodLevel;
+                void updateVisible();
                 void unlink();
             };
             std::map<ipair,chunk*> chunks;
