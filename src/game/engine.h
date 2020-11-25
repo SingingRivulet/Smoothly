@@ -8,6 +8,7 @@
 #include <AL/alut.h>
 #include "graphbase.h"
 #include "localLight.h"
+#include <atomic>
 
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
@@ -64,7 +65,7 @@ namespace smoothly{
 
             irr::s32 waterMapSize;
 
-            bool running;
+            std::atomic<bool> running;
 
             irr::gui::IGUIFont * font;
 

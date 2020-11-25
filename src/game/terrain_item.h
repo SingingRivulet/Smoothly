@@ -4,6 +4,9 @@
 #include "../utils/cJSON.h"
 #include <map>
 #include <queue>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
 namespace smoothly{
     typedef client::mapItem mapItem;
     class terrain_item:public terrain{
@@ -151,6 +154,27 @@ namespace smoothly{
             irr::gui::IGUIButton * terrmapacl_save;
 
             bool isMyChunk(int x,int y);
+
+        private://hiz多线程
+
+            std::mutex hiz_solve_mtx;
+            std::condition_variable hiz_solve_cv;
+            void hiz_solve_wait(){
+                std::unique_lock<std::mutex> lck(hiz_solve_mtx);
+                hiz_solve_cv.wait(lck);
+            }
+            void hiz_solve_wake(){
+                std::unique_lock<std::mutex> lck(hiz_solve_mtx);
+                hiz_solve_cv.notify_all();
+            }
+
+            std::atomic<int> hiz_num;
+
+            std::mutex hiz_queue_lock;
+            std::queue<item*> hiz_queue;
+
+            void hiz_solve_mainThread();
+
     };
 }
 #endif

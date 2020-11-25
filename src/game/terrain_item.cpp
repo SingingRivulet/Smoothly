@@ -150,6 +150,7 @@ void terrain_item::loop(){
     for(auto it:chunks){
         it.second->updateVisible();
     }
+    while(hiz_num!=0);
     hizEnd();
 
     int left = rmtQueue.size();
@@ -331,6 +332,7 @@ terrain_item::item * terrain_item::makeTerrainItem(int id,int index,float x,floa
             res->id.y =y;
             res->id.id.id=id;
             res->id.id.index=index;
+            res->useHiZ = true;
             irr::video::ITexture * tex;
             res->node[0]=genGrass(x * y + index + id,res->hideLodLevel , tex);
             res->node[0]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
@@ -633,6 +635,16 @@ terrain_item::terrain_item(){
         terrmapacl_save->setVisible(false);
         terrmapacl_save->setOverrideColor(video::SColor(255,0,0,0));
     }
+
+    //hiz线程
+    hiz_num = 0;
+    for(int i=0;i<4;++i){
+        std::thread st([&](terrain_item * self){
+            printf("[status]create hiz thread\n");
+            self->hiz_solve_mainThread();
+        },this);
+        st.detach();
+    }
 }
 
 void terrain_item::setFullMapMode(bool m){
@@ -675,6 +687,7 @@ terrain_item::~terrain_item(){
     releaseAllChunk();
     releaseConfig();
     mesh_grass->drop();
+    hiz_solve_wake();
 }
 void terrain_item::loadConfig(){
     config.clear();
@@ -854,7 +867,12 @@ void terrain_item::msg_chunkACL(int32_t x, int32_t y, bool b, bool c, bool t,con
 void terrain_item::chunk::updateVisible(){
     if(lodLevel>0){
         for(auto i : children){
-            i.second->updateVisible();
+            parent->hiz_queue_lock.lock();
+            //i.second->updateVisible();
+            parent->hiz_queue.push(i.second);
+            ++parent->hiz_num;
+            parent->hiz_queue_lock.unlock();
+            parent->hiz_solve_wake();
         }
     }
 }
@@ -883,6 +901,25 @@ bool terrain_item::isMyChunk(int x, int y){
             return true;
     }
     return false;
+}
+
+void terrain_item::hiz_solve_mainThread(){
+    while(running){
+        item * it = NULL;
+        hiz_queue_lock.lock();
+        if(!hiz_queue.empty()){
+            it = hiz_queue.front();
+            hiz_queue.pop();
+        }
+        hiz_queue_lock.unlock();
+
+        if(it){
+            it->updateVisible();
+            --hiz_num;
+        }else{
+            hiz_solve_wait();
+        }
+    }
 }
 
 void terrain_item::createChunk(int x, int y){
