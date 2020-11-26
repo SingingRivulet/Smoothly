@@ -53,26 +53,30 @@ void body::bodyItem::updateFromWorld(){
     irrRot.Y = irr::core::radToDeg(btRot.y());
     irrRot.Z = irr::core::radToDeg(btRot.z());
 
-    //处理动画
-    node->animateJoints(true,&animationBlend);
-    if(!ik_effectors.empty() && config && config->ik_solver){//如果需要使用ik
-        uploadIK();//上传数据至ik
-        solveIK();//更新ik
-        updateIK();//修正骨骼
+    if(node->isVisible() || this==parent->mainControlBody){
+        //处理动画
+        node->animateJoints(true,&animationBlend);
+        if(!ik_effectors.empty() && config && config->ik_solver){//如果需要使用ik
+            uploadIK();//上传数据至ik
+            solveIK();//更新ik
+            updateIK();//修正骨骼
+        }
     }
 
     //更新光影
     if(this->shadow){
         this->shadow->setPosition(irrPos);
         this->shadow->setRotation(irrRot);
-        u32 num = node->getJointCount();
-        if(num == this->shadow->getJointCount()){
-            for(u32 i=0;i<num;++i){
-                auto jt1 = this->shadow->getJointNode(i);
-                auto jt2 = node->getJointNode(i);
-                if(jt1 && jt2){
-                    jt1->setPosition(jt2->getPosition());
-                    jt1->setRotation(jt2->getRotation());
+        if(node->isVisible() || this==parent->mainControlBody){
+            u32 num = node->getJointCount();
+            if(num == this->shadow->getJointCount()){
+                for(u32 i=0;i<num;++i){
+                    auto jt1 = this->shadow->getJointNode(i);
+                    auto jt2 = node->getJointNode(i);
+                    if(jt1 && jt2){
+                        jt1->setPosition(jt2->getPosition());
+                        jt1->setRotation(jt2->getRotation());
+                    }
                 }
             }
         }

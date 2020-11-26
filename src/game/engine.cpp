@@ -16,6 +16,7 @@ engine::engine(){
     SSRTStep                = 16;
     waterMapSize            = 512;
     mblurStep               = 4;
+    haveShadowBlur          = false;
     haveMblur               = true;
 
     loadConfig();
@@ -346,9 +347,11 @@ void engine::sceneLoop(){
     drawScreen;
     postShaderCallback.shadowMapMode = false;
     //pass 2
-    driver->setMaterial(shadowSoftMaterial);
     postShaderCallback.shadowBlendMode = true;
-    drawScreen;
+    if(haveShadowBlur){
+        driver->setMaterial(shadowSoftMaterial);
+        drawScreen;
+    }
     //pass 3
     driver->setRenderTarget(post_tex,false,false);
     driver->setMaterial(shadowBlendMaterial);
@@ -630,6 +633,9 @@ void engine::loadConfig(){
                     if(mblurStep<=1){
                         haveMblur = false;
                     }
+                }else if(key=="haveShadowBlur"){
+                    iss>>val;
+                    haveShadowBlur = (val==1);
                 }
             }
         }

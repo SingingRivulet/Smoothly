@@ -1,6 +1,7 @@
 #include "terrain_item.h"
 #include <stdio.h>
 #include <QString>
+#include <raknet/RakSleep.h>
 namespace smoothly{
 
 #define findChunk(x,y) \
@@ -150,7 +151,10 @@ void terrain_item::loop(){
     for(auto it:chunks){
         it.second->updateVisible();
     }
-    while(hiz_num!=0);
+    while(hiz_num>0){
+        RakSleep(5);
+        hiz_solve_wake();
+    }
     hizEnd();
 
     int left = rmtQueue.size();
@@ -459,10 +463,11 @@ void terrain_item::updateLOD(int x, int y, int lv){
             for(auto c:it->second->children){
                 item * im = c.second;
                 im->lodLevel = -1;
-                //for(int i=0;i<4;++i){
-                //    if(im->node[i])
-                //        im->node[i]->setVisible(false);
-                //}
+                //防止视野外的物体没有隐藏
+                for(int i=0;i<4;++i){
+                    if(im->node[i])
+                        im->node[i]->setVisible(false);
+                }
             }
         }else{
             for(auto c:it->second->children){

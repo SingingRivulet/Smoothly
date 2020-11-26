@@ -9,6 +9,14 @@
 #include "graphbase.h"
 #include "localLight.h"
 #include <atomic>
+#define markTimeInit \
+    clock_t markTimeBegin_starts;
+
+#define markTimeBegin(var) \
+    markTimeBegin_starts = clock();
+
+#define markTimeEnd(var) \
+    var = clock() - markTimeBegin_starts;
 
 namespace smoothly{
     inline void rotate2d(irr::core::vector2df & v,double a){
@@ -159,6 +167,7 @@ namespace smoothly{
             bool haveSSAO;
             bool haveSSRTGI;
             bool haveMblur;
+            bool haveShadowBlur;
             s32 SSRTStep;
             s32 mblurStep;
 

@@ -220,8 +220,17 @@ void fire::processBullets(){
     processBulletRemove();
 }
 void fire::worldLoop(){
+    //int deltat1,deltat2;
+    //markTimeInit;
+    //markTimeBegin(deltat1);
     body::loop();
+    //markTimeEnd(deltat2);
+
+    //markTimeBegin(deltat1);
     engine::worldLoop();
+    //markTimeBegin(deltat2);
+
+    //printf("%d %d\n",deltat1,deltat2);
     this->processBullets();
 }
 
