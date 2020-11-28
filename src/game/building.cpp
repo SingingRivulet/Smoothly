@@ -258,7 +258,7 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
         if(c->haveShader){
             res->node[i]->setMaterialType((irr::video::E_MATERIAL_TYPE)c->shader);
         }
-        res->node[i]->setMaterialTexture(0,shadowMapTexture);
+        //res->node[i]->setMaterialTexture(0,shadowMapTexture);
         res->node[i]->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         if(c->texture){
             res->node[i]->setMaterialTexture(1,c->texture);
@@ -561,7 +561,7 @@ void building::buildingStart(){
     buildingPrev->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
     buildingPrev->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
 
-    buildingPrev->setMaterialTexture(0,shadowMapTexture);
+    //buildingPrev->setMaterialTexture(0,shadowMapTexture);
     if(buildingPrevConf->texture){
         buildingPrev->setMaterialTexture(1,buildingPrevConf->texture);
     }
@@ -930,15 +930,15 @@ void building::linkChunk(building::buildingChunk * c, int x, int y){
 }
 
 void building::BuildingShaderCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
-    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
+    //services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
 
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipY"),&parent->clipY, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipYUp"),&parent->clipYUp, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("enableClipY"),&parent->enableClipY, 1);
 
-    s32 var0 = 0;
+    //s32 var0 = 0;
     s32 var1 = 1;
-    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var0, 1);
+    //services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var0, 1);
 
     irr::f32 sas = parent->scan_animation_showing;
     services->setPixelShaderConstant(services->getPixelShaderConstantID("scan_animation_showing"),&sas, 1);

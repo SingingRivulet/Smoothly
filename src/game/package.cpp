@@ -78,7 +78,7 @@ void package::addPackage(int id ,int x , int y , const vec3 & posi, const std::s
                 pack.cy   = y;
                 pack.node = scene->addMeshSceneNode(conf->mesh,packageRoot);
                 pack.node->setMaterialType((video::E_MATERIAL_TYPE)packageShader_normal);
-                pack.node->setMaterialTexture(1,shadowMapTexture);
+                //pack.node->setMaterialTexture(1,shadowMapTexture);
                 vec3 tmpp = posi;
                 auto hei = getRealHight(tmpp.X,tmpp.Z);
                 if(tmpp.Y<hei)

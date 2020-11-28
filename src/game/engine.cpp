@@ -18,6 +18,7 @@ engine::engine(){
     mblurStep               = 4;
     haveShadowBlur          = false;
     haveMblur               = true;
+    haveShadow              = true;
 
     loadConfig();
     ambientColor.set(1.0,0.2,0.2,0.2);
@@ -314,7 +315,9 @@ void engine::sceneLoop(){
     water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
 
     renderSky();
-    renderShadow();
+    if(haveShadow){
+        renderShadow();
+    }
     renderMiniMap();
     updateListener();
 
@@ -340,23 +343,25 @@ void engine::sceneLoop(){
                            irr::video::SColor(0,0,0,0));
 
     //后期：阴影
-    //pass 1
-    driver->setRenderTarget(post_shadow,false,false);
-    driver->setMaterial(shadowMapMaterial);
-    postShaderCallback.shadowMapMode = true;
-    drawScreen;
-    postShaderCallback.shadowMapMode = false;
-    //pass 2
-    postShaderCallback.shadowBlendMode = true;
-    if(haveShadowBlur){
-        driver->setMaterial(shadowSoftMaterial);
+    if(haveShadow){
+        //pass 1
+        driver->setRenderTarget(post_shadow,false,false);
+        driver->setMaterial(shadowMapMaterial);
+        postShaderCallback.shadowMapMode = true;
         drawScreen;
+        postShaderCallback.shadowMapMode = false;
+        //pass 2
+        postShaderCallback.shadowBlendMode = true;
+        if(haveShadowBlur){
+            driver->setMaterial(shadowSoftMaterial);
+            drawScreen;
+        }
+        //pass 3
+        driver->setRenderTarget(post_tex,false,false);
+        driver->setMaterial(shadowBlendMaterial);
+        drawScreen;
+        postShaderCallback.shadowBlendMode = false;
     }
-    //pass 3
-    driver->setRenderTarget(post_tex,false,false);
-    driver->setMaterial(shadowBlendMaterial);
-    drawScreen;
-    postShaderCallback.shadowBlendMode = false;
 
     //后期：光照
     driver->setRenderTarget(post_tex,false,false);
@@ -636,6 +641,9 @@ void engine::loadConfig(){
                 }else if(key=="haveShadowBlur"){
                     iss>>val;
                     haveShadowBlur = (val==1);
+                }else if(key=="haveShadow"){
+                    iss>>val;
+                    haveShadow = (val==1);
                 }
             }
         }

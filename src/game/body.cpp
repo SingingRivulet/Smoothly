@@ -759,7 +759,7 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     p->node->setJointMode(irr::scene::EJUOR_CONTROL);//设为控制模式，因为要混合
 
     p->node->setMaterialType(bodyShader);
-    p->node->setMaterialTexture( 1 , shadowMapTexture);
+    //p->node->setMaterialTexture( 1 , shadowMapTexture);
 
     if(c->texture){
         p->node->setMaterialTexture( 0 , c->texture);

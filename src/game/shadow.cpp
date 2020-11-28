@@ -53,15 +53,16 @@ void shadow::ShadowCallback::OnSetConstants(video::IMaterialRendererServices * s
 }
 
 void shadow::DefaultCallback::OnSetConstants(video::IMaterialRendererServices * services, s32 userData){
-    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
+    //光影移到后期了
+    //services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMapSize"),&parent->shadowMapSize, 1);
 
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipY"),&parent->clipY, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("clipYUp"),&parent->clipYUp, 1);
     services->setPixelShaderConstant(services->getPixelShaderConstantID("enableClipY"),&parent->enableClipY, 1);
 
     s32 var0 = 0;
-    s32 var1 = 1;
-    services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var1, 1);
+    //s32 var1 = 1;
+    //services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowMap"),&var1, 1);
 
     irr::f32 sas = parent->scan_animation_showing;
     services->setPixelShaderConstant(services->getPixelShaderConstantID("scan_animation_showing"),&sas, 1);

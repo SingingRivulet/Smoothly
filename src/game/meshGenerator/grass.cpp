@@ -16,7 +16,7 @@ irr::scene::ISceneNode * terrain_item::genGrass(int seed, int & lodLevel, video:
     int r = randg.rand()%texture_grass.size();
     tex = texture_grass[r];
     res->setMaterialTexture(0,texture_grass[r]);
-    res->setMaterialTexture(1,shadowMapTexture);
+    //res->setMaterialTexture(1,shadowMapTexture);
     res->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     res->getMaterial(0).BackfaceCulling = false;
     res->getMaterial(0).BlendOperation=irr::video::EBO_NONE;

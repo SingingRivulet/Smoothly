@@ -168,6 +168,7 @@ namespace smoothly{
             bool haveSSRTGI;
             bool haveMblur;
             bool haveShadowBlur;
+            bool haveShadow;
             s32 SSRTStep;
             s32 mblurStep;
 

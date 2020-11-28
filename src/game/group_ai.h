@@ -4,7 +4,9 @@
 #include "../utils/cJSON.h"
 #include <lua.hpp>
 #include <string.h>
+#include <string>
 #include <vector>
+#include <unordered_map>
 #include "mail.h"
 
 namespace smoothly{
@@ -32,6 +34,7 @@ class group_ai:public mail{
                 void load(cJSON * data , std::shared_ptr<BrainTree::Composite> n);//data指向children元素
                 void load(cJSON * data);
         };
+        std::unordered_map<std::string,std::shared_ptr<group> > groups;
     private:
         lua_State *  L;
 };

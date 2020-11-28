@@ -117,7 +117,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
         res->node[i] = scene->addMeshSceneNode(mesh,0,-1);
         res->node[i]->setPosition(posi);
 
-        if(i==0){
+        if(i==2){
             res->shadowNode = createShadowNode(mesh,0,-1);
             res->shadowNode->setPosition(posi);
             res->shadowNode->getMaterial(0).BackfaceCulling = false;
@@ -130,7 +130,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
         res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );
         res->node[i]->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, true );
 
-        res->node[i]->setMaterialTexture(0,shadowMapTexture);
+        //res->node[i]->setMaterialTexture(0,shadowMapTexture);
         res->node[i]->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
         //res->node[i]->getMaterial(0).Wireframe = true;
 

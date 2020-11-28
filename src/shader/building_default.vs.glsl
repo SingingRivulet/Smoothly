@@ -1,5 +1,4 @@
 uniform sampler2D tex;
-uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 uniform mat4 modelMatrix;
 uniform mat4 transformMatrix;
