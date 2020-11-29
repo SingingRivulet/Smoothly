@@ -1,0 +1,7 @@
+[
+    {
+        "type" : "action" , 
+        "func" : "test" , 
+        "arg"  : "test"
+    }
+]

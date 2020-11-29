@@ -634,6 +634,9 @@ class body:public mission{
         void saveFastUseTool();
         void loadFastUseTool();
 
+    public:
+        virtual void createBodyAI(bodyItem*)=0;
+
     private:
         void occupyChunk()override;
 

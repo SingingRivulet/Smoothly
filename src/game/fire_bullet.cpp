@@ -223,7 +223,7 @@ void fire::worldLoop(){
     //int deltat1,deltat2;
     //markTimeInit;
     //markTimeBegin(deltat1);
-    body::loop();
+    loop();
     //markTimeEnd(deltat2);
 
     //markTimeBegin(deltat1);

@@ -812,6 +812,8 @@ void body::addBody(const std::string & uuid,int id,int hp,int32_t sta_mask,const
     if(uuid==mainControl){
         mainControlBody = p;
     }
+
+    createBodyAI(p);
 }
 void body::setWearing(bodyItem * n, const std::set<int> & wearing){
     std::set<int> rm;
