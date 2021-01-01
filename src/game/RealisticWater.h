@@ -86,6 +86,8 @@ private:
 	f32								_colorBlendFactor;
 
 	u32								_time;
+
+    bool                            updateFrameFlag;
 };
 
 #endif

@@ -74,6 +74,8 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 	_waterSceneNode->setMaterialTexture(2, _reflectionMap);
     //_waterSceneNode->getMaterial(0).ZWriteFineControl = irr::video::EZI_ZBUFFER_FLAG;
     //_waterSceneNode->getMaterial(0).BlendOperation = irr::video::EBO_ADD;
+
+    updateFrameFlag = false;
 }
 
 RealisticWaterSceneNode::~RealisticWaterSceneNode()
@@ -136,52 +138,59 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 	{
 		setVisible(false); //hide the water
 
-		//refraction
-		_videoDriver->setRenderTarget(_refractionMap, true, true); //render to refraction
+        //get current camera
+        scene::ICameraSceneNode* currentCamera = _sceneManager->getActiveCamera();
 
-		//refraction clipping plane
-        //core::plane3d<f32> refractionClipPlane(0, RelativeTranslation.Y + CLIP_PLANE_OFFSET_Y, 0, 0, -1, 0); //refraction clip plane
-        //_videoDriver->setClipPlane(0, refractionClipPlane, true);
-        graph->enableClipY = 1;
-        graph->clipY = getAbsolutePosition().Y;
-        graph->clipYUp = 1;
+        if(graph->haveRefraction && ((!graph->halfFrameWater) || updateFrameFlag)){
+            //refraction
+            _videoDriver->setRenderTarget(_refractionMap, true, true); //render to refraction
 
-		_sceneManager->drawAll(); //draw the scene
+            //refraction clipping plane
+            //core::plane3d<f32> refractionClipPlane(0, RelativeTranslation.Y + CLIP_PLANE_OFFSET_Y, 0, 0, -1, 0); //refraction clip plane
+            //_videoDriver->setClipPlane(0, refractionClipPlane, true);
+            graph->enableClipY = 1;
+            graph->clipY = getAbsolutePosition().Y;
+            graph->clipYUp = 1;
 
-		//reflection
-        _videoDriver->setRenderTarget(_reflectionMap, true, true); //render to reflection
+            _sceneManager->drawAll(); //draw the scene
 
-		//get current camera
-		scene::ICameraSceneNode* currentCamera = _sceneManager->getActiveCamera();
+            //reflection
+            _videoDriver->setRenderTarget(_reflectionMap, true, true); //render to reflection
 
-		//set FOV anf far value from current camera
-		_camera->setFarValue(currentCamera->getFarValue());
-		_camera->setFOV(currentCamera->getFOV());
+            //set FOV anf far value from current camera
+            _camera->setFarValue(currentCamera->getFarValue());
+            _camera->setFOV(currentCamera->getFOV());
 
-		core::vector3df position = currentCamera->getAbsolutePosition();
-		position.Y = -position.Y + 2 * RelativeTranslation.Y; //position of the water
-		_camera->setPosition(position);
+            core::vector3df position = currentCamera->getAbsolutePosition();
+            position.Y = -position.Y + 2 * RelativeTranslation.Y; //position of the water
+            _camera->setPosition(position);
 
-		core::vector3df target = currentCamera->getTarget();
+            core::vector3df target = currentCamera->getTarget();
 
-		//invert Y position of current camera
-		target.Y = -target.Y + 2 * RelativeTranslation.Y;
-		_camera->setTarget(target);
+            //invert Y position of current camera
+            target.Y = -target.Y + 2 * RelativeTranslation.Y;
+            _camera->setTarget(target);
+        }
 
-		//set the reflection camera
-		_sceneManager->setActiveCamera(_camera);
+        if(graph->haveReflection && ((!graph->halfFrameWater) || (!updateFrameFlag))){
 
-        //reflection clipping plane
-        //core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
-        //_videoDriver->setClipPlane(0, reflectionClipPlane, true);
-        graph->clipYUp = -1;
+            //set the reflection camera
+            _sceneManager->setActiveCamera(_camera);
 
-        _sceneManager->drawAll(); //draw the scene
+            //reflection clipping plane
+            //core::plane3d<f32> reflectionClipPlane(0, RelativeTranslation.Y - CLIP_PLANE_OFFSET_Y, 0, 0, 1, 0);
+            //_videoDriver->setClipPlane(0, reflectionClipPlane, true);
+            graph->clipYUp = -1;
 
-		//disable clip plane
-        //_videoDriver->enableClipPlane(0, false);
+            _sceneManager->drawAll(); //draw the scene
 
-		//set back old render target
+            //disable clip plane
+            //_videoDriver->enableClipPlane(0, false);
+
+
+        }
+
+        //set back old render target
         _videoDriver->setRenderTargetEx(renderTarget,video::ECBF_COLOR | video::ECBF_DEPTH);
 
 		//set back the active camera
@@ -192,6 +201,8 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
         graph->enableClipY = oecy;
         graph->clipY = ocy;
         graph->clipYUp = ocyu;
+
+        updateFrameFlag = !updateFrameFlag;
 	}
 }
 

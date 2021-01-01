@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <cassert>
+#include <exception>
 
 namespace BrainTree
 {
@@ -286,7 +286,8 @@ public:
 
     Node::Ptr build()
     {
-        assert(root != nullptr && "The Behavior Tree is empty!");
+        if(root != nullptr)
+            throw std::runtime_error("The Behavior Tree is empty!");
         auto tree = std::make_shared<BehaviorTree>();
         tree->setRoot(root);
         return tree;
@@ -310,7 +311,8 @@ public:
 
     Status update() override
     {
-        assert(hasChildren() && "Composite has no children");
+        if(!hasChildren())
+            throw std::runtime_error("Composite has no children");
 
         while (it != children.end()) {
             auto status = (*it)->tick();
@@ -340,7 +342,8 @@ public:
 
     Status update() override
     {
-        assert(hasChildren() && "Composite has no children");
+        if(!hasChildren())
+            throw std::runtime_error("Composite has no children");
 
         while (it != children.end()) {
             auto status = (*it)->tick();
@@ -365,7 +368,8 @@ class StatefulSelector : public Composite
 public:
     Status update() override
     {
-        assert(hasChildren() && "Composite has no children");
+        if(!hasChildren())
+            throw std::runtime_error("Composite has no children");
 
         while (it != children.end()) {
             auto status = (*it)->tick();
@@ -391,7 +395,8 @@ class MemSequence : public Composite
 public:
     Status update() override
     {
-        assert(hasChildren() && "Composite has no children");
+        if(!hasChildren())
+            throw std::runtime_error("Composite has no children");
 
         while (it != children.end()) {
             auto status = (*it)->tick();
@@ -416,7 +421,8 @@ public:
 
     Status update() override
     {
-        assert(hasChildren() && "Composite has no children");
+        if(!hasChildren())
+            throw std::runtime_error("Composite has no children");
 
         int minimumSuccess = minSuccess;
         int minimumFail = minFail;

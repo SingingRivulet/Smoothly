@@ -6,6 +6,7 @@ namespace smoothly{
 
 group_ai::group_ai(){
     L = luaL_newstate();
+    loadBodyLuaAPI(L);
     group_id = 0;
     groupMaxMember = 8;
     groupMergeLength = 10;
@@ -113,7 +114,9 @@ void group_ai::updateGroupAI(){
     for(auto it:groups){
         it.second->merging = false;
         it.second->updateBox();
-        it.second->update();
+        try{
+            it.second->update();
+        }catch(...){}
         it.second->updateGroup();
     }
     addGroupBuffer();

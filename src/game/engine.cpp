@@ -644,6 +644,15 @@ void engine::loadConfig(){
                 }else if(key=="haveShadow"){
                     iss>>val;
                     haveShadow = (val==1);
+                }else if(key=="haveRefraction"){
+                    iss>>val;
+                    haveRefraction = (val==1);
+                }else if(key=="haveReflection"){
+                    iss>>val;
+                    haveReflection = (val==1);
+                }else if(key=="halfFrameWater"){
+                    iss>>val;
+                    halfFrameWater = (val==1);
                 }
             }
         }

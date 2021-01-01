@@ -81,7 +81,7 @@ class body:public mission{
         irr::video::ITexture * texture_attackTarget;
         bool attackingTarget;
 
-    private:
+    public:
         void loadBodyLuaAPI(lua_State * L);
 
     public:
