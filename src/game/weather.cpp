@@ -159,10 +159,12 @@ void weather::updateWeather(int tm){
     ldir*=200;
     ldir+=lightTarget;
     light->setPosition(ldir);
+    lightSpaceData->setPosition(ldir);
 
     video::SLight lconf;
     lconf.DiffuseColor.set(glow.X,glow.Y,glow.Z);
     light->setLightData(lconf);
+    lightSpaceData->setLightData(lconf);
 }
 
 }

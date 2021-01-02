@@ -11,14 +11,28 @@ shadow::shadow(){
     shadowSpace = scene->createNewSceneManager(false);//创建光影空间
     shadowMapLight = shadowSpace->addCameraSceneNode();//创建光源
     shadowMapLight->setProjectionMatrix(core::matrix4().buildProjectionMatrixOrthoLH(shadowArea,shadowArea,0.9f,400.f),true);
-    shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMap", video::ECF_R32F);//创建渲染目标
+
+    shadowRenderTarget = driver->addRenderTarget();
+    shadowMapDepth = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMapDepth", video::ECF_D32);
+    shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMap", video::ECF_R32F);
+    lightSpaceGIMap = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "lightSpaceGIMap", video::ECF_R8G8B8);
+    core::array<video::ITexture*> textureArray(2);
+    textureArray.push_back(shadowMapTexture);
+    textureArray.push_back(lightSpaceGIMap);
+    shadowRenderTarget->setTexture(
+                textureArray , shadowMapDepth);
+
     shadowMapMaterial.setTexture(5,shadowMapTexture);//设置后期材质
     shadowFactor = 0.3;
     defaultCallback.parent = this;
+
+    lightSpaceData = shadowSpace->addLightSceneNode();
+    lightSpaceData->setPosition(irr::core::vector3df(0,500,0));
+
 }
 
 void shadow::renderShadow(){
-    driver->setRenderTarget(shadowMapTexture,true,true,irr::video::SColor(255,255,255,255));
+    driver->setRenderTargetEx(shadowRenderTarget,video::ECBF_COLOR | video::ECBF_DEPTH,irr::video::SColor(255,0,0,0));
 
     auto cam = camera->getPosition();
 
