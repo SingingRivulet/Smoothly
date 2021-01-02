@@ -154,6 +154,10 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 
             _sceneManager->drawAll(); //draw the scene
 
+        }
+
+        if(graph->haveReflection && ((!graph->halfFrameWater) || (!updateFrameFlag))){
+
             //reflection
             _videoDriver->setRenderTarget(_reflectionMap, true, true); //render to reflection
 
@@ -170,9 +174,6 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
             //invert Y position of current camera
             target.Y = -target.Y + 2 * RelativeTranslation.Y;
             _camera->setTarget(target);
-        }
-
-        if(graph->haveReflection && ((!graph->halfFrameWater) || (!updateFrameFlag))){
 
             //set the reflection camera
             _sceneManager->setActiveCamera(_camera);

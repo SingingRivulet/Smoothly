@@ -16,9 +16,11 @@ shadow::shadow(){
     shadowMapDepth = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMapDepth", video::ECF_D32);
     shadowMapTexture = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowMap", video::ECF_R32F);
     lightSpaceGIMap = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "lightSpaceGIMap", video::ECF_R8G8B8);
+    shadowPosMap = driver->addRenderTargetTexture(core::dimension2d<u32>(shadowMapSize, shadowMapSize), "shadowPosMap", video::ECF_A16B16G16R16F);
     core::array<video::ITexture*> textureArray(2);
     textureArray.push_back(shadowMapTexture);
     textureArray.push_back(lightSpaceGIMap);
+    textureArray.push_back(shadowPosMap);
     shadowRenderTarget->setTexture(
                 textureArray , shadowMapDepth);
 

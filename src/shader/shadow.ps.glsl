@@ -21,6 +21,7 @@ void main(){
     color.y*=lightcolor.y;
     color.z*=lightcolor.z;
     
-    gl_FragData[0] = vec4(gl_FragCoord.z,0,0,1);
+    gl_FragData[0] = vec4(gl_FragCoord.z,gl_FragCoord.z,gl_FragCoord.z,1);
     gl_FragData[1] = color;
+    gl_FragData[2] = vec4(pointPosition.xyz/pointPosition.w,1.0);
 }
