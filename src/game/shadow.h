@@ -14,8 +14,6 @@ class shadow:public cloud{
         irr::video::IRenderTarget    * shadowRenderTarget;      //渲染目标
         irr::video::ITexture         * shadowMapTexture;        //光影贴图
         irr::video::ITexture         * shadowMapDepth;          //光影深度图
-        irr::video::ITexture         * lightSpaceGIMap;         //光源空间全局光照贴图
-        irr::video::ITexture         * shadowPosMap;            //光源空间坐标
         irr::s32                       shadowMapShader;         //光影着色器
 
         irr::scene::ILightSceneNode  * lightSpaceData;

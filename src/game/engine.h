@@ -152,7 +152,10 @@ namespace smoothly{
                                     * post_ssrtConf ,
                                     * post_sky ,
                                     * post_final ,
-                                    * post_shadow;
+                                    * post_shadow ,
+                                    * post_lsgi,
+                                    * lightSpaceGIMap , //光源空间全局光照贴图
+                                    * shadowPosMap;     //光源空间坐标
             irr::core::matrix4 skyMatrix;
             irr::video::IRenderTarget * post;//后期
             irr::video::SMaterial postMaterial;//最终后期
@@ -160,6 +163,7 @@ namespace smoothly{
             irr::video::SMaterial lightMaterial;//延迟光照
             irr::video::SMaterial ssaoMaterial;//ssao
             irr::video::SMaterial ssrtMaterial;//ssrt
+            irr::video::SMaterial lsgiMaterial;//lsgi
             irr::video::SMaterial shadowMapMaterial;
             irr::video::SMaterial shadowSoftMaterial;
             irr::video::SMaterial shadowBlendMaterial;
@@ -169,6 +173,7 @@ namespace smoothly{
             bool haveMblur;
             bool haveShadowBlur;
             bool haveShadow;
+            bool haveLSGI;
             s32 SSRTStep;
             s32 mblurStep;
 
@@ -187,6 +192,7 @@ namespace smoothly{
                     bool mblurMode;
                     bool shadowMapMode;
                     bool shadowBlendMode;
+                    bool lsgiMode;
                     irr::core::matrix4 preViewMatrix;
             }postShaderCallback;
 

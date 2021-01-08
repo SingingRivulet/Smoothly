@@ -268,6 +268,9 @@ building::buildingBody *building::createBuilding(const vec3 &p, const vec3 &r, i
     }
     res->node[ml]->setVisible(true);//显示最低lod级别
     res->shadowNode = createShadowNode(c->mesh[ml],0,-1,p,r);//创建光影
+    if(c->texture){
+        res->shadowNode->setMaterialTexture(0,c->texture);
+    }
 
     res->uuid = uuid;
 

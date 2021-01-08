@@ -19,6 +19,7 @@ engine::engine(){
     haveShadowBlur          = false;
     haveMblur               = true;
     haveShadow              = true;
+    haveLSGI                = true;
 
     loadConfig();
     ambientColor.set(1.0,0.2,0.2,0.2);
@@ -184,6 +185,7 @@ engine::engine(){
     post_posi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "posi", video::ECF_A32B32G32R32F);
     post_final = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "final", video::ECF_A8R8G8B8);
     post_shadow = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "shadow", video::ECF_A8R8G8B8);
+    post_lsgi = driver->addRenderTargetTexture(core::dimension2d<u32>(width, height), "lsgi", video::ECF_A8R8G8B8);
 
     post = driver->addRenderTarget();
     core::array<video::ITexture*> textureArray(3);
@@ -251,6 +253,7 @@ engine::engine(){
     printf("post shader:shadow blend\n");
     initPostMat(shadowBlendMaterial);
     shadowBlendMaterial.setTexture(5,post_shadow);
+    shadowBlendMaterial.setTexture(6,post_lsgi);
     shadowBlendMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/shadowBlend.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/shadowBlend.ps.glsl", "main", video::EPST_PS_1_1,
@@ -269,6 +272,13 @@ engine::engine(){
     shadowMapMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
                                     "../shader/shadowMap.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/shadowMap.ps.glsl", "main", video::EPST_PS_1_1,
+                                    &postShaderCallback);
+
+    printf("post shader:lsgi\n");
+    initPostMat(lsgiMaterial);
+    lsgiMaterial.MaterialType = (video::E_MATERIAL_TYPE)driver->getGPUProgrammingServices()->addHighLevelShaderMaterialFromFiles(
+                                    "../shader/lsgi.vs.glsl", "main", video::EVST_VS_1_1,
+                                    "../shader/lsgi.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
 }
 engine::~engine(){
@@ -301,6 +311,7 @@ void engine::sceneLoop(){
     postShaderCallback.mblurMode = false;
     postShaderCallback.shadowMapMode = false;
     postShaderCallback.shadowBlendMode = false;
+    postShaderCallback.lsgiMode = false;
     auto cm  = camera->getPosition();
 
     if(cm.Y<waterLevel){
@@ -344,18 +355,30 @@ void engine::sceneLoop(){
 
     //后期：阴影
     if(haveShadow){
+
+        //lsgi
+        if(haveLSGI){
+            driver->setRenderTarget(post_lsgi,true,true);
+            driver->setMaterial(lsgiMaterial);
+            postShaderCallback.lsgiMode = true;
+            drawScreen;
+            postShaderCallback.lsgiMode = false;
+        }
+
         //pass 1
         driver->setRenderTarget(post_shadow,false,false);
         driver->setMaterial(shadowMapMaterial);
         postShaderCallback.shadowMapMode = true;
         drawScreen;
         postShaderCallback.shadowMapMode = false;
+
         //pass 2
         postShaderCallback.shadowBlendMode = true;
         if(haveShadowBlur){
             driver->setMaterial(shadowSoftMaterial);
             drawScreen;
         }
+
         //pass 3
         driver->setRenderTarget(post_tex,false,false);
         driver->setMaterial(shadowBlendMaterial);
@@ -653,6 +676,9 @@ void engine::loadConfig(){
                 }else if(key=="halfFrameWater"){
                     iss>>val;
                     halfFrameWater = (val==1);
+                }else if(key=="haveLSGI"){
+                    iss>>val;
+                    haveLSGI = (val==1);
                 }
             }
         }
@@ -706,6 +732,14 @@ void engine::PostShaderCallback::OnSetConstants(video::IMaterialRendererServices
     if(shadowBlendMode){
         s32 var5 = 5;
         services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowViewMap"),&var5, 1);
+        s32 var6 = 6;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("lsgiMap"),&var6, 1);
+    }
+    if(lsgiMode){
+        s32 var5 = 5;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("lsgiMap"),&var5, 1);
+        s32 var6 = 6;
+        services->setPixelShaderConstant(services->getPixelShaderConstantID("shadowPosMap"),&var6, 1);
     }
     if(shadowMapMode){
         s32 var5 = 5;

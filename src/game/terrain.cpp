@@ -117,14 +117,15 @@ terrain::chunk * terrain::genChunk(int x,int y){
         res->node[i] = scene->addMeshSceneNode(mesh,0,-1);
         res->node[i]->setPosition(posi);
 
-        if(i==2){
+        if(i==0){
+            res->bodyMesh  = createBtMesh(mesh);
+        }else if(i==2){
             res->shadowNode = createShadowNode(mesh,0,-1);
             res->shadowNode->setPosition(posi);
             res->shadowNode->getMaterial(0).BackfaceCulling = false;
             auto selector=scene->createOctreeTriangleSelector(mesh,res->node[i]);   //创建选择器
             res->node[i]->setTriangleSelector(selector);
             selector->drop();
-            res->bodyMesh  = createBtMesh(mesh);
         }
 
         res->node[i]->setMaterialFlag(irr::video::EMF_LIGHTING, true );

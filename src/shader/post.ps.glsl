@@ -106,7 +106,7 @@ void main(){
     vec3 ssgi = vec3(0.0);
     
     if(haveSSAO==1)ssaoFactor = getSSAO();
-    if(haveSSRTGI==1)ssgi = getSSGI(realDepth,int(ssrtConf.x));
+    if(haveSSRTGI==1)ssgi = getSSGI(realDepth,min(int(ssrtConf.x),4));
     
     color.rgb += bloom.rgb - color.rgb*ssaoFactor + ssgi*color.rgb*ssrtConf.y + ssgi*ssrtConf.z;
 
