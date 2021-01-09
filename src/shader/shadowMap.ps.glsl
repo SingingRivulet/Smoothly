@@ -30,7 +30,7 @@ float getPosShadowOri(vec3 lightView){
     else
         closestDepth = getPosDepth(lightView.xy);
     float currentDepth = lightView.z;
-    float shadow = currentDepth-0.001 < closestDepth  ? 0.0 : 1.0;
+    float shadow = currentDepth-mix(0.001,0.01,abs(max(lightView.x,lightView.y))) < closestDepth  ? 0.0 : 1.0;
     return shadow;
 }
 float getPosShadow(vec3 lightView){
