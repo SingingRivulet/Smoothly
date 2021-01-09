@@ -54,12 +54,18 @@ float getPosShadow(vec3 lightView){
     return mix(x5,x6,ay);
 }
 
+float shadow_tanh(float x){
+    return (exp(x)-exp(-x))/(exp(x)+exp(-x));
+}
+
 void main(){
     vec3 pos = texture2D(posMap,position).xyz;//位置
     if(abs(pos.x)>0.1 || abs(pos.y)>0.1 || abs(pos.z)>0.1){
         //变换到光源空间
         vec4 lightView4 = shadowMatrix * vec4(pos,1.0);
         vec3 lightView = lightView4.xyz / lightView4.w;
+        lightView.x = shadow_tanh(lightView.x);
+        lightView.y = shadow_tanh(lightView.y);
         lightView = lightView * 0.5 + 0.5;
     
         float shadow = getPosShadow(lightView);
