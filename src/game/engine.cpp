@@ -322,8 +322,17 @@ void engine::sceneLoop(){
 
     auto coll = scene->getSceneCollisionManager();
     screenCenter = coll->getScreenCoordinatesFrom3DPosition(camera->getTarget(),camera);
-    water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
-    water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    {
+        auto lastPos = water->getPosition();
+        auto newPos  = irr::core::vector3df(cm.X,waterLevel,cm.Z);
+        auto deltaPos_o = newPos - lastPos;
+        deltaPos_o.X /= 2048;
+        deltaPos_o.Z /= 2048;
+        water->setWaveDeltaPos(core::vector2df(deltaPos_o.X , deltaPos_o.Z));
+        water->setPosition(newPos);
+        water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+        water->updateWave();
+    }
 
     renderSky();
     if(haveShadow){

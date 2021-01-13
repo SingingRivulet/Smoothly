@@ -32,62 +32,82 @@ using namespace irr;
 class RealisticWaterSceneNode: public scene::ISceneNode, video::IShaderConstantSetCallBack
 {
 public:
-	RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
-							const irr::core::stringc& resourcePath = irr::core::stringc(),
+    RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
+                            const irr::core::stringc& resourcePath = irr::core::stringc(),
                             core::dimension2du renderTargetSize=core::dimension2du(512,512),scene::ISceneNode* parent = NULL, s32 id = -1);
-	virtual ~RealisticWaterSceneNode();
+    virtual ~RealisticWaterSceneNode();
 
-	// frame
-	virtual void OnRegisterSceneNode();
+    // frame
+    virtual void OnRegisterSceneNode();
 
-	virtual void OnAnimate(u32 timeMs);
+    virtual void OnAnimate(u32 timeMs);
 
-	// renders terrain
-	virtual void render();
+    // renders terrain
+    virtual void render();
     
-	// returns the axis aligned bounding box of terrain
-	virtual const core::aabbox3d<f32>& getBoundingBox() const;
+    // returns the axis aligned bounding box of terrain
+    virtual const core::aabbox3d<f32>& getBoundingBox() const;
 
-	virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData);
+    virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData);
 
-	void setWindForce(f32 windForce);
-	void setWindDirection(const core::vector2df& windDirection);
-	void setWaveHeight(f32 waveHeight);
+    void setWindForce(f32 windForce);
+    void setWindDirection(const core::vector2df& windDirection);
+    void setWaveHeight(f32 waveHeight);
 
-	void setWaterColor(const video::SColorf& waterColor);
-	void setColorBlendFactor(f32 colorBlendFactor);
+    void updateWave();
+
+    void setWaterColor(const video::SColorf& waterColor);
+    void setColorBlendFactor(f32 colorBlendFactor);
+
+    void setWaveDeltaPos(const core::vector2df & p){
+        _deltaPos.set(p);
+    }
 
     smoothly::graphBase * graph;
 
     irr::video::IRenderTarget * renderTarget;
 
-private:
+    private:
 
-	scene::ICameraSceneNode*		_camera;
-	scene::ISceneNode*				_waterSceneNode;
+    scene::ICameraSceneNode*            _camera;
+    scene::ISceneNode*                  _waterSceneNode;
 
-	video::IVideoDriver*			_videoDriver;
-	scene::ISceneManager*			_sceneManager;
-	
-	core::dimension2d<f32>			_size;
+    video::IVideoDriver*                _videoDriver;
+    scene::ISceneManager*               _sceneManager;
 
-	s32								_shaderMaterial;
+    core::dimension2d<f32>              _size;
 
-	scene::IAnimatedMesh*			_waterMesh;
+    s32                                 _shaderMaterial;
+    video::SMaterial                    _waveMaterial;
 
-	video::ITexture*				_refractionMap;
-	video::ITexture*				_reflectionMap;
+    scene::IAnimatedMesh*               _waterMesh;
 
-	f32								_windForce;
-	core::vector2df					_windDirection;
-	f32								_waveHeight;
+    video::ITexture*                    _refractionMap;
+    video::ITexture*                    _reflectionMap;
+    public:
+    video::ITexture*                    _waveMap;
+    private:
+    video::ITexture*                    _waveMap_last;
 
-	video::SColorf					_waterColor;
-	f32								_colorBlendFactor;
+    core::vector2df                     _deltaPos;
 
-	u32								_time;
+    f32                                 _windForce;
+    core::vector2df                     _windDirection;
+    f32                                 _waveHeight;
 
-    bool                            updateFrameFlag;
+    video::SColorf                      _waterColor;
+    f32                                 _colorBlendFactor;
+
+    u32                                 _time;
+
+    bool                                updateFrameFlag;
+
+
+    class WaveCallback:public video::IShaderConstantSetCallBack{//shader回调
+        public:
+            RealisticWaterSceneNode * parent;
+            void OnSetConstants(video::IMaterialRendererServices * services, s32 userData)override;
+    }waveCallback;
 };
 
 #endif

@@ -33,6 +33,7 @@ uniform float        ColorBlendFactor;
 uniform sampler2D    WaterBump; //coverage
 uniform sampler2D    RefractionMap; //coverage
 uniform sampler2D    ReflectionMap; //coverage
+uniform sampler2D    waveMap; //coverage
 
 uniform bool        FogEnabled;
 uniform int            FogMode;
@@ -46,14 +47,25 @@ varying vec4 pointPosition;
 void main()
 {
     //bump color
-        vec4 bumpColor = 
-                    texture2D(WaterBump, mod(bumpMapTexCoord*64.0,vec2(1.0,1.0)))/64.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*32.0,vec2(1.0,1.0)))/32.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*16.0,vec2(1.0,1.0)))/16.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*8.0 ,vec2(1.0,1.0)))/8.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*4.0 ,vec2(1.0,1.0)))/4.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*2.0 ,vec2(1.0,1.0)))/2.0;
-    vec2 perturbation = WaveHeight * (bumpColor.rg - 0.5);
+    //    vec4 bumpColor = 
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*64.0,vec2(1.0,1.0)))/64.0+
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*32.0,vec2(1.0,1.0)))/32.0+
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*16.0,vec2(1.0,1.0)))/16.0+
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*8.0 ,vec2(1.0,1.0)))/8.0+
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*4.0 ,vec2(1.0,1.0)))/4.0+
+    //                texture2D(WaterBump, mod(bumpMapTexCoord*2.0 ,vec2(1.0,1.0)))/2.0;
+    
+    float px = floor(bumpMapTexCoord.x*2048.0);
+    float py = floor(bumpMapTexCoord.y*2048.0);
+    float h1 = texture2D(waveMap , vec2(px/2048.0 , py/2048.0)).r;
+    float h2 = texture2D(waveMap , vec2((px+1.0)/2048.0 , py/2048.0)).r;
+    float h3 = texture2D(waveMap , vec2(px/2048.0 , (py+1.0)/2048.0)).r;
+    vec3 p1 = vec3(0.0,h1,0.0);
+    vec3 p2 = vec3(1.0,h2,0.0);
+    vec3 p3 = vec3(0.0,h3,1.0);
+    vec2 bumpColor = normalize(cross(p3-p1,p2-p1)).xz;
+    
+    vec2 perturbation = WaveHeight * bumpColor.xy;
     
     //refraction
     vec2 ProjectedRefractionTexCoords = clamp(refractionMapTexCoord.xy / refractionMapTexCoord.z + perturbation, 0.0, 1.0);

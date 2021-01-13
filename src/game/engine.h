@@ -207,6 +207,10 @@ namespace smoothly{
             void hizBegin();
             bool pointVisible(const irr::core::vector3df & p);//判断一个点是否在视野内（hi-z剔除）
             void hizEnd();
+
+        public:
+            RealisticWaterSceneNode * water;
+
         private:
             u32 * hizbuf;
             u32 hizbuf_size;
@@ -218,7 +222,6 @@ namespace smoothly{
         private:
             float deltaTime,lastTime;
             bool deltaTimeUpdateFirst;
-            RealisticWaterSceneNode * water;
             int lastFPS;
             virtual void renderSky()=0;
             virtual void renderShadow()=0;
