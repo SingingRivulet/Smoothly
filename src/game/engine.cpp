@@ -211,6 +211,7 @@ engine::engine(){
 
     printf("post shader:final\n");
     initPostMat(postMaterial);
+    //postMaterial.setTexture(0,water->_waveMap);//调试用，可将某纹理显示到屏幕上
     postMaterial.setTexture(5,post_ssao);
     postMaterial.setTexture(6,post_ssrt);
     postMaterial.setTexture(7,post_ssrtConf);

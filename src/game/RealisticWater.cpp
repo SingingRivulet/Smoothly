@@ -312,8 +312,8 @@ void RealisticWaterSceneNode::updateWave(){
     _waveMaterial.setTexture(0,_waveMap_last);
 
     //在水面添加随机波浪
-    //_videoDriver->setRenderTarget(_waveMap_last , false , true);
-    //_videoDriver->drawPixel(rand()%2048 , rand()%2048 , irr::video::SColor(255,255,255,255));
+    _videoDriver->setRenderTarget(_waveMap_last , false , true);
+    _videoDriver->drawPixel(rand()%2048 , rand()%2048 , irr::video::SColor(255,128,128,128));
 
     _videoDriver->setRenderTarget(_waveMap , true , true);
     _videoDriver->setMaterial(_waveMaterial);
