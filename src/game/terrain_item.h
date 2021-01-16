@@ -39,6 +39,7 @@ namespace smoothly{
             void occupy(int x,int y);
         private:
             std::map<ipair,std::set<mapItem> > rmtCache;
+            float * mapBuffer;
             struct chunk;
             struct item{
                 irr::scene::ISceneNode  * node[4];

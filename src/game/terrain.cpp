@@ -76,11 +76,8 @@ float terrain::genTerrain(float * img, int x , int y , int pointNum){
     //printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
     return max;
 }
-terrain::chunk * terrain::genChunk(int x,int y){
-    //printf("[genChunk](%d,%d)\n",x,y);
-    auto res = new chunk;
-    res->mapBuf = new float[33*33];
-    genTerrain(res->mapBuf , x , y , 33);
+
+void terrain::initChunk(terrain::chunk * res){
     //创建寻路单元
     for(int i=0;i<16;++i){
         for(int j=0;j<16;++j){
@@ -88,9 +85,9 @@ terrain::chunk * terrain::genChunk(int x,int y){
         }
     }
 
-    auto posi = vec3(x*32.0f , 0 , y*32.0f);
+    auto posi = vec3(res->x*32.0f , 0 , res->y*32.0f);
 
-    res->updateLOD(x,y,cm_cx,cm_cy);
+    res->updateLOD(res->x , res->y , cm_cx , cm_cy);
 
     for(int i=0;i<4;++i){
         int meshLod = 1;
@@ -103,7 +100,9 @@ terrain::chunk * terrain::genChunk(int x,int y){
 
         auto mesh=this->createTerrainMesh(
             NULL ,
-            res->mapBuf , 33 , 33 ,
+            res->mapBuf ,
+            res->digMap ,
+            33 , 33 ,
             irr::core::dimension2d<irr::f32>(1 , 1),
             irr::core::dimension2d<irr::u32>(33 , 33),
             meshLod,true
@@ -147,28 +146,79 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
     res->rigidBody->setFriction(0.7);
     res->rigidBody->setRestitution(0.1);
-    
+
     res->info.type=BODY_TERRAIN;
     res->info.ptr=res;
     res->rigidBody->setUserPointer(&(res->info));
-    
+
     this->dynamicsWorld->addRigidBody(res->rigidBody);
 
     res->show();
+}
+
+void terrain::updateChunk(terrain::chunk * p){
+    if(p->rigidBody){
+        dynamicsWorld->removeRigidBody(p->rigidBody);
+    }
+    if(p->rigidBody){
+        delete p->rigidBody;
+    }
+    if(p->bodyState){
+        delete p->bodyState;
+    }
+    if(p->bodyShape){
+        delete p->bodyShape;
+    }
+    if(p->bodyMesh){
+        delete p->bodyMesh;
+    }
+    for(int i=0;i<4;++i){
+        if(p->node[i]){
+            p->node[i]->remove();
+        }
+    }
+    if(p->shadowNode){
+        p->shadowNode->remove();
+    }
+    initChunk(p);
+}
+terrain::chunk * terrain::genChunk(int x,int y){
+    //printf("[genChunk](%d,%d)\n",x,y);
+    auto res = new chunk;
+    res->mapBuf = new float[33*33];
+    res->digMap = new int16_t[33*33];
+    res->x = x;
+    res->y = y;
+    for(int i=0;i<33*33;++i){
+        res->digMap[i] = 0;
+    }
+    genTerrain(res->mapBuf , x , y , 33);
+
+    initChunk(res);
 
     return res;
 }
 void terrain::freeChunk(terrain::chunk * p){
-    dynamicsWorld->removeRigidBody(p->rigidBody);
-    delete p->rigidBody;
-    delete p->bodyState;
-    delete p->bodyShape;
-    delete p->bodyMesh;
-    delete [] p->mapBuf;
+    if(p->rigidBody)
+        dynamicsWorld->removeRigidBody(p->rigidBody);
+    if(p->rigidBody)
+        delete p->rigidBody;
+    if(p->bodyState)
+        delete p->bodyState;
+    if(p->bodyShape)
+        delete p->bodyShape;
+    if(p->bodyMesh)
+        delete p->bodyMesh;
+    if(p->mapBuf)
+        delete [] p->mapBuf;
+    if(p->digMap)
+        delete [] p->digMap;
     for(int i=0;i<4;++i){
-        p->node[i]->remove();
+        if(p->node[i])
+            p->node[i]->remove();
     }
-    p->shadowNode->remove();
+    if(p->shadowNode)
+        p->shadowNode->remove();
     delete p;
 }
 

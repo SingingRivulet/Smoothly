@@ -41,7 +41,7 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
     randg.setSeed((x+10)*(y+20)*(hu+30)*(tem+40));
 
     flatCells.clear();
-    auto tbuf = genTerrain(x,y);
+    auto tbuf = genTerrain(x,y,mapBuffer);
     for(int i=0;i<16;++i){
         for(int j=0;j<16;++j){
             int ti = i*2;
@@ -111,7 +111,6 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
         //ptr->minimap_element = n;
         //m->drop();
     }
-    delete [] tbuf;
     return true;
 }
 
@@ -586,6 +585,7 @@ terrain_item::terrain_item(){
     chunkLeft = 0;
     chunkLeft_text = NULL;
     showText_time = 0;
+    mapBuffer = new float[33*33];
     loadConfig();
 
     {
@@ -694,6 +694,7 @@ terrain_item::~terrain_item(){
     releaseConfig();
     mesh_grass->drop();
     hiz_solve_wake();
+    delete [] mapBuffer;
 }
 void terrain_item::loadConfig(){
     config.clear();

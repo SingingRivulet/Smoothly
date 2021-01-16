@@ -30,6 +30,7 @@ namespace smoothly{
         private:
             static irr::scene::IMesh * createTerrainMesh(irr::video::ITexture* texture,
                 float * heightmap,
+                int16_t * digmap,
                 irr::u32 hx, irr::u32 hy,
                 const irr::core::dimension2d<irr::f32>& stretchSize,
                 const irr::core::dimension2d<irr::u32>& maxVtxBlockSize,  //网眼大小。官方文档没写
@@ -38,13 +39,14 @@ namespace smoothly{
             //irrlicht自带的太差，所以自己实现一个
             float genTerrain(float * img,int x , int y ,int pointNum);
         public:
-            float * genTerrain(int x , int y){
-                auto mapBuf = new float[33*33];
+            float * genTerrain(int x , int y , float * mb = NULL){
+                auto mapBuf = mb;
+                if(mapBuf==NULL)
+                    mapBuf = new float[33*33];
                 genTerrain(mapBuf , x , y , 33);
                 return mapBuf;
             }
         private:
-            
             struct chunk{//各组件维护各自的chunk
                 irr::scene::IMeshSceneNode  * node[4] , * shadowNode;
                 
@@ -54,6 +56,7 @@ namespace smoothly{
                 btTriangleMesh   * bodyMesh;
 
                 float * mapBuf;
+                int16_t * digMap;
                 
                 bodyInfo info;
                 
@@ -88,6 +91,8 @@ namespace smoothly{
                 }
 
                 int collMap[16][16];
+
+                int x,y;
 
             };
             std::map<ipair,chunk*> chunks;
@@ -135,6 +140,8 @@ namespace smoothly{
                 first = false;
                 return res;
             }
+            void initChunk(chunk * res);
+            void updateChunk(chunk * p);
             int lastUCT;
 
             class TerrainShaderCallback:public irr::video::IShaderConstantSetCallBack{//shader回调

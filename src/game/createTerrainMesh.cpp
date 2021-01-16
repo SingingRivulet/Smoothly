@@ -4,7 +4,7 @@ namespace smoothly{
 using namespace irr;
 using namespace irr::scene;
 scene::IMesh * terrain::createTerrainMesh(video::ITexture* texture,
-    float * heightmap,
+    float * heightmap, int16_t * digmap,
     u32 hx, u32 hy,
     const core::dimension2d<f32>& stretchSize,
     const core::dimension2d<u32>& maxVtxBlockSize, //网眼大小。官方文档没写
@@ -49,9 +49,10 @@ scene::IMesh * terrain::createTerrainMesh(video::ITexture* texture,
 				for (u32 x=0; x<blockSize.Width; ++x)
 				{
                     const f32 height = heightmap[(x+processed.X)+(y+processed.Y)*hx];
+                    const int16_t dig = digmap[(x+processed.X)+(y+processed.Y)*hx];
 
-					vtx.Pos.set(pos.X, height, pos.Y);
-                    vtx.Color.set(255,0,0,0);
+                    vtx.Pos.set(pos.X, height+dig, pos.Y);
+                    vtx.Color.set(255,(dig==0?0:255),0,0);
 					vtx.TCoords.set(tc);
 					buffer->Vertices.push_back(vtx);
 					pos.X += stretchSize.Width;
