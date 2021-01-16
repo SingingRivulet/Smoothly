@@ -46,7 +46,7 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
         for(int j=0;j<16;++j){
             int ti = i*2;
             int tj = j*2;
-            float d = (fabs(tbuf[ti][tj]-tbuf[ti+1][tj])+fabs(tbuf[ti][tj]-tbuf[ti][tj+1]))*0.5;
+            float d = (fabs(tbuf[ti+tj*33]-tbuf[ti+1+tj*33])+fabs(tbuf[ti+tj*33]-tbuf[ti+(tj+1)*33]))*0.5;
             if(d<0.5){
                 flatCells.push_back(ipair(ti,tj));
             }
@@ -111,6 +111,7 @@ bool terrain_item::setRemoveTable(int x, int y, const std::set<mapItem> & rmt, b
         //ptr->minimap_element = n;
         //m->drop();
     }
+    delete [] tbuf;
     return true;
 }
 

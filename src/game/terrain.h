@@ -28,18 +28,18 @@ namespace smoothly{
 
             int getCollHeight(int x,int y);
         private:
-            float ** mapBuf;
             static irr::scene::IMesh * createTerrainMesh(irr::video::ITexture* texture,
-                float ** heightmap,
+                float * heightmap,
                 irr::u32 hx, irr::u32 hy,
                 const irr::core::dimension2d<irr::f32>& stretchSize,
                 const irr::core::dimension2d<irr::u32>& maxVtxBlockSize,  //网眼大小。官方文档没写
                 u32 lod,
                 bool debugBorders);
             //irrlicht自带的太差，所以自己实现一个
-            float genTerrain(float ** img,int x , int y ,int pointNum);
+            float genTerrain(float * img,int x , int y ,int pointNum);
         public:
-            float ** genTerrain(int x , int y){
+            float * genTerrain(int x , int y){
+                auto mapBuf = new float[33*33];
                 genTerrain(mapBuf , x , y , 33);
                 return mapBuf;
             }
@@ -52,6 +52,8 @@ namespace smoothly{
                 btMotionState    * bodyState;
                 btCollisionShape * bodyShape;
                 btTriangleMesh   * bodyMesh;
+
+                float * mapBuf;
                 
                 bodyInfo info;
                 

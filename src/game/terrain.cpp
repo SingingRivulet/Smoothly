@@ -3,9 +3,6 @@ namespace smoothly{
 
 terrain::terrain(){
     setSeed(1234);
-    mapBuf=new float*[33];
-    for(auto i=0;i<33;i++)
-        mapBuf[i]=new float[33];
     altitudeK=0.08;
     hillK=100;
     temperatureK=0.3;
@@ -51,12 +48,8 @@ terrain::terrain(){
 terrain::~terrain(){
     for(auto it:chunks)
         freeChunk(it.second);
-
-    for(auto i=0;i<33;i++)
-        delete [] mapBuf[i];
-    delete [] mapBuf;
 }
-float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
+float terrain::genTerrain(float * img, int x , int y , int pointNum){
     float h;
     float ix,iy;
     float max=0;
@@ -77,7 +70,7 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
                 //mx=ix;
                 //my=iy;
             }
-            img[i][j]=h;
+            img[i+j*33]=h;
         }
     }
     //printf("max:(%f,%f) begin:(%d,%d)\n",mx,my,begX,begY);
@@ -86,11 +79,12 @@ float terrain::genTerrain(float ** img,int x , int y ,int pointNum){
 terrain::chunk * terrain::genChunk(int x,int y){
     //printf("[genChunk](%d,%d)\n",x,y);
     auto res = new chunk;
-    genTerrain(mapBuf , x , y , 33);
+    res->mapBuf = new float[33*33];
+    genTerrain(res->mapBuf , x , y , 33);
     //创建寻路单元
     for(int i=0;i<16;++i){
         for(int j=0;j<16;++j){
-            res->collMap[i][j]=floor(mapBuf[i*2][j*2]/2);
+            res->collMap[i][j]=floor(res->mapBuf[i*2+j*2*33]/2);
         }
     }
 
@@ -109,7 +103,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
 
         auto mesh=this->createTerrainMesh(
             NULL ,
-            mapBuf , 33 , 33 ,
+            res->mapBuf , 33 , 33 ,
             irr::core::dimension2d<irr::f32>(1 , 1),
             irr::core::dimension2d<irr::u32>(33 , 33),
             meshLod,true
@@ -170,6 +164,7 @@ void terrain::freeChunk(terrain::chunk * p){
     delete p->bodyState;
     delete p->bodyShape;
     delete p->bodyMesh;
+    delete [] p->mapBuf;
     for(int i=0;i<4;++i){
         p->node[i]->remove();
     }
