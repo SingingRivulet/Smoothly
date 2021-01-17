@@ -226,6 +226,75 @@ void terrain::freeChunk(terrain::chunk * p){
     auto it = chunks.find(ipair(x,y)); \
     if(it!=chunks.end())
 
+void terrain::setDig(int x, int y, std::vector<std::pair<uint16_t,int16_t> > & dig){
+    findChunk(x,y){
+        for(auto d:dig){
+            if(d.first<33*33){
+                it->second->digMap[d.first] = d.second;
+            }
+        }
+        updateChunk(it->second);
+    }
+}
+
+void terrain::setDig(RakNet::BitStream * data){
+    int32_t x,y,num;
+    bool isMap,comp;
+    uint16_t compNum,index;
+    int16_t dig;
+    if(data->Read(x) && data->Read(y) && data->Read(isMap)){
+        if(isMap){
+            findChunk(x,y){
+                int index = 0;
+                while(index<33*33){
+                    if(data->Read(comp)){//有comp说明压缩过
+                        if(comp){
+                            if(data->Read(compNum)){//获取数量
+                                int i = 0;
+                                while(index<33*33 && i<compNum){
+                                    it->second->digMap[index] = 0;
+                                    ++index;
+                                    ++i;
+                                }
+                                if(index>=33*33){
+                                    break;
+                                }
+                            }else{
+                                break;
+                            }
+                        }else{
+                            if(data->Read(dig)){
+                                it->second->digMap[index] = dig;
+                                ++index;
+                            }
+                        }
+                    }else{
+                        break;
+                    }
+                }
+            }
+        }else{
+            if(data->Read(num)){
+                findChunk(x,y){
+                    for(int i=0;i<num;++i){
+                        if(data->Read(index) && data->Read(dig)){
+                            if(index<33*33){
+                                it->second->digMap[index] = dig;
+                            }
+                        }else{
+                            break;
+                        }
+                    }
+                    updateChunk(it->second);
+                }
+            }
+        }
+    }
+}
+
+void terrain::msg_setDigMap(RakNet::BitStream * data){
+    setDig(data);
+}
 void terrain::createChunk(int x,int y){
     findChunk(x,y){
 

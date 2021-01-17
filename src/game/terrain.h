@@ -150,6 +150,10 @@ namespace smoothly{
                     void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
             }terrainShaderCallback;
 
+        public:
+            void setDig(int x, int y, std::vector<std::pair<uint16_t,int16_t> > & dig);//dig: index=>depth
+            void setDig(RakNet::BitStream * data);
+            void msg_setDigMap(RakNet::BitStream * data)override;
     };
 }
 #endif

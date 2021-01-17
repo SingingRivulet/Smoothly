@@ -8,6 +8,8 @@ varying vec4 pointPosition4;
 varying float temp;//温度
 varying float humi;//湿度
 
+varying float isDig;
+
 varying vec3 normal;
 varying vec3 onormal;
 varying vec3 lightDir;
@@ -96,4 +98,5 @@ void main(){
     normal  = normalize(gl_NormalMatrix * gl_Normal);
     onormal = normalize(gl_Normal);
     lightDir = normalize(vec3(gl_LightSource[0].position));
+    isDig = gl_Color.r;
 }

@@ -142,6 +142,13 @@ class connectionBase{
                                         break;
                                     }
                                 break;
+                                case 'D':
+                                    switch(data->data[3]){
+                                        case '=':
+                                            ctl_setDigMap(&bs);
+                                        break;
+                                    }
+                                break;
                                 case 'B':
                                     switch(data->data[3]){
                                         case 'A':
@@ -570,6 +577,18 @@ class connectionBase{
             bs.Write(RakNet::RakString(muuid));
             sendMessage(&bs);
         }
+        inline void cmd_setDig(int32_t x,int32_t y,const std::vector<std::pair<uint16_t,int16_t> > & dig){
+            makeHeader('D','+');
+            int16_t len = dig.size();
+            bs.Write(x);
+            bs.Write(y);
+            bs.Write(len);
+            for(auto it:dig){
+                bs.Write(it.first);
+                bs.Write(it.second);
+            }
+            sendMessage(&bs);
+        }
     private:
         //controllers
         inline void ctl_setVisualRange(RakNet::BitStream * data){
@@ -905,6 +924,9 @@ class connectionBase{
         inline void ctl_mailPackagePickedUp(RakNet::BitStream * data){
             msg_mailPackagePickedUp();
         }
+        inline void ctl_setDigMap(RakNet::BitStream * data){
+            msg_setDigMap(data);
+        }
 
         time_t lastHeartbeat;
 
@@ -950,6 +972,7 @@ class connectionBase{
         virtual void msg_newMail()=0;
         virtual void msg_mail(const char * text)=0;
         virtual void msg_mailPackagePickedUp()=0;
+        virtual void msg_setDigMap(RakNet::BitStream * data)=0;
 };
 ///////////////////////
 }//////client

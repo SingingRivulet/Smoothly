@@ -3,6 +3,7 @@ uniform vec3 campos;
 uniform float clipY;
 uniform int enableClipY;
 uniform int clipYUp;
+varying float isDig;
 
 uniform vec4 ambientColor;
 
@@ -174,7 +175,7 @@ void main(){
 
     if(temp>theta*2.0+0.5){
         float grass_theta = onormal.y-(theta*2.0+0.6);
-        if(grass_theta>0.0){
+        if(grass_theta>0.0 && isDig<0.0001){
             diffuseColor = vec4(mix(padd,texture_grass,min(grass_theta*10.0,1.0)),1.0);
         }else{
             diffuseColor = vec4(padd,1.0);
