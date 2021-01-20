@@ -179,6 +179,13 @@ void controllers::onMessage(const std::string & uuid,const RakNet::SystemAddress
                 break;
             }
         break;
+        case 'D':
+            switch (a) {
+                case '+':
+                    ctl_setDig(uuid,addr,data);
+                break;
+            }
+        break;
     }
 }
 //===========================================================================================================
