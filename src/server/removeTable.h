@@ -1,10 +1,10 @@
 #ifndef SMOOTHLY_SERVER_RMT
 #define SMOOTHLY_SERVER_RMT
-#include "map.h"
+#include "dig.h"
 namespace smoothly{
 namespace server{
 
-class removeTable:public map{
+class removeTable:public dig{
     public:
         removeTable();
         void getRemovedItem(int x,int y,std::list<std::pair<int,int> > &);//id , index

@@ -2,6 +2,7 @@
 #define SMOOTHLY_SERVER_CTLS
 
 #include "handlers.h"
+#include <algorithm>
 
 namespace smoothly{
 namespace server{
@@ -61,6 +62,8 @@ class controllers:public handlers{
         void ctl_getMails(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
         void ctl_pickupMailPackage(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
         void ctl_deleteMails(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
+
+        void ctl_setDig(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data);
 };
 /////////////////
 }//////server

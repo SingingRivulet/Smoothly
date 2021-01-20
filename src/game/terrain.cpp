@@ -1,4 +1,4 @@
-#include "terrain.h"
+﻿#include "terrain.h"
 namespace smoothly{
 
 terrain::terrain(){
@@ -189,6 +189,7 @@ terrain::chunk * terrain::genChunk(int x,int y){
     res->digMap = new int16_t[33*33];
     res->x = x;
     res->y = y;
+    res->needUpdateMesh = false;
     for(int i=0;i<33*33;++i){
         res->digMap[i] = 0;
     }
@@ -238,9 +239,9 @@ void terrain::setDig(int x, int y, std::vector<std::pair<uint16_t,int16_t> > & d
 }
 
 void terrain::setDig(RakNet::BitStream * data){
-    int32_t x,y,num;
-    bool isMap,comp;
-    uint16_t compNum,index;
+    int32_t x,y,num,rx,ry;
+    bool isMap,drawMode,oneChunkMode,comp;
+    uint16_t compNum,index,range;
     int16_t dig;
     if(data->Read(x) && data->Read(y) && data->Read(isMap)){
         if(isMap){
@@ -274,26 +275,99 @@ void terrain::setDig(RakNet::BitStream * data){
                 }
             }
         }else{
-            if(data->Read(num)){
-                findChunk(x,y){
-                    for(int i=0;i<num;++i){
-                        if(data->Read(index) && data->Read(dig)){
-                            if(index<33*33){
-                                it->second->digMap[index] = dig;
+            if(data->Read(drawMode)){
+                if(drawMode){
+                    if(data->Read(oneChunkMode)){
+                        if(oneChunkMode){
+                            if(data->Read(rx) && data->Read(ry) && data->Read(range)){
+                                setDig(x,y,rx,ry,range);
                             }
                         }else{
-                            break;
+                            if(data->Read(range)){
+                                setDig(x,y,range);
+                            }
                         }
                     }
-                    updateChunk(it->second);
+                }else{
+                    if(data->Read(num)){
+                        findChunk(x,y){
+                            for(int i=0;i<num;++i){
+                                if(data->Read(index) && data->Read(dig)){
+                                    if(index<33*33){
+                                        it->second->digMap[index] = dig;
+                                    }
+                                }else{
+                                    break;
+                                }
+                            }
+                            //updateChunk(it->second);
+                            it->second->needUpdateMesh = true;
+                        }
+                    }
                 }
             }
         }
     }
 }
 
+void terrain::setDig(int x, int y, int rx, int ry, int r){
+    findChunk(x,y){
+        chunk * c = it->second;
+
+        int chunkBeginX = x*32;
+        int chunkEndX   = chunkBeginX+32;
+        int chunkBeginY = y*32;
+        int chunkEndY   = chunkBeginY+32;
+
+        int sweepBeginX = std::max(rx-r,chunkBeginX);
+        int sweepEndX   = std::min(rx+r,chunkEndX);
+        int sweepBeginY = std::max(ry-r,chunkBeginY);
+        int sweepEndY   = std::min(ry+r,chunkEndY);
+
+        for(int i=sweepBeginX;i<=sweepEndX;++i){
+            for(int j=sweepBeginY;j<=sweepEndY;++j){
+
+            }
+        }
+    }
+}
+
+void terrain::setDig(int x, int y, int r){
+    ipair p[] = {
+        ipair(x-r,y-r),
+        ipair(x-r,y+r),
+        ipair(x+r,y-r),
+        ipair(x+r,y+r)
+    };
+    std::set<ipair> c;
+    for(int i=0;i<4;++i){
+        c.insert(ipair(floor(p[i].x/32.0),floor(p[i].y/32.0)));
+    }
+    for(auto it:c){
+        setDig(it.x,it.y,x,y,r);
+    }
+}
+
 void terrain::msg_setDigMap(RakNet::BitStream * data){
     setDig(data);
+}
+
+void terrain::msg_editDigMap(int x, int y, RakNet::BitStream * data){
+    findChunk(x,y){
+        int16_t index,depth,size;
+        if(data->Read(size)){
+            for(int i=0;i<size;++i){
+                if(data->Read(index) && data->Read(depth)){
+                    if(index>=0 && index<33*33){
+                        it->second->digMap[index] = depth;
+                    }
+                    it->second->needUpdateMesh = true;
+                }else{
+                    break;
+                }
+            }
+        }
+    }
 }
 void terrain::createChunk(int x,int y){
     findChunk(x,y){
@@ -333,7 +407,13 @@ void terrain::loop(){
     int tm = time(0);
     if(updateCamChunk() || abs(lastUCT-tm)>2){
         lastUCT = tm;
-        for(auto it:chunks){
+        for(auto & it:chunks){
+
+            if(it.second->needUpdateMesh){
+                it.second->needUpdateMesh = false;
+                updateChunk(it.second);
+            }
+
             ipair ch = it.first;
             int l = std::max(abs(ch.x-cm_cx),abs(ch.y-cm_cy));
             it.second->updateLOD(ch.x,ch.y,cm_cx,cm_cy);
@@ -344,6 +424,7 @@ void terrain::loop(){
                 updateLOD(ch.x,ch.y,0);
                 it.second->hide();
             }
+
         }
     }
 }

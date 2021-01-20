@@ -135,6 +135,7 @@ void handlers::sendRemoveTable(const ipair & p , const std::string & to){
         RakNet::SystemAddress addr;
         getAddrByUUID(to,addr);
         sendAddr_removeTable(addr,p.x,p.y, rmt);
+        //sendDigMap(addr,p.x,p.y);
         //sendAddr_chunkACL(addr,p,cache_chunkACL[p]);
     }catch(...){
         logError();
@@ -360,6 +361,30 @@ void handlers::boardcast_mission(const vec3 & posi, const std::string & muuid){
     int x = floor(posi.X);
     int y = floor(posi.Z);
     boardcast(x,y,&bs);
+}
+
+void handlers::boardcast_setDigDepth(int x, int y, const std::vector<std::pair<int16_t, int16_t> > & dig){
+    makeHeader('D','<');
+    bs.Write((int32_t)y);
+    bs.Write((int32_t)x);
+    int16_t s = dig.size();
+    bs.Write(s);
+    for(auto it:dig){
+        bs.Write(it.first);
+        bs.Write(it.second);
+    }
+    boardcast(x,y,&bs);
+}
+
+void handlers::sendAddr_digMap(const RakNet::SystemAddress & addr, int32_t x, int32_t y, const char * data, int len){
+    bool bbuf;
+    makeHeader('D','=');
+    bs.Write(x);
+    bs.Write(y);
+    bbuf = true;
+    bs.Write(bbuf);
+    bs.WriteBits((const unsigned char *)data,BYTES_TO_BITS(len));
+    sendMessage(&bs,addr);
 }
 
 void handlers::sendUser_newMail(const std::string & user){

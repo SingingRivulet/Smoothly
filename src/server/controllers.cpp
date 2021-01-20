@@ -460,6 +460,7 @@ void controllers::ctl_getChunkACL(const std::string & , const RakNet::SystemAddr
     data->Read(x);
     data->Read(y);
     sendAddr_chunkACL(addr,ipair(x,y),cache_chunkACL[ipair(x,y)]);
+    sendDigMap(addr,x,y);
 }
 
 void controllers::ctl_setChunkACL(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
@@ -596,6 +597,24 @@ void controllers::ctl_deleteMails(const std::string & uuid, const RakNet::System
     RakNet::RakString muuid;
     if(data->Read(muuid)){
         deleteMail(uuid , muuid.C_String());
+    }
+}
+
+void controllers::ctl_setDig(const std::string & uuid, const RakNet::SystemAddress &, RakNet::BitStream * data){
+    std::vector<std::pair<std::pair<int32_t,int32_t>,int16_t> > dig;
+    int16_t len,depth;
+    int32_t x,y;
+    if(data->Read(len)){
+        len = std::min((int16_t)64,len);//最多允许64格
+        for(int i=0;i<len;++i){
+            if(data->Read(x) && data->Read(y) && data->Read(depth)){
+                dig.push_back(std::pair<std::pair<int32_t,int32_t>,int16_t>(std::pair<int32_t,int32_t>(x,y),depth));
+            }else{
+                break;
+            }
+        }
+        //处理数据
+        setDigDepth(dig);
     }
 }
 

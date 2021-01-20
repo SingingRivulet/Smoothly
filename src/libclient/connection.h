@@ -147,6 +147,9 @@ class connectionBase{
                                         case '=':
                                             ctl_setDigMap(&bs);
                                         break;
+                                        case '<':
+                                            ctl_editDigMap(&bs);
+                                        break;
                                     }
                                 break;
                                 case 'B':
@@ -577,14 +580,13 @@ class connectionBase{
             bs.Write(RakNet::RakString(muuid));
             sendMessage(&bs);
         }
-        inline void cmd_setDig(int32_t x,int32_t y,const std::vector<std::pair<uint16_t,int16_t> > & dig){
+        inline void cmd_setDig(const std::vector<std::pair<std::pair<int32_t,int32_t>,int16_t> > & dig){
             makeHeader('D','+');
             int16_t len = dig.size();
-            bs.Write(x);
-            bs.Write(y);
             bs.Write(len);
             for(auto it:dig){
-                bs.Write(it.first);
+                bs.Write(it.first.first);
+                bs.Write(it.first.second);
                 bs.Write(it.second);
             }
             sendMessage(&bs);
@@ -927,6 +929,12 @@ class connectionBase{
         inline void ctl_setDigMap(RakNet::BitStream * data){
             msg_setDigMap(data);
         }
+        inline void ctl_editDigMap(RakNet::BitStream * data){
+            int32_t x,y;
+            if(data->Read(x) && data->Read(y)){
+                msg_editDigMap(x,y,data);
+            }
+        }
 
         time_t lastHeartbeat;
 
@@ -973,6 +981,7 @@ class connectionBase{
         virtual void msg_mail(const char * text)=0;
         virtual void msg_mailPackagePickedUp()=0;
         virtual void msg_setDigMap(RakNet::BitStream * data)=0;
+        virtual void msg_editDigMap(int x,int y,RakNet::BitStream * data)=0;
 };
 ///////////////////////
 }//////client
