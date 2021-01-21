@@ -114,7 +114,7 @@ void dig::setDigInChunk(int x, int y, int index, int16_t depth){
         }
 
         //开始映射
-        ptr = (int16_t*)mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+        ptr = (int16_t*)mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
         if (ptr == MAP_FAILED){
             printf("mmap failed\n");
             close(fd);

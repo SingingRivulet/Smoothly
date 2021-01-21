@@ -31,9 +31,9 @@ void body::loop(){
         }
         b->walk(b->status.walk_forward , b->status.walk_leftOrRight,b->config->walkVelocity);
         b->updateFromWorld();
-        auto h = getRealHight(p.X,p.Z);
+        auto h = getRealHight(p.X,p.Z)-1024;
         if(p.Y<h){
-            if(b->lastPosition.Y>=(h-0x7fff)){//挖掘的上限是0x7fff
+            if(b->lastPosition.Y>=h){//挖掘的上限是1024
                 p.Y = b->lastPosition.Y;
             }else{
                 p.Y = (b->config->height+b->config->width)*0.5+h;//防止掉出地图

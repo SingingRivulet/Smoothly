@@ -26,6 +26,7 @@ class control:public group_ai{
         void processCmd_mission(std::istringstream & iss);
         void processCmd_mail(std::istringstream & iss);
         void processCmd_ik(std::istringstream & iss);
+        void processCmd_test(std::istringstream & iss);
 };
 
 }

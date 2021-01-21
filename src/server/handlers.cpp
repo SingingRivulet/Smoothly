@@ -365,8 +365,8 @@ void handlers::boardcast_mission(const vec3 & posi, const std::string & muuid){
 
 void handlers::boardcast_setDigDepth(int x, int y, const std::vector<std::pair<int16_t, int16_t> > & dig){
     makeHeader('D','<');
-    bs.Write((int32_t)y);
     bs.Write((int32_t)x);
+    bs.Write((int32_t)y);
     int16_t s = dig.size();
     bs.Write(s);
     for(auto it:dig){
