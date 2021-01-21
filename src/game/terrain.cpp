@@ -246,6 +246,7 @@ void terrain::setDig(RakNet::BitStream * data){
     if(data->Read(x) && data->Read(y) && data->Read(isMap)){
         if(isMap){
             findChunk(x,y){
+                it->second->needUpdateMesh = true;
                 int index = 0;
                 while(index<33*33){
                     if(data->Read(comp)){//有comp说明压缩过
@@ -291,6 +292,7 @@ void terrain::setDig(RakNet::BitStream * data){
                 }else{
                     if(data->Read(num)){
                         findChunk(x,y){
+                            it->second->needUpdateMesh = true;
                             for(int i=0;i<num;++i){
                                 if(data->Read(index) && data->Read(dig)){
                                     if(index<33*33){
@@ -300,8 +302,6 @@ void terrain::setDig(RakNet::BitStream * data){
                                     break;
                                 }
                             }
-                            //updateChunk(it->second);
-                            it->second->needUpdateMesh = true;
                         }
                     }
                 }

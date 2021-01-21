@@ -33,7 +33,7 @@ void body::loop(){
         b->updateFromWorld();
         auto h = getRealHight(p.X,p.Z);
         if(p.Y<h){
-            if(b->lastPosition.Y>=h){
+            if(b->lastPosition.Y>=(h-0x7fff)){//挖掘的上限是0x7fff
                 p.Y = b->lastPosition.Y;
             }else{
                 p.Y = (b->config->height+b->config->width)*0.5+h;//防止掉出地图

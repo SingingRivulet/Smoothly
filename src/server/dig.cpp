@@ -7,6 +7,9 @@ namespace server{
 dig::dig(){
     mkdir("./map",0777);
     mkdir("./map/digmap",0777);
+    //std::vector<std::pair<std::pair<int32_t, int32_t>, int16_t> > d;
+    //d.push_back(std::pair<std::pair<int32_t, int32_t>, int16_t>(std::pair<int32_t, int32_t>(-2218,3716),-10));
+    //setDigDepth(d);
 }
 
 void dig::setDigDepth(const std::vector<std::pair<std::pair<int32_t, int32_t>, int16_t> > & dig){
@@ -89,7 +92,7 @@ void dig::setDigInChunk(int x, int y, int index, int16_t depth){
         //大小
         static const int size = 33*33*sizeof(int16_t);
 
-        if((fd = open(path, O_RDWR)) < 0){
+        if((fd = open(path, O_RDWR|O_CREAT,0777)) < 0){
             printf("open file error\n");
             return;
         }
@@ -169,6 +172,7 @@ void dig::buildDigCache(){
                 bs.Write((int16_t)ptr[i]);
                 zeroCount = 0;
             }
+            ++i;
         }
 
         //清空压缩
