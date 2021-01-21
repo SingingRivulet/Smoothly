@@ -10,16 +10,14 @@ void fire::attackBody(const std::string &uuid, fireConfig *conf, bodyInfo *body,
             if(dh!=0)
                 cmd_HPInc(b->uuid , dh);
         }
-    }else
-    if(body->type==BODY_BUILDING){
+    }else if(body->type==BODY_BUILDING){
         auto b = (buildingBody*)body->ptr;
         if(b){
             int dh = attackBuilding(uuid,conf,b,force);
             if(dh!=0)
                 cmd_damageBuilding(b->uuid , dh);
         }
-    }else
-    if(body->type==BODY_TERRAIN_ITEM){
+    }else if(body->type==BODY_TERRAIN_ITEM){
         auto mid = (mapId*)body->ptr;
         if(attackTerrainItem(uuid,conf,mid,force))
             cmd_addRemovedItem(mid->cx , mid->cy ,mid->x , mid->y , mid->id.id , mid->id.index);

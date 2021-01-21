@@ -141,6 +141,7 @@ class fire:public interactive{
 
         int  attackBody(const std::string & uuid , fireConfig * conf , bodyItem * , float force = 1);
         bool attackTerrainItem(const std::string & uuid , fireConfig * conf , mapId * , float force = 1);
+        void attackTerrain(const vec3 & pos);
 
         void bulletAttackBody(bullet * b , const btCollisionObject * body);
         void releaseBullet(bullet * b);

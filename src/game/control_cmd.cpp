@@ -97,14 +97,7 @@ void control::processCmd_test(std::istringstream & iss){
     std::string act;
     iss>>act;
 
-    if(act=="dig"){
-        if(mainControlBody){
-            auto p = mainControlBody->node->getPosition();
-            std::vector<std::pair<std::pair<int32_t, int32_t>, int16_t> > d;
-            d.push_back(std::pair<std::pair<int32_t, int32_t>, int16_t>(std::pair<int32_t, int32_t>(p.X,p.Z),-10));
-            cmd_setDig(d);
-        }
-    }
+
 }
 
 }

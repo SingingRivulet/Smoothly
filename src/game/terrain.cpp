@@ -242,7 +242,7 @@ void terrain::setDig(RakNet::BitStream * data){
     int32_t x,y,num,rx,ry;
     bool isMap,drawMode,oneChunkMode,comp;
     uint16_t compNum,index,range;
-    int16_t dig;
+    int16_t dig,h;
     if(data->Read(x) && data->Read(y) && data->Read(isMap)){
         if(isMap){
             findChunk(x,y){
@@ -280,12 +280,12 @@ void terrain::setDig(RakNet::BitStream * data){
                 if(drawMode){
                     if(data->Read(oneChunkMode)){
                         if(oneChunkMode){
-                            if(data->Read(rx) && data->Read(ry) && data->Read(range)){
-                                setDig(x,y,rx,ry,range);
+                            if(data->Read(rx) && data->Read(ry) && data->Read(h) && data->Read(range)){
+                                setDig(x,y,rx,ry,h,range);
                             }
                         }else{
-                            if(data->Read(range)){
-                                setDig(x,y,range);
+                            if(data->Read(h) && data->Read(range)){
+                                setDig(x,y,h,range);
                             }
                         }
                     }
@@ -310,7 +310,7 @@ void terrain::setDig(RakNet::BitStream * data){
     }
 }
 
-void terrain::setDig(int x, int y, int rx, int ry, int r){
+void terrain::setDig(int x, int y, int rx, int ry , int rh , int r){
     findChunk(x,y){
         chunk * c = it->second;
 
@@ -324,15 +324,39 @@ void terrain::setDig(int x, int y, int rx, int ry, int r){
         int sweepBeginY = std::max(ry-r,chunkBeginY);
         int sweepEndY   = std::min(ry+r,chunkEndY);
 
+        int r2 = r*r;
+
         for(int i=sweepBeginX;i<=sweepEndX;++i){
             for(int j=sweepBeginY;j<=sweepEndY;++j){
-
+                int x2 = i-rx;
+                int y2 = j-ry;
+                int l2 = x2*x2 + y2*y2;
+                if(l2 <= r2){//在范围内
+                    float eh = sqrt(r2-l2);//求这个位置的影响高度
+                    int posInChunk_x = i-chunkBeginX;
+                    int posInChunk_y = j-chunkBeginY;
+                    int index = posInChunk_x+posInChunk_y*33;
+                    auto d = c->digMap[index];//挖掘高度
+                    auto h = c->mapBuf[index];//原始高度
+                    int oh = d+h;//实际高度
+                    int th = rh-eh;//应挖掘到
+                    if(oh>th){
+                        //应该挖掘
+                        int delta = th - h;
+                        if(delta>1024)
+                            delta = 1024;
+                        if(delta<-1024)
+                            delta = -1024;
+                        digBuffer.push_back(std::tuple<int32_t,int32_t,int16_t>(rx,ry,delta));
+                    }
+                }
             }
         }
     }
 }
 
-void terrain::setDig(int x, int y, int r){
+void terrain::setDig(int x, int y , int h , int r){
+    digBuffer.clear();
     ipair p[] = {
         ipair(x-r,y-r),
         ipair(x-r,y+r),
@@ -344,8 +368,10 @@ void terrain::setDig(int x, int y, int r){
         c.insert(ipair(floor(p[i].x/32.0),floor(p[i].y/32.0)));
     }
     for(auto it:c){
-        setDig(it.x,it.y,x,y,r);
+        setDig(it.x,it.y,x , y , h , r);
     }
+    cmd_setDig(digBuffer);
+    digBuffer.clear();
 }
 
 void terrain::msg_setDigMap(RakNet::BitStream * data){

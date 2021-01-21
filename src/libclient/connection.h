@@ -580,14 +580,14 @@ class connectionBase{
             bs.Write(RakNet::RakString(muuid));
             sendMessage(&bs);
         }
-        inline void cmd_setDig(const std::vector<std::pair<std::pair<int32_t,int32_t>,int16_t> > & dig){
+        inline void cmd_setDig(const std::vector<std::tuple<int32_t,int32_t,int16_t> > & dig){
             makeHeader('D','+');
             int16_t len = dig.size();
             bs.Write(len);
             for(auto it:dig){
-                bs.Write(it.first.first);
-                bs.Write(it.first.second);
-                bs.Write(it.second);
+                bs.Write(std::get<0>(it));
+                bs.Write(std::get<1>(it));
+                bs.Write(std::get<2>(it));
             }
             sendMessage(&bs);
         }

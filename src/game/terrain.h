@@ -154,10 +154,12 @@ namespace smoothly{
         public:
             void setDig(int x, int y, std::vector<std::pair<uint16_t,int16_t> > & dig);//dig: index=>depth
             void setDig(RakNet::BitStream * data);
-            void setDig(int x, int y, int rx, int ry, int r);
-            void setDig(int x, int y, int r);
+            void setDig(int x, int y, int rx, int ry, int h, int r);
+            void setDig(int x, int y, int h, int r);
             void msg_setDigMap(RakNet::BitStream * data)override;
             void msg_editDigMap(int x,int y,RakNet::BitStream * data)override;
+        private:
+            std::vector<std::tuple<int32_t,int32_t,int16_t> > digBuffer;
     };
 }
 #endif
