@@ -347,7 +347,7 @@ void terrain::setDig(int x, int y, int rx, int ry , int rh , int r){
                             delta = 1024;
                         if(delta<-1024)
                             delta = -1024;
-                        digBuffer.push_back(std::tuple<int32_t,int32_t,int16_t>(rx,ry,delta));
+                        digBuffer.push_back(std::tuple<int32_t,int32_t,int16_t>(i,j,delta));
                     }
                 }
             }
@@ -393,6 +393,22 @@ void terrain::msg_editDigMap(int x, int y, RakNet::BitStream * data){
                 }
             }
         }
+    }
+}
+
+void terrain::digByRay(const irr::core::line3d<f32> & ray, int r){
+    fetchByRay(ray.start, ray.end,[&](const vec3 & p,bodyInfo * b){
+        if(b->type==BODY_TERRAIN){
+            setDig(p.X , p.Z , p.Y , r);
+        }
+    });
+}
+
+void terrain::digByCamera(int r){
+    if(camera){
+        digByRay(
+                    irr::core::line3d<f32>(camera->getPosition(),camera->getTarget()),
+                    r);
     }
 }
 void terrain::createChunk(int x,int y){

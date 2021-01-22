@@ -104,6 +104,13 @@ void fire::fireTo_act(const std::string & uuid , int id , const vec3 & from , co
         playAudioPosition(from,conf->startAudio);
     }
 
+    //挖掘
+    if(conf->dig > 0){
+        digByRay(
+                    irr::core::line3d<f32>(from , from+dir*conf->dig),
+                    conf->digRange);
+    }
+
     if(conf->type==FIRE_SHOOT){
         shoot(uuid,conf,from,dir,attack);
     }else

@@ -54,6 +54,9 @@ class fire:public interactive{
             float       streamParticleVelocity;
 
             float       mass;
+
+            int         dig,digRange;
+
             btVector3   inertia;
 
             btConvexShape * castShape;  //碰撞体

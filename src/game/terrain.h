@@ -158,6 +158,9 @@ namespace smoothly{
             void setDig(int x, int y, int h, int r);
             void msg_setDigMap(RakNet::BitStream * data)override;
             void msg_editDigMap(int x,int y,RakNet::BitStream * data)override;
+
+            void digByRay(const irr::core::line3d<irr::f32>& ray,int r);
+            void digByCamera(int r);
         private:
             std::vector<std::tuple<int32_t,int32_t,int16_t> > digBuffer;
     };

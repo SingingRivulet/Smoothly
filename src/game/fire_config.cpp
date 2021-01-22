@@ -60,6 +60,9 @@ irr::core::dimension2df json2dimension(cJSON * json){
 }
 
 fire::fireConfig::fireConfig(){
+    this->dig = 0;
+    this->digRange = 0;
+
     this->breakWhenHit  = true;
 
     this->bulletConf.billboardMode  = true;
@@ -329,6 +332,12 @@ void fire::openConfig(){
                                     }else
                                     if(strcmp(line->string,"timePerFrame")==0){
                                         p->timePerFrame=line->valueint;
+                                    }else
+                                    if(strcmp(line->string,"dig")==0){
+                                        p->dig=line->valueint;
+                                    }else
+                                    if(strcmp(line->string,"digRange")==0){
+                                        p->digRange=line->valueint;
                                     }
                                 }
                                 line=line->next;

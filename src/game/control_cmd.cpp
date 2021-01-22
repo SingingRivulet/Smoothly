@@ -96,8 +96,6 @@ void control::processCmd_ik(std::istringstream & iss){
 void control::processCmd_test(std::istringstream & iss){
     std::string act;
     iss>>act;
-
-
 }
 
 }
