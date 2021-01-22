@@ -98,5 +98,5 @@ void main(){
     normal  = normalize(gl_NormalMatrix * gl_Normal);
     onormal = normalize(gl_Normal);
     lightDir = normalize(vec3(gl_LightSource[0].position));
-    isDig = gl_Color.r;
+    isDig = 1.0-gl_Color.a;
 }

@@ -52,7 +52,7 @@ scene::IMesh * terrain::createTerrainMesh(video::ITexture* texture,
                     const int16_t dig = digmap[(x+processed.X)+(y+processed.Y)*hx];
 
                     vtx.Pos.set(pos.X, height+dig, pos.Y);
-                    vtx.Color.set(255,(dig==0?0:255),0,0);
+                    vtx.Color.set((dig==0?255:0),0,0,0);
 					vtx.TCoords.set(tc);
 					buffer->Vertices.push_back(vtx);
 					pos.X += stretchSize.Width;
