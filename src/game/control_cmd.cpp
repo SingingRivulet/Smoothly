@@ -19,6 +19,8 @@ void control::processCmd(){
         processCmd_ik(iss);
     }else if(key=="test"){
         processCmd_test(iss);
+    }else if(key=="waterwave"){
+        processCmd_waterwave(iss);
 
     }
 
@@ -96,6 +98,14 @@ void control::processCmd_ik(std::istringstream & iss){
 void control::processCmd_test(std::istringstream & iss){
     std::string act;
     iss>>act;
+}
+
+void control::processCmd_waterwave(std::istringstream & iss){
+    std::string method;
+    iss>>method;
+    if(method=="debug"){
+        debug_wave->setVisible(!debug_wave->isVisible());
+    }
 }
 
 }

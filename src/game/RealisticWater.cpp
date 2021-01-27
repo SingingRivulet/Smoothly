@@ -29,8 +29,7 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
                                                  scene::ISceneNode* parent, s32 id):
 	scene::ISceneNode(parent, sceneManager, id), _time(0),
 	_size(width, height), _sceneManager(sceneManager), _refractionMap(NULL), _reflectionMap(NULL),
-    _windForce(20.0f),_windDirection(0, 1),_waveHeight(0.3f), _waterColor(0.1f, 0.1f, 0.6f, 1.0f), _colorBlendFactor(0.2f), _camera(NULL)
-{
+    _windForce(20.0f),_windDirection(0, 1),_waveHeight(0.3f), _waterColor(0.1f, 0.1f, 0.6f, 1.0f), _colorBlendFactor(0.2f), _camera(NULL) ,wave(sceneManager->getVideoDriver()){
 	_videoDriver = sceneManager->getVideoDriver();
 
 	//create new camera
@@ -62,9 +61,6 @@ RealisticWaterSceneNode::RealisticWaterSceneNode(scene::ISceneManager* sceneMana
 		this);
 
 	_waterSceneNode->setMaterialType((video::E_MATERIAL_TYPE)_shaderMaterial);
-
-    irr::video::ITexture* bumpTexture = _videoDriver->getTexture("../../res/waterbump.png");
-	_waterSceneNode->setMaterialTexture(0, bumpTexture);
 
 	_refractionMap = _videoDriver->addRenderTargetTexture(renderTargetSize);
 	_reflectionMap = _videoDriver->addRenderTargetTexture(renderTargetSize);
@@ -205,6 +201,7 @@ void RealisticWaterSceneNode::OnAnimate(u32 timeMs)
 
         updateFrameFlag = !updateFrameFlag;
 	}
+    _waterSceneNode->setMaterialTexture(0, wave.waveMap);
 }
 
 void RealisticWaterSceneNode::render()
@@ -284,6 +281,8 @@ void RealisticWaterSceneNode::OnSetConstants(video::IMaterialRendererServices* s
 		services->setPixelShaderConstant(services->getVertexShaderConstantID("FogEnabled"), (int*)&fogEnabled, 1);
         services->setPixelShaderConstant(services->getVertexShaderConstantID("FogMode"), (int*)&fogType, 1);
 	}
+
+    wave.registerShaderVar(services);
 }
 
 void RealisticWaterSceneNode::setWindForce(const f32 windForce)

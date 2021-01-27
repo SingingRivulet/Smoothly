@@ -79,7 +79,8 @@ HEADERS += \
     graphbase.h \
     localLight.h \
     texturepool.h \
-    group_ai.h
+    group_ai.h \
+    waterwave.h
 
 SOURCES += \
     createTerrainMesh.cpp \
@@ -133,35 +134,65 @@ SOURCES += \
     body_api.cpp \
     localLight.cpp \
     body_ik.cpp \
-    group_ai.cpp
+    group_ai.cpp \
+    waterwave.cpp
 
 FORMS += \
     ui/login.ui \
     ui/missioneditor.ui
 
 DISTFILES += \
+    ../shader/body.ps.glsl \
+    ../shader/body.vs.glsl \
+    ../shader/building_default.ps.glsl \
+    ../shader/building_default.vs.glsl \
+    ../shader/cloud.ps.glsl \
+    ../shader/cloud.vs.glsl \
+    ../shader/fog.ps.glsl \
+    ../shader/fog.vs.glsl \
+    ../shader/light.ps.glsl \
+    ../shader/light.vs.glsl \
+    ../shader/light_out.ps.glsl \
+    ../shader/lsgi.ps.glsl \
+    ../shader/lsgi.vs.glsl \
+    ../shader/mblur.ps.glsl \
+    ../shader/mblur.vs.glsl \
+    ../shader/minimap_terrain.ps.glsl \
+    ../shader/minimap_terrain.vs.glsl \
+    ../shader/package.ps.glsl \
+    ../shader/package.vs.glsl \
+    ../shader/package_selected.ps.glsl \
+    ../shader/post.ps.glsl \
+    ../shader/post.vs.glsl \
+    ../shader/rain.ps.glsl \
+    ../shader/rain.vs.glsl \
+    ../shader/scan.ps.glsl \
+    ../shader/scan.vs.glsl \
+    ../shader/shadow.ps.glsl \
+    ../shader/shadow.vs.glsl \
+    ../shader/shadowBlend.ps.glsl \
+    ../shader/shadowBlend.vs.glsl \
+    ../shader/shadowMap.ps.glsl \
+    ../shader/shadowMap.vs.glsl \
+    ../shader/shadowSoft.ps.glsl \
+    ../shader/shadowSoft.vs.glsl \
+    ../shader/shadowSoft_3d.ps.glsl \
+    ../shader/sky.ps.glsl \
+    ../shader/sky.vs.glsl \
+    ../shader/ssao.ps.glsl \
+    ../shader/ssao.vs.glsl \
+    ../shader/ssrt.ps.glsl \
+    ../shader/ssrt.vs.glsl \
+    ../shader/SSRWater.ps.glsl \
+    ../shader/SSRWater.vs.glsl \
     ../shader/terrain.vs.glsl \
     ../shader/terrain_lod1.ps.glsl \
     ../shader/terrain_lod2.ps.glsl \
     ../shader/terrain_lod3.ps.glsl \
     ../shader/terrain_lod4.ps.glsl \
-    ../shader/Water.vs.glsl \
-    ../shader/Water.ps.glsl \
-    ../shader/cloud.ps.glsl \
-    ../shader/cloud.vs.glsl \
-    ../shader/sky.ps.glsl \
-    ../shader/sky.vs.glsl \
     ../shader/tree.ps.glsl \
     ../shader/tree.vs.glsl \
-    ../shader/building_default.ps.glsl \
-    ../shader/building_default.vs.glsl \
-    ../script/body.lua \
-    ../script/building.lua \
-    ../script/terrainItem.lua \
-    ../script/utils/print_r.lua \
-    ../script/fire.lua \
-    ../shader/shadow.ps.glsl \
-    ../shader/shadow.vs.glsl \
-    ../script/voxelDrawer.lua \
-    ../../ai/main.lua \
-    ../script/body_animation.lua
+    ../shader/Water.ps.glsl \
+    ../shader/Water.vs.glsl \
+    ../shader/waterWave.ps.glsl \
+    ../shader/waterWave.vs.glsl

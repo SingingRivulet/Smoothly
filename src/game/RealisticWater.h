@@ -26,6 +26,7 @@
 
 #include <irrlicht.h>
 #include "graphbase.h"
+#include "waterwave.h"
 
 using namespace irr;
 
@@ -60,6 +61,8 @@ public:
     smoothly::graphBase * graph;
 
     irr::video::IRenderTarget * renderTarget;
+
+    smoothly::waterwave wave;
 
 private:
 

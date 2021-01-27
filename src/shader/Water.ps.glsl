@@ -36,24 +36,49 @@ uniform sampler2D    ReflectionMap; //coverage
 
 uniform bool        FogEnabled;
 uniform int            FogMode;
+uniform vec2 lastPos;
+uniform vec2 nowPos;
 
 varying vec2 bumpMapTexCoord;
 varying vec3 refractionMapTexCoord;
 varying vec3 reflectionMapTexCoord;
 varying vec3 position3D;
 varying vec4 pointPosition;
-    
-void main()
-{
+
+vec2 getPosNormal(vec2 waveGlobal){
+    vec2 waveTexPos = waveGlobal - nowPos + vec2(1024.0,1024.0);
+
+    float h1 = texture2D(WaterBump , vec2(waveTexPos.x/2048.0 , waveTexPos.y/2048.0)).r;
+    float h2 = texture2D(WaterBump , vec2((waveTexPos.x+1.0)/2048.0 , waveTexPos.y/2048.0)).r;
+    float h3 = texture2D(WaterBump , vec2(waveTexPos.x/2048.0 , (waveTexPos.y+1.0)/2048.0)).r;
+    vec3 p1 = vec3(0.0,h1,0.0);
+    vec3 p2 = vec3(1.0,h2,0.0);
+    vec3 p3 = vec3(0.0,h3,1.0);
+    return normalize(cross(p3-p1,p2-p1)).xz;
+}
+
+vec2 smoothstep2d(vec2 a,vec2 b,float k){
+    return vec2(
+                smoothstep(a.x,b.x,k),
+                smoothstep(a.y,b.y,k));
+}
+
+void main(){
     //bump color
-        vec4 bumpColor = 
-                    texture2D(WaterBump, mod(bumpMapTexCoord*64.0,vec2(1.0,1.0)))/64.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*32.0,vec2(1.0,1.0)))/32.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*16.0,vec2(1.0,1.0)))/16.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*8.0 ,vec2(1.0,1.0)))/8.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*4.0 ,vec2(1.0,1.0)))/4.0+
-                    texture2D(WaterBump, mod(bumpMapTexCoord*2.0 ,vec2(1.0,1.0)))/2.0;
-    vec2 perturbation = WaveHeight * (bumpColor.rg - 0.5);
+    vec3 pointPosition3D = pointPosition.xyz/pointPosition.w;
+    vec2 waveGlobal = vec2(floor(pointPosition3D.x),floor(pointPosition3D.z));
+
+    vec2 bumpColor00 = getPosNormal(waveGlobal);
+    vec2 bumpColor01 = getPosNormal(waveGlobal+vec2(0.0,1.0));
+    vec2 bumpColor10 = getPosNormal(waveGlobal+vec2(1.0,0.0));
+    vec2 bumpColor11 = getPosNormal(waveGlobal+vec2(1.0,1.0));
+
+    vec2 bumpColor0 = smoothstep2d(bumpColor00,bumpColor01 , pointPosition3D.z-waveGlobal.y);
+    vec2 bumpColor1 = smoothstep2d(bumpColor10,bumpColor11 , pointPosition3D.z-waveGlobal.y);
+
+    vec2 bumpColor = smoothstep2d(bumpColor0,bumpColor1 , pointPosition3D.x-waveGlobal.x);
+
+    vec2 perturbation = WaveHeight * bumpColor;
     
     //refraction
     vec2 ProjectedRefractionTexCoords = clamp(refractionMapTexCoord.xy / refractionMapTexCoord.z + perturbation, 0.0, 1.0);

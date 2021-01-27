@@ -227,6 +227,9 @@ namespace smoothly{
         private:
             void loadConfig();
 
+        public:
+            irr::gui::IGUIImage * debug_wave;
+
     };
 }
 #endif

@@ -280,6 +280,11 @@ engine::engine(){
                                     "../shader/lsgi.vs.glsl", "main", video::EVST_VS_1_1,
                                     "../shader/lsgi.ps.glsl", "main", video::EPST_PS_1_1,
                                     &postShaderCallback);
+
+    //水面的调试窗口
+    debug_wave = gui->addImage(core::recti(0,0,256,256));
+    debug_wave->setImage(water->wave.waveMap);
+    debug_wave->setVisible(false);
 }
 engine::~engine(){
     ttf->drop();
@@ -323,7 +328,8 @@ void engine::sceneLoop(){
     auto coll = scene->getSceneCollisionManager();
     screenCenter = coll->getScreenCoordinatesFrom3DPosition(camera->getTarget(),camera);
     water->setPosition(irr::core::vector3df(cm.X,waterLevel,cm.Z));
-    water->getMaterial(0).BlendOperation=irr::video::EBO_ADD;
+    //计算水面
+    water->wave.update(irr::core::vector2df(cm.X,cm.Z));
 
     renderSky();
     if(haveShadow){
