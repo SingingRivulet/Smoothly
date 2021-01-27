@@ -59,8 +59,8 @@ vec2 getPosNormal(vec2 waveGlobal){
 
 vec2 smoothstep2d(vec2 a,vec2 b,float k){
     return vec2(
-                smoothstep(a.x,b.x,k),
-                smoothstep(a.y,b.y,k));
+                mix(a.x,b.x,k),
+                mix(a.y,b.y,k));
 }
 
 void main(){

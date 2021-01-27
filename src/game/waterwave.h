@@ -6,7 +6,7 @@ namespace smoothly{
 
 class waterwave:irr::video::IShaderConstantSetCallBack{
     public:
-        irr::video::ITexture    * waveMap , *waveMap_last;//纹理
+        irr::video::ITexture    *waveMap , *waveMap_last , *waveNormal;//纹理
         waterwave(irr::video::IVideoDriver * driver);
         void update(const irr::core::vector2df & pos);
 
@@ -16,7 +16,7 @@ class waterwave:irr::video::IShaderConstantSetCallBack{
         irr::video::IVideoDriver * driver;
         irr::core::vector2df    lastPos ,       //上一帧的位置
                                 nowPos;         //现在位置
-        irr::video::SMaterial material;
+        irr::video::SMaterial waveMaterial,normalMaterial;
         void OnSetConstants(irr::video::IMaterialRendererServices * services, irr::s32 userData)override;
 
         void swapTex();

@@ -229,6 +229,7 @@ namespace smoothly{
 
         public:
             irr::gui::IGUIImage * debug_wave;
+            irr::gui::IGUIImage * debug_waveNormal;
 
     };
 }

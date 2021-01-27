@@ -285,6 +285,9 @@ engine::engine(){
     debug_wave = gui->addImage(core::recti(0,0,256,256));
     debug_wave->setImage(water->wave.waveMap);
     debug_wave->setVisible(false);
+    debug_waveNormal = gui->addImage(core::recti(0,256,256,512));
+    debug_waveNormal->setImage(water->wave.waveNormal);
+    debug_waveNormal->setVisible(false);
 }
 engine::~engine(){
     ttf->drop();

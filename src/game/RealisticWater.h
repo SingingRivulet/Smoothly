@@ -32,65 +32,65 @@ using namespace irr;
 
 class RealisticWaterSceneNode: public scene::ISceneNode, video::IShaderConstantSetCallBack
 {
-public:
-	RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
-							const irr::core::stringc& resourcePath = irr::core::stringc(),
-                            core::dimension2du renderTargetSize=core::dimension2du(512,512),scene::ISceneNode* parent = NULL, s32 id = -1);
-	virtual ~RealisticWaterSceneNode();
+    public:
+        RealisticWaterSceneNode(scene::ISceneManager* sceneManager, f32 width, f32 height,
+                                const irr::core::stringc& resourcePath = irr::core::stringc(),
+                                core::dimension2du renderTargetSize=core::dimension2du(512,512),scene::ISceneNode* parent = NULL, s32 id = -1);
+        virtual ~RealisticWaterSceneNode();
 
-	// frame
-	virtual void OnRegisterSceneNode();
+        // frame
+        virtual void OnRegisterSceneNode();
 
-	virtual void OnAnimate(u32 timeMs);
+        virtual void OnAnimate(u32 timeMs);
 
-	// renders terrain
-	virtual void render();
-    
-	// returns the axis aligned bounding box of terrain
-	virtual const core::aabbox3d<f32>& getBoundingBox() const;
+        // renders terrain
+        virtual void render();
 
-	virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData);
+        // returns the axis aligned bounding box of terrain
+        virtual const core::aabbox3d<f32>& getBoundingBox() const;
 
-	void setWindForce(f32 windForce);
-	void setWindDirection(const core::vector2df& windDirection);
-	void setWaveHeight(f32 waveHeight);
+        virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData);
 
-	void setWaterColor(const video::SColorf& waterColor);
-	void setColorBlendFactor(f32 colorBlendFactor);
+        void setWindForce(f32 windForce);
+        void setWindDirection(const core::vector2df& windDirection);
+        void setWaveHeight(f32 waveHeight);
 
-    smoothly::graphBase * graph;
+        void setWaterColor(const video::SColorf& waterColor);
+        void setColorBlendFactor(f32 colorBlendFactor);
 
-    irr::video::IRenderTarget * renderTarget;
+        smoothly::graphBase * graph;
 
-    smoothly::waterwave wave;
+        irr::video::IRenderTarget * renderTarget;
 
-private:
+        smoothly::waterwave wave;
 
-	scene::ICameraSceneNode*		_camera;
-	scene::ISceneNode*				_waterSceneNode;
+    private:
 
-	video::IVideoDriver*			_videoDriver;
-	scene::ISceneManager*			_sceneManager;
-	
-	core::dimension2d<f32>			_size;
+        scene::ICameraSceneNode*        _camera;
+        scene::ISceneNode*                _waterSceneNode;
 
-	s32								_shaderMaterial;
+        video::IVideoDriver*            _videoDriver;
+        scene::ISceneManager*            _sceneManager;
 
-	scene::IAnimatedMesh*			_waterMesh;
+        core::dimension2d<f32>            _size;
 
-	video::ITexture*				_refractionMap;
-	video::ITexture*				_reflectionMap;
+        s32                                _shaderMaterial;
 
-	f32								_windForce;
-	core::vector2df					_windDirection;
-	f32								_waveHeight;
+        scene::IAnimatedMesh*            _waterMesh;
 
-	video::SColorf					_waterColor;
-	f32								_colorBlendFactor;
+        video::ITexture*                _refractionMap;
+        video::ITexture*                _reflectionMap;
 
-	u32								_time;
+        f32                                _windForce;
+        core::vector2df                    _windDirection;
+        f32                                _waveHeight;
 
-    bool                            updateFrameFlag;
+        video::SColorf                    _waterColor;
+        f32                                _colorBlendFactor;
+
+        u32                                _time;
+
+        bool                            updateFrameFlag;
 };
 
 #endif

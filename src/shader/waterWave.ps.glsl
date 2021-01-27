@@ -18,8 +18,6 @@ void main(){
     float x2 = getHeight(dpos-vec2(1.0/2048.0 , 0.0));
     float x3 = getHeight(dpos+vec2(0.0 , 1.0/2048.0));
     float x4 = getHeight(dpos-vec2(0.0 , 1.0/2048.0));
-    float agWave = 0.9 * ((x1+x2+x3+x4)/4.0);
-    float prevWave = 0.5 * x0;
-    float waveValue = clamp((prevWave - agWave) * 0.8,-1.0,1.0);
+    float waveValue = (x0+x1+x2+x3+x4) * 0.2;
     gl_FragColor = vec4(waveValue , 0.0 , 0.0 , 1.0);
 }

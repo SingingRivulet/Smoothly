@@ -195,4 +195,5 @@ DISTFILES += \
     ../shader/Water.ps.glsl \
     ../shader/Water.vs.glsl \
     ../shader/waterWave.ps.glsl \
-    ../shader/waterWave.vs.glsl
+    ../shader/waterWave.vs.glsl \
+    ../shader/waterWave_normal.ps.glsl

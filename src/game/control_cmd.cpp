@@ -103,8 +103,9 @@ void control::processCmd_test(std::istringstream & iss){
 void control::processCmd_waterwave(std::istringstream & iss){
     std::string method;
     iss>>method;
-    if(method=="debug"){
+    if(method=="map"){
         debug_wave->setVisible(!debug_wave->isVisible());
+        debug_waveNormal->setVisible(!debug_waveNormal->isVisible());
     }
 }
 
